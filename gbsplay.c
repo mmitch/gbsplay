@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.26 2003/08/24 10:56:13 ranma Exp $
+/* $Id: gbsplay.c,v 1.27 2003/08/24 11:59:58 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -89,12 +89,38 @@ static const char playercode[] = {
 	0xac, 0xdd, 0xda, 0x48
 };
 
-static void open_gbs(char *name, int i)
+static int gbs_base;
+static int gbs_init;
+static int gbs_play;
+static int gbs_stack;
+static int gbs_songdefault;
+static int gbs_songcnt;
+
+static void gbs_playsong(int i)
+{
+	gbhw_init();
+
+	if (i == -1) i = gbs_songdefault;
+	if (i > gbs_songcnt) {
+		printf("Subsong number out of range (min=1, max=%d).\n", gbs_songcnt);
+		exit(1);
+	}
+
+	gbcpu_if = 0;
+	gbcpu_halted = 0;
+	REGS16_W(gbcpu_regs, PC, 0x0050); /* playercode entry point */
+	REGS16_W(gbcpu_regs, SP, gbs_stack);
+	REGS16_W(gbcpu_regs, HL, gbs_base - 0x70);
+	gbcpu_regs.rn.a = i - 1;
+
+	printf("Playing song %d/%d.\n", i, gbs_songcnt);
+}
+
+static void open_gbs(char *name)
 {
 	int fd, j;
 	unsigned char buf[0x70];
 	struct stat st;
-	int gbs_base, gbs_init, gbs_play, gbs_stack;
 	int romsize, lastbank;
 	char *rom;
 
@@ -120,13 +146,10 @@ static void open_gbs(char *name, int i)
 	romsize = (st.st_size + gbs_base + 0x3fff) & ~0x3fff;
 	lastbank = (romsize / 0x4000)-1;
 
-	if (i == -1) i = buf[0x5];
-	if (i > buf[0x04]) {
-		printf("Subsong number out of range (min=1, max=%d).\n", buf[0x4]);
-		exit(1);
-	}
+	gbs_songcnt = buf[0x04];
+	gbs_songdefault = buf[0x05];
 
-	printf("Playing song %d/%d.\n"
+	printf("Subsongs: %d.\n"
 	       "Title:     \"%.32s\"\n"
 	       "Author:    \"%.32s\"\n"
 	       "Copyright: \"%.32s\"\n"
@@ -136,7 +159,7 @@ static void open_gbs(char *name, int i)
 	       "Stack pointer %04x.\n"
 	       "File size %08lx.\n"
 	       "ROM size %08x (%d banks).\n",
-	       i, buf[0x04],
+	       gbs_songcnt,
 	       &buf[0x10],
 	       &buf[0x30],
 	       &buf[0x50],
@@ -161,11 +184,6 @@ static void open_gbs(char *name, int i)
 	}
 	rom[0x40] = 0xc9; /* reti */
 	rom[0x48] = 0xc9; /* reti */
-
-	REGS16_W(gbcpu_regs, PC, 0x0050); /* playercode entry point */
-	REGS16_W(gbcpu_regs, SP, gbs_stack);
-	REGS16_W(gbcpu_regs, HL, gbs_base - 0x70);
-	gbcpu_regs.rn.a = i - 1;
 
 	close(fd);
 }
@@ -265,11 +283,19 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 	if (argc == 3) sscanf(argv[2], "%d", &subsong);
-	open_gbs(argv[1], subsong);
+	open_gbs(argv[1]);
+	if (subsong == -1) subsong = gbs_songdefault;
+	gbs_playsong(subsong);
 	while (1) {
+		static long long clock = 0;
+		static int silencectr = 0;
 		int cycles = gbhw_step();
 		statuscnt -= cycles;
+		clock += cycles;
 		if (statuscnt < 0) {
+			int time = clock / 4194304;
+			int timem = time / 60;
+			int times = time % 60;
 			int ni1 = getnote(gbhw_ch[0].div_tc);
 			int ni2 = getnote(gbhw_ch[1].div_tc);
 			int ni3 = getnote(gbhw_ch[2].div_tc);
@@ -287,9 +313,23 @@ int main(int argc, char **argv)
 			if (!gbhw_ch[1].volume) n2 = "---";
 			if (!gbhw_ch[2].volume) n3 = "---";
 
-			printf("ch1: %s %s  ch2: %s %s  ch3: %s %s  ch4: %s\r",
-				n1, v1, n2, v2, n3, v3, v4);
+			printf("%02d:%02d ch1: %s %s  ch2: %s %s  ch3: %s %s  ch4: %s\r",
+				timem, times, n1, v1, n2, v2, n3, v3, v4);
 			fflush(stdout);
+
+			if (gbhw_ch[0].volume == 0 &&
+			    gbhw_ch[1].volume == 0 &&
+			    gbhw_ch[2].volume == 0 &&
+			    gbhw_ch[3].volume == 0) {
+				silencectr++;
+			}
+
+			if (time > 3*60 || silencectr > 100) {
+				subsong++;
+				silencectr = 0;
+				clock = 0;
+				gbs_playsong(subsong);
+			}
 		}
 	}
 	return 0;
