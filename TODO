@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.7 2003/09/12 17:57:07 mitch Exp $>>
+<<$Id: TODO,v 1.8 2003/09/12 18:56:35 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -7,6 +7,7 @@ TODO list for gbsplay.
 ### version 0.0.2:
 
 ( )  set up feature list for 0.0.2 release
+( )  pump up man page version number on release!
 
 ### unspecified: (bits'n'ideas)
 
