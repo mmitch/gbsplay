@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.22 2003/08/28 14:37:03 ranma Exp $
+# $Id: Makefile,v 1.23 2003/08/28 16:49:33 ranma Exp $
 
 include config.mk
 
@@ -86,14 +86,14 @@ dist:	distclean
 	rm -rf ./gbsplay
 
 gbslib.a: $(objs_gbslib)
-	$(AR) r $@ $?
+	$(AR) r $@ $+
 gbsinfo: $(objs_gbsinfo) gbslib.a
-	$(CC) $(LDFLAGS) -o $@ $? -lz
+	$(CC) $(LDFLAGS) -o $@ $+ -lz
 gbsplay: $(objs_gbsplay) gbslib.a
-	$(CC) $(LDFLAGS) -o $@ $? -lz -lm
+	$(CC) $(LDFLAGS) -o $@ $+ -lz -lm
 
 gbsxmms.so: $(objs_gbsxmms) gbslib.a
-	$(CC) -shared $(LDFLAGS) -o $@ $? -lpthread -lz
+	$(CC) -shared $(LDFLAGS) -o $@ $+ -lpthread -lz
 
 # rules for suffixes
 
