@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.50 2004/04/07 16:53:58 ranmachan Exp $
+# $Id: configure,v 1.51 2004/04/07 17:26:04 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -388,7 +388,7 @@ int main(int argc, char **argv)
 	struct stat st;
 
 	lstat("CVS/Entries", &st);
-	strftime(date, sizeof(date), "%Y%m%d%H%M%S", gmtime(&st.st_mtime));
+	strftime(date, sizeof(date), "%Y%m%d", gmtime(&st.st_mtime));
 	puts(date);
 
 	return 0;
