@@ -1,4 +1,4 @@
-/* $Id: gbcpu.c,v 1.6 2003/08/30 15:53:03 ranma Exp $
+/* $Id: gbcpu.c,v 1.7 2003/08/30 15:53:37 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -1825,7 +1825,7 @@ int gbcpu_step(void)
 		DEB(show_reg_diffs());
 		return 1;
 	}
-	if (gbcpu_halted == 1 && gbcpu_if == 0)
+	if (gbcpu_halted == 1 && gbcpu_if == 0) {
 		printf("CPU locked up (halt with interrupts disabled).\n");
 		gbcpu_stopped = 1;
 	}
