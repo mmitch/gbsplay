@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.71 2003/12/26 12:37:24 mitch Exp $
+/* $Id: gbsplay.c,v 1.72 2003/12/26 12:51:21 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -210,6 +210,33 @@ static int get_next_subsong(struct gbs *gbs)
 	return next;
 }
 
+static int get_prev_subsong(struct gbs *gbs)
+/* returns the number of the subsong that has been played previously */
+{
+	int prev = -1;
+	switch (playmode) {
+
+	case PLAYMODE_SHUFFLE:
+		prev = rand_int(gbs->songs);
+		break;
+
+	case PLAYMODE_RANDOM:
+		subsong_playlist_idx--;
+		if (subsong_playlist_idx == -1) {
+			free(subsong_playlist);
+			subsong_playlist = setup_playlist(gbs->songs);
+			subsong_playlist_idx = gbs->songs-1;
+		}
+		prev = subsong_playlist[subsong_playlist_idx];
+		break;
+
+	case PLAYMODE_LINEAR:
+		prev = gbs->subsong - 1;
+		break;
+	}
+	return prev;
+}
+
 static void setup_playmode(struct gbs *gbs)
 /* initializes the chosen playmode (set start subsong etc.) */
 {
@@ -389,8 +416,14 @@ static void handleuserinput(struct gbs *gbs)
 	if (read(STDIN_FILENO, &c, 1) != -1) {
 		switch (c) {
 		case 'p':
+			gbs->subsong = get_prev_subsong(gbs);
+			while (gbs->subsong < 0) {
+				gbs->subsong += gbs->songs;
+			}
+			gbs_init(gbs, gbs->subsong);
+			break;
 		case 'n':
-			gbs->subsong += c == 'n' ? 1 : gbs->songs-1;
+			gbs->subsong = get_next_subsong(gbs);
 			gbs->subsong %= gbs->songs;
 			gbs_init(gbs, gbs->subsong);
 			break;
