@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.8 2003/08/24 17:15:22 ranma Exp $
+/* $Id: gbhw.c,v 1.9 2003/08/25 00:54:15 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -412,6 +412,7 @@ void gbhw_romfree(void)
 void gbhw_init(void)
 {
 	memset(gbhw_ch, 0, sizeof(gbhw_ch));
+	soundbufpos = 0;
 	gbhw_ch[0].duty_ctr = 4;
 	gbhw_ch[1].duty_ctr = 4;
 	gbhw_ch[0].div_tc = 1;

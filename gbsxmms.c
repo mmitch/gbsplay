@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.3 2003/08/25 00:07:21 ranma Exp $
+/* $Id: gbsxmms.c,v 1.4 2003/08/25 00:54:16 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -229,7 +229,7 @@ static void callback(void *buf, int len, void *priv)
 		silencectr++;
 	} else silencectr = 0;
 
-	if (time > 2*60 || silencectr > 20) {
+	if (time > 2*60 || silencectr > 100) {
 		file_info_box(NULL);
 	}
 }
@@ -261,8 +261,18 @@ void *playloop(void *priv)
 		puts("Error opening output plugin.");
 		return 0;
 	}
-	while (!stopthread)
+	while (!stopthread) {
 		gbclock += gbhw_step();
+		if (!((gbhw_ch[0].volume == 0 ||
+		       gbhw_ch[0].master == 0) &&
+		      (gbhw_ch[1].volume == 0 ||
+		       gbhw_ch[1].master == 0) &&
+		      (gbhw_ch[2].volume == 0 ||
+		       gbhw_ch[2].master == 0) &&
+		      (gbhw_ch[3].volume == 0 ||
+		       gbhw_ch[3].master == 0)))
+			silencectr = 0;
+	}
 	gbs_ip.output->close_audio();
 	return 0;
 }
