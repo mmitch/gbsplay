@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.55 2003/09/21 08:25:29 mitch Exp $
+/* $Id: gbsplay.c,v 1.56 2003/09/22 17:08:27 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -268,15 +268,15 @@ void usage(int exitcode)
 	        "Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
 	        "\n"
 	        "Available options are:\n"
-	        "  -h	display this help and exit\n"
-	        "  -q	quiet\n"
-	        "  -r	set samplerate (%dHz)\n"
-	        "  -s	write to stdout\n"
-	        "  -t	set subsong timeout (%d seconds)\n"
-	        "  -T	set silence timeout (%d seconds)\n"
-	        "  -V	print version and exit\n"
-		"  -z   play subsongs in random mode\n"
-		"  -Z   play subsongs in shuffle mode (repetitions possible)\n",
+	        "  -h  display this help and exit\n"
+	        "  -q  quiet\n"
+	        "  -r  set samplerate (%dHz)\n"
+	        "  -s  write to stdout\n"
+	        "  -t  set subsong timeout (%d seconds)\n"
+	        "  -T  set silence timeout (%d seconds)\n"
+	        "  -V  print version and exit\n"
+		"  -z  play subsongs in random mode\n"
+		"  -Z  play subsongs in shuffle mode (repetitions possible)\n",
 	        myname,
 	        rate,
 	        subsong_timeout,

@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.21 2003/09/21 16:11:57 mitch Exp $>>
+<<$Id: TODO,v 1.22 2003/09/22 17:09:21 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -33,3 +33,6 @@ TODO list for gbsplay.
 ( )  set up feature list for 0.0.3 release
 
 ( )  pump up man page version number on release!
+
+( )  gbsplay:
+     fix help text spacing
