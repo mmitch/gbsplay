@@ -1,21 +1,28 @@
 #!/bin/sh
 DIR=`dirname $1`
+FILE="$1"
 SUBMK=""
+
+shift
+
+EXTRADEP=" $*"
 
 if [ "$DIR" = "" -o "$DIR" = "." ]; then
 	DIR=""
 else
 	DIR="$DIR/"
+fi
+if [ -f "${DIR}subdir.mk" ]; then
 	SUBMK=" ${DIR}subdir.mk"
 fi
 
-$CC -M $CFLAGS "$1" |
+exec $CC -M $CFLAGS "$FILE" |
 	sed -n -e "
-		s@^\\(.*\\)\\.o:@$DIR\\1.d $DIR\\1.o: depend.sh Makefile$SUBMK@
-		s@/usr/[^ ]*\\.h@@g
+		s@^\\(.*\\)\\.o:@$DIR\\1.d $DIR\\1.o: depend.sh Makefile$SUBMK$EXTRADEP@
+		s@/usr/[^\t ]*@@g
 		t foo
 		:foo
-		s@^ *\\\\\$@@
+		s@^[\t ]*\\\\\$@@
 		t
 		p
 		"
