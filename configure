@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.62 2004/04/16 18:32:21 mitch Exp $
+# $Id: configure,v 1.63 2004/04/20 17:24:42 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -20,6 +20,10 @@ CC="${CC-gcc}" # use gcc by default
 
 package=gbsplay
 prefix=/usr/local
+
+## define sane environment
+LANG=C
+export LANG
 
 ## sane echo is in /usr/ucb on Solaris
 if [ -d /usr/ucb ]; then
