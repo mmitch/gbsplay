@@ -1,4 +1,4 @@
-/* $Id: gbhw.h,v 1.8 2003/11/30 14:35:59 ranma Exp $
+/* $Id: gbhw.h,v 1.9 2003/11/30 14:37:47 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -8,6 +8,8 @@
 
 #ifndef _GBHW_H_
 #define _GBHW_H_
+
+#include <inttypes.h>
 
 struct gbhw_channel {
 	int mute;
