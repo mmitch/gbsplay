@@ -1,7 +1,14 @@
-<<$Id: HISTORY,v 1.11 2004/01/04 08:39:14 mitch Exp $>>
+<<$Id: HISTORY,v 1.12 2004/01/17 18:58:03 mitch Exp $>>
 
 
 gbsplay HISTORY
+
+
+2004/01/16  -  0.0.5
+~~~~~~~~~~~~~~~~~~~~
+- build process:
+  - fix broken Cygwin build
+  - more standards compliant configure script
 
 
 2003/12/28  -  0.0.4
