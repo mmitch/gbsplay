@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.29 2003/10/11 19:54:30 mitch Exp $>>
+<<$Id: TODO,v 1.30 2003/10/11 20:22:39 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -40,3 +40,5 @@ TODO list for gbsplay.
 (X)  gbsplay: allow play/pause with Space bar
 
 (X)  gbsplay: add fadeout and subsong gap
+
+(X)  Makefile: fix dist target (manpages were broken)

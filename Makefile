@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.40 2003/09/22 18:18:10 mitch Exp $
+# $Id: Makefile,v 1.41 2003/10/11 20:22:39 mitch Exp $
 
 include config.mk
 
@@ -25,10 +25,11 @@ export CC CFLAGS LDFLAGS
 
 docs           := README TODO HISTORY INSTALL gbsplayrc_sample
 
-mans           := gbsplay.1 gbsinfo.1 gbsplayrc.5
+mans           := gbsplay.1    gbsinfo.1    gbsplayrc.5
+mans_src       := gbsplay.in.1 gbsinfo.in.1 gbsplayrc.in.5
 
 objs_gbslibpic := gbcpu.po gbhw.po gbs.po cfgparser.po
-objs_gbslib    := gbcpu.o gbhw.o gbs.o cfgparser.o
+objs_gbslib    := gbcpu.o  gbhw.o  gbs.o  cfgparser.o
 objs_gbsplay   := gbsplay.o util.o
 objs_gbsinfo   := gbsinfo.o
 objs_gbsxmms   := gbsxmms.o
@@ -98,7 +99,7 @@ dist:	distclean
 	install -m 644 Makefile ./$(DISTDIR)/
 	install -m 644 *.c ./$(DISTDIR)/
 	install -m 644 *.h ./$(DISTDIR)/
-	install -m 644 $(mans) ./$(DISTDIR)/
+	install -m 644 $(mans_src) ./$(DISTDIR)/
 	install -m 644 $(docs) ./$(DISTDIR)/
 	tar -c $(DISTDIR)/ -vzf ../$(DISTDIR).tar.gz
 	rm -rf ./$(DISTDIR)
