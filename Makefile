@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.72 2004/01/20 20:52:36 ranma Exp $
+# $Id: Makefile,v 1.73 2004/01/24 12:26:57 mitch Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -31,7 +31,7 @@ LDFLAGS += $(EXTRA_LDFLAGS)
 
 export CC CFLAGS LDFLAGS
 
-docs           := README TODO HISTORY gbsplayrc_sample
+docs           := README HISTORY gbsplayrc_sample
 
 mans           := gbsplay.1    gbsinfo.1    gbsplayrc.5
 mans_src       := gbsplay.in.1 gbsinfo.in.1 gbsplayrc.in.5
