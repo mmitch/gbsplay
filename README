@@ -1,4 +1,4 @@
-<<$Id: README,v 1.1 2003/08/24 13:44:53 mitch Exp $>>
+<<$Id: README,v 1.2 2003/09/12 17:59:11 mitch Exp $>>
 
 gbsplay - A Gameboy sound player
 
@@ -8,7 +8,18 @@ gbsplay - A Gameboy sound player
 
 Licensed under GNU GPL.
 
+Homepage:
+http://www.cgarbs.de/gbsplay.en.html
+
 
 This program emulates the sound hardware of the Nintendo Gameboy.  It
 is able to play the sounds from a Gameboy module dump (.GBS format)
 over /dev/dsp.
+
+gbsplay is compatible to GBS v1 and v2.  The gbsplay package contains
+the following parts:
+
+ * gpslay:      a console player
+ * gbsinfo:     displays information about a gbs file
+ * gbsxmms.so:  an .GBS input plugin for XMMS
+
