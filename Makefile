@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.39 2003/09/22 17:12:11 mitch Exp $
+# $Id: Makefile,v 1.40 2003/09/22 18:18:10 mitch Exp $
 
 include config.mk
 
@@ -25,6 +25,8 @@ export CC CFLAGS LDFLAGS
 
 docs           := README TODO HISTORY INSTALL gbsplayrc_sample
 
+mans           := gbsplay.1 gbsinfo.1 gbsplayrc.5
+
 objs_gbslibpic := gbcpu.po gbhw.po gbs.po cfgparser.po
 objs_gbslib    := gbcpu.o gbhw.o gbs.o cfgparser.o
 objs_gbsplay   := gbsplay.o util.o
@@ -41,7 +43,7 @@ endif
 
 .PHONY: all distclean clean install dist
 
-all: config.mk $(objs) $(dsts) $(EXTRA_ALL)
+all: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL)
 
 # include the dependency files
 
@@ -49,11 +51,12 @@ include $(patsubst %.o,%.d,$(filter %.o,$(objs)))
 
 distclean: clean
 	find -regex ".*\.d" -exec rm -f "{}" \;
-	rm -f ./config.mk ./config.h ./config.err
+	rm -f ./config.mk ./config.h ./config.err ./config.sed
 
 clean:
 	find -regex ".*\.\([aos]\|[sp]o\)" -exec rm -f "{}" \;
 	find -name "*~" -exec rm -f "{}" \;
+	rm -f $(mans)
 	rm -f ./gbsplay ./gbsinfo
 
 install: all install-default $(EXTRA_INSTALL)
@@ -95,7 +98,7 @@ dist:	distclean
 	install -m 644 Makefile ./$(DISTDIR)/
 	install -m 644 *.c ./$(DISTDIR)/
 	install -m 644 *.h ./$(DISTDIR)/
-	install -m 644 gbsplay.1 gbsinfo.1 gbsplayrc.5 ./$(DISTDIR)/
+	install -m 644 $(mans) ./$(DISTDIR)/
 	install -m 644 $(docs) ./$(DISTDIR)/
 	tar -c $(DISTDIR)/ -vzf ../$(DISTDIR).tar.gz
 	rm -rf ./$(DISTDIR)
@@ -131,6 +134,14 @@ gbsxmms.so: $(objs_gbsxmms) gbslibpic.a
 
 config.mk: configure
 	./configure
+
 %.d: %.c config.mk
 	@echo DEP $< -o $@
 	@./depend.sh $< $(CFLAGS) > $@
+
+%.1: %.in.1
+	sed -f config.sed $< > $@
+
+%.5: %.in.5
+	sed -f config.sed $< > $@
+

@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.14 2003/09/22 17:12:11 mitch Exp $
+# $Id: configure,v 1.15 2003/09/22 18:18:10 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -184,6 +184,10 @@ fi
 (
     echo "#define GBS_VERSION \"$VERSION\""
 ) > config.h
+
+(
+    echo "s/%%%VERSION%%%/$VERSION/g"
+) > config.sed
 
 ## end
 
