@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.84 2004/04/20 21:46:58 ranmachan Exp $
+# $Id: Makefile,v 1.85 2004/07/05 19:49:30 mitch Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -202,6 +202,7 @@ dist:	distclean
 	install -m 644 Makefile ./$(DISTDIR)/
 	install -m 644 *.c ./$(DISTDIR)/
 	install -m 644 *.h ./$(DISTDIR)/
+	install -m 644 *.ver ./$(DISTDIR)/
 	install -m 644 $(mans_src) ./$(DISTDIR)/
 	install -m 644 $(docs) INSTALL CODINGSTYLE ./$(DISTDIR)/
 	install -d ./$(DISTDIR)/examples
