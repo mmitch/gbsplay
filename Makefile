@@ -1,35 +1,44 @@
-# $Id: Makefile,v 1.21 2003/08/27 15:07:02 ranma Exp $
+# $Id: Makefile,v 1.22 2003/08/28 14:37:03 ranma Exp $
 
 include config.mk
 
-prefix = /usr/local
-exec_prefix = ${prefix}
+prefix      := /usr/local
+exec_prefix := $(prefix)
 
-bindir = ${exec_prefix}/bin
-mandir = ${prefix}/man
-man1dir = $(mandir)/man1
+bindir      := $(exec_prefix)/bin
+mandir      := $(prefix)/man
+man1dir     := $(mandir)/man1
 
-DESTDIR =
+DESTDIR :=
 
-CFLAGS := -Wall -Wstrict-prototypes -Os -fomit-frame-pointer -fPIC $(EXTRA_CFLAGS)
+CFLAGS  := -Wall -Wstrict-prototypes -Os -fomit-frame-pointer -fPIC
 LDFLAGS :=
 
-SRCS := gbcpu.c gbhw.c gbsinfo.c gbsplay.c gbs.c $(EXTRA_SRCS)
+CFLAGS  += $(EXTRA_CFLAGS)
+LDFLAGS += $(EXTRA_LDFLAGS)
+
+export CC CFLAGS LDFLAGS
+
+objs_gbslib  := gbcpu.o gbhw.o gbs.o
+objs_gbsplay := gbsplay.o
+objs_gbsinfo := gbsinfo.o
+objs_gbsxmms := gbsxmms.o
+
+objs := $(objs_gbslib) $(objs_gbsplay) $(objs_gbsinfo)
+dsts := gbslib.a gbsplay gbsinfo
+
+ifeq ($(build_xmmsplugin),y)
+objs += $(objs_gbsxmms)
+dsts += gbsxmms.so
+endif
 
 .PHONY: all distclean clean install dist
 
-# determine the object files
-
-OBJS := $(patsubst %.c,%.o,$(filter %.c,$(SRCS)))
-
-all: config.mk $(OBJS) gbsplay gbsinfo $(EXTRA_ALL)
+all: config.mk $(objs) $(dsts) $(EXTRA_ALL)
 
 # include the dependency files
 
-%.d: %.c
-	CC=$(CC) ./depend.sh $< $(CFLAGS) > $@
-
-include $(OBJS:.o=.d)
+include $(patsubst %.o,%.d,$(filter %.o,$(objs)))
 
 distclean: clean
 	find -regex ".*\.d" -exec rm -f "{}" \;
@@ -76,17 +85,32 @@ dist:	distclean
 	tar -c gbsplay/ -vzf ../gbsplay.tar.gz
 	rm -rf ./gbsplay
 
-gbsinfo: gbsinfo.o gbs.o gbhw.o gbcpu.o
-	$(CC) $(LDFLAGS) -o $@ gbsinfo.o gbhw.o gbcpu.o gbs.o -lz
-gbsplay: gbsplay.o gbcpu.o gbhw.o gbs.o
-	$(CC) $(LDFLAGS) -o $@ gbsplay.o gbcpu.o gbhw.o gbs.o -lm -lz
+gbslib.a: $(objs_gbslib)
+	$(AR) r $@ $?
+gbsinfo: $(objs_gbsinfo) gbslib.a
+	$(CC) $(LDFLAGS) -o $@ $? -lz
+gbsplay: $(objs_gbsplay) gbslib.a
+	$(CC) $(LDFLAGS) -o $@ $? -lz -lm
 
-gbsxmms.so: gbcpu.o gbhw.o gbsxmms.o gbs.o
-	$(CC) -shared $(LDFLAGS) -o $@ gbcpu.o gbhw.o gbs.o gbsxmms.o -lpthread -lz
+gbsxmms.so: $(objs_gbsxmms) gbslib.a
+	$(CC) -shared $(LDFLAGS) -o $@ $? -lpthread -lz
+
+# rules for suffixes
 
 .SUFFIXES: .i .s
 
+.c.o:
+	@echo CC $<
+	@$(CC) $(CFLAGS) -c -o $@ $<
 .c.i:
 	$(CC) -E $(CFLAGS) -o $@ $<
 .c.s:
 	$(CC) -S $(CFLAGS) -fverbose-asm -o $@ $<
+
+# rules for generated files
+
+config.mk: configure
+	./configure
+%.d: %.c config.mk
+	@echo DEP $<
+	@./depend.sh $< $(CFLAGS) > $@
