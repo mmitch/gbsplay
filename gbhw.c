@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.29 2004/03/10 01:48:15 ranmachan Exp $
+/* $Id: gbhw.c,v 1.30 2004/06/05 21:08:47 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -48,6 +48,14 @@ static int pause_output = 0;
 
 static gbhw_callback_fn callback;
 static void *callbackpriv;
+
+#define TAP1_15		0x4000;
+#define TAP2_15		0x2000;
+#define TAP1_7		0x0040;
+#define TAP2_7		0x0020;
+
+static uint32_t tap1 = TAP1_15;
+static uint32_t tap2 = TAP2_15;
 
 static regparm uint32_t rom_get(uint32_t addr)
 {
@@ -190,13 +198,19 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 		case 0xff23:
 			{
 				int div = ioregs[0x22];
-				int shift = div >> 5;
+				int shift = div >> 4;
 				int rate = div & 7;
 				gbhw_ch[3].div_ctr = 0;
 				gbhw_ch[3].div_tc = 1 << shift;
+				if (div & 8) {
+					tap1 = TAP1_7;
+					tap2 = TAP2_7;
+				} else {
+					tap1 = TAP1_15;
+					tap2 = TAP2_15;
+				}
 				if (rate) gbhw_ch[3].div_tc *= rate;
 				else gbhw_ch[3].div_tc /= 2;
-				gbhw_ch[3].div_tc *= 2;
 				if (addr == 0xff22) break;
 //				printf(" ch4: vol=%02d envd=%d envspd=%d duty_ctr=%d len=%03d len_en=%d key=%04d gate=%d%d\n", gbhw_ch[3].volume, gbhw_ch[3].env_dir, gbhw_ch[3].env_ctr, gbhw_ch[3].duty_ctr, gbhw_ch[3].len, gbhw_ch[3].len_enable, gbhw_ch[3].div_tc, gbhw_ch[3].leftgate, gbhw_ch[3].rightgate);
 			}
@@ -415,9 +429,9 @@ static regparm void gb_sound(int cycles)
 			gbhw_ch[3].div_ctr--;
 			if (gbhw_ch[3].div_ctr <= 0) {
 				gbhw_ch[3].div_ctr = gbhw_ch[3].div_tc;
-				lfsr = (lfsr << 1) | (((lfsr >> 15) ^ (lfsr >> 14)) & 1);
-				val = gbhw_ch[3].volume * ((random() & 2)-1);
-//				val = gbhw_ch[3].volume * ((lfsr & 2)-1);
+				lfsr = (lfsr << 1) | (((lfsr & tap1) > 0) ^ ((lfsr & tap2) > 0));
+//				val = gbhw_ch[3].volume * ((random() & 2)-1);
+				val = gbhw_ch[3].volume * ((lfsr & 2)-1);
 			}
 		}
 		smpldivisor++;
@@ -509,11 +523,19 @@ regparm int gbhw_step(int time_to_work)
 	time_to_work *= msec_cycles;
 	
 	while (cycles_total < time_to_work) {
-		int cycles = gbcpu_step();
+		int maxcycles = time_to_work - cycles_total;
+		int cycles = 0;
 
-		if (cycles < 0) return cycles;
-		
-		gb_sound(cycles);
+		if (vblankctr > 0 && vblankctr < maxcycles) maxcycles = vblankctr;
+		if (timerctr > 0 && timerctr < maxcycles) maxcycles = timerctr;
+
+		while (cycles < maxcycles) {
+			int step = gbcpu_step();
+			if (step < 0) return step;
+			cycles += step;
+			gb_sound(step);
+		}
+
 		if (vblankctr > 0) vblankctr -= cycles;
 		if (vblankctr <= 0 && gbcpu_if && (ioregs[0x7f] & 1)) {
 			vblankctr += vblanktc;
