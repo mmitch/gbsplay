@@ -1,13 +1,12 @@
-$Id: TODO,v 1.6 2003/09/12 13:38:39 ranma Exp $
+<<$Id: TODO,v 1.7 2003/09/12 17:57:07 mitch Exp $>>
+
 
 TODO list for gbsplay.
 
-### version 0.0.1:
 
-( )  set up feature list for 0.0.1 release
-(X)  add manpage for gbsplayrc(5)
-(X)  add "--next_song_after_pause" switch to gbsplay
-(X)  add "--next_song_after_playtime" switch to gbsplay
+### version 0.0.2:
+
+( )  set up feature list for 0.0.2 release
 
 ### unspecified: (bits'n'ideas)
 
@@ -15,3 +14,5 @@ TODO list for gbsplay.
      (perhaps via with commandline switch)
 ( )  add info about GBS formats 1 and 2
 ( )  add random and shuffle mode (as "described" by mpg123) for subsongs
+( )  generate 1 dynamic library that is used by gbsplay, gbsinfo and gbsxmms
+( )  add fadeout option to automatic songchange
