@@ -1,4 +1,4 @@
-/* $Id: gbcpu.c,v 1.18 2004/07/08 13:46:01 ranmachan Exp $
+/* $Id: gbcpu.c,v 1.19 2004/07/14 19:59:10 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -681,14 +681,13 @@ static regparm void op_bit(uint32_t op)
 static regparm void op_rl(uint32_t op, const struct opinfo *oi)
 {
 	int reg = op & 7;
-	uint16_t res;
-	uint8_t val;
+	uint8_t res, val;
 
 	DPRINTF(" %s ", oi->name);
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res << 1;
-	res |= (((uint16_t)gbcpu_regs.rn.f & CF) >> 4);
+	res |= (gbcpu_regs.rn.f & CF) >> 4;
 	gbcpu_regs.rn.f = (val >> 7) << 4;
 	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	put_reg(reg, res);
@@ -696,12 +695,12 @@ static regparm void op_rl(uint32_t op, const struct opinfo *oi)
 
 static regparm void op_rla(uint32_t op, const struct opinfo *oi)
 {
-	uint16_t res;
+	uint8_t res;
 
 	DPRINTF(" %s", oi->name);
 	res  = gbcpu_regs.rn.a;
 	res  = res << 1;
-	res |= (((uint16_t)gbcpu_regs.rn.f & CF) >> 4);
+	res |= (gbcpu_regs.rn.f & CF) >> 4;
 	gbcpu_regs.rn.f = (gbcpu_regs.rn.a >> 7) << 4;
 	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	gbcpu_regs.rn.a = res;
@@ -710,14 +709,13 @@ static regparm void op_rla(uint32_t op, const struct opinfo *oi)
 static regparm void op_rlc(uint32_t op, const struct opinfo *oi)
 {
 	int reg = op & 7;
-	uint16_t res;
-	uint8_t val;
+	uint8_t res, val;
 
 	DPRINTF(" %s ", oi->name);
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res << 1;
-	res |= (val >> 7);
+	res |= val >> 7;
 	gbcpu_regs.rn.f = (val >> 7) << 4;
 	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	put_reg(reg, res);
@@ -725,12 +723,12 @@ static regparm void op_rlc(uint32_t op, const struct opinfo *oi)
 
 static regparm void op_rlca(uint32_t op, const struct opinfo *oi)
 {
-	uint16_t res;
+	uint8_t res;
 
 	DPRINTF(" %s", oi->name);
 	res  = gbcpu_regs.rn.a;
 	res  = res << 1;
-	res |= (gbcpu_regs.rn.a >> 7);
+	res |= gbcpu_regs.rn.a >> 7;
 	gbcpu_regs.rn.f = (gbcpu_regs.rn.a >> 7) << 4;
 	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	gbcpu_regs.rn.a = res;
@@ -739,14 +737,13 @@ static regparm void op_rlca(uint32_t op, const struct opinfo *oi)
 static regparm void op_sla(uint32_t op, const struct opinfo *oi)
 {
 	int reg = op & 7;
-	uint16_t res;
-	uint8_t val;
+	uint8_t res, val;
 
 	DPRINTF(" %s ", oi->name);
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res << 1;
-	gbcpu_regs.rn.f = ((val >> 7) << 4);
+	gbcpu_regs.rn.f = (val >> 7) << 4;
 	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
@@ -754,14 +751,13 @@ static regparm void op_sla(uint32_t op, const struct opinfo *oi)
 static regparm void op_rr(uint32_t op, const struct opinfo *oi)
 {
 	int reg = op & 7;
-	uint16_t res;
-	uint8_t val;
+	uint8_t res, val;
 
 	DPRINTF(" %s ", oi->name);
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res >> 1;
-	res |= (((uint16_t)gbcpu_regs.rn.f & CF) << 3);
+	res |= (gbcpu_regs.rn.f & CF) << 3;
 	gbcpu_regs.rn.f = (val & 1) << 4;
 	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	put_reg(reg, res);
@@ -769,12 +765,12 @@ static regparm void op_rr(uint32_t op, const struct opinfo *oi)
 
 static regparm void op_rra(uint32_t op, const struct opinfo *oi)
 {
-	uint16_t res;
+	uint8_t res;
 
 	DPRINTF(" %s", oi->name);
 	res  = gbcpu_regs.rn.a;
 	res  = res >> 1;
-	res |= (((uint16_t)gbcpu_regs.rn.f & CF) << 3);
+	res |= (gbcpu_regs.rn.f & CF) << 3;
 	gbcpu_regs.rn.f = (gbcpu_regs.rn.a & 1) << 4;
 	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	gbcpu_regs.rn.a = res;
@@ -783,14 +779,13 @@ static regparm void op_rra(uint32_t op, const struct opinfo *oi)
 static regparm void op_rrc(uint32_t op, const struct opinfo *oi)
 {
 	int reg = op & 7;
-	uint16_t res;
-	uint8_t val;
+	uint8_t res, val;
 
 	DPRINTF(" %s ", oi->name);
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res >> 1;
-	res |= (val << 7);
+	res |= val << 7;
 	gbcpu_regs.rn.f = (val & 1) << 4;
 	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	put_reg(reg, res);
@@ -798,12 +793,12 @@ static regparm void op_rrc(uint32_t op, const struct opinfo *oi)
 
 static regparm void op_rrca(uint32_t op, const struct opinfo *oi)
 {
-	uint16_t res;
+	uint8_t res;
 
 	DPRINTF(" %s", oi->name);
 	res  = gbcpu_regs.rn.a;
 	res  = res >> 1;
-	res |= (gbcpu_regs.rn.a << 7);
+	res |= gbcpu_regs.rn.a << 7;
 	gbcpu_regs.rn.f = (gbcpu_regs.rn.a & 1) << 4;
 	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	gbcpu_regs.rn.a = res;
@@ -812,15 +807,14 @@ static regparm void op_rrca(uint32_t op, const struct opinfo *oi)
 static regparm void op_sra(uint32_t op, const struct opinfo *oi)
 {
 	int reg = op & 7;
-	uint16_t res;
-	uint8_t val;
+	uint8_t res, val;
 
 	DPRINTF(" %s ", oi->name);
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res >> 1;
-	res |= (val & 0x80);
-	gbcpu_regs.rn.f = ((val & 1) << 4);
+	res |= val & 0x80;
+	gbcpu_regs.rn.f = (val & 1) << 4;
 	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
@@ -828,14 +822,13 @@ static regparm void op_sra(uint32_t op, const struct opinfo *oi)
 static regparm void op_srl(uint32_t op, const struct opinfo *oi)
 {
 	int reg = op & 7;
-	uint16_t res;
-	uint8_t val;
+	uint8_t res, val;
 
 	DPRINTF(" %s ", oi->name);
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res >> 1;
-	gbcpu_regs.rn.f = ((val & 1) << 4);
+	gbcpu_regs.rn.f = (val & 1) << 4;
 	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
