@@ -1,4 +1,4 @@
-/* $Id: gbcpu.h,v 1.5 2003/11/28 20:52:05 ranma Exp $
+/* $Id: gbcpu.h,v 1.6 2003/11/29 19:03:15 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -9,8 +9,8 @@
 #ifndef _GBCPU_H_
 #define _GBCPU_H_
 
-#include <stdio.h>
 #include <sys/param.h>
+#include <inttypes.h>
 
 #ifndef BYTE_ORDER
 
@@ -66,64 +66,64 @@ static inline void foo(void)
 
 #if BYTE_ORDER == LITTLE_ENDIAN
 
-#define REGS16_R(r, i) (*((unsigned short*)&r.ri[i*2]))
-#define REGS16_W(r, i, x) (*((unsigned short*)&r.ri[i*2])) = x
+#define REGS16_R(r, i) (*((uint16_t*)&r.ri[i*2]))
+#define REGS16_W(r, i, x) (*((uint16_t*)&r.ri[i*2])) = x
 #define REGS8_R(r, i) (r.ri[i^1])
 #define REGS8_W(r, i, x) (r.ri[i^1]) = x
 
 struct gbcpu_regs {
 	union {
-		unsigned char ri[12];
+		uint8_t ri[12];
 		struct {
-			unsigned char c;
-			unsigned char b;
-			unsigned char e;
-			unsigned char d;
-			unsigned char l;
-			unsigned char h;
-			unsigned char a;
-			unsigned char f;
-			unsigned short sp;
-			unsigned short pc;
+			uint8_t c;
+			uint8_t b;
+			uint8_t e;
+			uint8_t d;
+			uint8_t l;
+			uint8_t h;
+			uint8_t a;
+			uint8_t f;
+			uint16_t sp;
+			uint16_t pc;
 		} rn;
 	};
 };
 
 #else
 
-#define REGS16_R(r, i) (*((unsigned short*)&r.ri[i*2]))
-#define REGS16_W(r, i, x) (*((unsigned short*)&r.ri[i*2])) = x
+#define REGS16_R(r, i) (*((uint16_t*)&r.ri[i*2]))
+#define REGS16_W(r, i, x) (*((uint16_t*)&r.ri[i*2])) = x
 #define REGS8_R(r, i) (r.ri[i])
 #define REGS8_W(r, i, x) (r.ri[i]) = x
 
 struct gbcpu_regs {
 	union {
-		unsigned char ri[12];
+		uint8_t ri[12];
 		struct {
-			unsigned char b;
-			unsigned char c;
-			unsigned char d;
-			unsigned char e;
-			unsigned char h;
-			unsigned char l;
-			unsigned char f;
-			unsigned char a;
-			unsigned short sp;
-			unsigned short pc;
+			uint8_t b;
+			uint8_t c;
+			uint8_t d;
+			uint8_t e;
+			uint8_t h;
+			uint8_t l;
+			uint8_t f;
+			uint8_t a;
+			uint16_t sp;
+			uint16_t pc;
 		} rn;
 	};
 };
 
 #endif
 
-typedef void (*gbcpu_put_fn)(unsigned int addr, unsigned char val);
-typedef unsigned char (*gbcpu_get_fn)(unsigned int addr);
+typedef void (*gbcpu_put_fn)(uint32_t addr, uint8_t val);
+typedef uint8_t (*gbcpu_get_fn)(uint32_t addr);
 
 extern struct gbcpu_regs gbcpu_regs;
 extern int gbcpu_halted;
 extern int gbcpu_if;
 
-void gbcpu_addmem(int start, int end, gbcpu_put_fn putfn, gbcpu_get_fn getfn);
+void gbcpu_addmem(uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn);
 void gbcpu_init(void);
 int gbcpu_step(void);
 void gbcpu_intr(int vec);

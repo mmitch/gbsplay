@@ -1,4 +1,4 @@
-/* $Id: gbs.h,v 1.3 2003/10/27 21:52:29 ranma Exp $
+/* $Id: gbs.h,v 1.4 2003/11/29 19:03:15 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -9,39 +9,41 @@
 #ifndef _GBS_H_
 #define _GBS_H_
 
+#include <inttypes.h>
+
 #define GBS_LEN_SHIFT	10
 #define GBS_LEN_DIV	(1 << (GBS_LEN_SHIFT-1))
 
 struct gbs_subsong_info {
-	unsigned int len;
+	uint32_t len;
 	char *title;
 };
 
 struct gbs {
-	unsigned char *buf;
-	unsigned int version;
-	unsigned int songs;
-	unsigned int defaultsong;
-	unsigned int load;
-	unsigned int init;
-	unsigned int play;
-	unsigned int stack;
-	unsigned int tma;
-	unsigned int tmc;
+	uint8_t *buf;
+	uint32_t version;
+	uint32_t songs;
+	uint32_t defaultsong;
+	uint32_t load;
+	uint32_t init;
+	uint32_t play;
+	uint32_t stack;
+	uint32_t tma;
+	uint32_t tmc;
 	char *title;
 	char *author;
 	char *copyright;
-	unsigned int codelen;
-	unsigned char *code;
-	unsigned char *exthdr;
-	unsigned int filesize;
-	unsigned int crc;
-	unsigned int crcnow;
+	uint32_t codelen;
+	uint8_t *code;
+	uint8_t *exthdr;
+	uint32_t filesize;
+	uint32_t crc;
+	uint32_t crcnow;
 	struct gbs_subsong_info *subsong_info;
 	char *strings;
 	char v1strings[33*3];
-	unsigned char *rom;
-	unsigned int romsize;
+	uint8_t *rom;
+	uint32_t romsize;
 };
 
 struct gbs *gbs_open(char *name);

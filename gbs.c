@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.10 2003/10/27 21:52:29 ranma Exp $
+/* $Id: gbs.c,v 1.11 2003/11/29 19:03:15 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -24,7 +24,7 @@
 #define GBS_MAGIC		"GBS"
 #define GBS_EXTHDR_MAGIC	"GBSX"
 
-static const unsigned char playercode[] = {
+static const uint8_t playercode[] = {
 	0xf5,              /* 0050:  push af         */
 	0xe5,              /* 0051:  push hl         */
 	0x01, 0x30, 0x00,  /* 0052:  ld   bc, 0x0030 */
@@ -167,7 +167,7 @@ void gbs_close(struct gbs *gbs)
 	free(gbs);
 }
 
-void writeint(unsigned char *buf, unsigned int val, int bytes)
+void writeint(uint8_t *buf, uint32_t val, int bytes)
 {
 	int shift = 0;
 	int i;
@@ -178,11 +178,11 @@ void writeint(unsigned char *buf, unsigned int val, int bytes)
 	}
 }
 
-unsigned int readint(unsigned char *buf, int bytes)
+uint32_t readint(uint8_t *buf, int bytes)
 {
 	int i;
 	int shift = 0;
-	unsigned int res = 0;
+	uint32_t res = 0;
 
 	for (i=0; i<bytes; i++) {
 		res |= buf[i] << shift;
@@ -195,7 +195,7 @@ unsigned int readint(unsigned char *buf, int bytes)
 int gbs_write(struct gbs *gbs, char *name, int version)
 {
 	int fd;
-	unsigned int codelen = (gbs->codelen + 15) >> 4;
+	int codelen = (gbs->codelen + 15) >> 4;
 	char pad[16];
 	char strings[65536];
 	int stringofs = 0;
@@ -211,7 +211,7 @@ int gbs_write(struct gbs *gbs, char *name, int version)
 	if (version == 2) {
 		int len,i;
 		int ehdrlen = 32 + 8*gbs->songs;
-		unsigned int hdrcrc;
+		uint32_t hdrcrc;
 
 		newlen = 0x70 + codelen*16 + ehdrlen;
 		gbs->buf[3] = 1;
@@ -277,8 +277,8 @@ struct gbs *gbs_open(char *name)
 	int fd, i;
 	struct stat st;
 	struct gbs *gbs = malloc(sizeof(struct gbs));
-	unsigned char *buf;
-	unsigned char *buf2 = NULL;
+	uint8_t *buf;
+	uint8_t *buf2 = NULL;
 	int have_ehdr = 0;
 
 	memset(gbs, 0, sizeof(struct gbs));
@@ -322,7 +322,7 @@ struct gbs *gbs_open(char *name)
 	gbs->codelen = (buf[0x6e] + (buf[0x6f] << 8)) << 4;
 	if ((0x70 + gbs->codelen) < (gbs->filesize - 8) &&
 	    strncmp(&buf[0x70 + gbs->codelen], GBS_EXTHDR_MAGIC, 4) == 0) {
-		unsigned int crc, realcrc, ehdrlen;
+		uint32_t crc, realcrc, ehdrlen;
 
 		gbs->exthdr = gbs->code + gbs->codelen;
 		ehdrlen = readint(&gbs->exthdr[0x04], 4) + 8;

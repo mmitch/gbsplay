@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.18 2003/11/28 20:52:04 ranma Exp $
+# $Id: configure,v 1.19 2003/11/29 19:03:15 ranma Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -55,9 +55,19 @@ EOF
     if [ $RESULT -eq 0 ]; then
 	echo "ok"
 	eval "have_$varname=yes"
+	return 0
     else
 	echo "not found"
 	eval "have_$varname=no"
+	return 1
+    fi
+}
+
+need_include() {
+    check_include "$1"
+    if [ $? -ne 0 ]; then
+	echo "Could not find $1, which is needed for compilation."
+	exit 1
     fi
 }
 
@@ -135,6 +145,7 @@ else
 fi
 
 check_include sys/soundcard.h
+need_include inttypes.h
 
 ## check for glib development files
 
