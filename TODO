@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.24 2003/09/22 18:18:10 mitch Exp $>>
+<<$Id: TODO,v 1.25 2003/10/11 17:43:03 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -22,6 +22,8 @@ TODO list for gbsplay.
      (after the last subsong subsong 1 starts over)
 
 ( )  gbsplay: add restart subsong keyboard command
+
+( )  gbsplay: make refresh_delay a commandline argument
 
 
 ### version 0.0.3:
