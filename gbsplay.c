@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.11 2003/08/23 08:31:38 mitch Exp $
+/* $Id: gbsplay.c,v 1.12 2003/08/23 14:16:40 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -100,6 +100,8 @@ static unsigned short gbs_base;
 static unsigned short gbs_init;
 static unsigned short gbs_play;
 static unsigned short gbs_stack;
+static unsigned int romsize;
+static unsigned int lastbank;
 
 struct channel {
 	int master;
@@ -437,7 +439,7 @@ static get_fn getlookup[256] = {
 	&io_get
 };
 
-static unsigned char mem_get(unsigned short addr)
+static inline unsigned char mem_get(unsigned short addr)
 {
 	unsigned char res = getlookup[addr >> 8](addr);
 	cycles+=4;
@@ -450,8 +452,14 @@ static void vidram_put(unsigned short addr, unsigned char val)
 
 static void rom_put(unsigned short addr, unsigned char val)
 {
-	if (addr >= 0x2000 && addr <= 0x3fff)
+	if (addr >= 0x2000 && addr <= 0x3fff) {
+		val &= 0x1f;
 		rombank = val + (val == 0);
+		if (rombank > lastbank) {
+			printf("Bank %d out of range (0-%d)!\n", rombank, lastbank);
+			rombank = lastbank;
+		}
+	}
 }
 
 static void io_put(unsigned short addr, unsigned char val)
@@ -713,7 +721,7 @@ static void io_put(unsigned short addr, unsigned char val)
 			case 0xff3f:
 				break;
 			default:
-				printf("iowrite to 0x%04x unimplemented.\n", addr);
+				printf("iowrite to 0x%04x unimplemented (val=%02x).\n", addr, val);
 				break;
 		}
 		return;
@@ -990,9 +998,9 @@ static put_fn putlookup[256] = {
 	&io_put
 };
 
-static void mem_put(unsigned short addr, unsigned char val)
+static inline void mem_put(unsigned short addr, unsigned char val)
 {
-	cycles++;
+	cycles+=4;
 	putlookup[addr >> 8](addr, val);
 }
 
@@ -1031,7 +1039,7 @@ static unsigned short get_imm16(void)
 	return get_imm8() + ((unsigned short)get_imm8() << 8);
 }
 
-static void print_reg(int i)
+static inline void print_reg(int i)
 {
 	if (i == 6) DPRINTF("[HL]"); /* indirect memory access by [HL] */
 	else DPRINTF("%c", regnames[i]);
@@ -1446,7 +1454,7 @@ static void op_inc(unsigned char op, struct opinfo *oi)
 		mem_put(hl, res);
 	}
 	if (res == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
-	if ((old & 7) > (res & 7)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
+	if ((old & 15) > (res & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
 	regs.rn.f &= ~ NF;
 }
 
@@ -1480,7 +1488,7 @@ static void op_dec(unsigned char op, struct opinfo *oi)
 		mem_put(hl, res);
 	}
 	if (res == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
-	if ((old & 7) > (res & 7)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
+	if ((old & 15) > (res & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
 	regs.rn.f |= NF;
 }
 
@@ -2443,10 +2451,9 @@ static void open_gbs(char *name, int i)
 	int fd;
 	unsigned char buf[0x70];
 	struct stat st;
-	unsigned int romsize;
 
 	if ((fd = open(name, O_RDONLY)) == -1) {
-		DPRINTF("Could not open %s: %s\n", name, strerror(errno));
+		printf("Could not open %s: %s\n", name, strerror(errno));
 		exit(1);
 	}
 	fstat(fd, &st);
@@ -2455,7 +2462,7 @@ static void open_gbs(char *name, int i)
 	    buf[1] != 'B' ||
 	    buf[2] != 'S' ||
 	    buf[3] != 1) {
-		DPRINTF("Not a GBS-File: %s\n", name);
+		printf("Not a GBS-File: %s\n", name);
 		exit(1);
 	}
 
@@ -2465,6 +2472,7 @@ static void open_gbs(char *name, int i)
 	gbs_stack = buf[0x0c] + (buf[0x0d] << 8);
 
 	romsize = (st.st_size + gbs_base + 0x3fff) & ~0x3fff;
+	lastbank = (romsize / 0x4000)-1;
 
 	if (i == -1) i = buf[0x5];
 	if (i > buf[0x04]) {
@@ -2582,6 +2590,7 @@ int main(int argc, char **argv)
 	ch1.master = ch2.master = ch4.master = 1;
 
 	memcpy(&ioregs[0x30], dmgwave, sizeof(dmgwave));
+//	memset(ram, 0xff, sizeof(ram));
 
 	if (argc < 2) {
 		printf("Usage: %s <gbs-file> [<subsong>]\n", argv[0]);
