@@ -1,4 +1,4 @@
-/* $Id: plugout_nas.c,v 1.4 2004/04/04 19:20:00 ranmachan Exp $
+/* $Id: plugout_nas.c,v 1.5 2004/04/04 19:26:42 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -43,25 +43,25 @@ struct output_plugin plugout_nas = {
 static char regparm *nas_error(AuStatus status)
 /* convert AuStatus to error string */
 {
-        static char s[100];
+	static char s[100];
 
-        AuGetErrorText(nas_server, status, s, sizeof(s));
+	AuGetErrorText(nas_server, status, s, sizeof(s));
 
-        return s;
+	return s;
 }
 
 static AuDeviceID regparm nas_find_device(AuServer *aud)
 /* look for a NAS device that supports 2 channels (we need stereo sound) */
 {
-        int i;
-        for (i=0; i < AuServerNumDevices(aud); i++) {
-                AuDeviceAttributes *dev = AuServerDevice(aud, i);
-                if ((AuDeviceKind(dev) == AuComponentKindPhysicalOutput) &&
+	int i;
+	for (i=0; i < AuServerNumDevices(aud); i++) {
+		AuDeviceAttributes *dev = AuServerDevice(aud, i);
+		if ((AuDeviceKind(dev) == AuComponentKindPhysicalOutput) &&
 		    AuDeviceNumTracks(dev) == 2) {
-                        return AuDeviceIdentifier(dev);
-                }
-        }
-        return AuNone;
+			return AuDeviceIdentifier(dev);
+		}
+	}
+	return AuNone;
 }
 
 
@@ -81,8 +81,8 @@ static int regparm nas_open(int endian, int rate)
 	}
 
 	/* search device with 2 channels */
-        nas_device = nas_find_device(nas_server);
-        if (nas_device == AuNone) {
+	nas_device = nas_find_device(nas_server);
+	if (nas_device == AuNone) {
 		fprintf(stderr, _("%s: Can't find device with 2 channels\n"), plugout_nas.name);
 		goto err_close;
 	}
@@ -95,25 +95,25 @@ static int regparm nas_open(int endian, int rate)
 	}
 
 	/* create elements(?) */
-        AuMakeElementImportClient(nas_elements, rate, nas_format, 2, AuTrue,
-				  NAS_BUFFER_SAMPLES, NAS_BUFFER_SAMPLES / 2, 0, NULL);
-        AuMakeElementExportDevice(nas_elements+1, 0, nas_device, rate,
-				  AuUnlimitedSamples, 0, NULL);
-        AuSetElements(nas_server, nas_flow, AuTrue, 2, nas_elements, &status);
+	AuMakeElementImportClient(nas_elements, rate, nas_format, 2, AuTrue,
+	                          NAS_BUFFER_SAMPLES, NAS_BUFFER_SAMPLES / 2,
+	                          0, NULL);
+	AuMakeElementExportDevice(nas_elements+1, 0, nas_device, rate,
+	                          AuUnlimitedSamples, 0, NULL);
+	AuSetElements(nas_server, nas_flow, AuTrue, 2, nas_elements, &status);
 	if (status != AuSuccess) {
 		fprintf(stderr, _("%s: Can't set audio elements: %s\n"), plugout_nas.name, nas_error(status));
 		goto err_close;
 	}
 
 	/* start sound flow */
-        AuStartFlow(nas_server, nas_flow, &status);
-        if (status != AuSuccess) {
-                fprintf(stderr, _("%s: Can't start audio flow: %s\n"), plugout_nas.name, nas_error(status));
-                goto err_close;
-        }
-	
-	return 0;
+	AuStartFlow(nas_server, nas_flow, &status);
+	if (status != AuSuccess) {
+		fprintf(stderr, _("%s: Can't start audio flow: %s\n"), plugout_nas.name, nas_error(status));
+		goto err_close;
+	}
 
+	return 0;
 err_close:
 	AuCloseServer(nas_server);
 	nas_server = NULL;
@@ -125,9 +125,9 @@ static ssize_t regparm nas_write(const void *buf, size_t count)
 /* write audio data to NAS device */
 {
 	int maxlen = NAS_BUFFER_SAMPLES * 2;
-        int numwritten = 0;
+	int numwritten = 0;
 
-        while (numwritten < count) {
+	while (numwritten < count) {
 		AuStatus as;
 		int writelen = count - numwritten;
 
@@ -152,9 +152,9 @@ static ssize_t regparm nas_write(const void *buf, size_t count)
 		}
 		numwritten += writelen;
 		buf += writelen;
-        }
+	}
 
-        return numwritten;
+	return numwritten;
 }
 
 static void regparm nas_close()
