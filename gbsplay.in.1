@@ -1,4 +1,4 @@
-.\" $Id: gbsplay.in.1,v 1.4 2003/10/11 18:25:25 ranma Exp $
+.\" $Id: gbsplay.in.1,v 1.5 2003/10/11 19:48:54 mitch Exp $
 .\" This manpage 2003 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
 .TH "gbsplay" "1" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
@@ -6,12 +6,18 @@
 .LP
 \fBgbsplay\fR \- Gameboy sound player
 .SH "SYNOPSIS"
-\fBgbsplay\fR [\fI\-h\fR] [\fI\-r samplerate\fR] [\fI\-s\fR] [\fI\-t subsong\-timeout\fR] [\fI\-T silence\-timeout\fR] [\fI\-G subsong\-gap\fR] [\fI-F fadeout\-time\fR] [\fI\-V\fR] \fIgbs\-file\fR [\fIstart\-subsong\fR [\fIstop\-subsong\fR] ]
+\fBgbsplay\fR [\fIoptions\fR] \fIgbs\-file\fR [\fIstart\-subsong\fR [\fIstop\-subsong\fR] ]
 .SH "DESCRIPTION"
 gbsplay emulates the sound hardware of the Nintendo Gameboy.  It
 is able to play the sounds from a Gameboy module dump (.GBS format)
 over /dev/dsp.
 .SH "OPTIONS"
+.TP
+\fI\-f fadeout\-time\fR
+Set fadeout time to \fIsubsong\-gap\fR seconds.  Instead of cutting of the subsong hard, do a soft fadeout.  Default value is 3 seconds.
+.TP
+\fI\-g subsong\-gap\fR
+Set subsong gap to \fIsubsong\-gap\fR seconds.  Before playing the next subsong after the subsong timeout, play \fIsubsong\-gap\fR seconds of silence.  Default value is 2 seconds.
 .TP
 \fI\-h\fR
 Display short help and exit.
@@ -30,12 +36,6 @@ Set subsong timeout to \fIsubsong\-timeout\fR seconds.  When a subsong has been 
 .TP
 \fI\-T silence\-timeout\fR
 Set silence timeout to \fIsilence\-timeout\fR seconds.  When a subsong contains silence for the given time, the player will skip to the next subsong.  Default value is 2 seconds.
-.TP
-\fI\-G subsong\-gap\fR
-Set subsong gap to \fIsubsong\-gap\fR seconds.  Before playing the next subsong after the subsong timeout, play \fIsubsong\-gap\fR seconds of silence.  Default value is 2 seconds.
-.TP
-\fI\-F fadeout\-time\fR
-Set fadeout time to \fIsubsong\-gap\fR seconds.  Instead of cutting of the subsong hard, do a soft fadeout.  Default value is 3 seconds.
 .TP
 \fI\-V\fR
 Display version number and exit.
@@ -64,11 +64,11 @@ Skip to the previous subsong.
 \fIn\fR
 Skip to the next subsong.
 .TP
-\fISpace\fR
-Toggle play/pause.
-.TP
 \fIq\fR or \fIEsc\fR
 Quit gbsplay.
+.TP
+\fISpace\fR
+Toggle play/pause.
 .SH "FILES"
 .TP
 \fI/etc/gbsplayrc\fR

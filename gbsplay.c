@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.58 2003/10/11 18:25:25 ranma Exp $
+/* $Id: gbsplay.c,v 1.59 2003/10/11 19:48:54 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -272,14 +272,15 @@ void usage(int exitcode)
 	        "Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
 	        "\n"
 	        "Available options are:\n"
+	        "  -f  set fadeout (%d seconds)\n"
+	        "  -g  set subsong gap (%d seconds)\n"
+	        "  -h  display this help and exit\n"
 	        "  -h  display this help and exit\n"
 	        "  -q  quiet\n"
 	        "  -r  set samplerate (%dHz)\n"
 	        "  -s  write to stdout\n"
 	        "  -t  set subsong timeout (%d seconds)\n"
 	        "  -T  set silence timeout (%d seconds)\n"
-	        "  -F  set fadeout (%d seconds)\n"
-	        "  -G  set subsong gap (%d seconds)\n"
 	        "  -V  print version and exit\n"
 		"  -z  play subsongs in random mode\n"
 		"  -Z  play subsongs in shuffle mode (repetitions possible)\n",
@@ -302,7 +303,7 @@ void parseopts(int *argc, char ***argv)
 {
 	int res;
 	myname = *argv[0];
-	while ((res = getopt(*argc, *argv, "hqr:st:T:F:G:VzZ")) != -1) {
+	while ((res = getopt(*argc, *argv, "hqr:st:T:f:g:VzZ")) != -1) {
 		switch (res) {
 		default:
 			usage(1);
@@ -326,10 +327,10 @@ void parseopts(int *argc, char ***argv)
 		case 'T':
 			sscanf(optarg, "%d", &silence_timeout);
 			break;
-		case 'F':
+		case 'f':
 			sscanf(optarg, "%d", &fadeout);
 			break;
-		case 'G':
+		case 'g':
 			sscanf(optarg, "%d", &subsong_gap);
 			break;
 		case 'V':
