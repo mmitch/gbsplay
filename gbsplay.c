@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.48 2003/09/17 21:25:56 mitch Exp $
+/* $Id: gbsplay.c,v 1.49 2003/09/18 11:15:08 ikari Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -50,7 +50,7 @@ static int dspfd;
 static int quit = 0;
 static int silencectr = 0;
 static int statuscnt;
-static long long clock = 0;
+static long long ticks = 0;
 static struct termios ots;
 
 
@@ -263,7 +263,7 @@ void parseopts(int *argc, char ***argv)
 
 static void handletimeouts(struct gbs *gbs)
 {
-	int time = clock / 4194304;
+	int time = ticks / 4194304;
 	int next_subsong;
 
 	if ((gbhw_ch[0].volume == 0 ||
@@ -289,7 +289,7 @@ static void handletimeouts(struct gbs *gbs)
 			subsong = next_subsong;
 		}
 		silencectr = 0;
-		clock = 0;
+		ticks = 0;
 		gbs_playsong(gbs, subsong);
 	}
 }
@@ -305,7 +305,7 @@ static void handleuserinput(struct gbs *gbs)
 			subsong += c == 'n' ? 1 : gbs->songs-1;
 			subsong %= gbs->songs;
 			silencectr = 0;
-			clock = 0;
+			ticks = 0;
 			gbs_playsong(gbs, subsong);
 			break;
 		case 'q':
@@ -318,7 +318,7 @@ static void handleuserinput(struct gbs *gbs)
 
 static void printstatus(struct gbs *gbs)
 {
-	int time = clock / 4194304;
+	int time = ticks / 4194304;
 	int timem = time / 60;
 	int times = time % 60;
 	int ni1 = getnote(gbhw_ch[0].div_tc);
@@ -452,7 +452,7 @@ int main(int argc, char **argv)
 		}
 
 		statuscnt -= cycles;
-		clock += cycles;
+		ticks += cycles;
 
 		if (statuscnt < 0) {
 			statuscnt += statustc;
