@@ -1,7 +1,11 @@
 #!/bin/sh
-# $Id: configure,v 1.8 2003/09/19 16:08:50 mitch Exp $
+# $Id: configure,v 1.9 2003/09/19 18:51:42 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
+#
+# 2003 (C) by Christian Garbs <mitch@cgarbs.de>
+#             Tobias Diedrich <ranma@gmx.at>
+# Licensed under GNU GPL.
 
 EXTRA_ALL=
 EXTRA_CFLAGS=
@@ -18,6 +22,54 @@ build_xmmsplugin=n
 
 ERRORLOG=config.err
 exec 2> $ERRORLOG
+
+## check for C compiler
+
+echo -n "checking for CC:  "
+if [ $CC ]; then
+    echo "ok"
+else
+    echo "nok"
+    cat <<EOF
+Environment variable CC is not set.
+Pleasy point it to a working C compiler.
+You probably want to run 'make' instead of './configure'.
+EOF
+    exit 1
+fi
+
+echo -n "checking for working compiler:  "
+INFILE=$(mktemp).c
+OUTFILE=$(mktemp)
+
+cat > "$INFILE" <<EOF
+int main(char argc, char **argv) {
+    return 0;
+}
+EOF
+$CC -o "$OUTFILE" "$INFILE"
+RESULT=$?
+rm -f "$INFILE"
+if [ $RESULT -eq 0 ]; then
+    if [ -s "$OUTFILE" ]; then
+	"$OUTFILE"
+	rm -f "$OUTFILE"
+	if [ $? -eq 0 ]; then
+	    echo "ok"
+	else
+	    echo "can't execute generated code"
+	    exit 1
+	fi
+    else
+	rm -f "$OUTFILE"
+	echo "no code generated"
+	exit 1
+    fi
+else
+    echo "error executing $CC"
+    exit 1
+fi
+
 
 ## check for glib development files
 
