@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.13 2003/08/23 14:37:56 ranma Exp $
+/* $Id: gbsplay.c,v 1.14 2003/08/23 16:11:50 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -110,7 +110,9 @@ typedef void (*put_fn)(unsigned short addr, unsigned char val);
 typedef unsigned char (*get_fn)(unsigned short addr);
 
 struct opinfo {
+#if DEBUG == 1
 	char *name;
+#endif
 	ex_fn fn;
 };
 
@@ -1330,15 +1332,21 @@ static void op_swap(unsigned char op, struct opinfo *oi)
 	put_reg(reg, res);
 }
 
+#if DEBUG == 1
+#define OPINFO(name, fn) {name, fn}
+#else
+#define OPINFO(name, fn) {fn}
+#endif
+
 static struct opinfo cbops[8] = {
-	{"RLC", &op_rlc},		/* opcode cb00-cb07 */
-	{"RRC", &op_rrc},		/* opcode cb08-cb0f */
-	{"RL", &op_rl},		/* opcode cb10-cb17 */
-	{"RR", &op_rr},		/* opcode cb18-cb1f */
-	{"SLA", &op_sla},		/* opcode cb20-cb27 */
-	{"SRA", &op_sra},		/* opcode cb28-cb2f */
-	{"SWAP", &op_swap},		/* opcode cb30-cb37 */
-	{"SRL", &op_srl},		/* opcode cb38-cb3f */
+	OPINFO("RLC", &op_rlc),		/* opcode cb00-cb07 */
+	OPINFO("RRC", &op_rrc),		/* opcode cb08-cb0f */
+	OPINFO("RL", &op_rl),		/* opcode cb10-cb17 */
+	OPINFO("RR", &op_rr),		/* opcode cb18-cb1f */
+	OPINFO("SLA", &op_sla),		/* opcode cb20-cb27 */
+	OPINFO("SRA", &op_sra),		/* opcode cb28-cb2f */
+	OPINFO("SWAP", &op_swap),		/* opcode cb30-cb37 */
+	OPINFO("SRL", &op_srl),		/* opcode cb38-cb3f */
 };
 
 static void op_cbprefix(unsigned char op, struct opinfo *oi)
@@ -1961,262 +1969,262 @@ static void op_nop(unsigned char op, struct opinfo *oi)
 }
 
 static struct opinfo ops[256] = {
-	{"NOP", &op_nop},		/* opcode 00 */
-	{"LD", &op_ld_reg16_imm},		/* opcode 01 */
-	{"LD", &op_ld_reg16_a},		/* opcode 02 */
-	{"INC", &op_inc16},		/* opcode 03 */
-	{"INC", &op_inc},		/* opcode 04 */
-	{"DEC", &op_dec},		/* opcode 05 */
-	{"LD", &op_ld_reg8_imm},		/* opcode 06 */
-	{"RLCA", &op_rlca},		/* opcode 07 */
-	{"LD", &op_ld_ind16_sp},		/* opcode 08 */
-	{"ADD", &op_add_hl},		/* opcode 09 */
-	{"LD", &op_ld_reg16_a},		/* opcode 0a */
-	{"DEC", &op_dec16},		/* opcode 0b */
-	{"INC", &op_inc},		/* opcode 0c */
-	{"DEC", &op_dec},		/* opcode 0d */
-	{"LD", &op_ld_reg8_imm},		/* opcode 0e */
-	{"RRCA", &op_rrca},		/* opcode 0f */
-	{"STOP", &op_stop},		/* opcode 10 */
-	{"LD", &op_ld_reg16_imm},		/* opcode 11 */
-	{"LD", &op_ld_reg16_a},		/* opcode 12 */
-	{"INC", &op_inc16},		/* opcode 13 */
-	{"INC", &op_inc},		/* opcode 14 */
-	{"DEC", &op_dec},		/* opcode 15 */
-	{"LD", &op_ld_reg8_imm},		/* opcode 16 */
-	{"RLA", &op_rla},		/* opcode 17 */
-	{"JR", &op_jr},		/* opcode 18 */
-	{"ADD", &op_add_hl},		/* opcode 19 */
-	{"LD", &op_ld_reg16_a},		/* opcode 1a */
-	{"DEC", &op_dec16},		/* opcode 1b */
-	{"INC", &op_inc},		/* opcode 1c */
-	{"DEC", &op_dec},		/* opcode 1d */
-	{"LD", &op_ld_reg8_imm},		/* opcode 1e */
-	{"RRA", &op_rra},		/* opcode 1f */
-	{"JR", &op_jr_cond},		/* opcode 20 */
-	{"LD", &op_ld_reg16_imm},		/* opcode 21 */
-	{"LDI", &op_ld_reg16_a},		/* opcode 22 */
-	{"INC", &op_inc16},		/* opcode 23 */
-	{"INC", &op_inc},		/* opcode 24 */
-	{"DEC", &op_dec},		/* opcode 25 */
-	{"LD", &op_ld_reg8_imm},		/* opcode 26 */
-	{"UNKN", &op_unknown},		/* opcode 27 */
-	{"JR", &op_jr_cond},		/* opcode 28 */
-	{"ADD", &op_add_hl},		/* opcode 29 */
-	{"LDI", &op_ld_reg16_a},		/* opcode 2a */
-	{"DEC", &op_dec16},		/* opcode 2b */
-	{"INC", &op_inc},		/* opcode 2c */
-	{"DEC", &op_dec},		/* opcode 2d */
-	{"LD", &op_ld_reg8_imm},		/* opcode 2e */
-	{"CPL", &op_cpl},		/* opcode 2f */
-	{"JR", &op_jr_cond},		/* opcode 30 */
-	{"LD", &op_ld_reg16_imm},		/* opcode 31 */
-	{"LDD", &op_ld_reg16_a},		/* opcode 32 */
-	{"INC", &op_inc16},		/* opcode 33 */
-	{"INC", &op_inc},		/* opcode 34 */
-	{"DEC", &op_dec},		/* opcode 35 */
-	{"LD", &op_ld_reg8_imm},		/* opcode 36 */
-	{"SCF", &op_scf},		/* opcode 37 */
-	{"JR", &op_jr_cond},		/* opcode 38 */
-	{"ADD", &op_add_hl},		/* opcode 39 */
-	{"LDD", &op_ld_reg16_a},		/* opcode 3a */
-	{"DEC", &op_dec16},		/* opcode 3b */
-	{"INC", &op_inc},		/* opcode 3c */
-	{"DEC", &op_dec},		/* opcode 3d */
-	{"LD", &op_ld_reg8_imm},		/* opcode 3e */
-	{"CCF", &op_ccf},		/* opcode 3f */
-	{"LD", &op_ld},		/* opcode 40 */
-	{"LD", &op_ld},		/* opcode 41 */
-	{"LD", &op_ld},		/* opcode 42 */
-	{"LD", &op_ld},		/* opcode 43 */
-	{"LD", &op_ld},		/* opcode 44 */
-	{"LD", &op_ld},		/* opcode 45 */
-	{"LD", &op_ld},		/* opcode 46 */
-	{"LD", &op_ld},		/* opcode 47 */
-	{"LD", &op_ld},		/* opcode 48 */
-	{"LD", &op_ld},		/* opcode 49 */
-	{"LD", &op_ld},		/* opcode 4a */
-	{"LD", &op_ld},		/* opcode 4b */
-	{"LD", &op_ld},		/* opcode 4c */
-	{"LD", &op_ld},		/* opcode 4d */
-	{"LD", &op_ld},		/* opcode 4e */
-	{"LD", &op_ld},		/* opcode 4f */
-	{"LD", &op_ld},		/* opcode 50 */
-	{"LD", &op_ld},		/* opcode 51 */
-	{"LD", &op_ld},		/* opcode 52 */
-	{"LD", &op_ld},		/* opcode 53 */
-	{"LD", &op_ld},		/* opcode 54 */
-	{"LD", &op_ld},		/* opcode 55 */
-	{"LD", &op_ld},		/* opcode 56 */
-	{"LD", &op_ld},		/* opcode 57 */
-	{"LD", &op_ld},		/* opcode 58 */
-	{"LD", &op_ld},		/* opcode 59 */
-	{"LD", &op_ld},		/* opcode 5a */
-	{"LD", &op_ld},		/* opcode 5b */
-	{"LD", &op_ld},		/* opcode 5c */
-	{"LD", &op_ld},		/* opcode 5d */
-	{"LD", &op_ld},		/* opcode 5e */
-	{"LD", &op_ld},		/* opcode 5f */
-	{"LD", &op_ld},		/* opcode 60 */
-	{"LD", &op_ld},		/* opcode 61 */
-	{"LD", &op_ld},		/* opcode 62 */
-	{"LD", &op_ld},		/* opcode 63 */
-	{"LD", &op_ld},		/* opcode 64 */
-	{"LD", &op_ld},		/* opcode 65 */
-	{"LD", &op_ld},		/* opcode 66 */
-	{"LD", &op_ld},		/* opcode 67 */
-	{"LD", &op_ld},		/* opcode 68 */
-	{"LD", &op_ld},		/* opcode 69 */
-	{"LD", &op_ld},		/* opcode 6a */
-	{"LD", &op_ld},		/* opcode 6b */
-	{"LD", &op_ld},		/* opcode 6c */
-	{"LD", &op_ld},		/* opcode 6d */
-	{"LD", &op_ld},		/* opcode 6e */
-	{"LD", &op_ld},		/* opcode 6f */
-	{"LD", &op_ld},		/* opcode 70 */
-	{"LD", &op_ld},		/* opcode 71 */
-	{"LD", &op_ld},		/* opcode 72 */
-	{"LD", &op_ld},		/* opcode 73 */
-	{"LD", &op_ld},		/* opcode 74 */
-	{"LD", &op_ld},		/* opcode 75 */
-	{"HALT", &op_halt},		/* opcode 76 */
-	{"LD", &op_ld},		/* opcode 77 */
-	{"LD", &op_ld},		/* opcode 78 */
-	{"LD", &op_ld},		/* opcode 79 */
-	{"LD", &op_ld},		/* opcode 7a */
-	{"LD", &op_ld},		/* opcode 7b */
-	{"LD", &op_ld},		/* opcode 7c */
-	{"LD", &op_ld},		/* opcode 7d */
-	{"LD", &op_ld},		/* opcode 7e */
-	{"LD", &op_ld},		/* opcode 7f */
-	{"ADD", &op_add},		/* opcode 80 */
-	{"ADD", &op_add},		/* opcode 81 */
-	{"ADD", &op_add},		/* opcode 82 */
-	{"ADD", &op_add},		/* opcode 83 */
-	{"ADD", &op_add},		/* opcode 84 */
-	{"ADD", &op_add},		/* opcode 85 */
-	{"ADD", &op_add},		/* opcode 86 */
-	{"ADD", &op_add},		/* opcode 87 */
-	{"ADC", &op_adc},		/* opcode 88 */
-	{"ADC", &op_adc},		/* opcode 89 */
-	{"ADC", &op_adc},		/* opcode 8a */
-	{"ADC", &op_adc},		/* opcode 8b */
-	{"ADC", &op_adc},		/* opcode 8c */
-	{"ADC", &op_adc},		/* opcode 8d */
-	{"ADC", &op_adc},		/* opcode 8e */
-	{"ADC", &op_adc},		/* opcode 8f */
-	{"SUB", &op_sub},		/* opcode 90 */
-	{"SUB", &op_sub},		/* opcode 91 */
-	{"SUB", &op_sub},		/* opcode 92 */
-	{"SUB", &op_sub},		/* opcode 93 */
-	{"SUB", &op_sub},		/* opcode 94 */
-	{"SUB", &op_sub},		/* opcode 95 */
-	{"SUB", &op_sub},		/* opcode 96 */
-	{"SUB", &op_sub},		/* opcode 97 */
-	{"SBC", &op_sbc},		/* opcode 98 */
-	{"SBC", &op_sbc},		/* opcode 99 */
-	{"SBC", &op_sbc},		/* opcode 9a */
-	{"SBC", &op_sbc},		/* opcode 9b */
-	{"SBC", &op_sbc},		/* opcode 9c */
-	{"SBC", &op_sbc},		/* opcode 9d */
-	{"SBC", &op_sbc},		/* opcode 9e */
-	{"SBC", &op_sbc},		/* opcode 9f */
-	{"AND", &op_and},		/* opcode a0 */
-	{"AND", &op_and},		/* opcode a1 */
-	{"AND", &op_and},		/* opcode a2 */
-	{"AND", &op_and},		/* opcode a3 */
-	{"AND", &op_and},		/* opcode a4 */
-	{"AND", &op_and},		/* opcode a5 */
-	{"AND", &op_and},		/* opcode a6 */
-	{"AND", &op_and},		/* opcode a7 */
-	{"XOR", &op_xor},		/* opcode a8 */
-	{"XOR", &op_xor},		/* opcode a9 */
-	{"XOR", &op_xor},		/* opcode aa */
-	{"XOR", &op_xor},		/* opcode ab */
-	{"XOR", &op_xor},		/* opcode ac */
-	{"XOR", &op_xor},		/* opcode ad */
-	{"XOR", &op_xor},		/* opcode ae */
-	{"XOR", &op_xor},		/* opcode af */
-	{"OR", &op_or},		/* opcode b0 */
-	{"OR", &op_or},		/* opcode b1 */
-	{"OR", &op_or},		/* opcode b2 */
-	{"OR", &op_or},		/* opcode b3 */
-	{"OR", &op_or},		/* opcode b4 */
-	{"OR", &op_or},		/* opcode b5 */
-	{"OR", &op_or},		/* opcode b6 */
-	{"OR", &op_or},		/* opcode b7 */
-	{"CP", &op_cp},		/* opcode b8 */
-	{"CP", &op_cp},		/* opcode b9 */
-	{"CP", &op_cp},		/* opcode ba */
-	{"CP", &op_cp},		/* opcode bb */
-	{"CP", &op_cp},		/* opcode bc */
-	{"CP", &op_cp},		/* opcode bd */
-	{"CP", &op_cp},		/* opcode be */
-	{"UNKN", &op_unknown},		/* opcode bf */
-	{"RET", &op_ret_cond},		/* opcode c0 */
-	{"POP", &op_pop},		/* opcode c1 */
-	{"JP", &op_jp_cond},		/* opcode c2 */
-	{"JP", &op_jp},		/* opcode c3 */
-	{"CALL", &op_call_cond},		/* opcode c4 */
-	{"PUSH", &op_push},		/* opcode c5 */
-	{"ADD", &op_add_imm},		/* opcode c6 */
-	{"RST", &op_rst},		/* opcode c7 */
-	{"RET", &op_ret_cond},		/* opcode c8 */
-	{"RET", &op_ret},		/* opcode c9 */
-	{"JP", &op_jp_cond},		/* opcode ca */
-	{"CBPREFIX", &op_cbprefix},		/* opcode cb */
-	{"CALL", &op_call_cond},		/* opcode cc */
-	{"CALL", &op_call},		/* opcode cd */
-	{"ADC", &op_adc_imm},		/* opcode ce */
-	{"RST", &op_rst},		/* opcode cf */
-	{"RET", &op_ret_cond},		/* opcode d0 */
-	{"POP", &op_pop},		/* opcode d1 */
-	{"JP", &op_jp_cond},		/* opcode d2 */
-	{"UNKN", &op_unknown},		/* opcode d3 */
-	{"CALL", &op_call_cond},		/* opcode d4 */
-	{"PUSH", &op_push},		/* opcode d5 */
-	{"SUB", &op_sub_imm},		/* opcode d6 */
-	{"RST", &op_rst},		/* opcode d7 */
-	{"RET", &op_ret_cond},		/* opcode d8 */
-	{"RETI", &op_reti},		/* opcode d9 */
-	{"JP", &op_jp_cond},		/* opcode da */
-	{"UNKN", &op_unknown},		/* opcode db */
-	{"CALL", &op_call_cond},		/* opcode dc */
-	{"UNKN", &op_unknown},		/* opcode dd */
-	{"SBC", &op_sbc_imm},		/* opcode de */
-	{"RST", &op_rst},		/* opcode df */
-	{"LDH", &op_ldh},		/* opcode e0 */
-	{"POP", &op_pop},		/* opcode e1 */
-	{"LDH", &op_ldh},		/* opcode e2 */
-	{"UNKN", &op_unknown},		/* opcode e3 */
-	{"UNKN", &op_unknown},		/* opcode e4 */
-	{"PUSH", &op_push},		/* opcode e5 */
-	{"AND", &op_and_imm},		/* opcode e6 */
-	{"RST", &op_rst},		/* opcode e7 */
-	{"ADD", &op_add_sp_imm},		/* opcode e8 */
-	{"JP", &op_jp_hl},		/* opcode e9 */
-	{"LD", &op_ld_ind16_a},		/* opcode ea */
-	{"UNKN", &op_unknown},		/* opcode eb */
-	{"UNKN", &op_unknown},		/* opcode ec */
-	{"UNKN", &op_unknown},		/* opcode ed */
-	{"XOR", &op_xor_imm},		/* opcode ee */
-	{"RST", &op_rst},		/* opcode ef */
-	{"LDH", &op_ldh},		/* opcode f0 */
-	{"POP", &op_pop},		/* opcode f1 */
-	{"LDH", &op_ldh},		/* opcode f2 */
-	{"DI", &op_di},		/* opcode f3 */
-	{"UNKN", &op_unknown},		/* opcode f4 */
-	{"PUSH", &op_push},		/* opcode f5 */
-	{"OR", &op_or_imm},		/* opcode f6 */
-	{"RST", &op_rst},		/* opcode f7 */
-	{"UNKN", &op_unknown},		/* opcode f8 */
-	{"UNKN", &op_unknown},		/* opcode f9 */
-	{"LD", &op_ld_imm},		/* opcode fa */
-	{"EI", &op_ei},		/* opcode fb */
-	{"UNKN", &op_unknown},		/* opcode fc */
-	{"UNKN", &op_unknown},		/* opcode fd */
-	{"CP", &op_cp_imm},		/* opcode fe */
-	{"RST", &op_rst},		/* opcode ff */
+	OPINFO("NOP", &op_nop),		/* opcode 00 */
+	OPINFO("LD", &op_ld_reg16_imm),		/* opcode 01 */
+	OPINFO("LD", &op_ld_reg16_a),		/* opcode 02 */
+	OPINFO("INC", &op_inc16),		/* opcode 03 */
+	OPINFO("INC", &op_inc),		/* opcode 04 */
+	OPINFO("DEC", &op_dec),		/* opcode 05 */
+	OPINFO("LD", &op_ld_reg8_imm),		/* opcode 06 */
+	OPINFO("RLCA", &op_rlca),		/* opcode 07 */
+	OPINFO("LD", &op_ld_ind16_sp),		/* opcode 08 */
+	OPINFO("ADD", &op_add_hl),		/* opcode 09 */
+	OPINFO("LD", &op_ld_reg16_a),		/* opcode 0a */
+	OPINFO("DEC", &op_dec16),		/* opcode 0b */
+	OPINFO("INC", &op_inc),		/* opcode 0c */
+	OPINFO("DEC", &op_dec),		/* opcode 0d */
+	OPINFO("LD", &op_ld_reg8_imm),		/* opcode 0e */
+	OPINFO("RRCA", &op_rrca),		/* opcode 0f */
+	OPINFO("STOP", &op_stop),		/* opcode 10 */
+	OPINFO("LD", &op_ld_reg16_imm),		/* opcode 11 */
+	OPINFO("LD", &op_ld_reg16_a),		/* opcode 12 */
+	OPINFO("INC", &op_inc16),		/* opcode 13 */
+	OPINFO("INC", &op_inc),		/* opcode 14 */
+	OPINFO("DEC", &op_dec),		/* opcode 15 */
+	OPINFO("LD", &op_ld_reg8_imm),		/* opcode 16 */
+	OPINFO("RLA", &op_rla),		/* opcode 17 */
+	OPINFO("JR", &op_jr),		/* opcode 18 */
+	OPINFO("ADD", &op_add_hl),		/* opcode 19 */
+	OPINFO("LD", &op_ld_reg16_a),		/* opcode 1a */
+	OPINFO("DEC", &op_dec16),		/* opcode 1b */
+	OPINFO("INC", &op_inc),		/* opcode 1c */
+	OPINFO("DEC", &op_dec),		/* opcode 1d */
+	OPINFO("LD", &op_ld_reg8_imm),		/* opcode 1e */
+	OPINFO("RRA", &op_rra),		/* opcode 1f */
+	OPINFO("JR", &op_jr_cond),		/* opcode 20 */
+	OPINFO("LD", &op_ld_reg16_imm),		/* opcode 21 */
+	OPINFO("LDI", &op_ld_reg16_a),		/* opcode 22 */
+	OPINFO("INC", &op_inc16),		/* opcode 23 */
+	OPINFO("INC", &op_inc),		/* opcode 24 */
+	OPINFO("DEC", &op_dec),		/* opcode 25 */
+	OPINFO("LD", &op_ld_reg8_imm),		/* opcode 26 */
+	OPINFO("UNKN", &op_unknown),		/* opcode 27 */
+	OPINFO("JR", &op_jr_cond),		/* opcode 28 */
+	OPINFO("ADD", &op_add_hl),		/* opcode 29 */
+	OPINFO("LDI", &op_ld_reg16_a),		/* opcode 2a */
+	OPINFO("DEC", &op_dec16),		/* opcode 2b */
+	OPINFO("INC", &op_inc),		/* opcode 2c */
+	OPINFO("DEC", &op_dec),		/* opcode 2d */
+	OPINFO("LD", &op_ld_reg8_imm),		/* opcode 2e */
+	OPINFO("CPL", &op_cpl),		/* opcode 2f */
+	OPINFO("JR", &op_jr_cond),		/* opcode 30 */
+	OPINFO("LD", &op_ld_reg16_imm),		/* opcode 31 */
+	OPINFO("LDD", &op_ld_reg16_a),		/* opcode 32 */
+	OPINFO("INC", &op_inc16),		/* opcode 33 */
+	OPINFO("INC", &op_inc),		/* opcode 34 */
+	OPINFO("DEC", &op_dec),		/* opcode 35 */
+	OPINFO("LD", &op_ld_reg8_imm),		/* opcode 36 */
+	OPINFO("SCF", &op_scf),		/* opcode 37 */
+	OPINFO("JR", &op_jr_cond),		/* opcode 38 */
+	OPINFO("ADD", &op_add_hl),		/* opcode 39 */
+	OPINFO("LDD", &op_ld_reg16_a),		/* opcode 3a */
+	OPINFO("DEC", &op_dec16),		/* opcode 3b */
+	OPINFO("INC", &op_inc),		/* opcode 3c */
+	OPINFO("DEC", &op_dec),		/* opcode 3d */
+	OPINFO("LD", &op_ld_reg8_imm),		/* opcode 3e */
+	OPINFO("CCF", &op_ccf),		/* opcode 3f */
+	OPINFO("LD", &op_ld),		/* opcode 40 */
+	OPINFO("LD", &op_ld),		/* opcode 41 */
+	OPINFO("LD", &op_ld),		/* opcode 42 */
+	OPINFO("LD", &op_ld),		/* opcode 43 */
+	OPINFO("LD", &op_ld),		/* opcode 44 */
+	OPINFO("LD", &op_ld),		/* opcode 45 */
+	OPINFO("LD", &op_ld),		/* opcode 46 */
+	OPINFO("LD", &op_ld),		/* opcode 47 */
+	OPINFO("LD", &op_ld),		/* opcode 48 */
+	OPINFO("LD", &op_ld),		/* opcode 49 */
+	OPINFO("LD", &op_ld),		/* opcode 4a */
+	OPINFO("LD", &op_ld),		/* opcode 4b */
+	OPINFO("LD", &op_ld),		/* opcode 4c */
+	OPINFO("LD", &op_ld),		/* opcode 4d */
+	OPINFO("LD", &op_ld),		/* opcode 4e */
+	OPINFO("LD", &op_ld),		/* opcode 4f */
+	OPINFO("LD", &op_ld),		/* opcode 50 */
+	OPINFO("LD", &op_ld),		/* opcode 51 */
+	OPINFO("LD", &op_ld),		/* opcode 52 */
+	OPINFO("LD", &op_ld),		/* opcode 53 */
+	OPINFO("LD", &op_ld),		/* opcode 54 */
+	OPINFO("LD", &op_ld),		/* opcode 55 */
+	OPINFO("LD", &op_ld),		/* opcode 56 */
+	OPINFO("LD", &op_ld),		/* opcode 57 */
+	OPINFO("LD", &op_ld),		/* opcode 58 */
+	OPINFO("LD", &op_ld),		/* opcode 59 */
+	OPINFO("LD", &op_ld),		/* opcode 5a */
+	OPINFO("LD", &op_ld),		/* opcode 5b */
+	OPINFO("LD", &op_ld),		/* opcode 5c */
+	OPINFO("LD", &op_ld),		/* opcode 5d */
+	OPINFO("LD", &op_ld),		/* opcode 5e */
+	OPINFO("LD", &op_ld),		/* opcode 5f */
+	OPINFO("LD", &op_ld),		/* opcode 60 */
+	OPINFO("LD", &op_ld),		/* opcode 61 */
+	OPINFO("LD", &op_ld),		/* opcode 62 */
+	OPINFO("LD", &op_ld),		/* opcode 63 */
+	OPINFO("LD", &op_ld),		/* opcode 64 */
+	OPINFO("LD", &op_ld),		/* opcode 65 */
+	OPINFO("LD", &op_ld),		/* opcode 66 */
+	OPINFO("LD", &op_ld),		/* opcode 67 */
+	OPINFO("LD", &op_ld),		/* opcode 68 */
+	OPINFO("LD", &op_ld),		/* opcode 69 */
+	OPINFO("LD", &op_ld),		/* opcode 6a */
+	OPINFO("LD", &op_ld),		/* opcode 6b */
+	OPINFO("LD", &op_ld),		/* opcode 6c */
+	OPINFO("LD", &op_ld),		/* opcode 6d */
+	OPINFO("LD", &op_ld),		/* opcode 6e */
+	OPINFO("LD", &op_ld),		/* opcode 6f */
+	OPINFO("LD", &op_ld),		/* opcode 70 */
+	OPINFO("LD", &op_ld),		/* opcode 71 */
+	OPINFO("LD", &op_ld),		/* opcode 72 */
+	OPINFO("LD", &op_ld),		/* opcode 73 */
+	OPINFO("LD", &op_ld),		/* opcode 74 */
+	OPINFO("LD", &op_ld),		/* opcode 75 */
+	OPINFO("HALT", &op_halt),		/* opcode 76 */
+	OPINFO("LD", &op_ld),		/* opcode 77 */
+	OPINFO("LD", &op_ld),		/* opcode 78 */
+	OPINFO("LD", &op_ld),		/* opcode 79 */
+	OPINFO("LD", &op_ld),		/* opcode 7a */
+	OPINFO("LD", &op_ld),		/* opcode 7b */
+	OPINFO("LD", &op_ld),		/* opcode 7c */
+	OPINFO("LD", &op_ld),		/* opcode 7d */
+	OPINFO("LD", &op_ld),		/* opcode 7e */
+	OPINFO("LD", &op_ld),		/* opcode 7f */
+	OPINFO("ADD", &op_add),		/* opcode 80 */
+	OPINFO("ADD", &op_add),		/* opcode 81 */
+	OPINFO("ADD", &op_add),		/* opcode 82 */
+	OPINFO("ADD", &op_add),		/* opcode 83 */
+	OPINFO("ADD", &op_add),		/* opcode 84 */
+	OPINFO("ADD", &op_add),		/* opcode 85 */
+	OPINFO("ADD", &op_add),		/* opcode 86 */
+	OPINFO("ADD", &op_add),		/* opcode 87 */
+	OPINFO("ADC", &op_adc),		/* opcode 88 */
+	OPINFO("ADC", &op_adc),		/* opcode 89 */
+	OPINFO("ADC", &op_adc),		/* opcode 8a */
+	OPINFO("ADC", &op_adc),		/* opcode 8b */
+	OPINFO("ADC", &op_adc),		/* opcode 8c */
+	OPINFO("ADC", &op_adc),		/* opcode 8d */
+	OPINFO("ADC", &op_adc),		/* opcode 8e */
+	OPINFO("ADC", &op_adc),		/* opcode 8f */
+	OPINFO("SUB", &op_sub),		/* opcode 90 */
+	OPINFO("SUB", &op_sub),		/* opcode 91 */
+	OPINFO("SUB", &op_sub),		/* opcode 92 */
+	OPINFO("SUB", &op_sub),		/* opcode 93 */
+	OPINFO("SUB", &op_sub),		/* opcode 94 */
+	OPINFO("SUB", &op_sub),		/* opcode 95 */
+	OPINFO("SUB", &op_sub),		/* opcode 96 */
+	OPINFO("SUB", &op_sub),		/* opcode 97 */
+	OPINFO("SBC", &op_sbc),		/* opcode 98 */
+	OPINFO("SBC", &op_sbc),		/* opcode 99 */
+	OPINFO("SBC", &op_sbc),		/* opcode 9a */
+	OPINFO("SBC", &op_sbc),		/* opcode 9b */
+	OPINFO("SBC", &op_sbc),		/* opcode 9c */
+	OPINFO("SBC", &op_sbc),		/* opcode 9d */
+	OPINFO("SBC", &op_sbc),		/* opcode 9e */
+	OPINFO("SBC", &op_sbc),		/* opcode 9f */
+	OPINFO("AND", &op_and),		/* opcode a0 */
+	OPINFO("AND", &op_and),		/* opcode a1 */
+	OPINFO("AND", &op_and),		/* opcode a2 */
+	OPINFO("AND", &op_and),		/* opcode a3 */
+	OPINFO("AND", &op_and),		/* opcode a4 */
+	OPINFO("AND", &op_and),		/* opcode a5 */
+	OPINFO("AND", &op_and),		/* opcode a6 */
+	OPINFO("AND", &op_and),		/* opcode a7 */
+	OPINFO("XOR", &op_xor),		/* opcode a8 */
+	OPINFO("XOR", &op_xor),		/* opcode a9 */
+	OPINFO("XOR", &op_xor),		/* opcode aa */
+	OPINFO("XOR", &op_xor),		/* opcode ab */
+	OPINFO("XOR", &op_xor),		/* opcode ac */
+	OPINFO("XOR", &op_xor),		/* opcode ad */
+	OPINFO("XOR", &op_xor),		/* opcode ae */
+	OPINFO("XOR", &op_xor),		/* opcode af */
+	OPINFO("OR", &op_or),		/* opcode b0 */
+	OPINFO("OR", &op_or),		/* opcode b1 */
+	OPINFO("OR", &op_or),		/* opcode b2 */
+	OPINFO("OR", &op_or),		/* opcode b3 */
+	OPINFO("OR", &op_or),		/* opcode b4 */
+	OPINFO("OR", &op_or),		/* opcode b5 */
+	OPINFO("OR", &op_or),		/* opcode b6 */
+	OPINFO("OR", &op_or),		/* opcode b7 */
+	OPINFO("CP", &op_cp),		/* opcode b8 */
+	OPINFO("CP", &op_cp),		/* opcode b9 */
+	OPINFO("CP", &op_cp),		/* opcode ba */
+	OPINFO("CP", &op_cp),		/* opcode bb */
+	OPINFO("CP", &op_cp),		/* opcode bc */
+	OPINFO("CP", &op_cp),		/* opcode bd */
+	OPINFO("CP", &op_cp),		/* opcode be */
+	OPINFO("UNKN", &op_unknown),		/* opcode bf */
+	OPINFO("RET", &op_ret_cond),		/* opcode c0 */
+	OPINFO("POP", &op_pop),		/* opcode c1 */
+	OPINFO("JP", &op_jp_cond),		/* opcode c2 */
+	OPINFO("JP", &op_jp),		/* opcode c3 */
+	OPINFO("CALL", &op_call_cond),		/* opcode c4 */
+	OPINFO("PUSH", &op_push),		/* opcode c5 */
+	OPINFO("ADD", &op_add_imm),		/* opcode c6 */
+	OPINFO("RST", &op_rst),		/* opcode c7 */
+	OPINFO("RET", &op_ret_cond),		/* opcode c8 */
+	OPINFO("RET", &op_ret),		/* opcode c9 */
+	OPINFO("JP", &op_jp_cond),		/* opcode ca */
+	OPINFO("CBPREFIX", &op_cbprefix),		/* opcode cb */
+	OPINFO("CALL", &op_call_cond),		/* opcode cc */
+	OPINFO("CALL", &op_call),		/* opcode cd */
+	OPINFO("ADC", &op_adc_imm),		/* opcode ce */
+	OPINFO("RST", &op_rst),		/* opcode cf */
+	OPINFO("RET", &op_ret_cond),		/* opcode d0 */
+	OPINFO("POP", &op_pop),		/* opcode d1 */
+	OPINFO("JP", &op_jp_cond),		/* opcode d2 */
+	OPINFO("UNKN", &op_unknown),		/* opcode d3 */
+	OPINFO("CALL", &op_call_cond),		/* opcode d4 */
+	OPINFO("PUSH", &op_push),		/* opcode d5 */
+	OPINFO("SUB", &op_sub_imm),		/* opcode d6 */
+	OPINFO("RST", &op_rst),		/* opcode d7 */
+	OPINFO("RET", &op_ret_cond),		/* opcode d8 */
+	OPINFO("RETI", &op_reti),		/* opcode d9 */
+	OPINFO("JP", &op_jp_cond),		/* opcode da */
+	OPINFO("UNKN", &op_unknown),		/* opcode db */
+	OPINFO("CALL", &op_call_cond),		/* opcode dc */
+	OPINFO("UNKN", &op_unknown),		/* opcode dd */
+	OPINFO("SBC", &op_sbc_imm),		/* opcode de */
+	OPINFO("RST", &op_rst),		/* opcode df */
+	OPINFO("LDH", &op_ldh),		/* opcode e0 */
+	OPINFO("POP", &op_pop),		/* opcode e1 */
+	OPINFO("LDH", &op_ldh),		/* opcode e2 */
+	OPINFO("UNKN", &op_unknown),		/* opcode e3 */
+	OPINFO("UNKN", &op_unknown),		/* opcode e4 */
+	OPINFO("PUSH", &op_push),		/* opcode e5 */
+	OPINFO("AND", &op_and_imm),		/* opcode e6 */
+	OPINFO("RST", &op_rst),		/* opcode e7 */
+	OPINFO("ADD", &op_add_sp_imm),		/* opcode e8 */
+	OPINFO("JP", &op_jp_hl),		/* opcode e9 */
+	OPINFO("LD", &op_ld_ind16_a),		/* opcode ea */
+	OPINFO("UNKN", &op_unknown),		/* opcode eb */
+	OPINFO("UNKN", &op_unknown),		/* opcode ec */
+	OPINFO("UNKN", &op_unknown),		/* opcode ed */
+	OPINFO("XOR", &op_xor_imm),		/* opcode ee */
+	OPINFO("RST", &op_rst),		/* opcode ef */
+	OPINFO("LDH", &op_ldh),		/* opcode f0 */
+	OPINFO("POP", &op_pop),		/* opcode f1 */
+	OPINFO("LDH", &op_ldh),		/* opcode f2 */
+	OPINFO("DI", &op_di),		/* opcode f3 */
+	OPINFO("UNKN", &op_unknown),		/* opcode f4 */
+	OPINFO("PUSH", &op_push),		/* opcode f5 */
+	OPINFO("OR", &op_or_imm),		/* opcode f6 */
+	OPINFO("RST", &op_rst),		/* opcode f7 */
+	OPINFO("UNKN", &op_unknown),		/* opcode f8 */
+	OPINFO("UNKN", &op_unknown),		/* opcode f9 */
+	OPINFO("LD", &op_ld_imm),		/* opcode fa */
+	OPINFO("EI", &op_ei),		/* opcode fb */
+	OPINFO("UNKN", &op_unknown),		/* opcode fc */
+	OPINFO("UNKN", &op_unknown),		/* opcode fd */
+	OPINFO("CP", &op_cp_imm),		/* opcode fe */
+	OPINFO("RST", &op_rst),		/* opcode ff */
 };
 
 static void dump_regs(void)
@@ -2557,36 +2565,37 @@ static void open_gbs(char *name, int i)
 	close(fd);
 }
 
-static char *notes[] = {
- "C-0","C#0","D-0","D#0","E-0","F-0","F#0","G-0","G#0","A-0","A#0","H-0",
- "C-1","C#1","D-1","D#1","E-1","F-1","F#1","G-1","G#1","A-1","A#1","H-1",
- "C-2","C#2","D-2","D#2","E-2","F-2","F#2","G-2","G#2","A-2","A#2","H-2",
- "C-3","C#3","D-3","D#3","E-3","F-3","F#3","G-3","G#3","A-3","A#3","H-3",
- "C-4","C#4","D-4","D#4","E-4","F-4","F#4","G-4","G#4","A-4","A#4","H-4",
- "C-5","C#5","D-5","D#5","E-5","F-5","F#5","G-5","G#5","A-5","A#5","H-5"
-};
+static char notes[7] = "CDEFGAH";
+static void setnotes(char *s, unsigned int i)
+{
+	int n = i % 12;
 
+	s[2] = '0' + i / 12;
+	n += n > 4;
+	s[0] = notes[n >> 1];
+	if (n & 1) s[1] = '#';
+}
+
+static char vols[4] = " -=#";
+static void setvols(char *s, int i)
+{
+	int j;
+	for (j=0; j<4; j++) {
+		if (i>=4) {
+			s[j] = '%';
+			i -= 4;
+		} else {
+			s[j] = vols[i];
+			i = 0;
+		}
+	}
+}
+
+#define LN2 .69314718055994530941
+#define MAGIC 6.02980484763069750723
 #define FREQ(x) (262144 / x)
-#define NOTE(x) ((log(FREQ(x))/log(2)-log(130.67187)/log(2))*12 + .2)
-
-char *vols[] = {
-	"%%%#",
-	"%%%=",
-	"%%%-",
-	"%%% ",
-	"%%# ",
-	"%%= ",
-	"%%- ",
-	"%%  ",
-	"%#  ",
-	"%=  ",
-	"%-  ",
-	"%   ",
-	"#   ",
-	"=   ",
-	"-   ",
-	"    ",
-};
+// #define NOTE(x) ((log(FREQ(x))/LN2 - log(65.33593)/LN2)*12 + .2)
+#define NOTE(x) ((log(FREQ(x))/LN2 - MAGIC)*12 + .2)
 
 static int statustc = 83886;
 static int statuscnt;
@@ -2597,6 +2606,14 @@ static unsigned char dmgwave[16] = {
 	0x2c, 0x04, 0xe5, 0x2c,
 	0xac, 0xdd, 0xda, 0x48
 };
+
+static char n1[4];
+static char n2[4];
+static char n3[4];
+static char v1[5];
+static char v2[5];
+static char v3[5];
+static char v4[5];
 
 int main(int argc, char **argv)
 {
@@ -2649,27 +2666,22 @@ int main(int argc, char **argv)
 			int ni1 = (int)NOTE(ch1.div_tc);
 			int ni2 = (int)NOTE(ch2.div_tc);
 			int ni3 = (int)NOTE(ch3.div_tc);
-			char *n1 = "---";
-			char *n2 = "---";
-			char *n3 = "---";
 
 			statuscnt += statustc;
 
-			if (ni1 >= 0 && ni1 < 12*6) n1 = notes[ni1];
-			if (ni2 >= 0 && ni2 < 12*6) n2 = notes[ni2];
-			if (ni3 >= 0 && ni3 < 12*6) n3 = notes[ni3];
-			if (!ch1.volume) n1 = "---";
-			if (!ch2.volume) n2 = "---";
-			if (!ch3.volume) n3 = "---";
+			setnotes(n1, ni1);
+			setnotes(n2, ni2);
+			setnotes(n3, ni3);
+			setvols(v1, ch1.volume);
+			setvols(v2, ch2.volume);
+			setvols(v3, (3-((ch3.volume+3)&3)) << 2);
+			setvols(v4, ch4.volume);
+			if (!ch1.volume) strncpy(n1, "---", 4);
+			if (!ch2.volume) strncpy(n2, "---", 4);
+			if (!ch3.volume) strncpy(n3, "---", 4);
 
 			printf("ch1:%s %s ch2:%s %s  ch3:%s %s ch4:%s\r",
-				n1,
-				vols[15-ch1.volume],
-				n2,
-				vols[15-ch2.volume],
-				n3,
-				vols[((ch3.volume+3)&3) << 2],
-				vols[15-ch4.volume]);
+				n1, v1, n2, v2, n3, v3, v4);
 			fflush(stdout);
 		}
 		do_sound(cycles);
