@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.20 2003/08/23 23:03:03 ikari Exp $
+/* $Id: gbsplay.c,v 1.21 2003/08/23 23:46:26 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -2596,51 +2596,72 @@ static void open_gbs(char *name, int i)
 	close(fd);
 }
 
-static char notes[7] = "CDEFGAH";
-static void setnotes(char *s, unsigned int i)
-{
-	int n = i % 12;
-
-	s[2] = '0' + i / 12;
-	n += n > 4;
-	s[0] = notes[n >> 1];
-	if (n & 1) s[1] = '#';
-}
-
-static char vols[4] = " -=#";
-static void setvols(char *s, int i)
-{
-	int j;
-	for (j=0; j<4; j++) {
-		if (i>=4) {
-			s[j] = '%';
-			i -= 4;
-		} else {
-			s[j] = vols[i];
-			i = 0;
-		}
-	}
-}
-
 #define LN2 .69314718055994530941
 #define MAGIC 6.02980484763069750723
 #define FREQ(x) (262144 / x)
 // #define NOTE(x) ((log(FREQ(x))/LN2 - log(65.33593)/LN2)*12 + .2)
-#define NOTE(x) ((log(FREQ(x))/LN2 - MAGIC)*12 + .2)
+#define NOTE(x) ((int)((log(FREQ(x))/LN2 - MAGIC)*12 + .2))
+
+#define MAXOCTAVE 9
+
+static int getnote(int div)
+{
+	int n = 0;
+
+	if (div>0) n = NOTE(div);
+
+	if (n < 0) n = 0;
+	else if (n >= MAXOCTAVE*12) n = MAXOCTAVE-1;
+
+	return n;
+}
+
+static char notes[7] = "CDEFGAH";
+static char notelookup[4*MAXOCTAVE*12];
+static void precalc_notes(void)
+{
+	int i;
+	for (i=0; i<MAXOCTAVE*12; i++) {
+		char *s = notelookup + 4*i;
+		int n = i % 12;
+
+		s[2] = '0' + i / 12;
+		n += n > 4;
+		s[0] = notes[n >> 1];
+		if (n & 1) s[1] = '#';
+		else s[1] = '-';
+	}
+}
+
+static char vols[5] = " -=#%";
+static char vollookup[5*16];
+static void precalc_vols(void)
+{
+	int i, k;
+	for (k=0; k<16; k++) {
+		int j;
+		char *s = vollookup + 5*k;
+		i = k;
+		for (j=0; j<4; j++) {
+			if (i>=4) {
+				s[j] = vols[4];
+				i -= 4;
+			} else {
+				s[j] = vols[i];
+				i = 0;
+			}
+		}
+	}
+}
 
 static int statustc = 83886;
 static int statuscnt;
 
-static char n1[4];
-static char n2[4];
-static char n3[4];
-static char v1[5];
-static char v2[5];
-static char v3[5];
-static char v4[5];
-
 int main(int argc, char **argv)
 {
+	precalc_notes();
+	precalc_vols();
+
 	dspfd = open("/dev/dsp", O_WRONLY);
 	int c;
 	int subsong = -1;
@@ -2658,7 +2679,7 @@ int main(int argc, char **argv)
 	
 	ch1.duty = 4;
 	ch2.duty = 4;
-	ch1.div_tc = ch2.div_tc = ch3.div_tc = 1;
+	ch1.div_tc = ch2.div_tc = ch3.div_tc = ch4.div_tc= 1;
 
 	if (argc < 2) {
 		printf("Usage: %s <gbs-file> [<subsong>]\n", argv[0]);
@@ -2683,24 +2704,24 @@ int main(int argc, char **argv)
 			REGS16_W(regs, PC, 0x0048); /* timer int handler */
 		}
 		if (statuscnt < 0) {
-			int ni1 = (int)NOTE(ch1.div_tc);
-			int ni2 = (int)NOTE(ch2.div_tc);
-			int ni3 = (int)NOTE(ch3.div_tc);
+			int ni1 = getnote(ch1.div_tc);
+			int ni2 = getnote(ch2.div_tc);
+			int ni3 = getnote(ch3.div_tc);
+			char *n1 = &notelookup[4*ni1];
+			char *n2 = &notelookup[4*ni2];
+			char *n3 = &notelookup[4*ni3];
+			char *v1 = &vollookup[5*ch1.volume];
+			char *v2 = &vollookup[5*ch2.volume];
+			char *v3 = &vollookup[5*((3-((ch3.volume+3)&3)) << 2)];
+			char *v4 = &vollookup[5*ch4.volume];
 
 			statuscnt += statustc;
 
-			setnotes(n1, ni1);
-			setnotes(n2, ni2);
-			setnotes(n3, ni3);
-			setvols(v1, ch1.volume);
-			setvols(v2, ch2.volume);
-			setvols(v3, (3-((ch3.volume+3)&3)) << 2);
-			setvols(v4, ch4.volume);
-			if (!ch1.volume) strncpy(n1, "---", 4);
-			if (!ch2.volume) strncpy(n2, "---", 4);
-			if (!ch3.volume) strncpy(n3, "---", 4);
+			if (!ch1.volume) n1 = "---";
+			if (!ch2.volume) n2 = "---";
+			if (!ch3.volume) n3 = "---";
 
-			printf("ch1:%s %s ch2:%s %s  ch3:%s %s ch4:%s\r",
+			printf("ch1: %s %s  ch2: %s %s  ch3: %s %s  ch4: %s\r",
 				n1, v1, n2, v2, n3, v3, v4);
 			fflush(stdout);
 		}
