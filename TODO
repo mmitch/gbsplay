@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.40 2003/12/10 21:33:54 mitch Exp $>>
+<<$Id: TODO,v 1.41 2003/12/12 23:13:05 ranma Exp $>>
 
 
 TODO list for gbsplay.
@@ -37,4 +37,6 @@ TODO list for gbsplay.
 
 (X)  gbsplay: allow -1 as subsong (default)
 
-(X)  clean up bild process (rebuild only changed files)
+(X)  clean up build process (rebuild only changed files)
+
+(x)  gettext support
