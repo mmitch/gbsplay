@@ -1,10 +1,6 @@
-# $Id: Makefile,v 1.65 2004/01/04 09:02:13 mitch Exp $
+# $Id: Makefile,v 1.66 2004/01/06 21:16:30 ranma Exp $
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
-
-ifneq ($(noincludes),yes)
--include config.mk
-endif
 
 prefix      := /usr/local
 exec_prefix := $(prefix)
@@ -22,12 +18,12 @@ DISTDIR := gbsplay-$(VERSION)
 CFLAGS  := -Wall -g -Os
 LDFLAGS :=
 
+ifneq ($(noincludes),yes)
+-include config.mk
+endif
+
 CFLAGS  += $(EXTRA_CFLAGS)
 LDFLAGS += $(EXTRA_LDFLAGS)
-
-ifeq ($(have_xgettext),yes)
-CFLAGS  += -DLOCALE_PREFIX=\"$(localedir)\"
-endif
 
 export CC CFLAGS LDFLAGS
 
@@ -137,7 +133,7 @@ dist:	distclean
 	tar -c $(DISTDIR)/ -vzf ../$(DISTDIR).tar.gz
 	rm -rf ./$(DISTDIR)
 
-ifeq ($(build_sharedlib),y)
+ifeq ($(use_sharedlibgbs),yes)
 LDFLAGS += -L. -lgbs
 
 libgbs.so.1: $(objs_libgbspic)

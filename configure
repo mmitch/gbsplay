@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.33 2004/01/04 09:02:13 mitch Exp $
+# $Id: configure,v 1.34 2004/01/06 21:16:30 ranma Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -9,6 +9,18 @@
 
 ## initialize variables
 
+EXTRA_ALL=
+EXTRA_CFLAGS="$CFLAGS"
+EXTRA_INSTALL=
+EXTRA_LDFLAGS=
+EXTRA_SRCS=
+EXTRA_UNINSTALL=
+XMMS_INPUT_PLUGIN_DIR=
+CC="${CC-gcc}" # use gcc by default
+
+package=gbsplay
+prefix=/usr/local
+
 ## Sane echo is in /usr/ucb on Solaris
 if [ -d /usr/ucb ]; then
     PATH="/usr/ucb:$PATH"
@@ -16,18 +28,9 @@ fi
 
 VERSION=0.0.4
 if [ -f CVS/Entries ]; then
-    VERSION=${VERSION}+cvs`date -r CVS/Entries +%Y%m%d`
+    VERSION=${VERSION}+cvs`find CVS/Entries -printf "%TY%Tm%Td"`
 fi
 
-EXTRA_ALL=
-EXTRA_CFLAGS=
-EXTRA_INSTALL=
-EXTRA_LDFLAGS=
-EXTRA_SRCS=
-EXTRA_UNINSTALL=
-XMMS_INPUT_PLUGIN_DIR=
-
-build_xmmsplugin=n
 
 ##### begin of subroutines
 
@@ -43,6 +46,8 @@ check_include()
 {
     include="$1"
     name="`echo $include | sed -e 's@[/\.]@_@g'`"
+    eval "value=\$have_$name"
+    test -z $value || return
 
     cc_check "checking for $include" have_$name <<EOF
 #include <$include>
@@ -98,6 +103,16 @@ have_x() {
     fi
 }
 
+use_x() {
+    localvar="use_`echo $1 | tr A-Z a-z`"
+    eval "result=\$$localvar"
+    if [ "$result" = "yes" ]; then
+	echo "#define USE_$1 1"
+    else
+	echo "/* #undef USE_$1 */"
+    fi
+}
+
 ## external which is unreliable
 which()
 {
@@ -116,6 +131,16 @@ which()
     done
     IFS="$IFS_SAVE"
     return 1
+}
+
+# set variable to default value if empty
+# really the same as $var="${var-$default}"
+setdefault()
+{
+	eval "value=\$$1"
+	if [ -z $value ]; then
+		eval "$1=$2"
+	fi
 }
 
 ##### end of subroutines
@@ -150,20 +175,85 @@ if [ $? -ne 0 ]; then
     exit 1;
 fi
 
-## check for C compiler
+usage()
+{
+	cat<<EOF
+Usage: $0 [OPTION]...
 
-echo -n "checking for CC:  "
-if [ $CC ]; then
-    echo "ok"
-else
-    echo "nok"
-    cat <<EOF
-Environment variable CC is not set.
-Please point it to a working C compiler.
-You probably want to run 'make' instead of './configure'.
+Configuration:
+  --help                 display this help and exit
+
+Installation directories:
+  --prefix=PREFIX        install architecture-independent files in PREFIX
+                         [/usr/local]
+  --exec-prefix=EPREFIX  install architecture-dependent files in EPREFIX
+                         [EPREFIX]
+  --bindir=BINDIR        install binaries in BINDIR
+                         [EPREFIX/bin]
+  --mandir=MANDIR        install manpages in MANDIR
+                         [PREFIX/man]
+  --docdir=DOCDIR        install documentation in DOCDIR
+                         [PREFIX/share/doc/$package]
+
+Optional Features:
+  --disable-i18n         omit libintl support
+  --enable-sharedlibgbs  build libgbs as a shared library
+
+Optional Packages:
+  --with-xmmsplugin      build xmms input plugin
 EOF
-    die
-fi
+	exit $1
+}
+
+while [ $1 ]; do
+	case $1 in
+		--prefix=*)
+		prefix="${1#--prefix=}"
+		;;
+		--exec-prefix*)
+		exec_prefix="${1#--exec-prefix=}"
+		;;
+		--bindir)
+		bindir="${1#--bindir=}"
+		;;
+		--mandir)
+		mandir="${1#--mandir=}"
+		;;
+		--docdir)
+		docdir="${1#--docdir=}"
+		;;
+		--localedir)
+		localedir="${1#--localedir=}"
+		;;
+		--have-*)
+		eval "have_${1#--have-}=yes"
+		;;
+		--donthave-*)
+		eval "have_${1#--donthave-}=no"
+		;;
+		--enable-*)
+		eval "use_${1#--enable-}=yes"
+		;;
+		--disable-*)
+		eval "use_${1#--disable-}=no"
+		;;
+		--with-*)
+		eval "build_${1#--with-}=yes"
+		;;
+		--without-*)
+		eval "build_${1#--without-}=no"
+		;;
+		--help)
+		usage 0
+		;;
+		*)
+		usage 1
+		;;
+	esac
+	shift
+done
+
+## check for C compiler
 
 echo -n "checking for working compiler:  "
 INFILE="$TEMPDIR/cc.c"
@@ -198,55 +288,31 @@ fi
 
 need_include inttypes.h
 check_include sys/soundcard.h
-check_include locale.h
-check_include libintl.h
 
-## check for pthread
+if [ "$use_i18n" != no ]; then
+    check_include locale.h
+    check_include libintl.h
 
-check_include pthread.h
-if [ "$have_pthread_h" = "yes" ]; then
-    cc_check "checking for Linux flavoured pthread" have_pthread "-lpthread" found no <<EOF
-#include <pthread.h>
-int main(int argc, char **argv)
-{
-    pthread_self();
-    return 0;
-}
-EOF
-    if [ $? -eq 0 ]; then
-	PTHREAD="-lpthread"
-    else
-	cc_check "checking FreeBSD-flavoured pthread" have_pthread "-pthread" found no <<EOF
-#include <pthread.h>
-int main(int argc, char **argv)
-{
-    pthread_self();
-    return 0;
-}
-EOF
-	if [ $? -eq 0 ]; then
-	    PTHREAD="-pthread"
-	else
-	    echo "no known pthread implementation found!"
-	fi
+    ## check for gettext
+
+    echo -n "checking for gettext tools:  "
+    have_xgettext=yes
+    for i in xgettext msgmerge msgfmt msgen; do
+        if [ "`which $i`" = "" ]; then
+	    test "$have_xgettext" = "yes" && echo "not ok"
+	    have_xgettext=no
+	    echo "$i is missing"
+        fi
+    done
+    test "$have_xgettext" = "yes" && echo "ok"
+
+    use_i18n=no
+    if [ "$have_locale_h" = "yes" -a "$have_libintl_h" = "yes" ]; then
+        use_i18n=yes
     fi
-    
 fi
 
-## check for gettext
-
-echo -n "checking for gettext tools:  "
-have_xgettext=yes
-for i in xgettext msgmerge msgfmt msgen; do
-    if [ "`which $i`" = "" ]; then
-	test "$have_xgettext" = "yes" && echo "not ok"
-	have_xgettext=no
-	echo "$i is missing"
-    fi
-done
-test "$have_xgettext" = "yes" && echo "ok"
-
-if [ "$have_locale_h" = "yes" -a "$have_libintl_h" = "yes" ]; then
+if [ "$use_i18n" = "yes" ]; then
     cc_check "do we need -lintl" need_lintl "-lintl" yes no <<EOF
 #include <libintl.h>
 int main(int argc, char **argv)
@@ -260,58 +326,105 @@ EOF
     fi
 fi
 
-## check for glib development files
+if [ "$build_xmmsplugin" != "no" ]; then
+    ## check for pthread
 
-echo -n "checking for glib-dev:  "
-CONFIG=`which glib-config`
-if [ $? -eq 0 ]; then
-    GLIB_CFLAGS=`glib-config --cflags`
-    if [ $? -eq 0 ]; then
-	echo "ok"
-    else
-	echo "error running glib-config --cflags!"
+    check_include pthread.h
+    if [ "$have_pthread_h" = "yes" ]; then
+        cc_check "checking for Linux flavoured pthread" have_pthread "-lpthread" found no <<EOF
+#include <pthread.h>
+int main(int argc, char **argv)
+{
+    pthread_self();
+    return 0;
+}
+EOF
+        if [ $? -eq 0 ]; then
+	    PTHREAD="-lpthread"
+        else
+	    cc_check "checking FreeBSD-flavoured pthread" have_pthread "-pthread" found no <<EOF
+#include <pthread.h>
+int main(int argc, char **argv)
+{
+    pthread_self();
+    return 0;
+}
+EOF
+	    if [ $? -eq 0 ]; then
+	        PTHREAD="-pthread"
+	    else
+	        echo "no known pthread implementation found!"
+	    fi
+        fi
     fi
-else
-    echo "glib-config not found!"
-fi
 
-## check for xmms development files
+    ## check for glib development files
 
-echo -n "checking for xmms-dev:  "
-CONFIG=`which xmms-config`
-if [ $? -eq 0 ]; then
-    XMMS_CFLAGS=`xmms-config --cflags` 
+    echo -n "checking for glib-dev:  "
+    CONFIG=`which glib-config`
     if [ $? -eq 0 ]; then
-	XMMS_INPUT_PLUGIN_DIR=`xmms-config --input-plugin-dir`
-	if [ $? -eq 0 ]; then
+        GLIB_CFLAGS=`glib-config --cflags`
+        if [ $? -eq 0 ]; then
 	    echo "ok"
-	else
-	    echo "error running xmms-config --input-plugin-dir!"
-	fi
+        else
+	    echo "error running glib-config --cflags!"
+        fi
     else
-	echo "error running xmms-config --cflags!"
+        echo "glib-config not found!"
     fi
-else
-    echo "xmms-config not found!"
+
+    ## check for xmms development files
+
+    echo -n "checking for xmms-dev:  "
+    CONFIG=`which xmms-config`
+    if [ $? -eq 0 ]; then
+        XMMS_CFLAGS=`xmms-config --cflags` 
+        if [ $? -eq 0 ]; then
+	    XMMS_INPUT_PLUGIN_DIR=`xmms-config --input-plugin-dir`
+	    if [ $? -eq 0 ]; then
+	        echo "ok"
+	    else
+	        echo "error running xmms-config --input-plugin-dir!"
+	    fi
+        else
+	    echo "error running xmms-config --cflags!"
+        fi
+    else
+        echo "xmms-config not found!"
+    fi
 fi
 
 ## everything ok?
 
-if [ "$GLIB_CFLAGS" -a "$XMMS_CFLAGS" -a "XMMS_INPUT_PLUGIN_DIR" -a "$PTHREAD" ]; then
+echo -n "xmms support "
+if [ "$build_xmmsplugin" != "no" -a "$GLIB_CFLAGS" -a "$XMMS_CFLAGS" -a "XMMS_INPUT_PLUGIN_DIR" -a "$PTHREAD" ]; then
     EXTRA_CFLAGS="$EXTRA_CFLAGS $GLIB_CFLAGS $XMMS_CFLAGS"
     EXTRA_INSTALL="$EXTRA_INSTALL install-gbsxmms.so"
     EXTRA_UNINSTALL="$EXTRA_UNINSTALL uninstall-gbsxmms.so"
-    build_xmmsplugin=y
-    echo "xmms support enabled."
+    build_xmmsplugin=yes
+    echo "enabled."
 else
-    echo "no xmms support."
+    build_xmmsplugin=no
+    echo "disabled."
 fi
+
+# set variables we have no test for to default values if not set
+
+setdefault exec_prefix "$prefix"
+setdefault bindir      "$exec_prefix/bin"
+setdefault mandir      "$prefix/man"
+setdefault man1dir     "$mandir/man1"
+setdefault man5dir     "$mandir/man5"
+setdefault docdir      "$prefix/share/doc/$package"
+setdefault localedir   "$prefix/share/locale"
+
+setdefault use_sharedlibgbs no
 
 ## write configuration
 
 (
     echo EXTRA_ALL := $EXTRA_ALL
-    echo EXTRA_CFLAGS := $EXTRA_CFLAGS 
+    echo EXTRA_CFLAGS := $EXTRA_CFLAGS
     echo EXTRA_INSTALL := $EXTRA_INSTALL
     echo EXTRA_LDFLAGS := $EXTRA_LDFLAGS
     echo EXTRA_SRCS := $EXTRA_SRCS
@@ -319,15 +432,26 @@ fi
     echo PTHREAD := $PTHREAD
     echo XMMS_INPUT_PLUGIN_DIR := $XMMS_INPUT_PLUGIN_DIR
     echo VERSION := $VERSION
+    echo prefix := $prefix
+    echo exec_prefix := $exec_prefix
+    echo bindir := $bindir
+    echo mandir := $mandir
+    echo man1dir := $man1dir
+    echo man5dir := $man5dir
+    echo docdir := $docdir
+    echo localedir := $localedir
+    echo CC := $CC
     echo build_xmmsplugin := $build_xmmsplugin
     echo have_xgettext := $have_xgettext
+    echo use_i18n := $use_i18n
+    echo use_sharedlibgbs := $use_sharedlibgbs
 ) > config.mk
 
 (
     echo "#define GBS_VERSION \"$VERSION\""
+    echo "#define LOCALE_PREFIX \"$localedir\""
     have_x SYS_SOUNDCARD_H
-    have_x LOCALE_H
-    have_x LIBINTL_H
+    use_x I18N
 ) > config.h
 
 (
