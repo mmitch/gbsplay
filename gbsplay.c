@@ -101,6 +101,9 @@ struct channel {
 	int env_dir;
 	int env_speed_tc;
 	int env_speed;
+	int sweep_dir;
+	int sweep_time;
+	int sweep_shift;
 	int len;
 	int len_enable;
 	int div_tc;
@@ -448,6 +451,11 @@ static void io_put(unsigned short addr, unsigned char val)
 	} else if (addr >= 0xff00 && addr <= 0xff7f) {
 		DPRINTF(" ([0x%04x]=%02x) ", addr, val);
 		switch (addr) {
+			case 0xff10:
+				ch1.sweep_time = (val >> 4) & 7;
+				ch1.sweep_dir = (val >> 3) & 1;
+				ch1.sweep_shift = val & 7;
+				break;
 			case 0xff14:
 				if (val & 0x80) {
 					int vol = ioregs[0x12] >> 4;
@@ -513,7 +521,7 @@ static void io_put(unsigned short addr, unsigned char val)
 					int len = ioregs[0x1b] & 0x3f;
 					int div = ioregs[0x1d];
 					div |= ((int)val & 7) << 8;
-					ch3.master = (ioregs[0x1a] & 0x80) > 0; 
+					ch3.master = (ioregs[0x1a] & 0x80) > 0;
 					if (vol == 0) {
 						ch3.master = 0;
 						ch3.volume = 0;
@@ -532,8 +540,7 @@ static void io_put(unsigned short addr, unsigned char val)
 					int vol = ioregs[0x21] >> 4;
 					int envdir = (ioregs[0x21] >> 3) & 1;
 					int envspd = ioregs[0x21] & 7;
-//					int duty = ioregs[0x20] >> 6;
-					int len = ioregs[0x20];
+					int len = ioregs[0x20] & 0x3f;
 					int div = ioregs[0x22];
 					div |= ((int)val & 7) << 8;
 					ch4.volume = vol;
@@ -1311,6 +1318,20 @@ static void op_dec16(unsigned char op, struct opinfo *oi)
 	if (res == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
 }
 
+static void op_add_sp_imm(unsigned char op, struct opinfo *oi)
+{
+	unsigned char imm = get_imm8();
+	unsigned short old = REGS16_R(regs, SP);
+	unsigned short new = old;
+
+	DPRINTF(" %s SP, %02x", oi->name, imm);
+	new += imm;
+	REGS16_W(regs, SP, new);
+	if (old > new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
+	if ((old & 0xfff) > (new & 0xfff)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
+	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+}
+
 static void op_add(unsigned char op, struct opinfo *oi)
 {
 	unsigned char old = regs.rn.a;
@@ -1944,7 +1965,7 @@ static struct opinfo ops[256] = {
 	{"PUSH", &op_push},		/* opcode e5 */
 	{"AND", &op_and_imm},		/* opcode e6 */
 	{"RST", &op_rst},		/* opcode e7 */
-	{"UNKN", &op_unknown},		/* opcode e8 */
+	{"ADD", &op_add_sp_imm},		/* opcode e8 */
 	{"JP", &op_jp_hl},		/* opcode e9 */
 	{"LD", &op_ld_ind16_a},		/* opcode ea */
 	{"UNKN", &op_unknown},		/* opcode eb */
@@ -2059,8 +2080,8 @@ static void do_sound(int cycles)
 	sound_div += (cycles * 65536);
 	while (sound_div > sound_div_tc) {
 		sound_div -= sound_div_tc;
-		r_smpl *= 512;
-		l_smpl *= 512;
+		r_smpl *= 256;
+		l_smpl *= 256;
 		r_smpl /= smpldivisor;
 		l_smpl /= smpldivisor;
 		soundbuf[soundbufpos++] = l_smpl;
@@ -2116,22 +2137,31 @@ static void do_sound(int cycles)
 			if (ch3.rightgate) r_smpl += val;
 		}
 		if (ch4.master) {
-			int val = ch4.volume * (((lfsr >> 13) & 2)-1);
+//			int val = ch4.volume * (((lfsr >> 13) & 2)-1);
 //			int val = ch4.volume * ((random() & 2)-1);
-//			static int val;
+			static int val;
 			if (ch4.leftgate) l_smpl += val;
 			if (ch4.rightgate) r_smpl += val;
 			ch4.div--;
 			if (ch4.div <= 0) {
 				ch4.div = ch4.div_tc;
 				lfsr = (lfsr << 1) | (((lfsr >> 15) ^ (lfsr >> 14)) & 1);
-//				val = ch4.volume * ((random() & 2)-1);
+				val = ch4.volume * ((random() & 2)-1);
 			}
 		}
 		smpldivisor++;
 		sweep_div += 1;
 		if (sweep_div > sweep_div_tc) {
 			sweep_div = 0;
+			if (ch1.sweep_time>0) {
+				ch1.sweep_time--;
+				if (ch1.sweep_dir) {
+					ch1.div_tc -= ch1.div_tc >> (ch1.sweep_shift+1);
+				} else {
+					ch1.div_tc += ch1.div_tc >> (ch1.sweep_shift+1);
+				}
+				ch1.duty_tc = ch1.div_tc*ch1.duty/8;
+			}
 			if (ch1.len > 0 && ch1.len_enable) {
 				ch1.len--;
 				if (ch1.len == 0) ch1.master = 0;
@@ -2186,6 +2216,19 @@ static void do_sound(int cycles)
 			if (ch4.len > 0 && ch4.len_enable) {
 				ch4.len--;
 				if (ch4.len == 0) ch4.master = 0;
+			}
+			if (ch4.env_speed_tc) {
+				ch4.env_speed--;
+				if (ch4.env_speed <=0) {
+					ch4.env_speed = ch4.env_speed_tc;
+					if (!ch4.env_dir) {
+						if (ch4.volume > 0)
+							ch4.volume--;
+					} else {
+						if (ch4.volume < 15)
+							ch4.volume++;
+					}
+				}
 			}
 		}
 	}
