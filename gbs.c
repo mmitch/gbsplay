@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.16 2003/12/13 21:45:46 ranma Exp $
+/* $Id: gbs.c,v 1.17 2003/12/14 16:24:06 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -450,7 +450,7 @@ struct gbs *gbs_open(char *name)
 
 	gbs->romsize = (gbs->codelen + gbs->load + 0x3fff) & ~0x3fff;
 
-	gbs->rom = malloc(gbs->romsize);
+	gbs->rom = calloc(1, gbs->romsize);
 	memcpy(&gbs->rom[gbs->load - 0x70], buf, 0x70 + gbs->codelen);
 	memcpy(&gbs->rom[0x50], playercode, sizeof(playercode));
 

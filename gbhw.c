@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.27 2003/12/13 21:45:46 ranma Exp $
+/* $Id: gbhw.c,v 1.28 2003/12/14 16:24:05 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -21,7 +21,6 @@ static uint8_t extram[0x2000];
 static uint8_t ioregs[0x80];
 static uint8_t hiram[0x80];
 static int rombank = 1;
-static int romsize;
 static int lastbank;
 
 static const char dutylookup[4] = {
@@ -457,13 +456,18 @@ void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax)
 	lmaxval = rmaxval = INT_MIN;
 }
 
+/*
+ * Initialize Gameboy hardware emulation.
+ * The size should be a multiple of 0x4000,
+ * so we don't need range checking in rom_get and
+ * rombank_get.
+ */
 void gbhw_init(uint8_t *rombuf, uint32_t size)
 {
 	int i;
 
 	rom = rombuf;
-	romsize = (size + 0x3fff) & ~0x3fff;
-	lastbank = (romsize / 0x4000) - 1;
+	lastbank = ((size + 0x3fff) / 0x4000) - 1;
 	rombank = 1;
 	memset(gbhw_ch, 0, sizeof(gbhw_ch));
 	master_volume = MASTER_VOL_MAX;
