@@ -9,16 +9,16 @@
 #include "cfgparser.h"
 
 static int cfg_line, cfg_char;
-static int fd;
+static FILE *cfg_file;
 
 static int nextchar_state;
 
 static char nextchar(void)
 {
-	char c;
+	int c;
 
 	do {
-		if (read(fd, &c, sizeof(c)) < 1) return 0;
+		if ((c = fgetc(cfg_file)) == EOF) return 0;
 
 		if (c == '\n') {
 			cfg_char = 0;
@@ -45,7 +45,7 @@ static char nextchar(void)
 
 static int state;
 static int nextstate;
-static char c;
+static int c;
 static char *filename;
 
 static void err_expect(char *s)
@@ -82,8 +82,8 @@ void cfg_int(void *ptr)
 void cfg_parse(char *fname, struct cfg_option *options)
 {
 	filename = fname;
-	fd = open(fname, O_RDONLY);
-	if (fd == -1) return;
+	cfg_file = fopen(fname, "r");
+	if (cfg_file == NULL) return;
 
 	nextchar_state = 0;
 	state = 0;
@@ -144,5 +144,5 @@ void cfg_parse(char *fname, struct cfg_option *options)
 		}
 	} while (c != 0);
 
-	close(fd);
+	fclose(cfg_file);
 }
