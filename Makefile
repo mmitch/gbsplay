@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.54 2003/12/06 18:08:12 ranma Exp $
+# $Id: Makefile,v 1.55 2003/12/09 22:19:26 benni Exp $
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
@@ -38,7 +38,7 @@ objs_gbsinfo   := gbsinfo.o
 objs_gbsxmms   := gbsxmms.po
 
 objs := $(objs_libgbs) $(objs_gbsplay) $(objs_gbsinfo)
-dsts := libgbs.a libgbspic.a gbsplay gbsinfo
+dsts := gbsplay gbsinfo
 
 ifeq ($(build_xmmsplugin),y)
 objs += $(objs_gbsxmms)
@@ -132,12 +132,12 @@ libgbspic.a: $(objs_libgbspic)
 	$(AR) r $@ $+
 libgbs.a: $(objs_libgbs)
 	$(AR) r $@ $+
-gbsinfo: $(objs_gbsinfo) libgbs
+gbsinfo: $(objs_gbsinfo) | libgbs
 	$(CC) $(LDFLAGS) -o $@ $(objs_gbsinfo)
-gbsplay: $(objs_gbsplay) libgbs
+gbsplay: $(objs_gbsplay) | libgbs
 	$(CC) $(LDFLAGS) -o $@ $(objs_gbsplay) -lm
 
-gbsxmms.so: $(objs_gbsxmms) libgbs
+gbsxmms.so: $(objs_gbsxmms) | libgbs
 	$(CC) $(LDFLAGS) -shared -fPIC -o $@ $(objs_gbsxmms) -lpthread
 
 # rules for suffixes
