@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.4 2003/09/18 18:52:12 mitch Exp $
+/* $Id: gbs.c,v 1.5 2003/10/11 20:04:41 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -128,7 +128,8 @@ void gbs_printinfo(struct gbs *gbs, int verbose)
 	       "Play address:  0x%04x.\n"
 	       "Stack pointer: 0x%04x.\n"
 	       "File size: 0x%08x.\n"
-	       "ROM size:  0x%08x (%d banks).\n",
+	       "ROM size:  0x%08x (%d banks).\n"
+	       "Subsongs: %d.\n",
 	       gbs->version,
 	       gbs->title,
 	       gbs->author,
@@ -139,7 +140,8 @@ void gbs_printinfo(struct gbs *gbs, int verbose)
 	       gbs->stack,
 	       gbs->filesize,
 	       gbs->romsize,
-	       gbs->romsize/0x4000);
+	       gbs->romsize/0x4000,
+	       gbs->songs);
 	if (gbs->version == 2) {
 		printf("CRC32:     0x%08x/0x%08x (%s).\n",
 		       gbs->crc, gbs->crcnow,
