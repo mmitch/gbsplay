@@ -1,4 +1,4 @@
-# $Id: en.po,v 1.10 2004/03/20 19:57:49 mitch Exp $
+# $Id: en.po,v 1.11 2004/04/05 10:28:06 mitch Exp $
 # English translations for gbsplay.
 # Copyright (C) 2003 Tobias Diedrich <ranma@gmx.at>
 # This file is distributed under GNU GPL.
@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-03-20 20:53+0100\n"
-"PO-Revision-Date: 2004-03-20 20:19+0100\n"
+"POT-Creation-Date: 2004-04-05 12:25+0200\n"
+"PO-Revision-Date: 2004-04-05 12:26+0200\n"
 "Last-Translator: Tobias Diedrich <ranma@gmx.at>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -50,6 +50,26 @@ msgstr ""
 "\n"
 
 #, c-format
+msgid "%s: Can't create audio flow\n"
+msgstr "%s: Can't create audio flow\n"
+
+#, c-format
+msgid "%s: Can't find device with 2 channels\n"
+msgstr "%s: Can't find device with 2 channels\n"
+
+#, c-format
+msgid "%s: Can't open server: %s\n"
+msgstr "%s: Can't open server: %s\n"
+
+#, c-format
+msgid "%s: Can't set audio elements: %s\n"
+msgstr "%s: Can't set audio elements: %s\n"
+
+#, c-format
+msgid "%s: Can't start audio flow: %s\n"
+msgstr "%s: Can't start audio flow: %s\n"
+
+#, c-format
 msgid "'%s' expected at %s line %d char %d.\n"
 msgstr "'%s' expected at %s line %d char %d.\n"
 
@@ -59,6 +79,14 @@ msgstr "(%d seconds)\n"
 
 msgid "Artist:"
 msgstr "Artist:"
+
+#, c-format
+msgid ""
+"Available output plugins:\n"
+"\n"
+msgstr ""
+"Available output plugins:\n"
+"\n"
 
 #, c-format
 msgid "CRC32:\t\t0x%08x/0x%08x (%s)\n"
@@ -77,6 +105,10 @@ msgstr "Could not open %s: %s\n"
 #, c-format
 msgid "Could not open /dev/dsp: %s\n"
 msgstr "Could not open /dev/dsp: %s\n"
+
+#, c-format
+msgid "Could not open output plugin \"%s\"\n"
+msgstr "Could not open output plugin \"%s\"\n"
 
 msgid "Error opening output plugin."
 msgstr "Error opening output plugin."
@@ -243,10 +275,6 @@ msgstr "Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x
 #, c-format
 msgid "Warning: File CRC does not match (0x%08x != 0x%08x).\n"
 msgstr "Warning: File CRC does not match (0x%08x != 0x%08x).\n"
-
-#, c-format
-msgid "available output plugins:\n"
-msgstr "available output plugins:\n"
 
 #, c-format
 msgid "fcntl(F_GETFL) failed: %s\n"

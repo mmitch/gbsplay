@@ -1,4 +1,4 @@
-# $Id: de.po,v 1.13 2004/03/20 19:57:49 mitch Exp $
+# $Id: de.po,v 1.14 2004/04/05 10:28:06 mitch Exp $
 # German translations for gbsplay.
 # Copyright (C) 2003-2004 Tobias Diedrich <ranma@gmx.at>
 #                         Christian Garbs <mitch@cgarbs.de>
@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-03-20 20:53+0100\n"
-"PO-Revision-Date: 2004-03-20 20:55+0100\n"
+"POT-Creation-Date: 2004-04-05 12:25+0200\n"
+"PO-Revision-Date: 2004-04-05 12:29+0200\n"
 "Last-Translator: Christian Garbs <mitch@cgarbs.de>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -38,7 +38,9 @@ msgstr ""
 msgid ""
 "\"%s\" is not a known output plugin.\n"
 "\n"
-msgstr "\"%s\" ist keine bekannte Ausgabemethode.\n\n"
+msgstr ""
+"\"%s\" ist keine bekannte Ausgabemethode.\n"
+"\n"
 
 #, c-format
 msgid ""
@@ -47,6 +49,26 @@ msgid ""
 msgstr ""
 "\"%s\" ist keine gültige Byte-Order.\n"
 "\n"
+
+#, c-format
+msgid "%s: Can't create audio flow\n"
+msgstr "%s: Kann keinen audio flow erzeugen\n"
+
+#, c-format
+msgid "%s: Can't find device with 2 channels\n"
+msgstr "%s: Kann kein Gerät mit 2 Kanälen finden\n"
+
+#, c-format
+msgid "%s: Can't open server: %s\n"
+msgstr "%s: Kann den Server nicht öffnen: %s\n"
+
+#, c-format
+msgid "%s: Can't set audio elements: %s\n"
+msgstr "%s: Kann audio elements nicht setzen: %s\n"
+
+#, c-format
+msgid "%s: Can't start audio flow: %s\n"
+msgstr "%s: Kann den audio flow nicht starten: %s\n"
 
 #, c-format
 msgid "'%s' expected at %s line %d char %d.\n"
@@ -58,6 +80,12 @@ msgstr "(%d Sekunden)\n"
 
 msgid "Artist:"
 msgstr "Künstler:"
+
+#, c-format
+msgid ""
+"Available output plugins:\n"
+"\n"
+msgstr "Verfügbare Ausgabemöglichkeiten:\n\n"
 
 #, c-format
 msgid "CRC32:\t\t0x%08x/0x%08x (%s)\n"
@@ -76,6 +104,10 @@ msgstr "Konnte %s nicht öffnen: %s\n"
 #, c-format
 msgid "Could not open /dev/dsp: %s\n"
 msgstr "Konnte /dev/dsp nicht öffnen: %s\n"
+
+#, c-format
+msgid "Could not open output plugin \"%s\"\n"
+msgstr "Could not open output plugin \"%s\"\n"
 
 msgid "Error opening output plugin."
 msgstr "Konnte Ausgabeplugin nicht öffnen."
@@ -141,7 +173,9 @@ msgstr "Nächster"
 msgid ""
 "No output plugins available.\n"
 "\n"
-msgstr "Keine Ausgabemethode verfügbar.\n\n"
+msgstr ""
+"Keine Ausgabemethode verfügbar.\n"
+"\n"
 
 #, c-format
 msgid "Not a GBS-File: %s\n"
@@ -241,10 +275,6 @@ msgstr "Warnung: Erweiterter Kopfbereich gefunden, aber die Prüfsumme stimmt nic
 #, c-format
 msgid "Warning: File CRC does not match (0x%08x != 0x%08x).\n"
 msgstr "Warnung: Dateiprüfsumme stimmt nicht überein (0x%08x != 0x%08x).\n"
-
-#, c-format
-msgid "available output plugins:\n"
-msgstr "Verfügbare Ausgabemöglichkeiten:\n"
 
 #, c-format
 msgid "fcntl(F_GETFL) failed: %s\n"
