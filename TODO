@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.53 2004/01/17 18:58:39 mitch Exp $>>
+<<$Id: TODO,v 1.54 2004/01/17 19:13:45 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -12,6 +12,9 @@ TODO list for gbsplay.
 ( )  configure script does not print "shared lib enabled"
 
 ( )  make install/uninstall miss shared library
+
+( )  make uninstall does not work on Cygwin because all executables get
+     a ".exe" prefix and rm does not find them.
 
 ### unspecified: (bits'n'ideas)
 
