@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.65 2004/04/25 21:50:30 ranmachan Exp $
+# $Id: configure,v 1.66 2004/04/26 20:44:32 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -34,7 +34,7 @@ if [ -d /usr/ucb ]; then
 fi
 
 ## set version number
-VERSION=0.0.6-rc2
+VERSION=0.0.6
 
 ##### begin of subroutines
 
@@ -412,7 +412,7 @@ Optional Packages:
 Output Plugins:
   --disable-devdsp       omit /dev/dsp sound output plugin
   --disable-stdout       omit stdout file writer plugin
-  --enable-nas           build NAS sound output plugin
+  --disable-nas          omit NAS sound output plugin
 EOF
 	exit $1
 }
