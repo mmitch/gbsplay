@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.38 2003/09/19 19:35:17 mitch Exp $
+# $Id: Makefile,v 1.39 2003/09/22 17:12:11 mitch Exp $
 
 include config.mk
 
@@ -12,6 +12,8 @@ man5dir     := $(mandir)/man5
 docdir      := $(prefix)/share/doc/gbsplay
 
 DESTDIR :=
+
+DISTDIR := gbsplay-$(VERSION)
 
 CFLAGS  := -Wall -Wstrict-prototypes -Os -fomit-frame-pointer
 LDFLAGS :=
@@ -87,16 +89,16 @@ uninstall-gbsxmms.so:
 	-rmdir -p $(DESTDIR)$(XMMS_INPUT_PLUGIN_DIR)
 
 dist:	distclean
-	install -d ./gbsplay
-	install -m 755 configure ./gbsplay/
-	install -m 755 depend.sh ./gbsplay/
-	install -m 644 Makefile ./gbsplay/
-	install -m 644 *.c ./gbsplay/
-	install -m 644 *.h ./gbsplay/
-	install -m 644 gbsplay.1 gbsinfo.1 gbsplayrc.5 ./gbsplay/
-	install -m 644 $(docs) ./gbsplay/
-	tar -c gbsplay/ -vzf ../gbsplay.tar.gz
-	rm -rf ./gbsplay
+	install -d ./$(DISTDIR)
+	install -m 755 configure ./$(DISTDIR)/
+	install -m 755 depend.sh ./$(DISTDIR)/
+	install -m 644 Makefile ./$(DISTDIR)/
+	install -m 644 *.c ./$(DISTDIR)/
+	install -m 644 *.h ./$(DISTDIR)/
+	install -m 644 gbsplay.1 gbsinfo.1 gbsplayrc.5 ./$(DISTDIR)/
+	install -m 644 $(docs) ./$(DISTDIR)/
+	tar -c $(DISTDIR)/ -vzf ../$(DISTDIR).tar.gz
+	rm -rf ./$(DISTDIR)
 
 gbslibpic.a: $(objs_gbslibpic)
 	$(AR) r $@ $+

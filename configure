@@ -1,11 +1,20 @@
 #!/bin/sh
-# $Id: configure,v 1.13 2003/09/22 16:56:26 mitch Exp $
+# $Id: configure,v 1.14 2003/09/22 17:12:11 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
 # 2003 (C) by Christian Garbs <mitch@cgarbs.de>
 #             Tobias Diedrich <ranma@gmx.at>
 # Licensed under GNU GPL.
+
+#
+
+VERSION=0.0.2
+if [ -f CVS/Entries ]; then
+    VERSION=${VERSION}+cvs`date -r CVS/Entries +%Y%m%d`
+fi
+
+#
 
 EXTRA_ALL=
 EXTRA_CFLAGS=
@@ -168,15 +177,12 @@ fi
     echo EXTRA_SRCS := $EXTRA_SRCS
     echo EXTRA_UNINSTALL := $EXTRA_UNINSTALL
     echo XMMS_INPUT_PLUGIN_DIR := $XMMS_INPUT_PLUGIN_DIR
+    echo VERSION := $VERSION
     echo build_xmmsplugin := $build_xmmsplugin
 ) > config.mk
 
 (
-    if [ -f CVS/Entries ]; then
-	echo "#define GBS_VERSION \"CVS `date -r CVS/Entries`\""
-    else
-	echo "#define GBS_VERSION \"0.0.3-dev\""
-    fi
+    echo "#define GBS_VERSION \"$VERSION\""
 ) > config.h
 
 ## end
