@@ -1,10 +1,18 @@
-<<$Id: TODO,v 1.50 2003/12/28 21:36:42 mitch Exp $>>
+<<$Id: TODO,v 1.51 2004/01/04 20:44:45 mitch Exp $>>
 
 
 TODO list for gbsplay.
 
 
 ### bugs
+
+( )  Build broken on Cygwin.  Possible fixes:
+     *  Either edit Makefile to do
+        CFLAGS  += -DLOCALE_PREFIX=\"$(localedir)\"
+        always, not only when have_xgettext == yes.
+     *  Or edit common.h and extend
+        #if HAVE_LOCALE_H == 1 && HAVE_LIBINTL_H == 1
+        with "&& HAVE_XGETTEXT == yes ".
 
 
 ### unspecified: (bits'n'ideas)
@@ -30,3 +38,4 @@ TODO list for gbsplay.
 
 ( )  set up feature list for 0.0.5 release
 
+( )  Fix broken Cygwin build.  Nothing else (except other Bugfixes).
