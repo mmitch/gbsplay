@@ -1,3 +1,11 @@
+/* $Id: common.h,v 1.6 2004/01/11 20:58:44 mitch Exp $
+ *
+ * gbsplay is a Gameboy sound player
+ *
+ * 2003,2004 (C) by Tobias Diedrich <ranma@gmx.at>
+ * Licensed under GNU GPL.
+ */
+
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
