@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.59 2003/12/14 16:42:10 ranma Exp $
+# $Id: Makefile,v 1.60 2003/12/25 10:16:09 mitch Exp $
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
@@ -51,7 +51,7 @@ endif
 all: default
 
 # include the rules for each subdir
-include $(shell find -type f -name "subdir.mk")
+include $(shell find . -type f -name "subdir.mk")
 
 default: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL)
 
@@ -62,12 +62,12 @@ ifneq ($(noincludes),yes)
 endif
 
 distclean: clean
-	find -regex ".*\.d" -exec rm -f "{}" \;
+	find . -regex ".*\.d" -exec rm -f "{}" \;
 	rm -f ./config.mk ./config.h ./config.err ./config.sed
 
 clean:
-	find -regex ".*\.\([aos]\|lo\|mo\|so\(\.[0-9]\)?\)" -exec rm -f "{}" \;
-	find -name "*~" -exec rm -f "{}" \;
+	find . -regex ".*\.\([aos]\|lo\|mo\|so\(\.[0-9]\)?\)" -exec rm -f "{}" \;
+	find . -name "*~" -exec rm -f "{}" \;
 	rm -f libgbs
 	rm -f $(mans)
 	rm -f ./gbsplay ./gbsinfo
