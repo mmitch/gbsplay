@@ -1,4 +1,4 @@
-/* $Id: plugout_devdsp.c,v 1.4 2004/03/20 20:32:04 mitch Exp $
+/* $Id: plugout_devdsp.c,v 1.5 2004/03/20 20:41:26 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -13,13 +13,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
 #include <sys/soundcard.h>
-
-#include "plugins.h"
 
 static int fd;
 

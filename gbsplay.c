@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.83 2004/03/20 20:32:04 mitch Exp $
+/* $Id: gbsplay.c,v 1.84 2004/03/20 20:41:26 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -25,7 +25,6 @@
 #include "gbcpu.h"
 #include "gbs.h"
 #include "cfgparser.h"
-#include "plugins.h"
 #include "util.h"
 
 #ifdef PLUGOUT_DEVDSP
@@ -106,7 +105,17 @@ static struct cfg_option options[] = {
 };
 
 /* sound output plugins */
-int regparm no_output_plugin(int endian, int rate);
+typedef void    regparm (*plugout_open_fn )(int endian, int rate);
+typedef ssize_t regparm (*plugout_write_fn)(const void *buf, size_t count);
+typedef void    regparm (*plugout_close_fn)();
+void regparm no_output_plugin(int endian, int rate);
+struct output_plugin {
+	char *id;
+	char *name;
+	plugout_open_fn  open_fn;
+	plugout_write_fn write_fn;
+	plugout_close_fn close_fn;
+};
 static struct output_plugin plugouts[] = {
 #ifdef PLUGOUT_NAS
 	{ "nas", "NAS sound driver", &nas_open, &nas_write, &nas_close },
@@ -125,7 +134,7 @@ static plugout_open_fn  sound_open;
 static plugout_write_fn sound_write;
 static plugout_close_fn sound_close;
 
-int regparm no_output_plugin(int endian, int rate)
+void regparm no_output_plugin(int endian, int rate)
 {
 	printf(_("No output plugins available.\n\n"));
 	exit(1);

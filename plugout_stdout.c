@@ -1,4 +1,4 @@
-/* $Id: plugout_stdout.c,v 1.3 2004/03/20 20:32:04 mitch Exp $
+/* $Id: plugout_stdout.c,v 1.4 2004/03/20 20:41:26 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -8,7 +8,8 @@
  * STDOUT file writer output plugin
  */
 
-#include "plugins.h"
+#include "common.h"
+#include <unistd.h>
 
 void regparm stdout_open(int endian, int rate)
 {
