@@ -1,4 +1,4 @@
-/* $Id: gbcpu.c,v 1.7 2003/08/30 15:53:37 ranma Exp $
+/* $Id: gbcpu.c,v 1.8 2003/08/31 17:46:34 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -635,7 +635,7 @@ static void put_reg(int i, unsigned char val)
 
 static void op_unknown(unsigned char op, const struct opinfo *oi)
 {
-	printf("\n\nUnknown opcode %02x.\n", op);
+	fprintf(stderr, "\n\nUnknown opcode %02x.\n", op);
 	gbcpu_stopped = 1;
 }
 
@@ -873,7 +873,7 @@ static void op_cbprefix(unsigned char op, const struct opinfo *oi)
 		case 2: op_res(op); return;
 		case 3: op_set(op); return;
 	}
-	printf("\n\nUnknown CB subopcode %02x.\n", op);
+	fprintf(stderr, "\n\nUnknown CB subopcode %02x.\n", op);
 	gbcpu_stopped = 1;
 }
 
@@ -1826,7 +1826,7 @@ int gbcpu_step(void)
 		return 1;
 	}
 	if (gbcpu_halted == 1 && gbcpu_if == 0) {
-		printf("CPU locked up (halt with interrupts disabled).\n");
+		fprintf(stderr, "CPU locked up (halt with interrupts disabled).\n");
 		gbcpu_stopped = 1;
 	}
 	if (gbcpu_stopped) return -1;

@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.1 2003/08/27 15:07:03 ranma Exp $
+/* $Id: gbs.c,v 1.2 2003/08/31 17:46:34 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -92,9 +92,9 @@ int gbs_playsong(struct gbs *gbs, int i)
 {
 	gbhw_init(gbs->rom, gbs->romsize);
 
-	if (i == -1) i = gbs->defaultsong;
-	if (i > gbs->songs) {
-		printf("Subsong number out of range (min=1, max=%d).\n", gbs->songs);
+	if (i == -1) i = gbs->defaultsong - 1;
+	if (i >= gbs->songs) {
+		fprintf(stderr, "Subsong number out of range (min=0, max=%d).\n", gbs->songs - 1);
 		return 0;
 	}
 
@@ -103,7 +103,7 @@ int gbs_playsong(struct gbs *gbs, int i)
 	REGS16_W(gbcpu_regs, PC, 0x0050); /* playercode entry point */
 	REGS16_W(gbcpu_regs, SP, gbs->stack);
 	REGS16_W(gbcpu_regs, HL, gbs->load - 0x70);
-	gbcpu_regs.rn.a = i - 1;
+	gbcpu_regs.rn.a = i;
 
 	return 1;
 }
@@ -173,7 +173,7 @@ int gbs_write(struct gbs *gbs, char *name, int version)
 	memset(pad, 0xff, sizeof(pad));
 
 	if ((fd = open(name, O_WRONLY|O_CREAT, 0644)) == -1) {
-		printf("Could not open %s: %s\n", name, strerror(errno));
+		fprintf(stderr, "Could not open %s: %s\n", name, strerror(errno));
 		return 0;
 	}
 
@@ -246,7 +246,7 @@ struct gbs *gbs_open(char *name)
 
 	memset(gbs, 0, sizeof(struct gbs));
 	if ((fd = open(name, O_RDONLY)) == -1) {
-		printf("Could not open %s: %s\n", name, strerror(errno));
+		fprintf(stderr, "Could not open %s: %s\n", name, strerror(errno));
 		return NULL;
 	}
 	fstat(fd, &st);
@@ -255,12 +255,12 @@ struct gbs *gbs_open(char *name)
 	if (buf[0] != 'G' ||
 	    buf[1] != 'B' ||
 	    buf[2] != 'S') {
-		printf("Not a GBS-File: %s\n", name);
+		fprintf(stderr, "Not a GBS-File: %s\n", name);
 		return NULL;
 	}
 	gbs->version = buf[3];
 	if (gbs->version > 2) {
-		printf("GBS Version %d unsupported.\n", buf[3]);
+		fprintf(stderr, "GBS Version %d unsupported.\n", buf[3]);
 		return NULL;
 	}
 
@@ -311,7 +311,7 @@ struct gbs *gbs_open(char *name)
 		gbs_authorex = buf2[10] + (buf2[11] << 8);
 		gbs_copyex = buf2[12] + (buf2[13] << 8);
 		if (gbs->filesize != st.st_size)
-			printf("Warning: file size does not match: %d != %ld\n", gbs->filesize, st.st_size);
+			fprintf(stderr, "Warning: file size does not match: %d != %ld\n", gbs->filesize, st.st_size);
 		if (gbs_titleex != 0xffff)
 			gbs->title = gbs->strings + gbs_titleex;
 		if (gbs_authorex != 0xffff)

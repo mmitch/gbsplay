@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.28 2003/08/31 08:30:08 mitch Exp $
+# $Id: Makefile,v 1.29 2003/08/31 17:46:34 ranma Exp $
 
 include config.mk
 
@@ -43,7 +43,7 @@ include $(patsubst %.o,%.d,$(filter %.o,$(objs)))
 
 distclean: clean
 	find -regex ".*\.d" -exec rm -f "{}" \;
-	rm -f ./config.mk ./config.err
+	rm -f ./config.mk ./config.h ./config.err
 
 clean:
 	find -regex ".*\.\([aos]\|[sp]o\)" -exec rm -f "{}" \;

@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.2 2003/08/28 14:37:03 ranma Exp $
+# $Id: configure,v 1.3 2003/08/31 17:46:34 ranma Exp $
 #
 # generate config.mk for gbsplay Makefile
 
@@ -75,6 +75,14 @@ fi
     echo XMMS_INPUT_PLUGIN_DIR := $XMMS_INPUT_PLUGIN_DIR
     echo build_xmmsplugin := $build_xmmsplugin
 ) > config.mk
+
+(
+    if [ -f CVS/Entries ]; then
+	echo "#define GBS_VERSION \"CVS `date -r CVS/Entries`\""
+    else
+	echo "#define GBS_VERSION \"0.0 not-ready-yet\""
+    fi
+) > config.h
 
 ## end
 
