@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.61 2004/04/16 18:26:32 mitch Exp $
+# $Id: configure,v 1.62 2004/04/16 18:32:21 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -542,12 +542,20 @@ if [ "$use_i18n" != no ]; then
 
     use_i18n=no
     if [ "$have_locale_h" = "yes" -a "$have_libintl_h" = "yes" ]; then
+        if [ "$include_locale_h_path" != " " ]; then
+            EXTRA_CFLAGS="$EXTRA_CFLAGS -I$include_locale_h_path"
+            EXTRA_I18NFLAGS="$EXTRA_I18NFLAGS -I$include_locale_h_path"
+        fi
+        if [ "$include_libintl_h_path" != " " ]; then
+            EXTRA_CFLAGS="$EXTRA_CFLAGS -I$include_libintl_h_path"
+            EXTRA_I18NFLAGS="$EXTRA_I18NFLAGS -I$include_libintl_h_path"
+        fi
         use_i18n=yes
     fi
 fi
 
 if [ "$use_i18n" = "yes" ]; then
-    check_libs c "intl" "/usr/local/lib" <<EOF
+    check_libs c "intl" "/usr/local/lib" "" "$EXTRA_I18NFLAGS" <<EOF
 #include <libintl.h>
 int main(int argc, char **argv)
 {
@@ -557,8 +565,6 @@ int main(int argc, char **argv)
 EOF
     if [ $? -eq 0 -a "$libc_flags" != "" ]; then
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS $libc_flags"
-    else
-	use_i18n=no
     fi
 fi
 
