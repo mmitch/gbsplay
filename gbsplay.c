@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.36 2003/08/27 15:07:03 ranma Exp $
+/* $Id: gbsplay.c,v 1.37 2003/08/29 16:32:57 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -204,6 +204,7 @@ int main(int argc, char **argv)
 
 			if (time >= timeout || silencectr > 100) {
 				subsong++;
+				if (subsong == gbs->songs) return 0;
 				silencectr = 0;
 				clock = 0;
 				gbs_playsong(gbs, subsong);
