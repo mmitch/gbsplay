@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.19 2003/11/29 23:07:46 ranma Exp $
+/* $Id: gbsxmms.c,v 1.20 2003/12/06 18:07:01 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -207,7 +207,11 @@ static void callback(void *buf, int len, void *priv)
 
 	gbs_ip.add_vis_pcm(gbs_ip.output->written_time(),
 	                   FMT_S16_NE, 2, len, buf);
-	while (gbs_ip.output->buffer_free() < len && !stopthread) usleep(10000);
+	while (gbs_ip.output->buffer_free() < len && !stopthread) {
+		pthread_mutex_unlock(&gbs_mutex);
+		usleep(10000);
+		pthread_mutex_lock(&gbs_mutex);
+	}
 	gbs_ip.output->write_audio(buf, len);
 
 
