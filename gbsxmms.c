@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.22 2003/12/07 01:39:04 ranma Exp $
+/* $Id: gbsxmms.c,v 1.23 2003/12/07 09:18:42 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -601,7 +601,6 @@ static void get_song_info(char *filename, char **title, int *length)
 
 	*title = malloc(len);
 	*length = gbs_time(gbs, gbs->songs);
-	printf("Length=%d\n", *length);
 
 	snprintf(*title, len, "%s - %s (%s)",
 	         gbs->title, gbs->author, gbs->copyright);
