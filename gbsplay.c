@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.37 2003/08/29 16:32:57 ranma Exp $
+/* $Id: gbsplay.c,v 1.38 2003/08/30 15:53:03 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -151,6 +151,9 @@ int main(int argc, char **argv)
 		static long long clock = 0;
 		static int silencectr = 0;
 		int cycles = gbhw_step();
+
+		if (cycles < 0) return 1;
+
 		statuscnt -= cycles;
 		clock += cycles;
 		if (statuscnt < 0) {
@@ -204,7 +207,7 @@ int main(int argc, char **argv)
 
 			if (time >= timeout || silencectr > 100) {
 				subsong++;
-				if (subsong == gbs->songs) return 0;
+				if (subsong > gbs->songs) return 0;
 				silencectr = 0;
 				clock = 0;
 				gbs_playsong(gbs, subsong);

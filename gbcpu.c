@@ -1,4 +1,4 @@
-/* $Id: gbcpu.c,v 1.5 2003/08/29 16:32:37 ranma Exp $
+/* $Id: gbcpu.c,v 1.6 2003/08/30 15:53:03 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -37,6 +37,7 @@ struct opinfo {
 
 struct gbcpu_regs gbcpu_regs;
 int gbcpu_halted;
+int gbcpu_stopped;
 int gbcpu_if;
 
 static unsigned char none_get(unsigned int addr)
@@ -635,7 +636,7 @@ static void put_reg(int i, unsigned char val)
 static void op_unknown(unsigned char op, const struct opinfo *oi)
 {
 	printf("\n\nUnknown opcode %02x.\n", op);
-	exit(1);
+	gbcpu_stopped = 1;
 }
 
 static void op_set(unsigned char op)
@@ -873,7 +874,7 @@ static void op_cbprefix(unsigned char op, const struct opinfo *oi)
 		case 3: op_set(op); return;
 	}
 	printf("\n\nUnknown CB subopcode %02x.\n", op);
-	exit(1);
+	gbcpu_stopped = 1;
 }
 
 static void op_ld(unsigned char op, const struct opinfo *oi)
@@ -1800,6 +1801,8 @@ void gbcpu_addmem(int start, int end, gbcpu_put_fn putfn, gbcpu_get_fn getfn)
 
 void gbcpu_init(void)
 {
+	gbcpu_halted = 0;
+	gbcpu_stopped = 0;
 	DEB(dump_regs());
 }
 
@@ -1822,9 +1825,10 @@ int gbcpu_step(void)
 		DEB(show_reg_diffs());
 		return 1;
 	}
-	if (gbcpu_halted == 1 && gbcpu_if == 0) {
+	if (gbcpu_halted == 1 && gbcpu_if == 0)
 		printf("CPU locked up (halt with interrupts disabled).\n");
-		exit(1);
+		gbcpu_stopped = 1;
 	}
+	if (gbcpu_stopped) return -1;
 	return 16;
 }

@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.5 2003/08/27 15:07:03 ranma Exp $
+/* $Id: gbsxmms.c,v 1.6 2003/08/30 15:53:03 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -96,16 +96,21 @@ void *playloop(void *priv)
 		return 0;
 	}
 	while (!stopthread) {
-		gbclock += gbhw_step();
-		if (!((gbhw_ch[0].volume == 0 ||
-		       gbhw_ch[0].master == 0) &&
-		      (gbhw_ch[1].volume == 0 ||
-		       gbhw_ch[1].master == 0) &&
-		      (gbhw_ch[2].volume == 0 ||
-		       gbhw_ch[2].master == 0) &&
-		      (gbhw_ch[3].volume == 0 ||
-		       gbhw_ch[3].master == 0)))
-			silencectr = 0;
+		int cycles = gbhw_step();
+		if (cycles<0) {
+			stopthread = 1;
+		} else {
+			gbclock += cycles;
+			if (!((gbhw_ch[0].volume == 0 ||
+			       gbhw_ch[0].master == 0) &&
+			      (gbhw_ch[1].volume == 0 ||
+			       gbhw_ch[1].master == 0) &&
+			      (gbhw_ch[2].volume == 0 ||
+			       gbhw_ch[2].master == 0) &&
+			      (gbhw_ch[3].volume == 0 ||
+			       gbhw_ch[3].master == 0)))
+				silencectr = 0;
+		}
 	}
 	gbs_ip.output->close_audio();
 	return 0;

@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.11 2003/08/29 16:32:37 ranma Exp $
+/* $Id: gbhw.c,v 1.12 2003/08/30 15:53:03 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -425,6 +425,8 @@ void gbhw_init(unsigned char *rombuf, unsigned int size)
 int gbhw_step(void)
 {
 	int cycles = gbcpu_step();
+
+	if (cycles < 0) return cycles;
 
 	gb_sound(cycles);
 	if (vblankctr > 0) vblankctr -= cycles;
