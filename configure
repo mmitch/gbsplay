@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.51 2004/04/07 17:26:04 mitch Exp $
+# $Id: configure,v 1.52 2004/04/08 15:50:04 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -300,6 +300,7 @@ Installation directories:
 
 Optional Features:
   --disable-i18n         omit libintl support
+  --enable-debug         build with debug code
   --enable-sharedlibgbs  build libgbs as a shared library
 
 Optional Packages:
