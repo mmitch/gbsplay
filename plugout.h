@@ -1,7 +1,13 @@
 #ifndef _PLUGOUT_H_
 #define _PLUGOUT_H_
 
-typedef int     regparm (*plugout_open_fn )(int endian, int rate);
+enum plugout_endian {
+	PLUGOUT_ENDIAN_BIG,
+	PLUGOUT_ENDIAN_LITTLE,
+	PLUGOUT_ENDIAN_NATIVE
+};
+
+typedef int     regparm (*plugout_open_fn )(enum plugout_endian endian, int rate);
 typedef ssize_t regparm (*plugout_write_fn)(const void *buf, size_t count);
 typedef void    regparm (*plugout_close_fn)(void);
 

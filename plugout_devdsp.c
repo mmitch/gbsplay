@@ -1,4 +1,4 @@
-/* $Id: plugout_devdsp.c,v 1.6 2004/03/21 02:46:15 ranmachan Exp $
+/* $Id: plugout_devdsp.c,v 1.7 2004/10/23 21:19:17 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -24,7 +24,7 @@
 
 static int fd;
 
-static int regparm devdsp_open(int endian, int rate)
+static int regparm devdsp_open(enum plugout_endian endian, int rate)
 {
 	int c;
 	int flags;
@@ -40,9 +40,9 @@ static int regparm devdsp_open(int endian, int rate)
 	}
 
 	switch (endian) {
-	case CFG_ENDIAN_BE: c = AFMT_S16_BE; break;
-	case CFG_ENDIAN_LE: c = AFMT_S16_LE; break;
-	case CFG_ENDIAN_NE: c = AFMT_S16_NE; break;
+	case PLUGOUT_ENDIAN_BIG: c = AFMT_S16_BE; break;
+	case PLUGOUT_ENDIAN_LITTLE: c = AFMT_S16_LE; break;
+	case PLUGOUT_ENDIAN_NATIVE: c = AFMT_S16_NE; break;
 	}
 	if ((ioctl(fd, SNDCTL_DSP_SETFMT, &c)) == -1) {
 		fprintf(stderr, _("ioctl(fd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"), c, strerror(errno));

@@ -1,4 +1,4 @@
-/* $Id: common.h,v 1.8 2004/03/20 18:36:02 mitch Exp $
+/* $Id: common.h,v 1.9 2004/10/23 21:19:17 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -107,9 +107,5 @@ static inline int is_be_machine() {
 }
 
 #endif
-
-#define CFG_ENDIAN_BE 0
-#define CFG_ENDIAN_LE 1
-#define CFG_ENDIAN_NE 2
 
 #endif

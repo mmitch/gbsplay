@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.90 2004/06/03 18:39:03 mitch Exp $
+/* $Id: gbsplay.c,v 1.91 2004/10/23 21:19:17 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -63,7 +63,7 @@ static int refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
 /* default values */
 static int playmode = PLAYMODE_LINEAR;
 static int loopmode = 0;
-static int endian = CFG_ENDIAN_NE;
+static enum plugout_endian endian = PLUGOUT_ENDIAN_NATIVE;
 static int verbosity = 3;
 static int rate = 44100;
 static int silence_timeout = 2;
@@ -184,8 +184,8 @@ static regparm void swap_endian(struct gbhw_buffer *buf)
 
 static regparm void callback(struct gbhw_buffer *buf, void *priv)
 {
-	if ((is_le_machine() && endian == CFG_ENDIAN_BE) ||
-	    (is_be_machine() && endian == CFG_ENDIAN_LE)) {
+	if ((is_le_machine() && endian == PLUGOUT_ENDIAN_BIG) ||
+	    (is_be_machine() && endian == PLUGOUT_ENDIAN_LITTLE)) {
 		swap_endian(buf);
 	}
 	sound_write(buf->data, buf->pos*sizeof(int16_t));
@@ -320,9 +320,9 @@ static regparm int nextsubsong_cb(struct gbs *gbs, void *priv)
 char *endian_str(int endian)
 {
 	switch (endian) {
-	case CFG_ENDIAN_BE: return "big";
-	case CFG_ENDIAN_LE: return "little";
-	case CFG_ENDIAN_NE: return "native";
+	case PLUGOUT_ENDIAN_BIG: return "big";
+	case PLUGOUT_ENDIAN_LITTLE: return "little";
+	case PLUGOUT_ENDIAN_NATIVE: return "native";
 	default: return "invalid";
 	}
 }
@@ -379,11 +379,11 @@ static regparm void parseopts(int *argc, char ***argv)
 			break;
 		case 'E':
 			if (strcasecmp(optarg, "b") == 0) {
-				endian = CFG_ENDIAN_BE;
+				endian = PLUGOUT_ENDIAN_BIG;
 			} else if (strcasecmp(optarg, "l") == 0) {
-				endian = CFG_ENDIAN_LE;
+				endian = PLUGOUT_ENDIAN_LITTLE;
 			} else if (strcasecmp(optarg, "n") == 0) {
-				endian = CFG_ENDIAN_NE;
+				endian = PLUGOUT_ENDIAN_NATIVE;
 			} else {
 				printf(_("\"%s\" is not a valid endian.\n\n"), optarg);
 				usage(1);

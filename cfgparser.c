@@ -1,4 +1,4 @@
-/* $Id: cfgparser.c,v 1.11 2004/04/13 14:14:43 mitch Exp $
+/* $Id: cfgparser.c,v 1.12 2004/10/23 21:19:17 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -16,6 +16,7 @@
 
 #include "common.h"
 #include "cfgparser.h"
+#include "plugout.h"
 
 static int cfg_line, cfg_char;
 static FILE *cfg_file;
@@ -68,6 +69,8 @@ static regparm void err_expect(char *s)
 
 regparm void cfg_endian(void *ptr)
 {
+	enum plugout_endian *endian = ptr;
+
 	c = tolower(c);
 	if (c != 'b' && c != 'l' && c!= 'n') {
 		err_expect("[bln]");
@@ -75,9 +78,9 @@ regparm void cfg_endian(void *ptr)
 	}
 
 	switch (c) {
-	case 'b': *((int*)ptr) = CFG_ENDIAN_BE; break;
-	case 'l': *((int*)ptr) = CFG_ENDIAN_LE; break;
-	default: *((int*)ptr) = CFG_ENDIAN_NE; break;
+	case 'b': *endian = PLUGOUT_ENDIAN_BIG; break;
+	case 'l': *endian = PLUGOUT_ENDIAN_LITTLE; break;
+	default: *endian = PLUGOUT_ENDIAN_NATIVE; break;
 	}
 
 	c = nextchar();

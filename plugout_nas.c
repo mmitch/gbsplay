@@ -1,4 +1,4 @@
-/* $Id: plugout_nas.c,v 1.8 2004/10/23 20:49:40 ranmachan Exp $
+/* $Id: plugout_nas.c,v 1.9 2004/10/23 21:19:17 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -29,10 +29,9 @@
 /* global variables */
 static AuServer      *nas_server;
 static AuFlowID       nas_flow;
-static unsigned char  nas_format = AuFormatLinearSigned16LSB;
 
 /* forward function declarations */
-static int     regparm nas_open(int endian, int rate);
+static int     regparm nas_open(enum plugout_endian endian, int rate);
 static ssize_t regparm nas_write(const void *buf, size_t count);
 static void    regparm nas_close();
 
@@ -83,18 +82,36 @@ static AuDeviceID regparm nas_find_device(AuServer *aud)
 
 
 /**
- * open NAS output
+ * Setup connection to NAS server.
+ * This includes finding a suitable output device and setting
+ * up the flow chain.
  *
- * @param endian  (0 == big, 1 == little, 2 == native endian)
- * BUGBUGBUG:  endian is ignored ATM
+ * @param endian  requested endianness
  * @param rate  requested samplerate
  */
-static int regparm nas_open(int endian, int rate)
+static int regparm nas_open(enum plugout_endian endian, int rate)
 {
 	char *text;
+	unsigned char nas_format;
 	AuElement nas_elements[3];
 	AuStatus  status;
 	AuDeviceID nas_device;
+
+	switch (endian) {
+	case PLUGOUT_ENDIAN_BIG:
+		nas_format = AuFormatLinearSigned16MSB;
+		break;
+	case PLUGOUT_ENDIAN_LITTLE:
+		nas_format = AuFormatLinearSigned16LSB;
+		break;
+	default:
+		if (is_le_machine()) {
+			nas_format = AuFormatLinearSigned16LSB;
+		} else {
+			nas_format = AuFormatLinearSigned16MSB;
+		}
+		break;
+	}
 
 	/* open server connection */
 	nas_server = AuOpenServer(NULL, 0, NULL, 0, NULL, &text);
