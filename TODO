@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.43 2003/12/19 21:47:05 mitch Exp $>>
+<<$Id: TODO,v 1.44 2003/12/25 10:18:49 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -44,3 +44,5 @@ TODO list for gbsplay.
 (X)  gettext support
 
 (X)  gbs2ogg.sh: fix script (wrong path to gbsinfo)
+
+( )  build process: fixes for FreeBSD
