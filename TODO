@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.35 2003/11/29 23:36:34 ranma Exp $>>
+<<$Id: TODO,v 1.36 2003/12/05 21:36:56 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -19,36 +19,7 @@ TODO list for gbsplay.
 
 ( )  gbsplay: make refresh_delay a commandline argument
 
-### version 0.0.3:
+### version 0.0.4:
 
-( )  set up feature list for 0.0.3 release
+( )  set up feature list for 0.0.4 release
 
-(X)  fixed some incorrect c type assumptions (char not signed on some platforms)
-
-(X)  fixed some endian issues (replaced AFMT_S16_LE by AFMT_S16_NE)
-
-(X)  change gbs_(open|write) to conform to new gbsformat.txt
-
-(X)  add info about GBS format
-
-(X)  gbsplay:
-     fix help text spacing
-
-(X)  create versioned directory on 'make dist'
-
-(X)  set version number in manpages automatically
-
-(X)  gbsplay: mention Esc to quit gbsplay
-
-(X)  gbsplay: allow play/pause with Space bar
-
-(X)  gbsplay: add fadeout and subsong gap
-
-(X)  gbsplay: add channel mute
-
-(X)  Makefile: fix dist target (manpages were broken)
-
-(X)  gbs2ogg.sh: contributed script to convert .gbs to .ogg
-
-(X)  make gbsinfo output more script friendly
-     (perhaps via with commandline switch)
