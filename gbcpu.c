@@ -1,4 +1,4 @@
-/* $Id: gbcpu.c,v 1.17 2004/04/14 17:28:34 ranmachan Exp $
+/* $Id: gbcpu.c,v 1.18 2004/07/08 13:46:01 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -612,7 +612,12 @@ static regparm uint32_t get_imm8(void)
 
 static regparm uint32_t get_imm16(void)
 {
-	return get_imm8() + (get_imm8() << 8);
+	uint32_t pc = REGS16_R(gbcpu_regs, PC);
+	uint32_t res;
+	REGS16_W(gbcpu_regs, PC, pc + 2);
+	res = mem_get(pc) + (mem_get(pc+1) << 8);
+	DPRINTF("%04x", res);
+	return res;
 }
 
 static inline void print_reg(int i)
