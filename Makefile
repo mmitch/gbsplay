@@ -1,11 +1,11 @@
-# $Id: Makefile,v 1.10 2003/08/24 03:27:11 ranma Exp $
+# $Id: Makefile,v 1.11 2003/08/24 09:55:06 ranma Exp $
 
 prefix = /usr/local
 exec_prefix = ${prefix}
 
 bindir = ${exec_prefix}/bin
 
-CFLAGS := -Wall -Wstrict-prototypes -Os -fomit-frame-pointer
+CFLAGS := -Wall -Wstrict-prototypes -Os -g
 LDFLAGS := -lm
 
 SRCS := gbcpu.c gbhw.c gbsplay.c

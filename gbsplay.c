@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.24 2003/08/24 07:54:00 mitch Exp $
+/* $Id: gbsplay.c,v 1.25 2003/08/24 09:55:06 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -270,22 +270,22 @@ int main(int argc, char **argv)
 		int cycles = gbhw_step();
 		statuscnt -= cycles;
 		if (statuscnt < 0) {
-			int ni1 = getnote(gbhw_ch[1].div_tc);
-			int ni2 = getnote(gbhw_ch[2].div_tc);
-			int ni3 = getnote(gbhw_ch[3].div_tc);
+			int ni1 = getnote(gbhw_ch[0].div_tc);
+			int ni2 = getnote(gbhw_ch[1].div_tc);
+			int ni3 = getnote(gbhw_ch[2].div_tc);
 			char *n1 = &notelookup[4*ni1];
 			char *n2 = &notelookup[4*ni2];
 			char *n3 = &notelookup[4*ni3];
-			char *v1 = &vollookup[5* (gbhw_ch[1].volume & 15)];
-			char *v2 = &vollookup[5* (gbhw_ch[2].volume & 15)];
-			char *v3 = &vollookup[5* (((3-((gbhw_ch[3].volume+3)&3)) << 2) & 15)];
-			char *v4 = &vollookup[5* (gbhw_ch[4].volume & 15)];
+			char *v1 = &vollookup[5* (gbhw_ch[0].volume & 15)];
+			char *v2 = &vollookup[5* (gbhw_ch[1].volume & 15)];
+			char *v3 = &vollookup[5* (((3-((gbhw_ch[2].volume+3)&3)) << 2) & 15)];
+			char *v4 = &vollookup[5* (gbhw_ch[3].volume & 15)];
 
 			statuscnt += statustc;
 
-			if (!gbhw_ch[1].volume) n1 = "---";
-			if (!gbhw_ch[2].volume) n2 = "---";
-			if (!gbhw_ch[3].volume) n3 = "---";
+			if (!gbhw_ch[0].volume) n1 = "---";
+			if (!gbhw_ch[1].volume) n2 = "---";
+			if (!gbhw_ch[2].volume) n3 = "---";
 
 			printf("ch1: %s %s  ch2: %s %s  ch3: %s %s  ch4: %s\r",
 				n1, v1, n2, v2, n3, v3, v4);
