@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.22 2003/08/24 01:56:52 ranma Exp $
+/* $Id: gbsplay.c,v 1.23 2003/08/24 03:26:10 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -22,27 +22,61 @@
 #include "gbcpu.h"
 
 static char playercode[] = {
-	0x01, 0x30, 0x00,  /* 0050:  ld   bc, 0x0030 */
-	0x11, 0x10, 0xff,  /* 0053:  ld   de, 0xff10 */
-	0x21, 0x72, 0x00,  /* 0056:  ld   hl, 0x0072 */
-	0x2a,              /* 0059:  ldi  a, [hl]    */
-	0x12,              /* 005a:  ld   [de], a    */
-	0x13,              /* 005b:  inc  de         */
-	0x0b,              /* 005c:  dec  bc         */
-	0x78,              /* 005d:  ld   a, b       */
-	0xb1,              /* 005e:  or   a, c       */
-	0x20, 0xf8,        /* 005f:  jr nz $-0x08    */
-	0x1e, 0xff,        /* 0061:  ld   e, 0xff    */
-	0x3e, 0x06,        /* 0063:  ld   a, 0x06    */
-	0x12,              /* 0065:  ld   [de], a    */
-	0x3e, 0x00,        /* 0066:  ld   a, 0x00    */
-	0xcd, 0x00, 0x00,  /* 0068:  call init       */
-	0xfb,              /* 006b:  ei              */
-	0x76,              /* 006c:  halt            */
-	0xcd, 0x00, 0x00,  /* 006d:  call play       */
-	0x18, 0xfa,        /* 0070:  jr $-6          */
+	0xf5,              /* 0050:  push af         */
+	0xe5,              /* 0051:  push hl         */
+	0x01, 0x30, 0x00,  /* 0052:  ld   bc, 0x0030 */
+	0x11, 0x10, 0xff,  /* 0055:  ld   de, 0xff10 */
+	0x21, 0x9f, 0x00,  /* 0058:  ld   hl, 0x009f */
+	0x2a,              /* 005b:  ldi  a, [hl]    */
+	0x12,              /* 005c:  ld   [de], a    */
+	0x13,              /* 005d:  inc  de         */
+	0x0b,              /* 005e:  dec  bc         */
+	0x78,              /* 005f:  ld   a, b       */
+	0xb1,              /* 0060:  or   a, c       */
+	0x20, 0xf8,        /* 0061:  jr nz $-0x08    */
+	0xe1,              /* 0063:  pop  hl         */
+	0xe5,              /* 0064:  push hl         */
+	0x01, 0x0e, 0x00,  /* 0065:  ld   bc, 0x000e */
+	0x09,              /* 0068:  add  hl, bc     */
+	0x2a,              /* 0069:  ldi  a, [hl]    */
+	0xe0, 0x06,        /* 006a:  ldh  [0x06], a  */
+	0x2a,              /* 006c:  ldi  a, [hl]    */
+	0xe0, 0x07,        /* 006d:  ldh  [0x07], a  */
+	0x11, 0xff, 0xff,  /* 006f:  ld   de, 0xffff */
+	0xcb, 0x57,        /* 0072:  bit  2, a       */
+	0x3e, 0x01,        /* 0074:  ld   a, 0x01    */
+	0x28, 0x02,        /* 0076:  jr z $+2        */
+	0x3e, 0x04,        /* 0078:  ld   a, 0x04    */
+	0x12,              /* 007a:  ld   [de], a    */
+	0xe1,              /* 007b:  pop  hl         */
+	0xf1,              /* 007c:  pop  af         */
+	0x57,              /* 007d:  ld   d, a       */
+	0xe5,              /* 007e:  push hl         */
+	0x01, 0x08, 0x00,  /* 007f:  ld   bc, 0x0008 */
+	0x09,              /* 0082:  add  hl, bc     */
+	0x2a,              /* 0083:  ldi  a, [hl]    */
+	0x66,              /* 0084:  ld   h, [hl]    */
+	0x6f,              /* 0085:  ld   l, a       */
+	0x7a,              /* 0086:  ld   a, d       */
+	0x01, 0x8c, 0x00,  /* 0087:  ld   bc, 0x008c */
+	0xc5,              /* 008a:  push bc         */
+	0xe9,              /* 008b:  jp   [hl]       */
+	0xfb,              /* 008c:  ei              */
+	0x76,              /* 008d:  halt            */
+	0xe1,              /* 008e:  pop  hl         */
+	0xe5,              /* 008f:  push hl         */
+	0x01, 0x0a, 0x00,  /* 0090:  ld   bc, 0x000a */
+	0x09,              /* 0093:  add  hl, bc     */
+	0x2a,              /* 0094:  ldi  a, [hl]    */
+	0x66,              /* 0095:  ld   h, [hl]    */
+	0x6f,              /* 0096:  ld   l, a       */
+	0x7a,              /* 0097:  ld   a, d       */
+	0x01, 0x9d, 0x00,  /* 0098:  ld   bc, 0x009d */
+	0xc5,              /* 009b:  push bc         */
+	0xe9,              /* 009c:  jp   [hl]       */
+	0x18, 0xee,        /* 009d:  jr $-6          */
 
-	0x80, 0xbf, 0x00, 0x00, 0xbf, /* 0072: initdata */
+	0x80, 0xbf, 0x00, 0x00, 0xbf, /* 009f: initdata */
 	0x00, 0x3f, 0x00, 0x00, 0xbf,
 	0x7f, 0xff, 0x9f, 0x00, 0xbf,
 	0x00, 0xff, 0x00, 0x00, 0xbf,
@@ -114,21 +148,10 @@ static void open_gbs(char *name, int i)
 	       romsize,
 	       romsize/0x4000);
 
-
-/*	if (buf[0x0f] & 4) {
-		ioregs[0x06] = buf[0x0e];
-		ioregs[0x07] = buf[0x0f];
-		timertc = (256-buf[0x0e]) * (16 << (((buf[0x0f]+3) & 3) << 1));
-		if ((buf[0x0f] & 0xf0) == 0x80) timertc /= 2;
-		printf("Callback rate %2.2fHz (Custom).\n", 4194304/(float)timertc);
-	} else {
-		timertc = 70256;
-		printf("Callback rate %2.2fHz (VBlank).\n", 4194304/(float)timertc);
-	}*/
-
 	rom = gbhw_romalloc(romsize);
 	memcpy(&rom[gbs_base - 0x70], buf, 0x70);
 	read(fd, &rom[gbs_base], st.st_size - 0x70);
+	memcpy(&rom[0x50], playercode, sizeof(playercode));
 
 	for (j=0; j<8; j++) {
 		int addr = gbs_base + 8*j; /* jump address */
@@ -139,16 +162,10 @@ static void open_gbs(char *name, int i)
 	rom[0x40] = 0xc9; /* reti */
 	rom[0x48] = 0xc9; /* reti */
 
-	memcpy(&rom[0x50], playercode, sizeof(playercode));
-
-	rom[0x67] = i - 1;
-	rom[0x69] = gbs_init & 0xff;
-	rom[0x6a] = gbs_init >> 8;
-	rom[0x6e] = gbs_play & 0xff;
-	rom[0x6f] = gbs_play >> 8;
-
 	REGS16_W(regs, PC, 0x0050); /* playercode entry point */
 	REGS16_W(regs, SP, gbs_stack);
+	REGS16_W(regs, HL, gbs_base - 0x70);
+	regs.rn.a = i - 1;
 
 	close(fd);
 }

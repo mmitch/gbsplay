@@ -1,4 +1,4 @@
-/* $Id: gbcpu.h,v 1.1 2003/08/24 01:56:52 ranma Exp $
+/* $Id: gbcpu.h,v 1.2 2003/08/24 03:26:10 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -111,6 +111,6 @@ extern int interrupts;
 void gbcpu_addmem(int start, int end, put_fn putfn, get_fn getfn);
 void gbcpu_init(void);
 int gbcpu_step(void);
-void gbcpu_timerint(void);
+void gbcpu_intr(int vec);
 
 #endif

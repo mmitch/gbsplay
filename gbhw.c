@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.1 2003/08/24 01:56:52 ranma Exp $
+/* $Id: gbhw.c,v 1.2 2003/08/24 03:26:10 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -31,8 +31,10 @@ struct gbhw_channel gbhw_ch[4];
 
 static unsigned long long gb_clk;
 
-static int timertc = 70256; /* ~59.7 Hz (vblank)*/
-static int timer = 70256;
+static int vblanktc = 70256; /* ~59.7 Hz (vblank)*/
+static int vblank = 70256;
+static int timertc = 0;
+static int timer = 0;
 
 static gbhw_callback_fn callback;
 static void *callbackpriv;
@@ -105,7 +107,8 @@ static void io_put(unsigned short addr, unsigned char val)
 			case 0xff06:
 			case 0xff07:
 				timertc = (256-ioregs[0x06]) * (16 << (((ioregs[0x07]+3) & 3) << 1));
-				printf("Callback rate set to %2.2fHz (Custom).\n", 4194304/(float)timertc);
+				if ((ioregs[0x07] & 0xf0) == 0x80) timertc /= 2;
+//				printf("Callback rate set to %2.2fHz.\n", 4194304/(float)timertc);
 				break;
 			case 0xff10:
 				gbhw_ch[1].sweep_speed = gbhw_ch[1].sweep_speed_tc = ((val >> 4) & 7)*2;
@@ -612,10 +615,15 @@ int gbhw_step(void)
 
 	gb_sound(cycles);
 	gb_clk += cycles;
+	if (vblank > 0) vblank -= cycles;
+	if (vblank <= 0 && interrupts && (ioregs[0x7f] & 1)) {
+		vblank += vblanktc;
+		gbcpu_intr(0x40);
+	}
 	if (timer > 0) timer -= cycles;
 	if (timer <= 0 && interrupts && (ioregs[0x7f] & 4)) {
 		timer += timertc;
-		gbcpu_timerint();
+		gbcpu_intr(0x48);
 	}
 
 	return cycles;

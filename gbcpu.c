@@ -1,4 +1,4 @@
-/* $Id: gbcpu.c,v 1.1 2003/08/24 01:56:52 ranma Exp $
+/* $Id: gbcpu.c,v 1.2 2003/08/24 03:26:10 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -940,7 +940,7 @@ static void op_ld_reg16_imm(unsigned char op, struct opinfo *oi)
 	int reg = (op >> 4) & 3;
 
 	reg += reg > 2; /* skip over FA */
-	DPRINTF(" %s  %s, 0x%02x", oi->name, regnamech16[reg], val);
+	DPRINTF(" %s  %s, 0x%04x", oi->name, regnamech16[reg], val);
 	REGS16_W(regs, reg, val);
 }
 
@@ -1803,11 +1803,11 @@ void gbcpu_init(void)
 	DEB(dump_regs());
 }
 
-void gbcpu_timerint(void)
+void gbcpu_intr(int vec)
 {
 	halted = 0;
 	push(REGS16_R(regs, PC));
-	REGS16_W(regs, PC, 0x0048); /* timer int handler */
+	REGS16_W(regs, PC, vec);
 }
 
 int gbcpu_step(void)
