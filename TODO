@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.10 2003/09/13 10:23:10 mitch Exp $>>
+<<$Id: TODO,v 1.11 2003/09/13 15:21:55 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -6,10 +6,6 @@ TODO list for gbsplay.
 
 ### bugs
 
-( )  XMMS Plugin:
-     forwarding though subsongs works
-     when jumping back a subsong, the songchange is ok, but the time
-     and position display always jump straight to the beginning
 
 
 ### unspecified: (bits'n'ideas)
@@ -25,6 +21,11 @@ TODO list for gbsplay.
 ( )  set up feature list for 0.0.2 release
 
 ( )  pump up man page version number on release!
+
+(X)  xmms-gbs bugfix:
+     forwarding though subsongs works
+     when jumping back a subsong, the songchange is ok, but the time
+     and position display always jump straight to the beginning
 
 ( )  make gbsinfo output more script friendly
      (perhaps via with commandline switch)
