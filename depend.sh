@@ -19,10 +19,10 @@ fi
 exec $CC -M $CFLAGS "$FILE" |
 	sed -n -e "
 		s@^\\(.*\\)\\.o:@$DIR\\1.d $DIR\\1.o: depend.sh Makefile$SUBMK$EXTRADEP@
-		s@/usr/[^\t ]*@@g
+		s@/usr/[^	 ]*@@g
 		t foo
 		:foo
-		s@^[\t ]*\\\\\$@@
+		s@^[	 ]*\\\\\$@@
 		t
 		p
 		"

@@ -1,4 +1,4 @@
-/* $Id: gbsinfo.c,v 1.2 2003/10/24 00:25:55 ranma Exp $
+/* $Id: gbsinfo.c,v 1.3 2003/11/28 20:52:05 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -8,14 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <sys/ioctl.h>
-#include <sys/soundcard.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <string.h>
-#include <math.h>
 
 #include "gbhw.h"
 #include "gbcpu.h"

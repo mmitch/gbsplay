@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.62 2003/10/27 21:52:29 ranma Exp $
+/* $Id: gbsplay.c,v 1.63 2003/11/28 20:52:05 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -7,11 +7,15 @@
  * Licensed under GNU GPL.
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
+#ifdef HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>
+#endif
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -26,8 +30,6 @@
 #include "gbs.h"
 #include "cfgparser.h"
 #include "util.h"
-
-#include "config.h"
 
 #define LN2 .69314718055994530941
 #define MAGIC 5.78135971352465960412
@@ -49,7 +51,7 @@ static const char vols[5] = " -=#%";
 
 /* global variables */
 static char *myname;
-static int dspfd;
+static int dspfd = -1;
 static int quit = 0;
 static int silencectr = 0;
 static long long ticks = 0;
@@ -147,7 +149,8 @@ static void precalc_vols(void)
 
 void callback(void *buf, int len, void *priv)
 {
-	write(dspfd, buf, len);
+	if (dspfd != -1)
+		write(dspfd, buf, len);
 }
 
 static struct cfg_option options[] = {
@@ -240,13 +243,10 @@ static void setup_playmode(struct gbs *gbs)
 
 void open_dsp(void)
 {
+#ifdef HAVE_SYS_SOUNDCARD_H
 	int c;
 	int flags;
 
-	if (usestdout) {
-		dspfd = STDOUT_FILENO;
-		return;
-	}
 	if ((dspfd = open("/dev/dsp", O_WRONLY|O_NONBLOCK)) == -1) {
 		fprintf(stderr, "Could not open /dev/dsp: %s\n", strerror(errno));
 		exit(1);
@@ -279,6 +279,10 @@ void open_dsp(void)
 	c=(4 << 16) + 11;
 	if ((ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, &c)) == -1)
 		fprintf(stderr, "ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n", c, strerror(errno));
+#else
+	puts("No sound support on this platform.");
+	puts("Use 'gbsplay -s' for stdout output.");
+#endif
 }
 
 void usage(int exitcode)
@@ -543,7 +547,11 @@ int main(int argc, char **argv)
 	precalc_notes();
 	precalc_vols();
 
-	open_dsp();
+	if (usestdout) {
+		dspfd = STDOUT_FILENO;
+	} else {
+		open_dsp();
+	}
 	gbhw_setcallback(callback, NULL);
 	gbhw_setrate(rate);
 

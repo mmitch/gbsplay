@@ -1,4 +1,4 @@
-/* $Id: gbcpu.h,v 1.4 2003/08/29 16:35:11 ranma Exp $
+/* $Id: gbcpu.h,v 1.5 2003/11/28 20:52:05 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -11,6 +11,21 @@
 
 #include <stdio.h>
 #include <sys/param.h>
+
+#ifndef BYTE_ORDER
+
+#define BIG_ENDIAN 1
+#define LITTLE_ENDIAN 2
+
+#ifdef _BIG_ENDIAN
+#define BYTE_ORDER BIG_ENDIAN
+#endif
+
+#ifdef _LITTLE_ENDIAN
+#define BYTE_ORDER LITTLE_ENDIAN
+#endif
+
+#endif /* BYTE_ORDER */
 
 #if !BYTE_ORDER || !BIG_ENDIAN || !LITTLE_ENDIAN
 #error endian defines missing

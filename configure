@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.17 2003/10/24 00:25:55 ranma Exp $
+# $Id: configure,v 1.18 2003/11/28 20:52:04 ranma Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -34,6 +34,44 @@ die ()
     exit 1
 }
 
+## check for presence of include files
+check_include()
+{
+    INFILE="$TEMPDIR/cc.c"
+    OUTFILE="$TEMPDIR/cc"
+    include="$1"
+    varname="`echo $include | sed -e 's@[/\.]@_@g'`"
+
+    echo -n "checking for $include:  "
+
+    cat > "$INFILE" <<EOF
+#include <$include>
+int main(char argc, char **argv) {
+    return 0;
+}
+EOF
+    $CC -o "$OUTFILE" "$INFILE"
+    RESULT=$?
+    if [ $RESULT -eq 0 ]; then
+	echo "ok"
+	eval "have_$varname=yes"
+    else
+	echo "not found"
+	eval "have_$varname=no"
+    fi
+}
+
+## config.h helper
+have_x() {
+    localvar="have_`echo $1 | tr A-Z a-z`"
+    eval "result=\$$localvar"
+    if [ "$result" = "yes" ]; then
+	echo "#define HAVE_$1 1"
+    else
+	echo "/* #undef HAVE_$1 */"
+    fi
+}
+
 ## enable logging of errors
 
 ERRORLOG=config.err
@@ -41,7 +79,12 @@ exec 2> $ERRORLOG
 
 ## generate tmp directory
 
-TEMPDIR=`mktemp -d`
+if [ "`which mktemp`" != "" ]; then
+    TEMPDIR=`mktemp -d`
+else
+    TEMPDIR="`basename $0`.$$"
+    mkdir "$TEMPDIR"
+fi
 if [ $? -ne 0 ]; then
     echo "can't create temporary directory!"
     exit 1;
@@ -90,6 +133,8 @@ else
     echo "error executing $CC"
     die
 fi
+
+check_include sys/soundcard.h
 
 ## check for glib development files
 
@@ -154,6 +199,7 @@ fi
 
 (
     echo "#define GBS_VERSION \"$VERSION\""
+    have_x SYS_SOUNDCARD_H
 ) > config.h
 
 (
