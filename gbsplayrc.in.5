@@ -1,4 +1,4 @@
-.\" $Id: gbsplayrc.in.5,v 1.8 2004/04/05 12:08:36 mitch Exp $
+.\" $Id: gbsplayrc.in.5,v 1.9 2004/04/05 12:11:58 mitch Exp $
 .\" This manpage 2003-2004 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
 .TH "gbsplayrc" "5" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
@@ -9,12 +9,14 @@
 \fI/etc/gbsplayrc\fR and \fI~/\.gbsplayrc\fR are used by gbsplay(1).
 .SH "SYNTAX"
 Comments are introduced by hash marks.  A comment continues to the end of the line.  Whitespace, including empty lines, is ignored.  Option values follow the option name and an equal sign.  Valid option value types are:
-.IP Integer
-An integer number in decimal.
 .IP Boolean
 An integer number in decimal. 0 is considered \fIfalse\fR, everything else is \fItrue\fR.
 .IP Endian
 A single character denoting the endianness. n == native endian, l == little endian and b == big endian.
+.IP Integer
+An integer number in decimal.
+.IP Plugin
+The name of an output plugin.  Run \fIgbsplay -o list\fR to get a list of all available output plugins.
 .SH "OPTIONS"
 .IP "endian = \fIEndian\fR"
 The output endianness.
@@ -23,7 +25,7 @@ The fadeout time in seconds.  Instead of cutting of the subsong hard, do a soft 
 .IP "loop = \fIBoolean\fR"
 In loop mode the playback will restart from the beginning after the last subsong.
 .IP "output_plugin = \fIPlugin\fR"
-Select sound output plugin \fIplugin\fR.  Run \fIgbsplay -o list\FR to view a list of all available output plugins.
+The sound output plugin to be used.
 .IP "quiet = \fIBoolean\fR"
 In quiet mode the player will only show error messages.
 .IP "rate = \fIInteger\fR"
