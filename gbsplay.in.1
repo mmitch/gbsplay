@@ -1,4 +1,4 @@
-.\" $Id: gbsplay.in.1,v 1.12 2004/04/02 09:23:11 mitch Exp $
+.\" $Id: gbsplay.in.1,v 1.13 2004/04/05 12:08:36 mitch Exp $
 .\" This manpage 2003-2004 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
 .TH "gbsplay" "1" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
@@ -24,6 +24,9 @@ Set subsong gap to \fIsubsong\-gap\fR seconds.  Before playing the next subsong 
 .TP
 \fI\-h\fR
 Display short help and exit.
+.TP
+\fI\-l\fR
+Enable loop mode.  When the last subsong is played, playback starts again with the first subsong.  Default is no loop.
 .TP
 \fI\-o plugin\fR
 Select sound output plugin \fIplugin\fR.  Default depends on compilation options.  Select \fIlist\fR to view a list of all available output plugins.

@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.87 2004/04/05 11:24:20 mitch Exp $
+/* $Id: gbsplay.c,v 1.88 2004/04/05 12:08:36 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -100,6 +100,7 @@ static struct cfg_option options[] = {
 	{ "fadeout", &fadeout, cfg_int },
 	{ "silence_timeout", &silence_timeout, cfg_int },
 	{ "output_plugin", &sound_name, cfg_string },
+	{ "loop", &loopmode, cfg_int },
 	/* playmode not implemented yet */
 	{ NULL, NULL, NULL }
 };

@@ -1,4 +1,4 @@
-.\" $Id: gbsplayrc.in.5,v 1.7 2004/04/05 11:07:21 mitch Exp $
+.\" $Id: gbsplayrc.in.5,v 1.8 2004/04/05 12:08:36 mitch Exp $
 .\" This manpage 2003-2004 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
 .TH "gbsplayrc" "5" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
@@ -20,10 +20,12 @@ A single character denoting the endianness. n == native endian, l == little endi
 The output endianness.
 .IP "fadeout = \fIInteger\fR"
 The fadeout time in seconds.  Instead of cutting of the subsong hard, do a soft fadeout.
+.IP "loop = \fIBoolean\fR"
+In loop mode the playback will restart from the beginning after the last subsong.
 .IP "output_plugin = \fIPlugin\fR"
 Select sound output plugin \fIplugin\fR.  Run \fIgbsplay -o list\FR to view a list of all available output plugins.
 .IP "quiet = \fIBoolean\fR"
-In quiet mode, the player will only show error messages.
+In quiet mode the player will only show error messages.
 .IP "rate = \fIInteger\fR"
 The samplerate to be used.
 .IP "refresh_delay = \fIInteger\fR"

@@ -1,4 +1,4 @@
-# $Id: en.po,v 1.11 2004/04/05 10:28:06 mitch Exp $
+# $Id: en.po,v 1.12 2004/04/05 12:12:43 mitch Exp $
 # English translations for gbsplay.
 # Copyright (C) 2003 Tobias Diedrich <ranma@gmx.at>
 # This file is distributed under GNU GPL.
@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-04-05 12:25+0200\n"
-"PO-Revision-Date: 2004-04-05 12:26+0200\n"
+"POT-Creation-Date: 2004-04-05 14:13+0200\n"
+"PO-Revision-Date: 2004-04-05 14:13+0200\n"
 "Last-Translator: Tobias Diedrich <ranma@gmx.at>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -225,6 +225,7 @@ msgid ""
 "  -f  set fadeout (%d seconds)\n"
 "  -g  set subsong gap (%d seconds)\n"
 "  -h  display this help and exit\n"
+"  -l  loop mode\n"
 "  -o  select output plugin (%s)\n"
 "      'list' shows available plugins\n"
 "  -q  quiet\n"
@@ -243,6 +244,7 @@ msgstr ""
 "  -f  set fadeout (%d seconds)\n"
 "  -g  set subsong gap (%d seconds)\n"
 "  -h  display this help and exit\n"
+"  -l  loop mode\n"
 "  -o  select output plugin (%s)\n"
 "      'list' shows available plugins\n"
 "  -q  quiet\n"
