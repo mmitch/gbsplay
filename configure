@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.30 2003/12/28 16:10:34 mitch Exp $
+# $Id: configure,v 1.31 2003/12/29 19:13:13 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -14,7 +14,7 @@ if [ -d /usr/ucb ]; then
     PATH="/usr/ucb:$PATH"
 fi
 
-VERSION=0.0.4-pre1
+VERSION=0.0.4-pre2
 if [ -f CVS/Entries ]; then
     VERSION=${VERSION}+cvs`date -r CVS/Entries +%Y%m%d`
 fi
