@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.51 2004/01/04 20:44:45 mitch Exp $>>
+<<$Id: TODO,v 1.52 2004/01/06 21:28:30 ranma Exp $>>
 
 
 TODO list for gbsplay.
@@ -6,18 +6,7 @@ TODO list for gbsplay.
 
 ### bugs
 
-( )  Build broken on Cygwin.  Possible fixes:
-     *  Either edit Makefile to do
-        CFLAGS  += -DLOCALE_PREFIX=\"$(localedir)\"
-        always, not only when have_xgettext == yes.
-     *  Or edit common.h and extend
-        #if HAVE_LOCALE_H == 1 && HAVE_LIBINTL_H == 1
-        with "&& HAVE_XGETTEXT == yes ".
-
-
 ### unspecified: (bits'n'ideas)
-
-( )  generate a dynamic library that is used by gbsplay, gbsinfo and gbsxmms
 
 ( )  gbsplay: add repeat mode for module
      (after the last subsong subsong 1 starts over)
@@ -38,4 +27,9 @@ TODO list for gbsplay.
 
 ( )  set up feature list for 0.0.5 release
 
-( )  Fix broken Cygwin build.  Nothing else (except other Bugfixes).
+(X)  make configure more standards compliant
+
+(X)  generate a dynamic library that is used by gbsplay, gbsinfo and gbsxmms
+     (configure --enable-sharedlibgbs)
+
+(X)  Fix broken Cygwin build.
