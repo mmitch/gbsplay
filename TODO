@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.25 2003/10/11 17:43:03 mitch Exp $>>
+<<$Id: TODO,v 1.26 2003/10/11 17:45:55 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -36,3 +36,5 @@ TODO list for gbsplay.
 (X)  create versioned directory on 'make dist'
 
 (X)  set version number in manpages automatically
+
+(X)  gbsplay: mention Esc to quit gbsplay
