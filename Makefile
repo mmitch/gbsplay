@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.25 2003/08/30 19:27:46 mitch Exp $
+# $Id: Makefile,v 1.26 2003/08/30 19:30:03 mitch Exp $
 
 include config.mk
 
@@ -48,7 +48,7 @@ distclean: clean
 clean:
 	find -regex ".*\.\([aos]\|[sp]o\)" -exec rm -f "{}" \;
 	find -name "*~" -exec rm -f "{}" \;
-	rm -rf ./gbsplay
+	rm -rf ./gbsplay ./gbsinfo
 
 install: all install-default $(EXTRA_INSTALL)
 
