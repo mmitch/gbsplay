@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.47 2003/11/17 01:47:52 ranma Exp $
+# $Id: Makefile,v 1.48 2003/11/17 13:11:11 benni Exp $
 
 prefix      := /usr/local
 exec_prefix := $(prefix)
@@ -11,8 +11,6 @@ docdir      := $(prefix)/share/doc/gbsplay
 
 DESTDIR :=
 
-DISTDIR := gbsplay-$(VERSION)
-
 CFLAGS  := -Wall -std=gnu99 -Wstrict-prototypes -g -Os
 LDFLAGS :=
 
@@ -21,7 +19,7 @@ LDFLAGS += $(EXTRA_LDFLAGS)
 
 export CC CFLAGS LDFLAGS
 
-docs           := README TODO HISTORY INSTALL gbsplayrc_sample
+docs           := README TODO HISTORY gbsplayrc_sample
 
 mans           := gbsplay.1    gbsinfo.1    gbsplayrc.5
 mans_src       := gbsplay.in.1 gbsinfo.in.1 gbsplayrc.in.5
@@ -93,6 +91,8 @@ uninstall-gbsxmms.so:
 	rm -f $(DESTDIR)$(XMMS_INPUT_PLUGIN_DIR)/gbsxmms.so
 	-rmdir -p $(DESTDIR)$(XMMS_INPUT_PLUGIN_DIR)
 
+DISTDIR := gbsplay-$(VERSION)
+
 dist:	distclean
 	install -d ./$(DISTDIR)
 	sed 's/^VERSION=.*/VERSION=$(VERSION)/' < configure > ./$(DISTDIR)/configure
@@ -102,7 +102,7 @@ dist:	distclean
 	install -m 644 *.c ./$(DISTDIR)/
 	install -m 644 *.h ./$(DISTDIR)/
 	install -m 644 $(mans_src) ./$(DISTDIR)/
-	install -m 644 $(docs) ./$(DISTDIR)/
+	install -m 644 $(docs) INSTALL ./$(DISTDIR)/
 	install -d ./$(DISTDIR)/contrib
 	install -m 755 contrib/gbs2ogg.sh ./$(DISTDIR)/contrib
 	tar -c $(DISTDIR)/ -vzf ../$(DISTDIR).tar.gz
