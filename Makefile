@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.16 2003/08/24 13:49:23 mitch Exp $
+# $Id: Makefile,v 1.17 2003/08/24 21:40:44 ranma Exp $
 
 prefix = /usr/local
 exec_prefix = ${prefix}
@@ -7,17 +7,18 @@ bindir = ${exec_prefix}/bin
 mandir = ${prefix}/man
 man1dir = $(mandir)/man1
 
-CFLAGS := -Wall -Wstrict-prototypes -Os -fomit-frame-pointer
-LDFLAGS := -lm
+CFLAGS := -Wall -Wstrict-prototypes -Os -fomit-frame-pointer -fPIC -I/usr/include/glib-1.2 -I/usr/include/gtk-1.2 -I/usr/lib/glib/include
+LDFLAGS :=
 
-SRCS := gbcpu.c gbhw.c gbsplay.c
+SRCS := gbcpu.c gbhw.c gbsplay.c gbsxmms.c
 
 .PHONY: all distclean clean install dist
-all: gbsplay
 
 # determine the object files
 
 OBJS := $(patsubst %.c,%.o,$(filter %.c,$(SRCS)))
+
+all: $(OBJS) gbsplay gbsxmms.so
 
 # include the dependency files
 
@@ -57,8 +58,11 @@ dist:	distclean
 	tar -c gbsplay/ -vzf ../gbsplay.tar.gz
 	rm -rf ./gbsplay
 
-gbsplay: $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(OBJS)
+gbsplay: gbsplay.o gbcpu.o gbhw.o
+	$(CC) $(LDFLAGS) -o $@ gbsplay.o gbcpu.o gbhw.o -lm
+
+gbsxmms.so: gbcpu.o gbhw.o gbsxmms.o
+	$(CC) -shared $(LDFLAGS) -o $@ gbcpu.o gbhw.o gbsxmms.o -lpthread
 
 .SUFFIXES: .i .s
 

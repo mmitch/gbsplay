@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.33 2003/08/24 21:40:44 ranma Exp $
+/* $Id: gbsxmms.c,v 1.1 2003/08/24 21:40:44 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -10,16 +10,20 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/ioctl.h>
-#include <sys/soundcard.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
 #include <math.h>
+#include <pthread.h>
+
+#include <xmms/plugin.h>
+#include <xmms/util.h>
 
 #include "gbhw.h"
 #include "gbcpu.h"
+
+InputPlugin gbs_ip;
 
 static const char playercode[] = {
 	0xf5,              /* 0050:  push af         */
@@ -114,7 +118,7 @@ static void gbs_playsong(int i)
 	gbcpu_regs.rn.a = i - 1;
 }
 
-static void open_gbs(char *name)
+static int open_gbs(char *name)
 {
 	int fd, j;
 	unsigned char buf[0x70];
@@ -124,7 +128,7 @@ static void open_gbs(char *name)
 
 	if ((fd = open(name, O_RDONLY)) == -1) {
 		printf("Could not open %s: %s\n", name, strerror(errno));
-		exit(1);
+		return 0;
 	}
 	fstat(fd, &st);
 	read(fd, buf, sizeof(buf));
@@ -133,7 +137,7 @@ static void open_gbs(char *name)
 	    buf[2] != 'S' ||
 	    buf[3] != 1) {
 		printf("Not a GBS-File: %s\n", name);
-		exit(1);
+		return 0;
 	}
 
 	gbs_base  = buf[0x06] + (buf[0x07] << 8);
@@ -184,154 +188,106 @@ static void open_gbs(char *name)
 	rom[0x48] = 0xc9; /* reti */
 
 	close(fd);
+
+	return 1;
 }
 
-#define LN2 .69314718055994530941
-#define MAGIC 5.78135971352465960412
-#define FREQ(x) (262144 / x)
-// #define NOTE(x) ((log(FREQ(x))/LN2 - log(55)/LN2)*12 + .2)
-#define NOTE(x) ((int)((log(FREQ(x))/LN2 - MAGIC)*12 + .2))
+static int stopthread = 0;
 
-#define MAXOCTAVE 9
-
-static int getnote(int div)
+static void callback(void *buf, int len, void *priv)
 {
-	int n = 0;
-
-	if (div>0) n = NOTE(div);
-
-	if (n < 0) n = 0;
-	else if (n >= MAXOCTAVE*12) n = MAXOCTAVE-1;
-
-	return n;
+	gbs_ip.add_vis_pcm(gbs_ip.output->written_time(),
+	                   FMT_S16_LE, 2, len/4, buf);
+	while (gbs_ip.output->buffer_free() < len && !stopthread) usleep(10000);
+	gbs_ip.output->write_audio(buf, len);
 }
 
-static char notelookup[4*MAXOCTAVE*12];
-static void precalc_notes(void)
+static void init(void)
 {
-	int i;
-	for (i=0; i<MAXOCTAVE*12; i++) {
-		char *s = notelookup + 4*i;
-		int n = i % 12;
-
-		s[2] = '0' + i / 12;
-		n += (n > 2) + (n > 7);
-		s[0] = 'A' + (n >> 1);
-		if (n & 1) s[1] = '#';
-		else s[1] = '-';
-	}
-}
-
-static const char vols[5] = " -=#%";
-static char vollookup[5*16];
-static void precalc_vols(void)
-{
-	int i, k;
-	for (k=0; k<16; k++) {
-		int j;
-		char *s = vollookup + 5*k;
-		i = k;
-		for (j=0; j<4; j++) {
-			if (i>=4) {
-				s[j] = vols[4];
-				i -= 4;
-			} else {
-				s[j] = vols[i];
-				i = 0;
-			}
-		}
-	}
-}
-
-static int statustc = 83886;
-static int statuscnt;
-
-static int dspfd;
-
-void callback(void *buf, int len, void *priv)
-{
-	write(dspfd, buf, len);
-}
-
-int main(int argc, char **argv)
-{
-	precalc_notes();
-	precalc_vols();
-
-	dspfd = open("/dev/dsp", O_WRONLY);
-	int c;
-	int subsong = -1;
-
-	c=AFMT_S16_LE;
-	ioctl(dspfd, SNDCTL_DSP_SETFMT, &c);
-	c=1;
-	ioctl(dspfd, SNDCTL_DSP_STEREO, &c);
-	c=44100;
-	ioctl(dspfd, SNDCTL_DSP_SPEED, &c);
-	c=(4 << 16) + 11;
-	ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, &c);
-	
 	gbhw_init();
 	gbhw_setcallback(callback, NULL);
 	gbhw_setrate(44100);
-	
-	if (argc < 2) {
-		printf("Usage: %s <gbs-file> [<subsong>]\n", argv[0]);
-		exit(1);
+}
+
+static int is_our_file(char *filename)
+{
+	int fd = open(filename, O_RDONLY);
+	char id[4];
+
+	read(fd, id, sizeof(id));
+
+	close(fd);
+
+	return (!strncmp(id, "GBS\1", sizeof(id)));
+}
+
+static pthread_t playthread;
+static long long gbclock = 0;
+
+void *playloop(void *priv)
+{
+	if (!gbs_ip.output->open_audio(FMT_S16_LE, 44100, 2)) {
+		puts("Error opening output plugin.");
+		return 0;
 	}
-	if (argc == 3) sscanf(argv[2], "%d", &subsong);
-	open_gbs(argv[1]);
-	if (subsong == -1) subsong = gbs_songdefault;
-	gbs_playsong(subsong);
-	while (1) {
-		static long long clock = 0;
-		static int silencectr = 0;
-		int cycles = gbhw_step();
-		statuscnt -= cycles;
-		clock += cycles;
-		if (statuscnt < 0) {
-			int time = clock / 4194304;
-			int timem = time / 60;
-			int times = time % 60;
-			int ni1 = getnote(gbhw_ch[0].div_tc);
-			int ni2 = getnote(gbhw_ch[1].div_tc);
-			int ni3 = getnote(gbhw_ch[2].div_tc);
-			char *n1 = &notelookup[4*ni1];
-			char *n2 = &notelookup[4*ni2];
-			char *n3 = &notelookup[4*ni3];
-			char *v1 = &vollookup[5* (gbhw_ch[0].volume & 15)];
-			char *v2 = &vollookup[5* (gbhw_ch[1].volume & 15)];
-			char *v3 = &vollookup[5* (((3-((gbhw_ch[2].volume+3)&3)) << 2) & 15)];
-			char *v4 = &vollookup[5* (gbhw_ch[3].volume & 15)];
-
-			statuscnt += statustc;
-
-			if (!gbhw_ch[0].volume) n1 = "---";
-			if (!gbhw_ch[1].volume) n2 = "---";
-			if (!gbhw_ch[2].volume) n3 = "---";
-
-			printf("song %d/%d %02d:%02d ch1: %s %s  ch2: %s %s  ch3: %s %s  ch4: %s\r",
-			       	subsong, gbs_songcnt, timem, times, n1, v1, n2, v2, n3, v3, v4);
-			fflush(stdout);
-
-			if ((gbhw_ch[0].volume == 0 ||
-			     gbhw_ch[0].master == 0) &&
-			    (gbhw_ch[1].volume == 0 ||
-			     gbhw_ch[1].master == 0) &&
-			    (gbhw_ch[2].volume == 0 ||
-			     gbhw_ch[2].master == 0) &&
-			    (gbhw_ch[3].volume == 0 ||
-			     gbhw_ch[3].master == 0)) {
-				silencectr++;
-			} else silencectr = 0;
-
-			if (time > 2*60 || silencectr > 100) {
-				subsong++;
-				silencectr = 0;
-				clock = 0;
-				gbs_playsong(subsong);
-			}
-		}
+	while (!stopthread) {
+		gbclock += gbhw_step();
 	}
+	gbs_ip.output->close_audio();
 	return 0;
+}
+
+static void play_file(char *filename)
+{
+	if (open_gbs(filename)) {
+		gbs_playsong(-1);
+		pthread_create(&playthread, 0, playloop, 0);
+	}
+}
+
+static void stop(void)
+{
+	stopthread = 1;
+	pthread_join(playthread, 0);
+	stopthread = 0;
+}
+
+static int get_time(void)
+{
+	return gbclock / 4194304;
+}
+
+static void cleanup(void)
+{
+}
+
+static void get_song_info(char *filename, char **title, int *length)
+{
+	int fd = open(filename, O_RDONLY);
+	char buf[0x70];
+
+	read(fd, buf, sizeof(buf));
+	close(fd);
+
+	*title = malloc(3*32+10);
+
+	snprintf(*title, 3*32+9, "%.32s - %.32s (%.32s)",
+	         &buf[0x10], &buf[0x30], &buf[0x50]);
+	title[3*32+9] = 0;
+}
+
+InputPlugin gbs_ip = {
+description:	"GBS Player",
+init:		init,
+is_our_file:	is_our_file,
+play_file:	play_file,
+stop:		stop,
+get_time:	get_time,
+cleanup:	cleanup,
+get_song_info:	get_song_info,
+};
+
+InputPlugin *get_iplugin_info(void)
+{
+	return &gbs_ip;
 }
