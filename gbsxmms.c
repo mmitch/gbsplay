@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.13 2003/09/13 15:21:55 mitch Exp $
+/* $Id: gbsxmms.c,v 1.14 2003/09/13 16:03:23 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -87,7 +87,8 @@ static void next_subsong(int flush)
 
 static void prev_subsong(void)
 {
-	if (gbs_ip.output) gbs_ip.output->flush(0);
+	if (!(gbs_ip.output && gbs)) return;
+	gbclock = 0;
 	gbs_subsong += gbs->songs-1;
 	gbs_subsong %= gbs->songs;
 	gbs_playsong(gbs, gbs_subsong);
