@@ -5,17 +5,36 @@
 .LP
 \fBgbsplay\fR \- Gameboy sound player
 .SH "SYNOPSIS"
-\&\fBgbsplay\fR \fIgbs\-file\fR [\fIsubsong\fR]
+\&\fBgbsplay\fR [\fI\-h\fR] [\fI\-r samplerate\fR] [\fI\-s\fR] [\fI\-t subsong\-timeout\fR] [\fI\-T silence\-timeout\fR] [\fI\-V\fR] \fIgbs\-file\fR [\fIsubsong\-number\fR]
 .SH "DESCRIPTION"
 gbsplay emulates the sound hardware of the Nintendo Gameboy.  It
 is able to play the sounds from a Gameboy module dump (.GBS format)
 over /dev/dsp.
+.SH "OPTIONS"
+.TP
+\fI\-h\fR
+Display short help and exit.
+.TP
+\fI\-r samplerate\fR
+Set the samplerate to \fIsamplerate\fR Hz.  Default value is 44100Hz.
+.TP
+\fI\-s\fR
+Write to stdout instead of /dev/dsp.
+.TP
+\fI\-t subsong\-timeout\fR
+Set subsong timeout to \fIsubsong\-timeout\fR seconds.  When a subsong has been played for the given time, the player will skip to the next subsong.  Default value is 120 seconds.
+.TP
+\fI\-T silence\-timeout\fR
+Set silence timeout to \fIsilence\-timeout\fR seconds.  When a subsong contains silence for the given time, the player will skip to the next subsong.  Default value is 2 seconds.
+.TP
+\fI\-V\fR
+Display version number and exit.
 .SH "PARAMETERS"
 .TP
 \fIgbs\-file\fR
 The sound file to play.  Must be in uncompressed .GBS format.
 .TP
-\fIsubsong\fR
+\fIsubsong\-number\fR
 The subsong from the sound file to play.  If nothing is specified, the default song will be played.  An out\-of\-bounds number will result in an error.
 .SH "SEE ALSO"
 \fIgbsinfo\fR(1)
