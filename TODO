@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.48 2003/12/28 16:32:29 mitch Exp $>>
+<<$Id: TODO,v 1.49 2003/12/28 19:29:53 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -10,9 +10,6 @@ TODO list for gbsplay.
 
 ( )  XMMS reports error on exit when gbsxmms was loaded:
      Gtk-CRITICAL **: file gtkobject.c: line 1179 (gtk_object_unref): assertion `object->ref_count > 0' failed.
-
-( )  gbs2ogg.sh: subsongs are not faded out but stop before the desired time.
-     Possible bug with writing data to a pipe?
 
 ### unspecified: (bits'n'ideas)
 
