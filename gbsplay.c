@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.76 2003/12/28 19:24:51 ranma Exp $
+/* $Id: gbsplay.c,v 1.77 2003/12/28 19:52:21 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -75,6 +75,7 @@ static int subsong_gap = 2;
 static int subsong_stop = -1;
 static int subsong_timeout = 2*60;
 static int usestdout = 0;
+static int redraw = false;
 
 static char *cfgfile = ".gbsplayrc";
 
@@ -576,6 +577,17 @@ void stop_handler(int signum)
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
 }
 
+static void printinfo(struct gbs *gbs)
+{
+	if (!quiet) {
+		gbs_printinfo(gbs, 0);
+		puts(_("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player\n" \
+		         "           [ ] pause/resume   [1-4] mute channel"));
+		puts("\n\n"); /* additional newlines for the status display */
+	}
+	redraw = false;
+}
+
 void cont_handler(int signum)
 {
 	struct termios ts;
@@ -585,6 +597,8 @@ void cont_handler(int signum)
 	ts.c_lflag &= ~(ICANON | ECHO | ECHONL);
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ts);
 	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+
+	redraw = true;
 }
 
 int main(int argc, char **argv)
@@ -658,12 +672,7 @@ int main(int argc, char **argv)
 	gbhw_setbuffer(&buf);
 	gbs_set_nextsubsong_cb(gbs, nextsubsong_cb, NULL);
 	gbs_init(gbs, gbs->subsong);
-	if (!quiet) {
-		gbs_printinfo(gbs, 0);
-		puts(_("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player\n" \
-		         "           [ ] pause/resume   [1-4] mute channel"));
-		puts("\n\n"); /* additional newlines for the status display */
-	}
+	printinfo(gbs);
 	tcgetattr(STDIN_FILENO, &ts);
 	ots = ts;
 	ts.c_lflag &= ~(ICANON | ECHO | ECHONL);
@@ -686,6 +695,7 @@ int main(int argc, char **argv)
 			break;
 		}
 
+		if (redraw) printinfo(gbs);
 		if (!quiet) printstatus(gbs);
 		handleuserinput(gbs);
 	}
