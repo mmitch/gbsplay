@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.48 2003/11/17 13:11:11 benni Exp $
+# $Id: Makefile,v 1.49 2003/11/28 21:05:28 ranma Exp $
 
 prefix      := /usr/local
 exec_prefix := $(prefix)
@@ -116,7 +116,7 @@ libgbs.so.1: $(objs_gbslibpic)
 	ln -s $@ libgbs.so
 else
 objs_gbsinfo    += gbslib.a
-objs_gbsplay    += gbslibpic.a
+objs_gbsplay    += gbslib.a
 objs_gbsxmms    += gbslibpic.a
 
 .PHONY: libgbs.so.1
