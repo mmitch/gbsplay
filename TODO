@@ -1,4 +1,4 @@
-$Id: TODO,v 1.3 2003/08/31 17:46:34 ranma Exp $
+$Id: TODO,v 1.4 2003/09/11 18:29:38 mitch Exp $
 
 TODO list for gbsplay.
 
@@ -13,3 +13,4 @@ TODO list for gbsplay.
 (X)  add "--next_song_after_pause" switch to gbsplay
 (X)  add "--next_song_after_playtime" switch to gbsplay
 ( )  add info about GBS formats 1 and 2
+( )  add random and shuffle mode (as "described" by mpg123) for subsongs
