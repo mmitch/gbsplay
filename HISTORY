@@ -1,7 +1,36 @@
-<<$Id: HISTORY,v 1.3 2003/09/21 16:07:39 mitch Exp $>>
+<<$Id: HISTORY,v 1.4 2003/12/05 21:37:33 mitch Exp $>>
 
 
 gbsplay HISTORY
+
+
+2003/12/05  -  0.0.3-pre1
+~~~~~~~~~~~~~~~~~~~~~~~~~
+- support other architectures than Linux/i386:
+  - fix some endian issues
+  - fix some c type issues
+
+- gbsplay:
+  - fix display of help text
+  - add pause/play
+  - add fadeout
+  - add gap between subsongs
+  - add channel mute
+
+- gbsinfo:
+  - change output to a more script friendly format
+
+- gbs2ogg.sh:
+  - new script to convert .gbs to .ogg
+
+- documentation:
+  - add info about GBS format
+  - mention Esc key to quit gbsplay
+
+- build process:
+  - generate versioned manpages
+  - generate versioned directory in archive
+  - no need for zlib any more
 
 
 2003/09/21  -  0.0.2
@@ -24,7 +53,7 @@ gbsplay HISTORY
 
 - build process new features:
   - detect working C compiler
-  - detect zlib existance
+  - detect zlib existence
 
 
 2003/09/12  -  0.0.1
