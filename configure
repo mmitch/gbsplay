@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.51.2.7 2004/04/13 18:29:40 mitch Exp $
+# $Id: configure,v 1.51.2.8 2004/04/13 18:44:11 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -38,7 +38,7 @@ die ()
     exit 1
 }
 
-## check for presence of include files
+## check for presense of include files
 check_include()
 {
     include="$1"
