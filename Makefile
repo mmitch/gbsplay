@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.24 2003/08/29 02:16:54 ranma Exp $
+# $Id: Makefile,v 1.25 2003/08/30 19:27:46 mitch Exp $
 
 include config.mk
 
@@ -55,8 +55,8 @@ install: all install-default $(EXTRA_INSTALL)
 install-default:
 	install -d $(bindir)
 	install -d $(man1dir)
-	install -m 755 gbsplay $(bindir)/gbsplay
-	install -m 644 gbsplay.1 $(man1dir)/gbsplay.1
+	install -m 755 gbsplay   gbsinfo   $(bindir)/gbsplay
+	install -m 644 gbsplay.1 gbsinfo.1 $(man1dir)/gbsplay.1
 
 install-gbsxmms.so:
 	install -d $(DESTDIR)$(XMMS_INPUT_PLUGIN_DIR)
@@ -65,8 +65,8 @@ install-gbsxmms.so:
 uninstall: uninstall-default $(EXTRA_UNINSTALL)
 
 uninstall-default:
-	rm -f $(bindir)/gbsplay
-	rm -f $(man1dir)/gbsplay.1
+	rm -f $(bindir)/gbsplay    $(bindir)/gbsinfo
+	rm -f $(man1dir)/gbsplay.1 $(man1dir)/gbsinfo.1
 	-rmdir -p $(bindir)
 	-rmdir -p $(man1dir)
 
@@ -81,7 +81,7 @@ dist:	distclean
 	install -m 644 Makefile ./gbsplay/
 	install -m 644 *.c ./gbsplay/
 	install -m 644 *.h ./gbsplay/
-	install -m 644 gbsplay.1 ./gbsplay/
+	install -m 644 gbsplay.1 gbsinfo.1 ./gbsplay/
 	install -m 644 README ./gbsplay/
 	tar -c gbsplay/ -vzf ../gbsplay.tar.gz
 	rm -rf ./gbsplay

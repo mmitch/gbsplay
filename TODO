@@ -1,4 +1,4 @@
-$Id: TODO,v 1.1 2003/08/29 16:52:14 mitch Exp $
+$Id: TODO,v 1.2 2003/08/30 19:24:36 mitch Exp $
 
 TODO list for gbsplay.
 
@@ -8,8 +8,8 @@ TODO list for gbsplay.
 
 ### unspecified: (bits'n'ideas)
 
-( )  add manpage for gbsinfo
 ( )  make gbsinfo output more script friendly
      (perhaps via with commandline switch)
 ( )  add "--next_song_after_pause" switch to gbsplay
 ( )  add "--next_song_after_playtime" switch to gbsplay
+( )  add info about GBS formats 1 and 2

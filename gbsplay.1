@@ -2,7 +2,7 @@
 .\" Licensed under GNU GPL.
 .TH "gbsplay" "1" "0.0.0" "Tobias Diedrich" "Gameboy sound player"
 .SH "NAME"
-.LP 
+.LP
 \fBgbsplay\fR \- Gameboy sound player
 .SH "SYNOPSIS"
 \&\fBgbsplay\fR \fIgbs\-file\fR [\fIsubsong\fR]
@@ -11,13 +11,15 @@ gbsplay emulates the sound hardware of the Nintendo Gameboy.  It
 is able to play the sounds from a Gameboy module dump (.GBS format)
 over /dev/dsp.
 .SH "PARAMETERS"
-.TP 
+.TP
 \fIgbs\-file\fR
 The sound file to play.  Must be in uncompressed .GBS format.
-.TP 
+.TP
 \fIsubsong\fR
 The subsong from the sound file to play.  If nothing is specified, the default song will be played.  An out\-of\-bounds number will result in an error.
-.SH "BUGS"
+.SH "SEE ALSO"
+\fIgbsinfo\fR(1)
+.SH "BUG REPORS"
 If you encounter bugs, please report them to <\fIranma@gmx.at\fR>.
 .SH "AUTHOR"
 gbsplay was written by Tobias Diedrich <\fIranma@gmx.at\fR> (with contributions from others, see README).
