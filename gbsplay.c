@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.16 2003/08/23 16:52:42 ranma Exp $
+/* $Id: gbsplay.c,v 1.17 2003/08/23 17:45:34 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -1347,15 +1347,11 @@ static void op_ld(unsigned char op, struct opinfo *oi)
 	int src = op & 7;
 	int dst = (op >> 3) & 7;
 
-	if (dst == 6) { /* indirect memory access by [HL] */
-		DPRINTF(" %s [HL],", oi->name);
-		print_reg(src);
-		mem_put(REGS16_R(regs, HL), get_reg(src));
-	} else {
-		DPRINTF(" %s %c,", oi->name, regnames[dst]);
-		print_reg(src);
-		REGS8_W(regs, dst, get_reg(src));
-	}
+	DPRINTF(" %s ", oi->name);
+	print_reg(dst);
+	DPRINTF(", ", oi->name);
+	print_reg(src);
+	put_reg(dst, get_reg(src));
 }
 
 static void op_ld_imm(unsigned char op, struct opinfo *oi)
@@ -1379,7 +1375,7 @@ static void op_ld_ind16_sp(unsigned char op, struct opinfo *oi)
 	int ofs = get_imm16();
 	int sp = REGS16_R(regs, SP);
 
-	DPRINTF(" %s [0x%04x], A", oi->name, ofs);
+	DPRINTF(" %s [0x%04x], SP", oi->name, ofs);
 	mem_put(ofs, sp & 0xff);
 	mem_put(ofs+1, sp >> 8);
 }
@@ -1468,9 +1464,9 @@ static void op_inc(unsigned char op, struct opinfo *oi)
 		res++;
 		mem_put(hl, res);
 	}
-	if (res == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
-	if ((old & 15) > (res & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
-	regs.rn.f &= ~ NF;
+	regs.rn.f &= ~(NF | ZF | HF);
+	if (res == 0) regs.rn.f |= ZF;
+	if ((old & 15) > (res & 15)) regs.rn.f |= HF;
 }
 
 static void op_inc16(unsigned char op, struct opinfo *oi)
@@ -1502,9 +1498,10 @@ static void op_dec(unsigned char op, struct opinfo *oi)
 		res--;
 		mem_put(hl, res);
 	}
-	if (res == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
-	if ((old & 15) > (res & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
 	regs.rn.f |= NF;
+	regs.rn.f &= ~(ZF | HF);
+	if (res == 0) regs.rn.f |= ZF;
+	if ((old & 15) > (res & 15)) regs.rn.f |= HF;
 }
 
 static void op_dec16(unsigned char op, struct opinfo *oi)
@@ -1526,9 +1523,9 @@ static void op_add_sp_imm(unsigned char op, struct opinfo *oi)
 	DPRINTF(" %s SP, %02x", oi->name, imm);
 	new += imm;
 	REGS16_W(regs, SP, new);
-	if (old > new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
-	if ((old & 0xfff) > (new & 0xfff)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
-	regs.rn.f &= ~(ZF | NF);
+	regs.rn.f = 0;
+	if (old > new) regs.rn.f |= CF;
+	if ((old & 0xfff) > (new & 0xfff)) regs.rn.f |= HF;
 }
 
 static void op_add(unsigned char op, struct opinfo *oi)
@@ -1539,11 +1536,11 @@ static void op_add(unsigned char op, struct opinfo *oi)
 	DPRINTF(" %s A,", oi->name);
 	print_reg(op & 7);
 	regs.rn.a += get_reg(op & 7);
-	regs.rn.f &= ~NF;
 	new = regs.rn.a;
-	if (old > new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
-	if ((old & 15) > (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
-	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	regs.rn.f = 0;
+	if (old > new) regs.rn.f |= CF;
+	if ((old & 15) > (new & 15)) regs.rn.f |= HF;
+	if (new == 0) regs.rn.f |= ZF;
 }
 
 static void op_add_imm(unsigned char op, struct opinfo *oi)
@@ -1554,11 +1551,11 @@ static void op_add_imm(unsigned char op, struct opinfo *oi)
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new += imm;
-	regs.rn.f &= ~NF;
 	regs.rn.a = new;
-	if (old > new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
-	if ((old & 15) > (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
-	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	regs.rn.f = 0;
+	if (old > new) regs.rn.f |= CF;
+	if ((old & 15) > (new & 15)) regs.rn.f |= HF;
+	if (new == 0) regs.rn.f |= ZF;
 }
 
 static void op_add_hl(unsigned char op, struct opinfo *oi)
@@ -1573,9 +1570,9 @@ static void op_add_hl(unsigned char op, struct opinfo *oi)
 	new += REGS16_R(regs, reg);
 	REGS16_W(regs, HL, new);
 
-	regs.rn.f &= ~NF;
-	if (old > new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
-	if ((old & 0xfff) > (new & 0xfff)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
+	regs.rn.f &= ~(NF | CF | HF);
+	if (old > new) regs.rn.f |= CF;
+	if ((old & 0xfff) > (new & 0xfff)) regs.rn.f |= HF;
 }
 
 static void op_adc(unsigned char op, struct opinfo *oi)
@@ -1618,10 +1615,10 @@ static void op_cp(unsigned char op, struct opinfo *oi)
 	DPRINTF(" %s A,", oi->name);
 	print_reg(op & 7);
 	new -= get_reg(op & 7);
-	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
-	if ((old & 15) < (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
-	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
-	regs.rn.f |= NF;
+	regs.rn.f = NF;
+	if (old < new) regs.rn.f |= CF;
+	if ((old & 15) < (new & 15)) regs.rn.f |= HF;
+	if (new == 0) regs.rn.f |= ZF;
 }
 
 static void op_cp_imm(unsigned char op, struct opinfo *oi)
@@ -1632,10 +1629,10 @@ static void op_cp_imm(unsigned char op, struct opinfo *oi)
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new -= imm;
-	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
-	if ((old & 15) < (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
-	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
-	regs.rn.f |= NF;
+	regs.rn.f = NF;
+	if (old < new) regs.rn.f |= CF;
+	if ((old & 15) < (new & 15)) regs.rn.f |= HF;
+	if (new == 0) regs.rn.f |= ZF;
 }
 
 static void op_sub(unsigned char op, struct opinfo *oi)
@@ -1646,11 +1643,11 @@ static void op_sub(unsigned char op, struct opinfo *oi)
 	DPRINTF(" %s A,", oi->name);
 	print_reg(op & 7);
 	regs.rn.a -= get_reg(op & 7);
-	regs.rn.f |= NF;
 	new = regs.rn.a;
-	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
-	if ((old & 15) < (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
-	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	regs.rn.f = NF;
+	if (old < new) regs.rn.f |= CF;
+	if ((old & 15) < (new & 15)) regs.rn.f |= HF;
+	if (new == 0) regs.rn.f |= ZF;
 }
 
 static void op_sub_imm(unsigned char op, struct opinfo *oi)
@@ -1661,11 +1658,11 @@ static void op_sub_imm(unsigned char op, struct opinfo *oi)
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new -= imm;
-	regs.rn.f |= NF;
 	regs.rn.a = new;
-	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
-	if ((old & 15) < (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
-	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	regs.rn.f = NF;
+	if (old < new) regs.rn.f |= CF;
+	if ((old & 15) < (new & 15)) regs.rn.f |= HF;
+	if (new == 0) regs.rn.f |= ZF;
 }
 
 static void op_sbc(unsigned char op, struct opinfo *oi)
@@ -1677,11 +1674,11 @@ static void op_sbc(unsigned char op, struct opinfo *oi)
 	print_reg(op & 7);
 	regs.rn.a -= get_reg(op & 7);
 	regs.rn.a -= (regs.rn.f & CF) > 0;
-	regs.rn.f |= NF;
 	new = regs.rn.a;
-	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
-	if ((old & 15) < (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
-	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	regs.rn.f = NF;
+	if (old < new) regs.rn.f |= CF;
+	if ((old & 15) < (new & 15)) regs.rn.f |= HF;
+	if (new == 0) regs.rn.f |= ZF;
 }
 
 static void op_sbc_imm(unsigned char op, struct opinfo *oi)
@@ -1693,11 +1690,11 @@ static void op_sbc_imm(unsigned char op, struct opinfo *oi)
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new -= imm;
 	new -= (regs.rn.f & CF) > 0;
-	regs.rn.f |= NF;
 	regs.rn.a = new;
-	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
-	if ((old & 15) < (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
-	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	regs.rn.f = NF;
+	if (old < new) regs.rn.f |= CF;
+	if ((old & 15) < (new & 15)) regs.rn.f |= HF;
+	if (new == 0) regs.rn.f |= ZF;
 }
 
 static void op_and(unsigned char op, struct opinfo *oi)
@@ -1705,9 +1702,8 @@ static void op_and(unsigned char op, struct opinfo *oi)
 	DPRINTF(" %s A,", oi->name);
 	print_reg(op & 7);
 	regs.rn.a &= get_reg(op & 7);
-	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
-	regs.rn.f &= ~(NF | CF);
-	regs.rn.f |= HF;
+	regs.rn.f = HF;
+	if (regs.rn.a == 0) regs.rn.f |= ZF;
 }
 
 static void op_and_imm(unsigned char op, struct opinfo *oi)
@@ -1716,9 +1712,8 @@ static void op_and_imm(unsigned char op, struct opinfo *oi)
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	regs.rn.a &= imm;
-	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
-	regs.rn.f &= ~(NF | CF);
-	regs.rn.f |= HF;
+	regs.rn.f = HF;
+	if (regs.rn.a == 0) regs.rn.f |= ZF;
 }
 
 static void op_or(unsigned char op, struct opinfo *oi)
@@ -1726,8 +1721,8 @@ static void op_or(unsigned char op, struct opinfo *oi)
 	DPRINTF(" %s A,", oi->name);
 	print_reg(op & 7);
 	regs.rn.a |= get_reg(op & 7);
-	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
-	regs.rn.f &= ~(NF | CF | HF);
+	regs.rn.f = 0;
+	if (regs.rn.a == 0) regs.rn.f |= ZF;
 }
 
 static void op_or_imm(unsigned char op, struct opinfo *oi)
@@ -1736,8 +1731,8 @@ static void op_or_imm(unsigned char op, struct opinfo *oi)
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	regs.rn.a |= imm;
-	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
-	regs.rn.f &= ~(NF | CF | HF);
+	regs.rn.f = 0;
+	if (regs.rn.a == 0) regs.rn.f |= ZF;
 }
 
 static void op_xor(unsigned char op, struct opinfo *oi)
@@ -1745,8 +1740,8 @@ static void op_xor(unsigned char op, struct opinfo *oi)
 	DPRINTF(" %s A,", oi->name);
 	print_reg(op & 7);
 	regs.rn.a ^= get_reg(op & 7);
-	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
-	regs.rn.f &= ~(NF | CF | HF);
+	regs.rn.f = 0;
+	if (regs.rn.a == 0) regs.rn.f |= ZF;
 }
 
 static void op_xor_imm(unsigned char op, struct opinfo *oi)
@@ -1755,8 +1750,8 @@ static void op_xor_imm(unsigned char op, struct opinfo *oi)
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	regs.rn.a ^= imm;
-	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
-	regs.rn.f &= ~(NF | CF | HF);
+	regs.rn.f = 0;
+	if (regs.rn.a == 0) regs.rn.f |= ZF;
 }
 
 static void op_push(unsigned char op, struct opinfo *oi)
@@ -1779,7 +1774,7 @@ static void op_cpl(unsigned char op, struct opinfo *oi)
 {
 	DPRINTF(" %s", oi->name);
 	regs.rn.a = ~regs.rn.a;
-	regs.rn.f &= ~(NF | HF);
+	regs.rn.f |= NF | HF;
 }
 
 static void op_ccf(unsigned char op, struct opinfo *oi)
@@ -2522,6 +2517,7 @@ static void open_gbs(char *name, int i)
 		ioregs[0x06] = buf[0x0e];
 		ioregs[0x07] = buf[0x0f];
 		timertc = (256-buf[0x0e]) * (16 << (((buf[0x0f]+3) & 3) << 1));
+		if (buf[0x0f] & 0x80) timertc /= 2;
 		printf("Callback rate %2.2fHz (Custom).\n", 4194304/(float)timertc);
 	} else {
 		timertc = 70256;
