@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.73 2003/12/26 22:05:44 mitch Exp $
+/* $Id: gbsplay.c,v 1.74 2003/12/26 22:16:03 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -41,8 +41,8 @@
 
 /* player modes */
 #define PLAYMODE_LINEAR  1
-#define PLAYMODE_RANDOM 2
-#define PLAYMODE_SHUFFLE  3
+#define PLAYMODE_RANDOM  2
+#define PLAYMODE_SHUFFLE 3
 
 /* lookup tables */
 static char notelookup[4*MAXOCTAVE*12];
@@ -57,6 +57,8 @@ static struct termios ots;
 static int *subsong_playlist;
 static int subsong_playlist_idx = 0;
 static int pause_mode = 0;
+
+unsigned int random_seed;
 
 #define DEFAULT_REFRESH_DELAY 33
 
@@ -178,6 +180,8 @@ static int *setup_playlist(int songs)
 		playlist[i] = i;
 	}
 
+	/* reinit RNG with current seed - playlists shall be reproducible! */
+	srand(random_seed);
 	shuffle_int(playlist, songs);
 
 	return playlist;
@@ -197,6 +201,7 @@ static int get_next_subsong(struct gbs *gbs)
 		subsong_playlist_idx++;
 		if (subsong_playlist_idx == gbs->songs) {
 			free(subsong_playlist);
+			random_seed++;
 			subsong_playlist = setup_playlist(gbs->songs);
 			subsong_playlist_idx = 0;
 		}
@@ -224,6 +229,7 @@ static int get_prev_subsong(struct gbs *gbs)
 		subsong_playlist_idx--;
 		if (subsong_playlist_idx == -1) {
 			free(subsong_playlist);
+			random_seed--;
 			subsong_playlist = setup_playlist(gbs->songs);
 			subsong_playlist_idx = gbs->songs-1;
 		}
@@ -240,8 +246,6 @@ static int get_prev_subsong(struct gbs *gbs)
 static void setup_playmode(struct gbs *gbs)
 /* initializes the chosen playmode (set start subsong etc.) */
 {
-	int temp;
-
 	switch (playmode) {
 
 	case PLAYMODE_RANDOM:
@@ -255,11 +259,12 @@ static void setup_playmode(struct gbs *gbs)
 		if (gbs->subsong == -1) {
 			gbs->subsong = subsong_playlist[0];
 		} else {
-			/* rotate playlist until desired start song is first */
+			/* randomize playlist until desired start song is first */
+			/* (rotation does not work because this must be reproducible */
+			/* by setting random_seed to the old value */
 			while (subsong_playlist[0] != gbs->subsong) {
-				temp = subsong_playlist[gbs->songs-1];
-				memmove(subsong_playlist+1, subsong_playlist, (gbs->songs - 1) * sizeof(int));
-				subsong_playlist[0] = temp;
+				random_seed++;
+				subsong_playlist = setup_playlist(gbs->songs);
 			}
 		}
 
@@ -547,7 +552,10 @@ int main(int argc, char **argv)
 	int subsong = -1;
 
 	i18n_init();
-	srand(time(0)+getpid());  /* initialize RNG */
+
+	/* initialize RNG */
+	random_seed = time(0)+getpid();
+	srand(random_seed);
 
 	sprintf(usercfg, "%s/%s", homedir, cfgfile);
 	cfg_parse("/etc/gbsplayrc", options);
