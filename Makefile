@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.20 2003/08/25 22:59:16 mitch Exp $
+# $Id: Makefile,v 1.21 2003/08/27 15:07:02 ranma Exp $
 
 include config.mk
 
@@ -14,7 +14,7 @@ DESTDIR =
 CFLAGS := -Wall -Wstrict-prototypes -Os -fomit-frame-pointer -fPIC $(EXTRA_CFLAGS)
 LDFLAGS :=
 
-SRCS := gbcpu.c gbhw.c gbsplay.c $(EXTRA_SRCS)
+SRCS := gbcpu.c gbhw.c gbsinfo.c gbsplay.c gbs.c $(EXTRA_SRCS)
 
 .PHONY: all distclean clean install dist
 
@@ -22,7 +22,7 @@ SRCS := gbcpu.c gbhw.c gbsplay.c $(EXTRA_SRCS)
 
 OBJS := $(patsubst %.c,%.o,$(filter %.c,$(SRCS)))
 
-all: config.mk $(OBJS) gbsplay $(EXTRA_ALL)
+all: config.mk $(OBJS) gbsplay gbsinfo $(EXTRA_ALL)
 
 # include the dependency files
 
@@ -76,11 +76,13 @@ dist:	distclean
 	tar -c gbsplay/ -vzf ../gbsplay.tar.gz
 	rm -rf ./gbsplay
 
-gbsplay: gbsplay.o gbcpu.o gbhw.o
-	$(CC) $(LDFLAGS) -o $@ gbsplay.o gbcpu.o gbhw.o -lm
+gbsinfo: gbsinfo.o gbs.o gbhw.o gbcpu.o
+	$(CC) $(LDFLAGS) -o $@ gbsinfo.o gbhw.o gbcpu.o gbs.o -lz
+gbsplay: gbsplay.o gbcpu.o gbhw.o gbs.o
+	$(CC) $(LDFLAGS) -o $@ gbsplay.o gbcpu.o gbhw.o gbs.o -lm -lz
 
-gbsxmms.so: gbcpu.o gbhw.o gbsxmms.o
-	$(CC) -shared $(LDFLAGS) -o $@ gbcpu.o gbhw.o gbsxmms.o -lpthread
+gbsxmms.so: gbcpu.o gbhw.o gbsxmms.o gbs.o
+	$(CC) -shared $(LDFLAGS) -o $@ gbcpu.o gbhw.o gbs.o gbsxmms.o -lpthread -lz
 
 .SUFFIXES: .i .s
 

@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.9 2003/08/25 00:54:15 ranma Exp $
+/* $Id: gbhw.c,v 1.10 2003/08/27 15:07:03 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -120,7 +120,7 @@ static void io_put(unsigned short addr, unsigned char val)
 
 				gbhw_ch[chn].duty_ctr = dutylookup[duty_ctr];
 				gbhw_ch[chn].duty_tc = gbhw_ch[chn].div_tc*gbhw_ch[chn].duty_ctr/8;
-				gbhw_ch[chn].len = 64 - len;
+				gbhw_ch[chn].len = (64 - len)*2;
 
 				break;
 			}
@@ -134,7 +134,7 @@ static void io_put(unsigned short addr, unsigned char val)
 
 				gbhw_ch[chn].volume = vol;
 				gbhw_ch[chn].env_dir = envdir;
-				gbhw_ch[chn].env_ctr = gbhw_ch[chn].env_tc = envspd*4;
+				gbhw_ch[chn].env_ctr = gbhw_ch[chn].env_tc = envspd*8;
 			}
 			break;
 		case 0xff13:
@@ -254,7 +254,7 @@ static int sound_div_tc;
 static int sound_div;
 static const int main_div_tc = 32;
 static int main_div;
-static const int sweep_div_tc = 512;
+static const int sweep_div_tc = 256;
 static int sweep_div;
 
 int r_smpl;
@@ -393,24 +393,11 @@ void gbhw_setrate(int rate)
 	sound_div_tc = (long long)4194304*65536/rate;
 }
 
-char *gbhw_romalloc(int size)
+void gbhw_init(unsigned char *rombuf, unsigned int size)
 {
+	rom = rombuf;
 	romsize = (size + 0x3fff) & ~0x3fff;
 	lastbank = (romsize / 0x4000) - 1;
-
-	rom = malloc(romsize);
-	return rom;
-}
-
-void gbhw_romfree(void)
-{
-	free(rom);
-	romsize = 0;
-	lastbank = 0;
-}
-
-void gbhw_init(void)
-{
 	memset(gbhw_ch, 0, sizeof(gbhw_ch));
 	soundbufpos = 0;
 	gbhw_ch[0].duty_ctr = 4;

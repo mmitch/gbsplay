@@ -1,4 +1,4 @@
-/* $Id: gbhw.h,v 1.3 2003/08/24 11:28:19 ranma Exp $
+/* $Id: gbhw.h,v 1.4 2003/08/27 15:07:03 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -35,9 +35,7 @@ typedef void (*gbhw_callback_fn)(void *buf, int len, void *priv);
 
 void gbhw_setcallback(gbhw_callback_fn fn, void *priv);
 void gbhw_setrate(int rate);
-void gbhw_init(void);
+void gbhw_init(unsigned char *rombuf, unsigned int size);
 int gbhw_step(void);
-char *gbhw_romalloc(int size);
-void gbhw_romfree(void);
 
 #endif
