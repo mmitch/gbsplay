@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.7 2003/09/18 18:52:12 mitch Exp $
+# $Id: configure,v 1.8 2003/09/19 16:08:50 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 
@@ -69,6 +69,7 @@ int main(char argc, char **argv) {
 EOF
 $CC -o "$OUTFILE" "$INFILE"
 if [ $? -eq 0 ]; then
+    ZLIB_FOUND=yes
     echo "ok"
 else
     echo "not found"
