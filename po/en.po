@@ -1,4 +1,4 @@
-# $Id: en.po,v 1.6 2003/12/28 22:43:08 mitch Exp $
+# $Id: en.po,v 1.7 2004/03/12 19:19:18 mitch Exp $
 # English translations for gbsplay.
 # Copyright (C) 2003 Tobias Diedrich <ranma@gmx.at>
 # This file is distributed under GNU GPL.
@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
-"Report-Msgid-Bugs-To: Tobias Diedrich <ranma@gmx.at>\n"
-"POT-Creation-Date: 2003-12-28 20:25+0100\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2004-03-12 20:15+0100\n"
 "PO-Revision-Date: 2003-12-28 23:42+0100\n"
 "Last-Translator: Tobias Diedrich <ranma@gmx.at>\n"
 "Language-Team: none\n"
@@ -176,10 +176,6 @@ msgid "Untitled"
 msgstr "Untitled"
 
 #, c-format
-msgid "Usage: %s <gbs-file>\n"
-msgstr "Usage: %s <gbs-file>\n"
-
-#, c-format
 msgid ""
 "Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
 "\n"
@@ -214,6 +210,20 @@ msgstr ""
 "  -Z  play subsongs in random mode (repetitions possible)\n"
 
 #, c-format
+msgid ""
+"Usage: %s [option] <gbs-file>\n"
+"\n"
+"Available options are:\n"
+"  -h  display this help and exit\n"
+"  -V  print version and exit\n"
+msgstr ""
+"Usage: %s [option] <gbs-file>\n"
+"\n"
+"Available options are:\n"
+"  -h  display this help and exit\n"
+"  -V  print version and exit\n"
+
+#, c-format
 msgid "Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n"
 msgstr "Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n"
 
@@ -245,8 +255,11 @@ msgstr "ioctl(dspfd, SNDCTL_DSP_SPEED, %d) failed: %s\n"
 msgid "ioctl(dspfd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
 msgstr "ioctl(dspfd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
 
-msgid "no timelimit"
-msgstr "no timelimit"
+msgid "no time limit"
+msgstr "no time limit"
 
 msgid "untitled"
 msgstr "untitled"
+
+#~ msgid "Usage: %s <gbs-file>\n"
+#~ msgstr "Usage: %s <gbs-file>\n"

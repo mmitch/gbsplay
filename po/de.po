@@ -1,15 +1,15 @@
-# $Id: de.po,v 1.9 2003/12/28 22:43:08 mitch Exp $
+# $Id: de.po,v 1.10 2004/03/12 19:19:18 mitch Exp $
 # German translations for gbsplay.
-# Copyright (C) 2003 Tobias Diedrich <ranma@gmx.at>
-#                    Christian Garbs <mitch@cgarbs.de>
+# Copyright (C) 2003-2004 Tobias Diedrich <ranma@gmx.at>
+#                         Christian Garbs <mitch@cgarbs.de>
 # This file is distributed under GNU GPL.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
-"Report-Msgid-Bugs-To: Tobias Diedrich <ranma@gmx.at>\n"
-"POT-Creation-Date: 2003-12-28 20:25+0100\n"
-"PO-Revision-Date: 2003-12-28 23:41+0100\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2004-03-12 20:15+0100\n"
+"PO-Revision-Date: 2004-03-12 20:17+0100\n"
 "Last-Translator: Christian Garbs <mitch@cgarbs.de>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -21,9 +21,7 @@ msgstr ""
 msgid ""
 "\n"
 "Caught signal %d, exiting...\n"
-msgstr ""
-"\n"
-"Signal %d abgefangen, beende Ausführung...\n"
+msgstr "\nSignal %d abgefangen, beende Ausführung...\n"
 
 msgid ""
 "\n"
@@ -31,14 +29,16 @@ msgid ""
 "           [ ] pause/resume   [1-4] mute channel"
 msgstr ""
 "\n"
-"Kommandos: [p] vorheriger Subsong  [n]ächster Subsong  [q] Player beenden\n"
-"           [ ] Pause/Wiederaufnahme   [1-4] Kanal unterdrücken"
+"Befehle:  [p] vorheriger Subsong   [n]ächster Subsong   [q] Player beenden\n"
+"          [ ] Pause/Weiterspielen   [1-4] Kanal stumm schalten"
 
 #, c-format
 msgid ""
 "\"%s\" is not a valid endian.\n"
 "\n"
-msgstr "\"%s\" ist keine gültige Byte-Order.\n\n"
+msgstr ""
+"\"%s\" ist keine gültige Byte-Order.\n"
+"\n"
 
 #, c-format
 msgid "'%s' expected at %s line %d char %d.\n"
@@ -175,10 +175,6 @@ msgid "Untitled"
 msgstr "Unbenannt"
 
 #, c-format
-msgid "Usage: %s <gbs-file>\n"
-msgstr "Benutzung: %s <GBS-Datei>\n"
-
-#, c-format
 msgid ""
 "Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
 "\n"
@@ -213,6 +209,20 @@ msgstr ""
 "  -Z  Subsongs zufällig abspielen (Wiederholungen möglich)\n"
 
 #, c-format
+msgid ""
+"Usage: %s [option] <gbs-file>\n"
+"\n"
+"Available options are:\n"
+"  -h  display this help and exit\n"
+"  -V  print version and exit\n"
+msgstr ""
+"Benutzung: %s [Option] <GBS-Datei>\n"
+"\n"
+"Verfügbare Optionen sind:\n"
+"  -h  Diese Hilfe anzeigen und Programm beenden\n"
+"  -V  Version anzeigen und Programm beenden\n"
+
+#, c-format
 msgid "Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n"
 msgstr "Warnung: Erweiterter Kopfbereich gefunden, aber die Prüfsumme stimmt nicht (0x%08x != 0x%08x).\n"
 
@@ -244,8 +254,11 @@ msgstr "ioctl(dspfd, SNDCTL_DSP_SPEED, %d) fehlgeschlagen: %s\n"
 msgid "ioctl(dspfd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
 msgstr "ioctl(dspfd, SNDCTL_DSP_STEREO, %d) fehlgeschlagen: %s\n"
 
-msgid "no timelimit"
+msgid "no time limit"
 msgstr "Kein Zeitlimit"
 
 msgid "untitled"
 msgstr "Unbenannt"
+
+#~ msgid "Usage: %s <gbs-file>\n"
+#~ msgstr "Benutzung: %s <GBS-Datei>\n"
