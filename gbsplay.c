@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.50 2003/09/18 16:48:51 ikari Exp $
+/* $Id: gbsplay.c,v 1.51 2003/09/18 18:43:37 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -132,6 +132,7 @@ static struct cfg_option options[] = {
 	{ "quiet", &quiet, cfg_int },
 	{ "subsong_timeout", &subsong_timeout, cfg_int },
 	{ "silence_timeout", &silence_timeout, cfg_int },
+	/* playmode not implemented yet */
 	{ NULL, NULL, NULL }
 };
 
@@ -210,7 +211,9 @@ void usage(int exitcode)
 	        "  -s	write to stdout\n"
 	        "  -t	set subsong timeout (%d seconds)\n"
 	        "  -T	set silence timeout (%d seconds)\n"
-	        "  -V	print version and exit\n",
+	        "  -V	print version and exit\n"
+		"  -z   play subsongs in random mode\n"
+		"  -Z   play subsongs in shuffle mode (repetitions possible)\n",
 	        myname,
 	        rate,
 	        subsong_timeout,
@@ -255,6 +258,12 @@ void parseopts(int *argc, char ***argv)
 		case 'V':
 			version();
 			break;
+		case 'z':
+		  playmode = PLAYMODE_RANDOM;
+		  break;
+		case 'Z':
+		  playmode = PLAYMODE_SHUFFLE;
+		  break;
 		}
 	}
 	*argc -= optind;
