@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: gbs2ogg.sh,v 1.6 2003/12/28 19:20:28 mitch Exp $
+# $Id: gbs2ogg.sh,v 1.7 2003/12/28 19:28:59 mitch Exp $
 #
 # Automatically convert all subsongs from .gbs file to .ogg files.
 # 
@@ -9,8 +9,8 @@
 FILENAME=$1
 
 RATE=44100
-PLAY=120
-FADE=4
+PLAY=150
+FADE=6
 GAP=0
 
 if [ -z "$1" ]; then
@@ -43,7 +43,7 @@ FILEBASE=`echo "$FILEBASE"|sed 's/.gbs$//'`
     for SUBSONG in `seq 1 $SUBSONGS`; do
 	printf "== converting song %02d/%02d:\n" $SUBSONG $SUBSONGS
 	gbsplay -s -E l -r $RATE -g $GAP -f $FADE -t $PLAY "$FILENAME" $SUBSONG $SUBSONG \
-	    | oggenc -q6 -r --raw-endianness 0 -B 16 -C 2 -R $RATE -N $SUBSONG -t "$TITLE" -a "$AUTHOR" -c "copyright=$COPYRIGHT" -G "Gameboy music" - \
-	    > `printf "%s-%02d.ogg" "$FILEBASE" $SUBSONG`
+	    | oggenc -q6 -r --raw-endianness 0 -B 16 -C 2 -R $RATE -N $SUBSONG -t "$TITLE" -a "$AUTHOR" -c "copyright=$COPYRIGHT" -c "COMMENT=Subsong $SUBSONG" -G "Gameboy music" - \
+	    > "`printf "%s-%02d.ogg" "$FILEBASE" $SUBSONG`"
     done
 )
