@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.49 2004/04/05 16:02:35 ranmachan Exp $
+# $Id: configure,v 1.50 2004/04/07 16:53:58 ranmachan Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -28,10 +28,6 @@ fi
 
 ## set version number
 VERSION=0.0.5
-if [ -f CVS/Entries ]; then
-    VERSION=${VERSION}+cvs`find CVS/Entries -printf "%TY%Tm%Td"`
-fi
-
 
 ##### begin of subroutines
 
@@ -69,18 +65,18 @@ cc_check()
     okmsg="${4-ok}"
     errmsg="${5-not found}"
 
-    echo -n "$name:  "
+    test "$name" && echo -n "$name:  "
 
     cat > "$INFILE"
     $CC -o "$OUTFILE" "$INFILE" $flags
     RESULT=$?
     if [ $RESULT -eq 0 ]; then
-	echo "$okmsg"
-	eval "$varname=yes"
+	test "$name" && echo "$okmsg"
+	test "$varname" && eval "$varname=yes"
 	return 0
     else
-	echo "$errmsg"
-	eval "$varname=no"
+	test "$name" && echo "$errmsg"
+	test "$varname" && eval "$varname=no"
 	return 1
     fi
 }
@@ -375,6 +371,32 @@ int main(int argc, char **argv)
 	return 0;
 }
 EOF
+fi
+
+# Check CVS time
+
+if [ -f CVS/Entries ]; then
+    cc_check <<EOF
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <time.h>
+
+int main(int argc, char **argv)
+{
+	char date[200];
+	struct stat st;
+
+	lstat("CVS/Entries", &st);
+	strftime(date, sizeof(date), "%Y%m%d%H%M%S", gmtime(&st.st_mtime));
+	puts(date);
+
+	return 0;
+}
+EOF
+	if [ $? -eq 0 ]; then
+		VERSION=${VERSION}+cvs`$TEMPDIR/cc`
+	fi
 fi
 
 ## check for various headers
