@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.46 2003/09/14 15:51:26 mitch Exp $
+/* $Id: gbsplay.c,v 1.47 2003/09/17 21:19:10 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -33,6 +33,11 @@
 #define NOTE(x) ((int)((log(FREQ(x))/LN2 - MAGIC)*12 + .2))
 
 #define MAXOCTAVE 9
+
+/* Player modes */
+#define PLAYMODE_LINEAR  1
+#define PLAYMODE_SHUFFLE 2
+#define PLAYMODE_RANDOM  3
 
 static int getnote(int div)
 {
@@ -95,6 +100,9 @@ static int usestdout = 0;
 static int quiet = 0;
 static int subsongtimeout = 2*60;
 static int silencetimeout = 2;
+static int subsong = -1;
+
+static int playmode = PLAYMODE_LINEAR;
 
 static struct cfg_option options[] = {
 	{ "rate", &rate, cfg_int },
@@ -103,6 +111,25 @@ static struct cfg_option options[] = {
 	{ "silence_timeout", &silencetimeout, cfg_int },
 	{ NULL, NULL, NULL }
 };
+
+static int get_next_subsong(void)
+/* Return the number of the subsong that is to be played next */
+{
+	int next = -1;
+	switch (playmode) {
+
+	case PLAYMODE_SHUFFLE:
+		/* not implemented yet, use fallthrough */
+
+	case PLAYMODE_RANDOM:
+		/* not implemented yet, use fallthrough */
+
+	case PLAYMODE_LINEAR:
+		next = subsong + 1;
+		break;
+	}
+	return next;
+}
 
 void open_dsp(void)
 {
@@ -216,12 +243,12 @@ void parseopts(int *argc, char ***argv)
 static int quit = 0;
 static int silencectr = 0;
 static long long clock = 0;
-static int subsong = -1;
 static int subsong_stop = -1;
 
 static void handletimeouts(struct gbs *gbs)
 {
 	int time = clock / 4194304;
+	int next_subsong;
 
 	if ((gbhw_ch[0].volume == 0 ||
 	     gbhw_ch[0].master == 0) &&
@@ -239,10 +266,11 @@ static void handletimeouts(struct gbs *gbs)
 		if (subsong == subsong_stop) {
 			quit = 1;
 		}
-		subsong++;
-		if (subsong >= gbs->songs) {
+		next_subsong = get_next_subsong();
+		if (next_subsong >= gbs->songs) {
 			quit = 1;
-			subsong--;
+		} else {
+			subsong = next_subsong;
 		}
 		silencectr = 0;
 		clock = 0;
