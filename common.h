@@ -11,7 +11,7 @@
 #define TEXTDOMAIN "gbsplay"
 #define N_(x) x
 
-#if HAVE_LOCALE_H == 1 && HAVE_LIBINTL_H == 1
+#if USE_I18N == 1
 
 #  include <locale.h>
 #  include <libintl.h>
