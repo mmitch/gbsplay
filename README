@@ -1,10 +1,10 @@
-<<$Id: README,v 1.5 2004/02/16 20:47:24 mitch Exp $>>
+<<$Id: README,v 1.6 2004/02/16 21:32:30 mitch Exp $>>
 
 gbsplay - A Gameboy sound player
 
-(C) 2003 by Tobias Diedrich <ranma@gmx.at>
-            Christian Garbs <mitch@cgarbs.de>
-            Maximilian Rehkopf <otakon@gmx.net>
+(C) 2003-2004 by Tobias Diedrich <ranma@gmx.at>
+                 Christian Garbs <mitch@cgarbs.de>
+                 Maximilian Rehkopf <otakon@gmx.net>
 
 Licensed under GNU GPL.
 
