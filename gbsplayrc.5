@@ -1,0 +1,44 @@
+.\" This manpage 2003 (C) by Christian Garbs <mitch@cgarbs.de>
+.\" Licensed under GNU GPL.
+.TH "gbsplayrc" "5" "0.0.0" "Tobias Diedrich" "Gameboy sound player"
+.SH "NAME"
+.LP
+\fBgbsplayrc\fR \- Gameboy sound player configuration file
+.SH "DESCRIPTION"
+\fI/etc/gbsplayrc\fR and \fI~/\.gbsplayrc\fR are used by gbsplay(1).
+.SH "SYNTAX"
+Comments are introduced by hash marks.  A comment continues to the end
+of the line.  Whitespace, including empty lines, is ignored.  Option
+values follow the option name and an equal sign.  Valid Option value
+types are:
+.IP Integer
+An integer number in decimal.
+.IP Boolean
+An integer number in decimal. 0 is considered \fIfalse\fR, everything else is \fItrue\fR.
+.SH "OPTIONS"
+.IP "rate = \fIInteger\fR"
+The samplerate to be used.
+.IP "subsong_timeout = \fIInteger\fR"
+The subsong timeout in seconds.  When a subsong has been played for the given
+time, the player will skip to the next subsong.
+.IP "silence_timeout = \fIInteger\fR"
+The silence timeout in seconds.  When a subsong contains silence for the given
+time, the player will skip to the next subsong.
+.IP "quiet = \fIBoolean\fR"
+In quiet mode, the player will only show error messages.
+.SH "FILES"
+.TP
+\fI/etc/gbsplayrc\fR
+Default location of the global configuration file.
+.TP
+\fI~/\.gbsplayrc\fR
+User configuration file.
+.SH "SEE ALSO"
+\fIgbsplay\fR(1)
+\fIgbsinfo\fR(1)
+.SH "BUG REPORTS"
+If you encounter bugs, please report them to <\fIranma@gmx.at\fR>.
+.SH "AUTHOR"
+gbsplay was written by Tobias Diedrich <\fIranma@gmx.at\fR> (with contributions from others, see README).
+.SH "COPYRIGHT"
+gbsplay is licensed under GNU GPL.
