@@ -1,0 +1,15 @@
+$Id: TODO,v 1.1 2003/08/29 16:52:14 mitch Exp $
+
+TODO list for gbsplay.
+
+### version 0.0.1:
+
+( )  set up feature list for 0.0.1 release
+
+### unspecified: (bits'n'ideas)
+
+( )  add manpage for gbsinfo
+( )  make gbsinfo output more script friendly
+     (perhaps via with commandline switch)
+( )  add "--next_song_after_pause" switch to gbsplay
+( )  add "--next_song_after_playtime" switch to gbsplay
