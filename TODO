@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.19 2003/09/21 08:24:35 mitch Exp $>>
+<<$Id: TODO,v 1.20 2003/09/21 16:04:36 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -23,39 +23,11 @@ TODO list for gbsplay.
 
 ( )  gbsplay: add restart subsong keyboard command
 
+( )  update version number in manpages via configue/Makefile
 
-### version 0.0.2:
 
-( )  set up feature list for 0.0.2 release
+### version 0.0.3:
+
+( )  set up feature list for 0.0.3 release
 
 ( )  pump up man page version number on release!
-
-(X)  BUGFIX xmms-gbs:
-     forwarding though subsongs works
-     when jumping back a subsong, the songchange is ok, but the time
-     and position display always jump straight to the beginning
-
-(X)  BUGFIX gbsplay:
-     don't display "out of bounds error" after playing last subsong
-
-(X)  BUGFIX gbsplay:
-     segmentation fault on startup when $start_subsong is out-of-bounds
-
-(X)  BUGFIX configure:
-     Not all temporary files were deleted.
-
-(X)  BUGFIX gbsplay:
-     subsong_stop default was set to 0.
-
-(X)  gbsplay: add shuffle mode for subsongs
-     (play every subsong once)
-
-(X)  gbsplay: add random mode for subsongs
-     (single subsongs can be played more than once)
-
-(X)  gbsplay: stop at a given subsong
-     ("gbsplay $file 3 3" will play only song 3 and then stop)
-
-(X)  gbsplay: honor SIGSTOP+SIGCONT
-
-(X)  gbsplay: no need for return after keyboard command any more

@@ -1,7 +1,26 @@
-<<$Id: HISTORY,v 1.1 2003/09/12 17:57:07 mitch Exp $>>
+<<$Id: HISTORY,v 1.2 2003/09/21 16:04:35 mitch Exp $>>
 
 
 gbsplay HISTORY
+
+
+2003/09/21  -  0.0.2
+~~~~~~~~~~~~~~~~~~~~
+- gbsplay bugfixes:
+  - don't go haywire on startup when start_at_subsong is out-of-bounds
+  - don't exit with out-of-bounds error after playing the last song
+
+- xmms-gbs bugfixes:
+  - fix seeking of previous subsong
+
+- build process bugfixes:
+  - delete all temporary files created by configure
+
+- gbsplay new features:
+  - add shuffle and random playmode
+  - no need to press return for keyboard commands to take effect
+  - stop after playing a given subsong
+  - honor SIGSTOP and SIGCONT signals
 
 
 2003/09/12  -  0.0.1
