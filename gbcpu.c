@@ -1,4 +1,4 @@
-/* $Id: gbcpu.c,v 1.11 2003/11/29 19:03:15 ranma Exp $
+/* $Id: gbcpu.c,v 1.12 2003/12/13 21:45:46 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -1801,8 +1801,10 @@ void gbcpu_addmem(uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn
 
 void gbcpu_init(void)
 {
+	memset(&gbcpu_regs, 0, sizeof(gbcpu_regs));
 	gbcpu_halted = 0;
 	gbcpu_stopped = 0;
+	gbcpu_if = 0;
 	DEB(dump_regs());
 }
 

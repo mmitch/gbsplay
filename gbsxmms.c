@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.26 2003/12/12 23:05:51 ranma Exp $
+/* $Id: gbsxmms.c,v 1.27 2003/12/13 21:45:46 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -556,11 +556,10 @@ static void play_file(char *filename)
 		         gbs->title, gbs->author, gbs->copyright);
 		gbs_ip.set_info(title, length, 0, rate, 2);
 
-		gbhw_init(gbs->rom, gbs->romsize);
-		gbhw_setbuffer(&buffer);
-		gbhw_setrate(rate);
 		workunit = 1000*(buffer.len/2)/rate;
 		gbs_init(gbs, -1);
+		gbhw_setbuffer(&buffer);
+		gbhw_setrate(rate);
 		gbs->subsong_timeout = subsong_timeout;
 		gbs->gap = subsong_gap;
 		gbs->silence_timeout = silence_timeout;

@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.26 2003/12/13 15:42:57 ranma Exp $
+/* $Id: gbhw.c,v 1.27 2003/12/13 21:45:46 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -464,6 +464,7 @@ void gbhw_init(uint8_t *rombuf, uint32_t size)
 	rom = rombuf;
 	romsize = (size + 0x3fff) & ~0x3fff;
 	lastbank = (romsize / 0x4000) - 1;
+	rombank = 1;
 	memset(gbhw_ch, 0, sizeof(gbhw_ch));
 	master_volume = MASTER_VOL_MAX;
 	master_fade = 0;

@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.15 2003/12/12 23:05:51 ranma Exp $
+/* $Id: gbs.c,v 1.16 2003/12/13 21:45:46 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -104,8 +104,6 @@ int gbs_init(struct gbs *gbs, int subsong)
 	}
 
 	gbs->subsong = subsong;
-	gbcpu_if = 0;
-	gbcpu_halted = 0;
 	REGS16_W(gbcpu_regs, PC, 0x0050); /* playercode entry point */
 	REGS16_W(gbcpu_regs, SP, gbs->stack);
 	REGS16_W(gbcpu_regs, HL, gbs->load - 0x70);
