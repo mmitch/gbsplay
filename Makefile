@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.63 2003/12/29 18:53:32 mitch Exp $
+# $Id: Makefile,v 1.64 2003/12/29 19:08:22 mitch Exp $
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
@@ -84,9 +84,9 @@ install-default:
 	install -m 644 gbsplayrc.5 $(man5dir)
 	install -m 644 $(docs) $(docdir)
 	for i in $(mos); do \
-	base=`basename $$i`; \
-	install -d $(localedir)/$${base%.mo}/LC_MESSAGES; \
-	install -m 644 $$i $(localedir)/$${base%.mo}/LC_MESSAGES/gbsplay.mo; \
+		base=`basename $$i`; \
+		install -d $(localedir)/$${base%.mo}/LC_MESSAGES; \
+		install -m 644 $$i $(localedir)/$${base%.mo}/LC_MESSAGES/gbsplay.mo; \
 	done
 
 install-gbsxmms.so:
@@ -97,13 +97,19 @@ uninstall: uninstall-default $(EXTRA_UNINSTALL)
 
 uninstall-default:
 	rm -f $(bindir)/gbsplay    $(bindir)/gbsinfo
-	rm -f $(man1dir)/gbsplay.1 $(man1dir)/gbsinfo.1
-	rm -f $(man5dir)/gbsplayrc.5 $(man5dir)/gbsplayrc.5
-	rm -rf $(docdir)
 	-rmdir -p $(bindir)
+	rm -f $(man1dir)/gbsplay.1 $(man1dir)/gbsinfo.1
 	-rmdir -p $(man1dir)
+	rm -f $(man5dir)/gbsplayrc.5 $(man5dir)/gbsplayrc.5	
 	-rmdir -p $(man5dir)
+	rm -rf $(docdir)
+	-mkdir -p $(docdir)
 	-rmdir -p $(docdir)
+	-for i in $(mos); do \
+		base=`basename $$i`; \
+		rm -f $(localedir)/$${base%.mo}/LC_MESSAGES/gbsplay.mo; \
+		rmdir -p $(localedir)/$${base%.mo}/LC_MESSAGES; \
+	done
 
 uninstall-gbsxmms.so:
 	rm -f $(DESTDIR)$(XMMS_INPUT_PLUGIN_DIR)/gbsxmms.so
