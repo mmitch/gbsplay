@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.48 2004/04/05 10:34:48 mitch Exp $
+# $Id: configure,v 1.49 2004/04/05 16:02:35 ranmachan Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -383,16 +383,12 @@ need_include inttypes.h
 
 if [ "$use_devdsp" != no ]; then
     check_include sys/soundcard.h
-    if [ "$have_sys_soundcard_h" = "no" ]; then
-	use_devdsp=no
-    fi
+    use_devdsp=$have_sys_soundcard_h
 fi
 
 if [ "$use_nas" != no ]; then
     check_include audio/audiolib.h
-    if [ "$have_audio_audiolib_h" = "no" ]; then
-	use_nas=no
-    fi
+    use_nas=$have_audio_audiolib_h
 fi
 
 if [ "$use_i18n" != no ]; then
@@ -536,9 +532,7 @@ setdefault localedir   "$prefix/share/locale"
 setdefault use_sharedlibgbs no
 setdefault use_debug no
 
-setdefault use_devdsp yes
 setdefault use_stdout yes
-setdefault use_nas yes
 
 printoptional modules build
 printoptional features use
