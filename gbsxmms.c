@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.27 2003/12/13 21:45:46 ranma Exp $
+/* $Id: gbsxmms.c,v 1.28 2003/12/15 18:35:42 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -579,8 +579,23 @@ static void stop(void)
 	}
 }
 
+static void set_song_info(struct gbs *gbs, char **title, int *length)
+{
+	int len = 13 + strlen(gbs->title) + strlen(gbs->author) + strlen(gbs->copyright);
+
+	*title = malloc(len);
+	*length = gbs_time(gbs, gbs->songs);
+
+	snprintf(*title, len, "%s - %s (%s)",
+	         gbs->title, gbs->author, gbs->copyright);
+}
+
 static int get_time(void)
 {
+	char *title;
+	int length;
+	set_song_info(gbs, &title, &length);
+	gbs_ip.set_info(title, length, 0, 44100, 2);
 	if (stopthread) return -1;
 	return gbs_ip.output->output_time();
 }
@@ -593,14 +608,8 @@ static void cleanup(void)
 static void get_song_info(char *filename, char **title, int *length)
 {
 	struct gbs *gbs = gbs_open(filename);
-	int len = 13 + strlen(gbs->title) + strlen(gbs->author) + strlen(gbs->copyright);
 
-	*title = malloc(len);
-	*length = gbs_time(gbs, gbs->songs);
-
-	snprintf(*title, len, "%s - %s (%s)",
-	         gbs->title, gbs->author, gbs->copyright);
-
+	set_song_info(gbs, title, length);
 	gbs_close(gbs);
 }
 
