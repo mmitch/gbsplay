@@ -1,4 +1,8 @@
-# $Id: Makefile,v 1.69 2004/01/19 20:20:20 mitch Exp $
+# $Id: Makefile,v 1.70 2004/01/20 20:49:16 ranma Exp $
+
+.PHONY: all default distclean clean install dist
+
+all: default
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
@@ -47,17 +51,42 @@ gbsplaybin     :=$(gbsplaybin).exe
 gbsinfobin     :=$(gbsinfobin).exe
 endif
 
-objs := $(objs_libgbs) $(objs_gbsplay) $(objs_gbsinfo)
-dsts := gbsplay gbsinfo
+ifeq ($(use_sharedlibgbs),yes)
+LDFLAGS += -L. -lgbs
+objs += $(objs_libgbspic)
+
+libgbs.so.1: $(objs_libgbspic)
+	$(CC) -fPIC -shared -Wl,-soname=$@ -o $@ $+
+	ln -fs $@ libgbs.so
+
+libgbs: libgbs.so.1
+	touch libgbs
+
+libgbspic: libgbs.so.1
+	touch libgbspic
+else
+objs += $(objs_libgbs)
+objs_gbsplay += libgbs.a
+objs_gbsinfo += libgbs.a
+ifeq ($(build_xmmsplugin),yes)
+objs += $(objs_libgbspic)
+objs_gbsxmms += libgbspic.a
+endif # build_xmmsplugin
+
+libgbs: libgbs.a
+	touch libgbs
+
+libgbspic: libgbspic.a
+	touch libgbspic
+endif # use_sharedlibs
+
+objs += $(objs_gbsplay) $(objs_gbsinfo)
+dsts += gbsplay gbsinfo
 
 ifeq ($(build_xmmsplugin),yes)
 objs += $(objs_gbsxmms)
 dsts += gbsxmms.so
 endif
-
-.PHONY: all default distclean clean install dist
-
-all: default
 
 # include the rules for each subdir
 include $(shell find . -type f -name "subdir.mk")
@@ -67,7 +96,9 @@ default: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL)
 # include the dependency files
 
 ifneq ($(noincludes),yes)
--include $(patsubst %.o,%.d,$(filter %.o,$(objs)))
+deps := $(patsubst %.o,%.d,$(filter %.o,$(objs)))
+deps += $(patsubst %.lo,%.d,$(filter %.lo,$(objs)))
+-include $(deps)
 endif
 
 distclean: clean
@@ -143,23 +174,6 @@ dist:	distclean
 	tar -c $(DISTDIR)/ -vzf ../$(DISTDIR).tar.gz
 	rm -rf ./$(DISTDIR)
 
-ifeq ($(use_sharedlibgbs),yes)
-LDFLAGS += -L. -lgbs
-
-libgbs.so.1: $(objs_libgbspic)
-	$(CC) -fPIC -shared -Wl,-soname=$@ -o $@ $+
-	ln -s $@ libgbs.so
-
-libgbs: libgbs.so.1
-else
-objs_gbsinfo    += libgbs.a
-objs_gbsplay    += libgbs.a
-objs_gbsxmms    += libgbspic.a
-
-libgbs: libgbs.a libgbspic.a
-	touch libgbs
-endif
-
 libgbspic.a: $(objs_libgbspic)
 	$(AR) r $@ $+
 libgbs.a: $(objs_libgbs)
@@ -169,7 +183,7 @@ gbsinfo: $(objs_gbsinfo) libgbs
 gbsplay: $(objs_gbsplay) libgbs
 	$(CC) -o $(gbsplaybin) $(objs_gbsplay) $(LDFLAGS) -lm
 
-gbsxmms.so: $(objs_gbsxmms) libgbs
+gbsxmms.so: $(objs_gbsxmms) libgbspic
 	$(CC) -shared -fPIC -o $@ $(objs_gbsxmms) $(LDFLAGS) $(PTHREAD)
 
 # rules for suffixes
