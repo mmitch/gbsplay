@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.45 2004/03/20 19:57:49 mitch Exp $
+# $Id: configure,v 1.46 2004/04/02 10:40:44 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -316,7 +316,7 @@ EOF
 	exit $1
 }
 
-OPTS="build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_debug use_stdout use_devdsp"
+OPTS="build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_debug use_stdout use_devdsp use_nas"
 
 ## load user config
 if [ -f config.conf ]; then
@@ -579,6 +579,7 @@ echo "EXTRA_CFLAGS=$EXTRA_CFLAGS"
     echo build_xmmsplugin := $build_xmmsplugin
     echo have_xgettext := $have_xgettext
     echo plugout_devdsp := $use_devdsp
+    echo plugout_nas := $use_nas
     echo plugout_stdout := $use_stdout
     echo use_i18n := $use_i18n
     echo use_sharedlibgbs := $use_sharedlibgbs
@@ -589,6 +590,7 @@ echo "EXTRA_CFLAGS=$EXTRA_CFLAGS"
     echo "#define GBS_VERSION \"$VERSION\""
     echo "#define LOCALE_PREFIX \"$localedir\""
     plugout_x DEVDSP
+    plugout_x NAS
     plugout_x STDOUT
     use_x I18N
     use_x REGPARM
