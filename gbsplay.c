@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.57 2003/10/11 17:47:09 mitch Exp $
+/* $Id: gbsplay.c,v 1.58 2003/10/11 18:25:25 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -65,6 +65,8 @@ static int playmode = PLAYMODE_LINEAR;
 static int quiet = 0;
 static int rate = 44100;
 static int silence_timeout = 2;
+static int fadeout = 3;
+static int subsong_gap = 2;
 static int subsong = -1;
 static int subsong_stop = -1;
 static int subsong_timeout = 2*60;
@@ -136,6 +138,8 @@ static struct cfg_option options[] = {
 	{ "rate", &rate, cfg_int },
 	{ "quiet", &quiet, cfg_int },
 	{ "subsong_timeout", &subsong_timeout, cfg_int },
+	{ "subsong_gap", &subsong_gap, cfg_int },
+	{ "fadeout", &fadeout, cfg_int },
 	{ "silence_timeout", &silence_timeout, cfg_int },
 	/* playmode not implemented yet */
 	{ NULL, NULL, NULL }
@@ -274,13 +278,17 @@ void usage(int exitcode)
 	        "  -s  write to stdout\n"
 	        "  -t  set subsong timeout (%d seconds)\n"
 	        "  -T  set silence timeout (%d seconds)\n"
+	        "  -F  set fadeout (%d seconds)\n"
+	        "  -G  set subsong gap (%d seconds)\n"
 	        "  -V  print version and exit\n"
 		"  -z  play subsongs in random mode\n"
 		"  -Z  play subsongs in shuffle mode (repetitions possible)\n",
 	        myname,
 	        rate,
 	        subsong_timeout,
-	        silence_timeout);
+	        silence_timeout,
+		fadeout,
+		subsong_gap);
 	exit(exitcode);
 }
 
@@ -294,7 +302,7 @@ void parseopts(int *argc, char ***argv)
 {
 	int res;
 	myname = *argv[0];
-	while ((res = getopt(*argc, *argv, "hqr:st:T:VzZ")) != -1) {
+	while ((res = getopt(*argc, *argv, "hqr:st:T:F:G:VzZ")) != -1) {
 		switch (res) {
 		default:
 			usage(1);
@@ -317,6 +325,12 @@ void parseopts(int *argc, char ***argv)
 			break;
 		case 'T':
 			sscanf(optarg, "%d", &silence_timeout);
+			break;
+		case 'F':
+			sscanf(optarg, "%d", &fadeout);
+			break;
+		case 'G':
+			sscanf(optarg, "%d", &subsong_gap);
 			break;
 		case 'V':
 			version();
@@ -349,7 +363,12 @@ static void handletimeouts(struct gbs *gbs)
 		silencectr++;
 	} else silencectr = 0;
 
-	if ((subsong_timeout && time >= subsong_timeout) ||
+	if (fadeout && subsong_timeout && time >= subsong_timeout)
+		master_fade = -(128/fadeout);
+	if (subsong_timeout && time >= (subsong_timeout+fadeout))
+		master_fade = -128*16;
+
+	if ((subsong_timeout && time >= (subsong_timeout+fadeout+subsong_gap)) ||
 	    (silence_timeout && silencectr > 50*silence_timeout)) {
 		if (subsong == subsong_stop) {
 			quit = 1;

@@ -1,4 +1,4 @@
-/* $Id: gbhw.h,v 1.5 2003/10/11 17:47:09 mitch Exp $
+/* $Id: gbhw.h,v 1.6 2003/10/11 18:25:25 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -30,6 +30,8 @@ struct gbhw_channel {
 };
 
 extern struct gbhw_channel gbhw_ch[4];
+extern int master_volume;
+extern int master_fade;
 
 typedef void (*gbhw_callback_fn)(void *buf, int len, void *priv);
 

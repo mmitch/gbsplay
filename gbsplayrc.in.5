@@ -1,4 +1,4 @@
-.\" $Id: gbsplayrc.in.5,v 1.1 2003/09/22 18:21:37 mitch Exp $
+.\" $Id: gbsplayrc.in.5,v 1.2 2003/10/11 18:25:25 ranma Exp $
 .\" This manpage 2003 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
 .TH "gbsplayrc" "5" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
@@ -25,6 +25,11 @@ time, the player will skip to the next subsong.
 .IP "silence_timeout = \fIInteger\fR"
 The silence timeout in seconds.  When a subsong contains silence for the given
 time, the player will skip to the next subsong.
+.IP "subsong_gap = \fIInteger\fR"
+The subsong gap in seconds.  Before playing the next subsong after the subsong timeout, play \fIsubsong_gap\fR seconds of silence.
+.IP "fadeout = \fIInteger\fR"
+The fadeout time in seconds.  Instead of cutting of the subso
+ng hard, do a soft fadeout.
 .IP "quiet = \fIBoolean\fR"
 In quiet mode, the player will only show error messages.
 .SH "FILES"

@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.14 2003/10/11 17:47:08 mitch Exp $
+/* $Id: gbhw.c,v 1.15 2003/10/11 18:25:25 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -28,6 +28,8 @@ static const char dutylookup[4] = {
 };
 
 struct gbhw_channel gbhw_ch[4];
+int master_volume;
+int master_fade;
 
 static const int vblanktc = 70256; /* ~59.7 Hz (vblankctr)*/
 static int vblankctr = 70256;
@@ -309,6 +311,12 @@ static void gb_sound_sweep(void)
 			}
 		}
 	}
+	if (master_fade) {
+		master_volume += master_fade;
+		if (master_volume < 0) master_volume = 0;
+		if (master_volume > 256*256) master_volume = 256*256;
+	}
+
 }
 
 static void gb_sound(int cycles)
@@ -321,6 +329,10 @@ static void gb_sound(int cycles)
 		l_smpl *= 256;
 		r_smpl /= smpldivisor;
 		l_smpl /= smpldivisor;
+		r_smpl *= master_volume/256;
+		l_smpl *= master_volume/256;
+		r_smpl /= 256;
+		l_smpl /= 256;
 		soundbuf[soundbufpos++] = l_smpl;
 		soundbuf[soundbufpos++] = r_smpl;
 		smpldivisor = 0;
@@ -404,6 +416,8 @@ void gbhw_init(unsigned char *rombuf, unsigned int size)
 	romsize = (size + 0x3fff) & ~0x3fff;
 	lastbank = (romsize / 0x4000) - 1;
 	memset(gbhw_ch, 0, sizeof(gbhw_ch));
+	master_volume = 256*256;
+	master_fade = 0;
 	soundbufpos = 0;
 	gbhw_ch[0].duty_ctr = 4;
 	gbhw_ch[1].duty_ctr = 4;
