@@ -1,4 +1,4 @@
-/* $Id: gbcpu.c,v 1.16 2004/03/10 12:50:10 ranmachan Exp $
+/* $Id: gbcpu.c,v 1.17 2004/04/14 17:28:34 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -637,7 +637,7 @@ static regparm void put_reg(int i, uint32_t val)
 
 static regparm void op_unknown(uint32_t op, const struct opinfo *oi)
 {
-	fprintf(stderr, "\n\nUnknown opcode %02x.\n", op);
+	fprintf(stderr, "\n\nUnknown opcode %02x.\n", (unsigned char)op);
 	gbcpu_stopped = 1;
 }
 
@@ -875,7 +875,7 @@ static regparm void op_cbprefix(uint32_t op, const struct opinfo *oi)
 		case 2: op_res(op); return;
 		case 3: op_set(op); return;
 	}
-	fprintf(stderr, "\n\nUnknown CB subopcode %02x.\n", op);
+	fprintf(stderr, "\n\nUnknown CB subopcode %02x.\n", (unsigned char)op);
 	gbcpu_stopped = 1;
 }
 
