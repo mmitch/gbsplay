@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.30 2003/08/24 15:43:08 mitch Exp $
+/* $Id: gbsplay.c,v 1.31 2003/08/24 16:00:59 ikari Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -206,7 +206,7 @@ static int getnote(int div)
 	return n;
 }
 
-static const char notes[7] = "CDEFGAH";
+static const char notes[7] = "CDEFGAB";
 static char notelookup[4*MAXOCTAVE*12];
 static void precalc_notes(void)
 {
