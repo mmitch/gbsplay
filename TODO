@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.31 2003/10/11 20:46:25 mitch Exp $>>
+<<$Id: TODO,v 1.32 2003/10/21 23:39:59 ranma Exp $>>
 
 
 TODO list for gbsplay.
@@ -6,10 +6,9 @@ TODO list for gbsplay.
 
 ### bugs
 
+( )  change gbs_(open|write) to conform to new gbsformat.txt
 
 ### unspecified: (bits'n'ideas)
-
-( )  add info about GBS formats 1 and 2
 
 ( )  generate 1 dynamic library that is used by gbsplay, gbsinfo and gbsxmms
 
@@ -27,6 +26,8 @@ TODO list for gbsplay.
 ### version 0.0.3:
 
 ( )  set up feature list for 0.0.3 release
+
+(X)  add info about GBS format (GBSv2 is history)
 
 (X)  gbsplay:
      fix help text spacing

@@ -1,0 +1,50 @@
+MAIN HEADER FIELDS
+
+Offset Size Description
+====== ==== ==========================
+  00     3  Identifier string ("GBS")
+  03     1  Version (1)
+  04     1  Number of songs (1-255)
+  05     1  First song (usually 1)
+  06     2  Load address ($400-$7fff)
+  08     2  Init address ($400-$7fff)
+  0a     2  Play address ($400-$7fff)
+  0c     2  Stack pointer
+  0e     1  Timer modulo  (see TIMING)
+  0f     1  Timer control (see TIMING)
+  10    32  Game Title string
+  30    32  Author string
+  50    30  Copyright string
+  6e     2  Length of Code/Data section (1 = 16 Bytes)
+  70     n  Code and Data (see RST VECTORS)
+n+70     x  Extended Header (see EXTENDED HEADER)
+
+
+EXTENDED HEADER
+
+Offset Size Description
+====== ==== ==========================
+  00     4  File Size (SIZE)
+  08     2  Offset to Extended Title string
+  0a     2  Offset to Extended Author string
+  0c     2  Offset to Extended Copyright string
+  0e     6  Unused/Reserved (0)
+  14     4  Extended Header CRC (Bytes 00-13)
+  18     a  Subsong Info Table (see SUBSONG INFO TABLE)
+a+18     b  String area
+SIZE-4   4  File CRC
+
+Reserved bits shall be zero.
+The Offsets refer to the beginning of the String area.
+If the Offset is -1 (FFFF) the String is not set.
+The Extended String Offsets shall be -1 except when the String
+does not fit into the main header. Strings in the String area
+are zero terminated.
+
+
+SUBSONG INFO TABLE
+
+Offset Size Description
+====== ==== ==========================
+  00     4  Length of Subsong (1024 == 1 second, 0 == unlimited)
+  02     4  Offset to Subsong Title
