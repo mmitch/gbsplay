@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.56 2003/09/22 17:08:27 mitch Exp $
+/* $Id: gbsplay.c,v 1.57 2003/10/11 17:47:09 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -52,12 +52,13 @@ static char *myname;
 static int dspfd;
 static int quit = 0;
 static int silencectr = 0;
-static int statuscnt;
 static long long ticks = 0;
 static struct termios ots;
 static int *subsong_playlist;
 static int subsong_playlist_idx = 0;
+static int pause_mode = 0;
 
+static int refresh_delay = 33; /* msec */
 
 /* default values */
 static int playmode = PLAYMODE_LINEAR;
@@ -70,7 +71,6 @@ static int subsong_timeout = 2*60;
 static int usestdout = 0;
 
 static char *cfgfile = ".gbsplayrc";
-static int statustc = 83886;
 
 
 static int getnote(int div)
@@ -384,6 +384,10 @@ static void handleuserinput(struct gbs *gbs)
 		case 27:
 			quit = 1;
 			break;
+		case ' ':
+			pause_mode = !pause_mode;
+			gbhw_pause(pause_mode);
+			break;
 		}
 	}
 }
@@ -530,21 +534,17 @@ int main(int argc, char **argv)
 
 	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
 	while (!quit) {
-		int cycles = gbhw_step();
+		int cycles = gbhw_step(refresh_delay);
 
 		if (cycles < 0) {
 			quit = 1;
 		}
 
-		statuscnt -= cycles;
 		ticks += cycles;
 
-		if (statuscnt < 0) {
-			statuscnt += statustc;
-			if (!quiet) printstatus(gbs);
-			handleuserinput(gbs);
-			handletimeouts(gbs);
-		}
+		if (!quiet) printstatus(gbs);
+		handletimeouts(gbs);
+		handleuserinput(gbs);
 	}
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
 	return 0;

@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.13 2003/08/31 17:46:34 ranma Exp $
+/* $Id: gbhw.c,v 1.14 2003/10/11 17:47:08 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -29,10 +29,15 @@ static const char dutylookup[4] = {
 
 struct gbhw_channel gbhw_ch[4];
 
-static int vblanktc = 70256; /* ~59.7 Hz (vblankctr)*/
+static const int vblanktc = 70256; /* ~59.7 Hz (vblankctr)*/
 static int vblankctr = 70256;
 static int timertc = 70256;
 static int timerctr = 70256;
+
+#define HW_CLOCK 4194304
+static const int msec_cycles = HW_CLOCK/1000;
+
+static int pause_output = 0;
 
 static gbhw_callback_fn callback;
 static void *callbackpriv;
@@ -103,7 +108,7 @@ static void io_put(unsigned int addr, unsigned char val)
 		case 0xff07:
 			timertc = (256-ioregs[0x06]) * (16 << (((ioregs[0x07]+3) & 3) << 1));
 			if ((ioregs[0x07] & 0xf0) == 0x80) timertc /= 2;
-//			printf("Callback rate set to %2.2fHz.\n", 4194304/(float)timertc);
+//			printf("Callback rate set to %2.2fHz.\n", HW_CLOCK/(float)timertc);
 			break;
 		case 0xff10:
 			gbhw_ch[0].sweep_ctr = gbhw_ch[0].sweep_tc = ((val >> 4) & 7);
@@ -390,7 +395,7 @@ void gbhw_setcallback(gbhw_callback_fn fn, void *priv)
 
 void gbhw_setrate(int rate)
 {
-	sound_div_tc = (long long)4194304*65536/rate;
+	sound_div_tc = (long long)HW_CLOCK*65536/rate;
 }
 
 void gbhw_init(unsigned char *rombuf, unsigned int size)
@@ -422,23 +427,43 @@ void gbhw_init(unsigned char *rombuf, unsigned int size)
 	gbcpu_addmem(0xff, 0xff, io_put, io_get);
 }
 
-int gbhw_step(void)
+int gbhw_step(int time_to_work)
+/*
+ * Rückgabewert: Anzahl gelaufener CPU-Cycles
+ */
 {
-	int cycles = gbcpu_step();
+	int cycles_total = 0;
 
-	if (cycles < 0) return cycles;
-
-	gb_sound(cycles);
-	if (vblankctr > 0) vblankctr -= cycles;
-	if (vblankctr <= 0 && gbcpu_if && (ioregs[0x7f] & 1)) {
-		vblankctr += vblanktc;
-		gbcpu_intr(0x40);
-	}
-	if (timerctr > 0) timerctr -= cycles;
-	if (timerctr <= 0 && gbcpu_if && (ioregs[0x7f] & 4)) {
-		timerctr += timertc;
-		gbcpu_intr(0x48);
+	if (pause_output) {
+		usleep(time_to_work*1000);
+		return 0;
 	}
 
-	return cycles;
+	time_to_work *= msec_cycles;
+	
+	while (cycles_total < time_to_work) {
+		int cycles = gbcpu_step();
+
+		if (cycles < 0) return cycles;
+		
+		gb_sound(cycles);
+		if (vblankctr > 0) vblankctr -= cycles;
+		if (vblankctr <= 0 && gbcpu_if && (ioregs[0x7f] & 1)) {
+			vblankctr += vblanktc;
+			gbcpu_intr(0x40);
+		}
+		if (timerctr > 0) timerctr -= cycles;
+		if (timerctr <= 0 && gbcpu_if && (ioregs[0x7f] & 4)) {
+			timerctr += timertc;
+			gbcpu_intr(0x48);
+		}
+		cycles_total += cycles;
+	}
+
+	return cycles_total;
+}
+
+void gbhw_pause(int new_pause)
+{
+	pause_output = new_pause != 0;
 }
