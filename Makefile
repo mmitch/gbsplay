@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.8 2003/08/23 16:24:17 ranma Exp $
+# $Id: Makefile,v 1.9 2003/08/24 01:56:52 ranma Exp $
 
 prefix = /usr/local
 exec_prefix = ${prefix}
@@ -8,7 +8,7 @@ bindir = ${exec_prefix}/bin
 CFLAGS := -Wall -Wstrict-prototypes -Os -fomit-frame-pointer
 LDFLAGS := -lm
 
-SRCS := gbsplay.c
+SRCS := gbcpu.c gbhw.c gbsplay.c
 
 .PHONY: all distclean clean install dist
 all: gbsplay
@@ -44,8 +44,8 @@ dist:	distclean
 	tar -c gbsplay/ -vzf ../gbsplay.tar.gz
 	rm -rf ./gbsplay
 
-gbsplay: gbsplay.o 
-	$(CC) $(LDFLAGS) -o $@ $<
+gbsplay: $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(OBJS)
 
 .SUFFIXES: .i .s
 
