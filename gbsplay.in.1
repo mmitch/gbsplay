@@ -1,4 +1,4 @@
-.\" $Id: gbsplay.in.1,v 1.10 2004/03/17 14:17:43 mitch Exp $
+.\" $Id: gbsplay.in.1,v 1.11 2004/03/20 19:25:14 mitch Exp $
 .\" This manpage 2003-2004 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
 .TH "gbsplay" "1" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
@@ -25,6 +25,9 @@ Set subsong gap to \fIsubsong\-gap\fR seconds.  Before playing the next subsong 
 \fI\-h\fR
 Display short help and exit.
 .TP
+\fI\-o plugin\fR
+Select sound output plugin \fIplugin\fR.  Default depends on compilation options.  Select \fIlist\fR to view a list of all available output plugins.
+.TP
 \fI\-q\fR
 Be quiet, show only error messages.
 .TP
@@ -33,9 +36,6 @@ Set the samplerate to \fIsamplerate\fR Hz.  Default value is 44100Hz.
 .TP
 \fI\-R refresh\-delay\fR
 Set the refresh delay to \fIrefresh\-delay\fR milliseconds.  Default value is 33 milliseconds.  Larger values will lower CPU usage, but things as subsong changes, fadeouts, reactions to keypresses and the on\-screen display will be delayed.
-.TP
-\fI\-s\fR
-Write to stdout instead of /dev/dsp.
 .TP
 \fI\-t subsong\-timeout\fR
 Set subsong timeout to \fIsubsong\-timeout\fR seconds.  When a subsong has been played for the given time, the player will skip to the next subsong.  Default value is 120 seconds.

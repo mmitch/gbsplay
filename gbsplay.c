@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.80 2004/03/20 18:50:02 mitch Exp $
+/* $Id: gbsplay.c,v 1.81 2004/03/20 19:25:14 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -75,7 +75,6 @@ static int fadeout = 3;
 static int subsong_gap = 2;
 static int subsong_stop = -1;
 static int subsong_timeout = 2*60;
-static int usestdout = 0;
 static int redraw = false;
 
 static char *cfgfile = ".gbsplayrc";
@@ -109,6 +108,8 @@ static struct output_plugin plugouts[] = {
 	{ "stdout", "STDOUT file writer", &stdout_open, &stdout_write, &stdout_close },
 	{ NULL, NULL, NULL, NULL, NULL }
 };
+static char* sound_id;
+static char* sound_name;
 static plugout_open_fn  sound_open;
 static plugout_write_fn sound_write;
 static plugout_close_fn sound_close;
@@ -321,6 +322,45 @@ static regparm int nextsubsong_cb(struct gbs *gbs, void *priv)
 	return true;
 }
 
+static regparm void select_plugin_by_index(int idx)
+{
+	sound_id    = plugouts[idx].id;
+	sound_name  = plugouts[idx].name;
+	sound_close = plugouts[idx].close_fn;
+	sound_open  = plugouts[idx].open_fn;
+	sound_write = plugouts[idx].write_fn;
+	sound_close = plugouts[idx].close_fn;
+}
+
+static regparm void select_plugin(void)
+{
+	/* autoselect:  (make this more intelligent) */
+	select_plugin_by_index(0);
+}
+
+static regparm void select_plugin_by_id(char *id)
+{
+	int idx;
+
+	if (strcmp(id, "list") == 0) {
+		printf(_("available output plugins:\n"));
+		for (idx = 0; plugouts[idx].id != NULL; idx++) {
+			printf("%s\t- %s\n", plugouts[idx].id, plugouts[idx].name);
+		}
+		exit(0);
+	}
+
+	for (idx = 0; plugouts[idx].id != NULL; idx++) {
+		if ( strcmp(plugouts[idx].id, id) == 0 ) {
+			select_plugin_by_index(idx);
+			return;
+		}
+	}
+	
+	printf(_("\"%s\" is not a known output plugin.\n\n"), id);
+	exit(1);
+}
+
 char *endian_str(int endian)
 {
 	switch (endian) {
@@ -342,10 +382,11 @@ static regparm void usage(int exitcode)
 	        "  -f  set fadeout (%d seconds)\n"
 	        "  -g  set subsong gap (%d seconds)\n"
 	        "  -h  display this help and exit\n"
+	        "  -o  select output plugin (%s)\n"
+	        "      'list' shows available plugins\n"
 	        "  -q  quiet\n"
 	        "  -r  set samplerate (%dHz)\n"
 	        "  -R  set refresh delay (%d milliseconds)\n"
-	        "  -s  write to stdout\n"
 	        "  -t  set subsong timeout (%d seconds)\n"
 	        "  -T  set silence timeout (%d seconds)\n"
 	        "  -V  print version and exit\n"
@@ -355,6 +396,7 @@ static regparm void usage(int exitcode)
 	        endian_str(endian),
 		fadeout,
 		subsong_gap,
+		sound_id,
 	        rate,
 		refresh_delay,
 		subsong_timeout,
@@ -372,7 +414,7 @@ static regparm void parseopts(int *argc, char ***argv)
 {
 	int res;
 	myname = *argv[0];
-	while ((res = getopt(*argc, *argv, "E:f:g:hqr:R:st:T:VzZ")) != -1) {
+	while ((res = getopt(*argc, *argv, "E:f:g:hqo:r:R:t:T:VzZ")) != -1) {
 		switch (res) {
 		default:
 			usage(1);
@@ -398,6 +440,9 @@ static regparm void parseopts(int *argc, char ***argv)
 		case 'h':
 			usage(0);
 			break;
+		case 'o':
+			select_plugin_by_id(optarg);
+			break;
 		case 'q':
 			quiet = 1;
 			break;
@@ -406,10 +451,6 @@ static regparm void parseopts(int *argc, char ***argv)
 			break;
 		case 'R':
 			sscanf(optarg, "%d", &refresh_delay);
-			break;
-		case 's':
-			usestdout = 1;
-			quiet = 1;
 			break;
 		case 't':
 			sscanf(optarg, "%d", &subsong_timeout);
@@ -577,33 +618,6 @@ static regparm void printinfo(struct gbs *gbs)
 	redraw = false;
 }
 
-static regparm void select_plugin_by_index(int idx)
-{
-	sound_open  = plugouts[idx].open_fn;
-	sound_write = plugouts[idx].write_fn;
-	sound_close = plugouts[idx].close_fn;
-}
-
-static regparm void select_plugin()
-{
-	/* autoselect:  (make this more intelligent) */
-	select_plugin_by_index(0);
-}
-
-static regparm void select_plugin_by_id(char *id)
-{
-	int idx;
-
-	/* fallback: autoselect*/
-	select_plugin();
-
-	for (idx = 0; plugouts[idx].id != NULL; idx++) {
-		if ( strcmp(plugouts[idx].id, id) == 0 ) {
-			select_plugin_by_index(idx);
-		}
-	}
-}
-
 int main(int argc, char **argv)
 {
 	struct gbs *gbs;
@@ -619,6 +633,8 @@ int main(int argc, char **argv)
 	random_seed = time(0)+getpid();
 	srand(random_seed);
 
+	select_plugin();
+
 	sprintf(usercfg, "%s/%s", homedir, cfgfile);
 	cfg_parse("/etc/gbsplayrc", options);
 	cfg_parse(usercfg, options);
@@ -631,15 +647,7 @@ int main(int argc, char **argv)
 	precalc_notes();
 	precalc_vols();
 
-
-	if (usestdout) {
-		select_plugin_by_id( "stdout" );
-	} else {
-		select_plugin();
-	}
-
 	dspfd = sound_open(endian, rate);
-
 
 	gbhw_setcallback(callback, NULL);
 	gbhw_setrate(rate);

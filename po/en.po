@@ -1,4 +1,4 @@
-# $Id: en.po,v 1.8 2004/03/17 14:28:12 mitch Exp $
+# $Id: en.po,v 1.9 2004/03/20 19:25:14 mitch Exp $
 # English translations for gbsplay.
 # Copyright (C) 2003 Tobias Diedrich <ranma@gmx.at>
 # This file is distributed under GNU GPL.
@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-03-17 15:19+0100\n"
-"PO-Revision-Date: 2004-03-17 15:23+0100\n"
+"POT-Creation-Date: 2004-03-20 20:15+0100\n"
+"PO-Revision-Date: 2004-03-20 20:19+0100\n"
 "Last-Translator: Tobias Diedrich <ranma@gmx.at>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -32,6 +32,14 @@ msgstr ""
 "\n"
 "commands:  [p]revious subsong   [n]ext subsong   [q]uit player\n"
 "           [ ] pause/resume   [1-4] mute channel"
+
+#, c-format
+msgid ""
+"\"%s\" is not a known output plugin.\n"
+"\n"
+msgstr ""
+"\"%s\" is not a known output plugin.\n"
+"\n"
 
 #, c-format
 msgid ""
@@ -130,13 +138,6 @@ msgstr "Length    "
 msgid "Next"
 msgstr "Next"
 
-msgid ""
-"No sound support on this platform.\n"
-"Use 'gbsplay -s' for stdout output."
-msgstr ""
-"No sound support on this platform.\n"
-"Use 'gbsplay -s' for stdout output."
-
 #, c-format
 msgid "Not a GBS-File: %s\n"
 msgstr "Not a GBS-File: %s\n"
@@ -184,10 +185,11 @@ msgid ""
 "  -f  set fadeout (%d seconds)\n"
 "  -g  set subsong gap (%d seconds)\n"
 "  -h  display this help and exit\n"
+"  -o  select output plugin (%s)\n"
+"      'list' shows available plugins\n"
 "  -q  quiet\n"
 "  -r  set samplerate (%dHz)\n"
 "  -R  set refresh delay (%d milliseconds)\n"
-"  -s  write to stdout\n"
 "  -t  set subsong timeout (%d seconds)\n"
 "  -T  set silence timeout (%d seconds)\n"
 "  -V  print version and exit\n"
@@ -201,10 +203,11 @@ msgstr ""
 "  -f  set fadeout (%d seconds)\n"
 "  -g  set subsong gap (%d seconds)\n"
 "  -h  display this help and exit\n"
+"  -o  select output plugin (%s)\n"
+"      'list' shows available plugins\n"
 "  -q  quiet\n"
 "  -r  set samplerate (%dHz)\n"
 "  -R  set refresh delay (%d milliseconds)\n"
-"  -s  write to stdout\n"
 "  -t  set subsong timeout (%d seconds)\n"
 "  -T  set silence timeout (%d seconds)\n"
 "  -V  print version and exit\n"
@@ -234,6 +237,10 @@ msgid "Warning: File CRC does not match (0x%08x != 0x%08x).\n"
 msgstr "Warning: File CRC does not match (0x%08x != 0x%08x).\n"
 
 #, c-format
+msgid "available output plugins:\n"
+msgstr "available output plugins:\n"
+
+#, c-format
 msgid "fcntl(F_GETFL) failed: %s\n"
 msgstr "fcntl(F_GETFL) failed: %s\n"
 
@@ -242,20 +249,20 @@ msgid "fcntl(F_SETFL, flags&~O_NONBLOCK) failed: %s\n"
 msgstr "fcntl(F_SETFL, flags&~O_NONBLOCK) failed: %s\n"
 
 #, c-format
-msgid "ioctl(dspfd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"
-msgstr "ioctl(dspfd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"
+msgid "ioctl(fd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"
+msgstr "ioctl(fd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"
 
 #, c-format
-msgid "ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n"
-msgstr "ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n"
+msgid "ioctl(fd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n"
+msgstr "ioctl(fd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n"
 
 #, c-format
-msgid "ioctl(dspfd, SNDCTL_DSP_SPEED, %d) failed: %s\n"
-msgstr "ioctl(dspfd, SNDCTL_DSP_SPEED, %d) failed: %s\n"
+msgid "ioctl(fd, SNDCTL_DSP_SPEED, %d) failed: %s\n"
+msgstr "ioctl(fd, SNDCTL_DSP_SPEED, %d) failed: %s\n"
 
 #, c-format
-msgid "ioctl(dspfd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
-msgstr "ioctl(dspfd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
+msgid "ioctl(fd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
+msgstr "ioctl(fd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
 
 msgid "no time limit"
 msgstr "no time limit"
