@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.22 2003/12/06 02:41:37 ranma Exp $
+/* $Id: gbhw.c,v 1.21.2.1 2003/12/06 18:13:36 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
