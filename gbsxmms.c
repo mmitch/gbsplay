@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.1 2003/08/24 21:40:44 ranma Exp $
+/* $Id: gbsxmms.c,v 1.2 2003/08/24 23:43:11 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -18,7 +18,6 @@
 #include <pthread.h>
 
 #include <xmms/plugin.h>
-#include <xmms/util.h>
 
 #include "gbhw.h"
 #include "gbcpu.h"
@@ -192,14 +191,14 @@ static int open_gbs(char *name)
 	return 1;
 }
 
-static int stopthread = 0;
+static int stopthread = 1;
 
 static void callback(void *buf, int len, void *priv)
 {
-	gbs_ip.add_vis_pcm(gbs_ip.output->written_time(),
-	                   FMT_S16_LE, 2, len/4, buf);
 	while (gbs_ip.output->buffer_free() < len && !stopthread) usleep(10000);
 	gbs_ip.output->write_audio(buf, len);
+	gbs_ip.add_vis_pcm(gbs_ip.output->written_time(),
+	                   FMT_S16_LE, 2, len/4, buf);
 }
 
 static void init(void)
@@ -241,6 +240,8 @@ static void play_file(char *filename)
 {
 	if (open_gbs(filename)) {
 		gbs_playsong(-1);
+		gbclock = 0;
+		stopthread = 0;
 		pthread_create(&playthread, 0, playloop, 0);
 	}
 }
@@ -249,12 +250,12 @@ static void stop(void)
 {
 	stopthread = 1;
 	pthread_join(playthread, 0);
-	stopthread = 0;
 }
 
 static int get_time(void)
 {
-	return gbclock / 4194304;
+	if (stopthread) return -1;
+	return gbs_ip.output->output_time();
 }
 
 static void cleanup(void)
@@ -270,6 +271,7 @@ static void get_song_info(char *filename, char **title, int *length)
 	close(fd);
 
 	*title = malloc(3*32+10);
+	*length = -1;
 
 	snprintf(*title, 3*32+9, "%.32s - %.32s (%.32s)",
 	         &buf[0x10], &buf[0x30], &buf[0x50]);

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.17 2003/08/24 21:40:44 ranma Exp $
+# $Id: Makefile,v 1.18 2003/08/24 23:43:11 ranma Exp $
 
 prefix = /usr/local
 exec_prefix = ${prefix}
@@ -7,7 +7,7 @@ bindir = ${exec_prefix}/bin
 mandir = ${prefix}/man
 man1dir = $(mandir)/man1
 
-CFLAGS := -Wall -Wstrict-prototypes -Os -fomit-frame-pointer -fPIC -I/usr/include/glib-1.2 -I/usr/include/gtk-1.2 -I/usr/lib/glib/include
+CFLAGS := -Wall -Wstrict-prototypes -Os -fomit-frame-pointer -fPIC $(shell glib-config --cflags)
 LDFLAGS :=
 
 SRCS := gbcpu.c gbhw.c gbsplay.c gbsxmms.c
