@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.45 2003/12/26 15:00:07 mitch Exp $>>
+<<$Id: TODO,v 1.46 2003/12/26 22:17:05 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -52,3 +52,5 @@ TODO list for gbsplay.
 
 (X)  gbsxmms: now works on FreeBSD
 
+(X)  gbsplay: changed -z and -Z description.  shuffled lists are
+     reproducible over playlist boundaries.
