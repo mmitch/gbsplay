@@ -1,4 +1,4 @@
-/* $Id: gbcpu.c,v 1.12 2003/12/13 21:45:46 ranma Exp $
+/* $Id: gbcpu.c,v 1.13 2003/12/13 23:47:01 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/param.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "gbcpu.h"
 
@@ -35,7 +36,7 @@ struct opinfo {
 	ex_fn fn;
 };
 
-struct gbcpu_regs gbcpu_regs;
+gbcpu_regs_u gbcpu_regs;
 int gbcpu_halted;
 int gbcpu_stopped;
 int gbcpu_if;
@@ -1732,7 +1733,7 @@ static const struct opinfo ops[256] = {
 };
 
 #if DEBUG == 1
-static struct gbcpu_regs oldregs;
+static gbcpu_regs_u oldregs;
 
 static void dump_regs(void)
 {

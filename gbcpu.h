@@ -1,4 +1,4 @@
-/* $Id: gbcpu.h,v 1.6 2003/11/29 19:03:15 ranma Exp $
+/* $Id: gbcpu.h,v 1.7 2003/12/13 23:47:01 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -71,8 +71,7 @@ static inline void foo(void)
 #define REGS8_R(r, i) (r.ri[i^1])
 #define REGS8_W(r, i, x) (r.ri[i^1]) = x
 
-struct gbcpu_regs {
-	union {
+typedef union {
 		uint8_t ri[12];
 		struct {
 			uint8_t c;
@@ -86,8 +85,7 @@ struct gbcpu_regs {
 			uint16_t sp;
 			uint16_t pc;
 		} rn;
-	};
-};
+} gbcpu_regs_u;
 
 #else
 
@@ -96,8 +94,7 @@ struct gbcpu_regs {
 #define REGS8_R(r, i) (r.ri[i])
 #define REGS8_W(r, i, x) (r.ri[i]) = x
 
-struct gbcpu_regs {
-	union {
+typedef union {
 		uint8_t ri[12];
 		struct {
 			uint8_t b;
@@ -111,15 +108,14 @@ struct gbcpu_regs {
 			uint16_t sp;
 			uint16_t pc;
 		} rn;
-	};
-};
+} gbcpu_regs_u;
 
 #endif
 
 typedef void (*gbcpu_put_fn)(uint32_t addr, uint8_t val);
 typedef uint8_t (*gbcpu_get_fn)(uint32_t addr);
 
-extern struct gbcpu_regs gbcpu_regs;
+extern gbcpu_regs_u gbcpu_regs;
 extern int gbcpu_halted;
 extern int gbcpu_if;
 
