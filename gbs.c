@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.12 2003/11/30 14:35:59 ranma Exp $
+/* $Id: gbs.c,v 1.13 2003/12/05 22:02:19 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -114,17 +114,17 @@ int gbs_playsong(struct gbs *gbs, int i)
 
 void gbs_printinfo(struct gbs *gbs, int verbose)
 {
-	printf("GBSVersion:	%d\n"
-	       "Title:		\"%s\"\n"
-	       "Author:		\"%s\"\n"
-	       "Copyright:	\"%s\"\n"
-	       "Load address:	0x%04x\n"
-	       "Init address:	0x%04x\n"
-	       "Play address:	0x%04x\n"
-	       "Stack pointer:	0x%04x\n"
-	       "File size:	0x%08x\n"
-	       "ROM size:	0x%08x (%d banks)\n"
-	       "Subsongs:	%d\n",
+	printf("GBSVersion:     %d\n"
+	       "Title:          \"%s\"\n"
+	       "Author:         \"%s\"\n"
+	       "Copyright:      \"%s\"\n"
+	       "Load address:   0x%04x\n"
+	       "Init address:   0x%04x\n"
+	       "Play address:   0x%04x\n"
+	       "Stack pointer:  0x%04x\n"
+	       "File size:      0x%08x\n"
+	       "ROM size:       0x%08x (%d banks)\n"
+	       "Subsongs:       %d\n",
 	       gbs->version,
 	       gbs->title,
 	       gbs->author,
