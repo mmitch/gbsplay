@@ -1,10 +1,17 @@
-<<$Id: TODO,v 1.52 2004/01/06 21:28:30 ranma Exp $>>
+<<$Id: TODO,v 1.53 2004/01/17 18:58:39 mitch Exp $>>
 
 
 TODO list for gbsplay.
 
 
 ### bugs
+
+( )  `./configure --enable-something` prints no error like
+     "'something' does not exist".
+
+( )  configure script does not print "shared lib enabled"
+
+( )  make install/uninstall miss shared library
 
 ### unspecified: (bits'n'ideas)
 
@@ -23,13 +30,11 @@ TODO list for gbsplay.
 
 ( )  gbsinfo: add --help option
 
-### version 0.0.5:
+### version 0.0.6:
 
-( )  set up feature list for 0.0.5 release
-
-(X)  make configure more standards compliant
+( )  set up feature list for 0.0.6 release
 
 (X)  generate a dynamic library that is used by gbsplay, gbsinfo and gbsxmms
      (configure --enable-sharedlibgbs)
-
-(X)  Fix broken Cygwin build.
+     (at least install/uninstall buggy and thus this feature has not
+      been announced in the 0.0.5 release!)
