@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.11 2003/11/29 19:03:15 ranma Exp $
+/* $Id: gbs.c,v 1.12 2003/11/30 14:35:59 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -139,7 +139,7 @@ void gbs_printinfo(struct gbs *gbs, int verbose)
 	       gbs->songs);
 	if (gbs->version == 2) {
 		printf("CRC32:		0x%08x/0x%08x (%s)\n",
-		       gbs->crc, gbs->crcnow,
+		       (unsigned int)gbs->crc, (unsigned int)gbs->crcnow,
 		       gbs->crc == gbs->crcnow ? "OK" : "Failed");
 	}
 	if (verbose && gbs->version == 2) {
@@ -153,7 +153,7 @@ void gbs_printinfo(struct gbs *gbs, int verbose)
 			}
 			if (gbs->subsong_info[i].len) {
 				printf("(%d seconds)\n",
-				       gbs->subsong_info[i].len);
+				       (int)(gbs->subsong_info[i].len >> GBS_LEN_SHIFT));
 			} else {
 				printf("(no timelimit)\n");
 			}
@@ -332,7 +332,8 @@ struct gbs *gbs_open(char *name)
 		if ((realcrc=gbs_crc32(0, gbs->exthdr, ehdrlen)) == crc) {
 			have_ehdr = 1;
 		} else {
-			fprintf(stderr, "Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n", crc, realcrc);
+			fprintf(stderr, "Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n",
+			        (unsigned int)crc, (unsigned int)realcrc);
 		}
 	}
 	if (have_ehdr) {
@@ -374,7 +375,8 @@ struct gbs *gbs_open(char *name)
 		}
 
 		if (gbs->crc != gbs->crcnow) {
-			fprintf(stderr, "Warning: File CRC does not match (0x%08x != 0x%08x).\n", gbs->crc, gbs->crcnow);
+			fprintf(stderr, "Warning: File CRC does not match (0x%08x != 0x%08x).\n",
+			        (unsigned int)gbs->crc, (unsigned int)gbs->crcnow);
 		}
 	}
 

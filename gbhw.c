@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.19 2003/11/30 14:25:24 ranma Exp $
+/* $Id: gbhw.c,v 1.20 2003/11/30 14:35:59 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -74,7 +74,7 @@ static uint8_t io_get(uint32_t addr)
 	}
 	if (addr == 0xff00) return 0;
 	if (addr == 0xffff) return ioregs[0x7f];
-	fprintf(stderr, "ioread from 0x%04x unimplemented.\n", addr);
+	fprintf(stderr, "ioread from 0x%04x unimplemented.\n", (unsigned int)addr);
 	DPRINTF("io_get(%04x)\n", addr);
 	return 0xff;
 }
@@ -247,7 +247,7 @@ static void io_put(uint32_t addr, uint8_t val)
 		case 0xffff:
 			break;
 		default:
-			fprintf(stderr, "iowrite to 0x%04x unimplemented (val=%02x).\n", addr, val);
+			fprintf(stderr, "iowrite to 0x%04x unimplemented (val=%02x).\n", (unsigned int)addr, val);
 			break;
 	}
 }
