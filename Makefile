@@ -1,4 +1,10 @@
-# $Id: Makefile,v 1.50 2003/11/29 18:54:58 ranma Exp $
+# $Id: Makefile,v 1.51 2003/11/29 21:57:16 ranma Exp $
+
+noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
+
+ifneq ($(noincludes),yes)
+-include config.mk
+endif
 
 prefix      := /usr/local
 exec_prefix := $(prefix)
@@ -10,6 +16,7 @@ man5dir     := $(mandir)/man5
 docdir      := $(prefix)/share/doc/gbsplay
 
 DESTDIR :=
+DISTDIR := gbsplay-$(VERSION)
 
 CFLAGS  := -Wall -std=gnu99 -Wstrict-prototypes -g -Os
 LDFLAGS :=
@@ -44,8 +51,7 @@ all: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL)
 
 # include the dependency files
 
-ifneq ($(patsubst clean,nodep,$(patsubst distclean,nodep,$(MAKECMDGOALS))), nodep)
--include config.mk
+ifneq ($(noincludes),yes)
 -include $(patsubst %.o,%.d,$(filter %.o,$(objs)))
 endif
 
@@ -90,8 +96,6 @@ uninstall-default:
 uninstall-gbsxmms.so:
 	rm -f $(DESTDIR)$(XMMS_INPUT_PLUGIN_DIR)/gbsxmms.so
 	-rmdir -p $(DESTDIR)$(XMMS_INPUT_PLUGIN_DIR)
-
-DISTDIR := gbsplay-$(VERSION)
 
 dist:	distclean
 	install -d ./$(DISTDIR)
