@@ -1,4 +1,4 @@
-/* $Id: gbcpu.h,v 1.2 2003/08/24 03:26:10 ranma Exp $
+/* $Id: gbcpu.h,v 1.3 2003/08/24 10:56:13 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -56,7 +56,7 @@ static inline void foo(void)
 #define REGS8_R(r, i) (r.ri[i^1])
 #define REGS8_W(r, i, x) (r.ri[i^1]) = x
 
-struct regs {
+struct gbcpu_regs {
 	union {
 		unsigned char ri[12];
 		struct {
@@ -81,7 +81,7 @@ struct regs {
 #define REGS8_R(r, i) (r.ri[i])
 #define REGS8_W(r, i, x) (r.ri[i]) = x
 
-struct regs {
+struct gbcpu_regs {
 	union {
 		unsigned char ri[12];
 		struct {
@@ -101,14 +101,14 @@ struct regs {
 
 #endif
 
-typedef void (*put_fn)(unsigned short addr, unsigned char val);
-typedef unsigned char (*get_fn)(unsigned short addr);
+typedef void (*gbcpu_put_fn)(unsigned short addr, unsigned char val);
+typedef unsigned char (*gbcpu_get_fn)(unsigned short addr);
 
-extern struct regs regs;
-extern int halted;
-extern int interrupts;
+extern struct gbcpu_regs gbcpu_regs;
+extern int gbcpu_halted;
+extern int gbcpu_if;
 
-void gbcpu_addmem(int start, int end, put_fn putfn, get_fn getfn);
+void gbcpu_addmem(int start, int end, gbcpu_put_fn putfn, gbcpu_get_fn getfn);
 void gbcpu_init(void);
 int gbcpu_step(void);
 void gbcpu_intr(int vec);

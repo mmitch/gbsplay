@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.3 2003/08/24 09:55:06 ranma Exp $
+/* $Id: gbhw.c,v 1.4 2003/08/24 10:56:13 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -23,13 +23,11 @@ static unsigned char rombank = 1;
 static unsigned int romsize;
 static unsigned int lastbank;
 
-static char dutylookup[4] = {
+static const char dutylookup[4] = {
 	1, 2, 4, 6
 };
 
 struct gbhw_channel gbhw_ch[4];
-
-static unsigned long long gb_clk;
 
 static int vblanktc = 70256; /* ~59.7 Hz (vblank)*/
 static int vblank = 70256;
@@ -99,11 +97,10 @@ static void io_put(unsigned short addr, unsigned char val)
 	} else if ((addr >= 0xff00 &&
 	            addr <= 0xff7f) ||
 	            addr == 0xffff) {
+		int chn = (addr - 0xff10)/5;
 		ioregs[addr & 0x7f] = val;
 		DPRINTF(" ([0x%04x]=%02x) ", addr, val);
 		switch (addr) {
-			case 0xff00:
-				break;
 			case 0xff06:
 			case 0xff07:
 				timertc = (256-ioregs[0x06]) * (16 << (((ioregs[0x07]+3) & 3) << 1));
@@ -117,175 +114,67 @@ static void io_put(unsigned short addr, unsigned char val)
 
 				break;
 			case 0xff11:
+			case 0xff16:
+			case 0xff20:
 				{
-					int duty = ioregs[0x11] >> 6;
-					int len = ioregs[0x11] & 0x3f;
+					int duty = val >> 6;
+					int len = val & 0x3f;
 
-					gbhw_ch[0].duty = dutylookup[duty];
-					gbhw_ch[0].duty_tc = gbhw_ch[0].div_tc*gbhw_ch[0].duty/8;
-					gbhw_ch[0].len = (64 - len)*2;
+					gbhw_ch[chn].duty = dutylookup[duty];
+					gbhw_ch[chn].duty_tc = gbhw_ch[chn].div_tc*gbhw_ch[0].duty/8;
+					gbhw_ch[chn].len = (64 - len)*2;
 
 					break;
 				}
 			case 0xff12:
+			case 0xff17:
+			case 0xff21:
 				{
-					int vol = ioregs[0x12] >> 4;
-					int envdir = (ioregs[0x12] >> 3) & 1;
-					int envspd = ioregs[0x12] & 7;
+					int vol = val >> 4;
+					int envdir = (val >> 3) & 1;
+					int envspd = val & 7;
 
-					gbhw_ch[0].volume = vol;
-					gbhw_ch[0].env_dir = envdir;
-					gbhw_ch[0].env_speed = gbhw_ch[0].env_speed_tc = envspd*8;
+					gbhw_ch[chn].volume = vol;
+					gbhw_ch[chn].env_dir = envdir;
+					gbhw_ch[chn].env_speed = gbhw_ch[chn].env_speed_tc = envspd*8;
 				}
 				break;
 			case 0xff13:
 			case 0xff14:
-				{
-					int div = ioregs[0x13];
-
-					div |= ((int)ioregs[0x14] & 7) << 8;
-					gbhw_ch[0].div_tc = 2048 - div;
-					gbhw_ch[0].duty_tc = gbhw_ch[0].div_tc*gbhw_ch[0].duty/8;
-
-					if (addr == 0xff13) break;
-				}
-				if (val & 0x80) {
-					int vol = ioregs[0x12] >> 4;
-					int envdir = (ioregs[0x12] >> 3) & 1;
-					int envspd = ioregs[0x12] & 7;
-					int duty = ioregs[0x11] >> 6;
-					int len = ioregs[0x11] & 0x3f;
-					int div = ioregs[0x13];
-
-					div |= ((int)val & 7) << 8;
-					gbhw_ch[0].volume = vol;
-					gbhw_ch[0].master = 1;
-					gbhw_ch[0].env_dir = envdir;
-					gbhw_ch[0].env_speed = gbhw_ch[0].env_speed_tc = envspd*8;
-
-					gbhw_ch[0].div_tc = 2048 - div;
-					gbhw_ch[0].duty = dutylookup[duty];
-					gbhw_ch[0].duty_tc = gbhw_ch[0].div_tc*gbhw_ch[0].duty/8;
-					gbhw_ch[0].len = (64 - len)*2;
-					gbhw_ch[0].len_enable = (val & 0x40) > 0;
-
-//					printf(" ch1: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d gate=%d%d\n", gbhw_ch[0].volume, gbhw_ch[0].env_dir, gbhw_ch[0].env_speed_tc, gbhw_ch[0].duty, gbhw_ch[0].len, gbhw_ch[0].len_enable, gbhw_ch[0].div_tc, gbhw_ch[0].leftgate, gbhw_ch[0].rightgate);
-				}
-				break;
-			case 0xff15:
-				break;
-			case 0xff16:
-				{
-					int duty = ioregs[0x16] >> 6;
-					int len = ioregs[0x16] & 0x3f;
-
-					gbhw_ch[1].duty = dutylookup[duty];
-					gbhw_ch[1].duty_tc = gbhw_ch[1].div_tc*gbhw_ch[1].duty/8;
-					gbhw_ch[1].len = (64 - len)*2;
-
-					break;
-				}
-			case 0xff17:
-				{
-					int vol = ioregs[0x17] >> 4;
-					int envdir = (ioregs[0x17] >> 3) & 1;
-					int envspd = ioregs[0x17] & 7;
-
-					gbhw_ch[1].volume = vol;
-					gbhw_ch[1].env_dir = envdir;
-					gbhw_ch[1].env_speed = gbhw_ch[1].env_speed_tc = envspd*8;
-				}
-				break;
 			case 0xff18:
 			case 0xff19:
+			case 0xff1d:
+			case 0xff1e:
 				{
-					int div = ioregs[0x18];
+					int div = ioregs[0x13 + 5*chn];
 
-					div |= ((int)ioregs[0x19] & 7) << 8;
-					gbhw_ch[1].div_tc = 2048 - div;
-					gbhw_ch[1].duty_tc = gbhw_ch[1].div_tc*gbhw_ch[1].duty/8;
+					div |= ((int)ioregs[0x14 + 5*chn] & 7) << 8;
+					gbhw_ch[chn].div_tc = 2048 - div;
+					gbhw_ch[chn].duty_tc = gbhw_ch[chn].div_tc*gbhw_ch[0].duty/8;
 
-					if (addr == 0xff18) break;
+					if (addr == 0xff13 ||
+					    addr == 0xff18 ||
+					    addr == 0xff1e) break;
 				}
-				if (val & 0x80) {
-					int vol = ioregs[0x17] >> 4;
-					int envdir = (ioregs[0x17] >> 3) & 1;
-					int envspd = ioregs[0x17] & 7;
-					int duty = ioregs[0x16] >> 6;
-					int len = ioregs[0x16] & 0x3f;
-					int div = ioregs[0x18];
+				gbhw_ch[chn].len_enable = (val & 0x40) > 0;
 
-					div |= ((int)val & 7) << 8;
-					gbhw_ch[1].volume = vol;
-//					gbhw_ch[1].master = gbhw_ch[1].volume > 1; 
-					gbhw_ch[1].master = 1;
-					gbhw_ch[1].env_dir = envdir;
-					gbhw_ch[1].env_speed = gbhw_ch[1].env_speed_tc = envspd*8;
-					gbhw_ch[1].div_tc = 2048 - div;
-					gbhw_ch[1].duty = dutylookup[duty];
-					gbhw_ch[1].duty_tc = gbhw_ch[1].div_tc*gbhw_ch[1].duty/8;
-					gbhw_ch[1].len = (64 - len)*2;
-					gbhw_ch[1].len_enable = (val & 0x40) > 0;
-
-//					printf(" ch2: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d gate=%d%d\n", gbhw_ch[1].volume, gbhw_ch[1].env_dir, gbhw_ch[1].env_speed, gbhw_ch[1].duty, gbhw_ch[1].len, gbhw_ch[1].len_enable, gbhw_ch[1].div_tc, gbhw_ch[1].leftgate, gbhw_ch[1].rightgate);
-				}
+//				printf(" ch1: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d gate=%d%d\n", gbhw_ch[0].volume, gbhw_ch[0].env_dir, gbhw_ch[0].env_speed_tc, gbhw_ch[0].duty, gbhw_ch[0].len, gbhw_ch[0].len_enable, gbhw_ch[0].div_tc, gbhw_ch[0].leftgate, gbhw_ch[0].rightgate);
+				break;
+			case 0xff15:
 				break;
 			case 0xff1a:
 				gbhw_ch[2].master = (ioregs[0x1a] & 0x80) > 0;
 				break;
 			case 0xff1b:
-				{
-					int len = ioregs[0x1b];
-
-					gbhw_ch[2].len = (256 - len)*2;
-
-					break;
-				}
+				gbhw_ch[2].len = (256 - val)*2;
+				break;
 			case 0xff1c:
 				{
 					int vol = (ioregs[0x1c] >> 5) & 3;
 					gbhw_ch[2].volume = vol;
 					break;
 				}
-			case 0xff1d:
-			case 0xff1e:
-				{
-					int div = ioregs[0x1d];
-					div |= ((int)ioregs[0x1e] & 7) << 8;
-					gbhw_ch[2].div_tc = 2048 - div;
-					if (addr == 0xff1d) break;
-				}
-				if (val & 0x80) {
-					int vol = (ioregs[0x1c] >> 5) & 3;
-					int div = ioregs[0x1d];
-					div |= ((int)val & 7) << 8;
-					gbhw_ch[2].master = (ioregs[0x1a] & 0x80) > 0;
-					gbhw_ch[2].volume = vol;
-					gbhw_ch[2].div_tc = 2048 - div;
-					gbhw_ch[2].len_enable = (val & 0x40) > 0;
-//					printf(" ch3: sft=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d gate=%d%d\n", gbhw_ch[2].volume, gbhw_ch[2].env_dir, gbhw_ch[2].env_speed, gbhw_ch[2].duty, gbhw_ch[2].len, gbhw_ch[2].len_enable, gbhw_ch[2].div_tc, gbhw_ch[2].leftgate, gbhw_ch[2].rightgate);
-				}
-				break;
 			case 0xff1f:
-				break;
-			case 0xff20:
-				{
-					int len = ioregs[0x20] & 0x3f;
-
-					gbhw_ch[3].len = (64 - len)*2;
-
-					break;
-				}
-			case 0xff21:
-				{
-					int vol = ioregs[0x21] >> 4;
-					int envdir = (ioregs[0x21] >> 3) & 1;
-					int envspd = ioregs[0x21] & 7;
-
-					gbhw_ch[3].volume = vol;
-					gbhw_ch[3].env_dir = envdir;
-					gbhw_ch[3].env_speed = gbhw_ch[3].env_speed_tc = envspd*8;
-				}
 				break;
 			case 0xff22:
 			case 0xff23:
@@ -298,24 +187,8 @@ static void io_put(unsigned short addr, unsigned char val)
 					if (rate) gbhw_ch[3].div_tc *= rate;
 					else gbhw_ch[3].div_tc /= 2;
 					if (addr == 0xff22) break;
-				}
-				if (val & 0x80) {
-					int vol = ioregs[0x21] >> 4;
-					int envdir = (ioregs[0x21] >> 3) & 1;
-					int envspd = ioregs[0x21] & 7;
-					int len = ioregs[0x20] & 0x3f;
-
-					gbhw_ch[3].volume = vol;
-					gbhw_ch[3].master = 1;
-					gbhw_ch[3].env_dir = envdir;
-					gbhw_ch[3].env_speed = gbhw_ch[3].env_speed_tc = envspd*8;
-					gbhw_ch[3].len = (64 - len)*2;
-					gbhw_ch[3].len_enable = (val & 0x40) > 0;
-
 //					printf(" ch4: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d gate=%d%d\n", gbhw_ch[3].volume, gbhw_ch[3].env_dir, gbhw_ch[3].env_speed, gbhw_ch[3].duty, gbhw_ch[3].len, gbhw_ch[3].len_enable, gbhw_ch[3].div_tc, gbhw_ch[3].leftgate, gbhw_ch[3].rightgate);
 				}
-				break;
-			case 0xff24:
 				break;
 			case 0xff25:
 				gbhw_ch[0].leftgate = (val & 0x10) > 0;
@@ -330,6 +203,8 @@ static void io_put(unsigned short addr, unsigned char val)
 			case 0xff26:
 				ioregs[0x26] = 0x80;
 				break;
+			case 0xff00:
+			case 0xff24:
 			case 0xff27:
 			case 0xff28:
 			case 0xff29:
@@ -339,7 +214,6 @@ static void io_put(unsigned short addr, unsigned char val)
 			case 0xff2d:
 			case 0xff2e:
 			case 0xff2f:
-				break;
 			case 0xff30:
 			case 0xff31:
 			case 0xff32:
@@ -356,7 +230,6 @@ static void io_put(unsigned short addr, unsigned char val)
 			case 0xff3d:
 			case 0xff3e:
 			case 0xff3f:
-				break;
 			case 0xffff:
 				break;
 			default:
@@ -596,7 +469,14 @@ void gbhw_init(void)
 	callbackpriv = NULL;
 	gbhw_ch[0].duty = 4;
 	gbhw_ch[1].duty = 4;
-	gbhw_ch[0].div_tc = gbhw_ch[1].div_tc = gbhw_ch[2].div_tc = gbhw_ch[3].div_tc= 1;
+	gbhw_ch[0].div_tc = 1;
+	gbhw_ch[1].div_tc = 1;
+	gbhw_ch[2].div_tc = 1;
+	gbhw_ch[3].div_tc = 1;
+	gbhw_ch[0].master = 1;
+	gbhw_ch[1].master = 1;
+	gbhw_ch[2].master = 1;
+	gbhw_ch[3].master = 1;
 	memset(extram, 0, sizeof(extram));
 	memset(intram, 0, sizeof(intram));
 	memset(hiram, 0, sizeof(hiram));
@@ -614,14 +494,13 @@ int gbhw_step(void)
 	int cycles = gbcpu_step();
 
 	gb_sound(cycles);
-	gb_clk += cycles;
 	if (vblank > 0) vblank -= cycles;
-	if (vblank <= 0 && interrupts && (ioregs[0x7f] & 1)) {
+	if (vblank <= 0 && gbcpu_if && (ioregs[0x7f] & 1)) {
 		vblank += vblanktc;
 		gbcpu_intr(0x40);
 	}
 	if (timer > 0) timer -= cycles;
-	if (timer <= 0 && interrupts && (ioregs[0x7f] & 4)) {
+	if (timer <= 0 && gbcpu_if && (ioregs[0x7f] & 4)) {
 		timer += timertc;
 		gbcpu_intr(0x48);
 	}

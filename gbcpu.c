@@ -1,4 +1,4 @@
-/* $Id: gbcpu.c,v 1.2 2003/08/24 03:26:10 ranma Exp $
+/* $Id: gbcpu.c,v 1.3 2003/08/24 10:56:13 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -15,18 +15,18 @@
 #include "gbcpu.h"
 
 #if DEBUG == 1
-static char regnames[12] = "BCDEHLFASPPC";
-static char *regnamech16[6] = {
+static const char regnames[12] = "BCDEHLFASPPC";
+static const char *regnamech16[6] = {
 	"BC", "DE", "HL", "FA", "SP", "PC"
 };
-static char *conds[4] = {
+static const char *conds[4] = {
 	"NZ", "Z", "NC", "C"
 };
 #endif
 
 struct opinfo;
 
-typedef void (*ex_fn)(unsigned char op, struct opinfo *oi);
+typedef void (*ex_fn)(unsigned char op, const struct opinfo *oi);
 
 struct opinfo {
 #if DEBUG == 1
@@ -35,9 +35,9 @@ struct opinfo {
 	ex_fn fn;
 };
 
-struct regs regs;
-int halted;
-int interrupts;
+struct gbcpu_regs gbcpu_regs;
+int gbcpu_halted;
+int gbcpu_if;
 
 static unsigned char none_get(unsigned short addr)
 {
@@ -48,7 +48,7 @@ static void none_put(unsigned short addr, unsigned char val)
 {
 }
 
-static get_fn getlookup[256] = {
+static gbcpu_get_fn getlookup[256] = {
 	&none_get,
 	&none_get,
 	&none_get,
@@ -307,7 +307,7 @@ static get_fn getlookup[256] = {
 	&none_get
 };
 
-static put_fn putlookup[256] = {
+static gbcpu_put_fn putlookup[256] = {
 	&none_put,
 	&none_put,
 	&none_put,
@@ -579,8 +579,8 @@ static inline void mem_put(unsigned short addr, unsigned char val)
 
 static void push(unsigned short val)
 {
-	unsigned short sp = REGS16_R(regs, SP) - 2;
-	REGS16_W(regs, SP, sp);
+	unsigned short sp = REGS16_R(gbcpu_regs, SP) - 2;
+	REGS16_W(gbcpu_regs, SP, sp);
 	mem_put(sp, val & 0xff);
 	mem_put(sp+1, val >> 8);
 }
@@ -588,20 +588,20 @@ static void push(unsigned short val)
 static unsigned short pop(void)
 {
 	unsigned short res;
-	unsigned short sp = REGS16_R(regs, SP);
+	unsigned short sp = REGS16_R(gbcpu_regs, SP);
 
 	res  = mem_get(sp);
 	res += mem_get(sp+1) << 8;
-	REGS16_W(regs, SP, sp + 2);
+	REGS16_W(gbcpu_regs, SP, sp + 2);
 
 	return res;
 }
 
 static unsigned char get_imm8(void)
 {
-	unsigned short pc = REGS16_R(regs, PC);
+	unsigned short pc = REGS16_R(gbcpu_regs, PC);
 	unsigned char res;
-	REGS16_W(regs, PC, pc + 1);
+	REGS16_W(gbcpu_regs, PC, pc + 1);
 	res = mem_get(pc);
 	DPRINTF("%02x", res);
 	return res;
@@ -621,18 +621,18 @@ static inline void print_reg(int i)
 static unsigned char get_reg(int i)
 {
 	if (i == 6) /* indirect memory access by [HL] */
-		return mem_get(REGS16_R(regs, HL));
-	return REGS8_R(regs, i);
+		return mem_get(REGS16_R(gbcpu_regs, HL));
+	return REGS8_R(gbcpu_regs, i);
 }
 
 static void put_reg(int i, unsigned char val)
 {
 	if (i == 6) /* indirect memory access by [HL] */
-		mem_put(REGS16_R(regs, HL), val);
-	else REGS8_W(regs, i, val);
+		mem_put(REGS16_R(gbcpu_regs, HL), val);
+	else REGS8_W(gbcpu_regs, i, val);
 }
 
-static void op_unknown(unsigned char op, struct opinfo *oi)
+static void op_unknown(unsigned char op, const struct opinfo *oi)
 {
 	printf(" Unknown opcode %02x.\n", op);
 	exit(0);
@@ -665,12 +665,12 @@ static void op_bit(unsigned char op)
 
 	DPRINTF("\tBIT %d, ", bit);
 	print_reg(reg);
-	regs.rn.f &= ~NF;
-	regs.rn.f |= HF | ZF;
-	regs.rn.f ^= ((get_reg(reg) << 8) >> (bit+1)) & ZF;
+	gbcpu_regs.rn.f &= ~NF;
+	gbcpu_regs.rn.f |= HF | ZF;
+	gbcpu_regs.rn.f ^= ((get_reg(reg) << 8) >> (bit+1)) & ZF;
 }
 
-static void op_rl(unsigned char op, struct opinfo *oi)
+static void op_rl(unsigned char op, const struct opinfo *oi)
 {
 	int reg = op & 7;
 	unsigned short res;
@@ -680,26 +680,26 @@ static void op_rl(unsigned char op, struct opinfo *oi)
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res << 1;
-	res |= (((unsigned short)regs.rn.f & CF) >> 4);
-	regs.rn.f = (val >> 7) << 4;
-	if (res == 0) regs.rn.f |= ZF;
+	res |= (((unsigned short)gbcpu_regs.rn.f & CF) >> 4);
+	gbcpu_regs.rn.f = (val >> 7) << 4;
+	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
 
-static void op_rla(unsigned char op, struct opinfo *oi)
+static void op_rla(unsigned char op, const struct opinfo *oi)
 {
 	unsigned short res;
 
 	DPRINTF(" %s", oi->name);
-	res  = regs.rn.a;
+	res  = gbcpu_regs.rn.a;
 	res  = res << 1;
-	res |= (((unsigned short)regs.rn.f & CF) >> 4);
-	regs.rn.f = (regs.rn.a >> 7) << 4;
-	if (res == 0) regs.rn.f |= ZF;
-	regs.rn.a = res;
+	res |= (((unsigned short)gbcpu_regs.rn.f & CF) >> 4);
+	gbcpu_regs.rn.f = (gbcpu_regs.rn.a >> 7) << 4;
+	if (res == 0) gbcpu_regs.rn.f |= ZF;
+	gbcpu_regs.rn.a = res;
 }
 
-static void op_rlc(unsigned char op, struct opinfo *oi)
+static void op_rlc(unsigned char op, const struct opinfo *oi)
 {
 	int reg = op & 7;
 	unsigned short res;
@@ -710,25 +710,25 @@ static void op_rlc(unsigned char op, struct opinfo *oi)
 	res  = val = get_reg(reg);
 	res  = res << 1;
 	res |= (val >> 7);
-	regs.rn.f = (val >> 7) << 4;
-	if (res == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.f = (val >> 7) << 4;
+	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
 
-static void op_rlca(unsigned char op, struct opinfo *oi)
+static void op_rlca(unsigned char op, const struct opinfo *oi)
 {
 	unsigned short res;
 
 	DPRINTF(" %s", oi->name);
-	res  = regs.rn.a;
+	res  = gbcpu_regs.rn.a;
 	res  = res << 1;
-	res |= (regs.rn.a >> 7);
-	regs.rn.f = (regs.rn.a >> 7) << 4;
-	if (res == 0) regs.rn.f |= ZF;
-	regs.rn.a = res;
+	res |= (gbcpu_regs.rn.a >> 7);
+	gbcpu_regs.rn.f = (gbcpu_regs.rn.a >> 7) << 4;
+	if (res == 0) gbcpu_regs.rn.f |= ZF;
+	gbcpu_regs.rn.a = res;
 }
 
-static void op_sla(unsigned char op, struct opinfo *oi)
+static void op_sla(unsigned char op, const struct opinfo *oi)
 {
 	int reg = op & 7;
 	unsigned short res;
@@ -738,12 +738,12 @@ static void op_sla(unsigned char op, struct opinfo *oi)
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res << 1;
-	regs.rn.f = ((val >> 7) << 4);
-	if (res == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.f = ((val >> 7) << 4);
+	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
 
-static void op_rr(unsigned char op, struct opinfo *oi)
+static void op_rr(unsigned char op, const struct opinfo *oi)
 {
 	int reg = op & 7;
 	unsigned short res;
@@ -753,26 +753,26 @@ static void op_rr(unsigned char op, struct opinfo *oi)
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res >> 1;
-	res |= (((unsigned short)regs.rn.f & CF) << 3);
-	regs.rn.f = (val & 1) << 4;
-	if (res == 0) regs.rn.f |= ZF;
+	res |= (((unsigned short)gbcpu_regs.rn.f & CF) << 3);
+	gbcpu_regs.rn.f = (val & 1) << 4;
+	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
 
-static void op_rra(unsigned char op, struct opinfo *oi)
+static void op_rra(unsigned char op, const struct opinfo *oi)
 {
 	unsigned short res;
 
 	DPRINTF(" %s", oi->name);
-	res  = regs.rn.a;
+	res  = gbcpu_regs.rn.a;
 	res  = res >> 1;
-	res |= (((unsigned short)regs.rn.f & CF) << 3);
-	regs.rn.f = (regs.rn.a & 1) << 4;
-	if (res == 0) regs.rn.f |= ZF;
-	regs.rn.a = res;
+	res |= (((unsigned short)gbcpu_regs.rn.f & CF) << 3);
+	gbcpu_regs.rn.f = (gbcpu_regs.rn.a & 1) << 4;
+	if (res == 0) gbcpu_regs.rn.f |= ZF;
+	gbcpu_regs.rn.a = res;
 }
 
-static void op_rrc(unsigned char op, struct opinfo *oi)
+static void op_rrc(unsigned char op, const struct opinfo *oi)
 {
 	int reg = op & 7;
 	unsigned short res;
@@ -783,25 +783,25 @@ static void op_rrc(unsigned char op, struct opinfo *oi)
 	res  = val = get_reg(reg);
 	res  = res >> 1;
 	res |= (val << 7);
-	regs.rn.f = (val & 1) << 4;
-	if (res == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.f = (val & 1) << 4;
+	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
 
-static void op_rrca(unsigned char op, struct opinfo *oi)
+static void op_rrca(unsigned char op, const struct opinfo *oi)
 {
 	unsigned short res;
 
 	DPRINTF(" %s", oi->name);
-	res  = regs.rn.a;
+	res  = gbcpu_regs.rn.a;
 	res  = res >> 1;
-	res |= (regs.rn.a << 7);
-	regs.rn.f = (regs.rn.a & 1) << 4;
-	if (res == 0) regs.rn.f |= ZF;
-	regs.rn.a = res;
+	res |= (gbcpu_regs.rn.a << 7);
+	gbcpu_regs.rn.f = (gbcpu_regs.rn.a & 1) << 4;
+	if (res == 0) gbcpu_regs.rn.f |= ZF;
+	gbcpu_regs.rn.a = res;
 }
 
-static void op_sra(unsigned char op, struct opinfo *oi)
+static void op_sra(unsigned char op, const struct opinfo *oi)
 {
 	int reg = op & 7;
 	unsigned short res;
@@ -812,12 +812,12 @@ static void op_sra(unsigned char op, struct opinfo *oi)
 	res  = val = get_reg(reg);
 	res  = res >> 1;
 	res |= (val & 0x80);
-	regs.rn.f = ((val & 1) << 4);
-	if (res == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.f = ((val & 1) << 4);
+	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
 
-static void op_srl(unsigned char op, struct opinfo *oi)
+static void op_srl(unsigned char op, const struct opinfo *oi)
 {
 	int reg = op & 7;
 	unsigned short res;
@@ -827,12 +827,12 @@ static void op_srl(unsigned char op, struct opinfo *oi)
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res >> 1;
-	regs.rn.f = ((val & 1) << 4);
-	if (res == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.f = ((val & 1) << 4);
+	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
 
-static void op_swap(unsigned char op, struct opinfo *oi)
+static void op_swap(unsigned char op, const struct opinfo *oi)
 {
 	int reg = op & 7;
 	unsigned short res;
@@ -843,12 +843,12 @@ static void op_swap(unsigned char op, struct opinfo *oi)
 	val = get_reg(reg);
 	res = (val >> 4) |
 	      (val << 4);
-	regs.rn.f = 0;
-	if (res == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.f = 0;
+	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
 
-static struct opinfo cbops[8] = {
+static const struct opinfo cbops[8] = {
 	OPINFO("\tRLC", &op_rlc),		/* opcode cb00-cb07 */
 	OPINFO("\tRRC", &op_rrc),		/* opcode cb08-cb0f */
 	OPINFO("\tRL", &op_rl),		/* opcode cb10-cb17 */
@@ -859,11 +859,11 @@ static struct opinfo cbops[8] = {
 	OPINFO("\tSRL", &op_srl),		/* opcode cb38-cb3f */
 };
 
-static void op_cbprefix(unsigned char op, struct opinfo *oi)
+static void op_cbprefix(unsigned char op, const struct opinfo *oi)
 {
-	unsigned short pc = REGS16_R(regs, PC);
+	unsigned short pc = REGS16_R(gbcpu_regs, PC);
 
-	REGS16_W(regs, PC, pc + 1);
+	REGS16_W(gbcpu_regs, PC, pc + 1);
 	op = mem_get(pc);
 	switch (op >> 6) {
 		case 0: cbops[(op >> 3) & 7].fn(op, &cbops[(op >> 3) & 7]);
@@ -876,7 +876,7 @@ static void op_cbprefix(unsigned char op, struct opinfo *oi)
 	exit(0);
 }
 
-static void op_ld(unsigned char op, struct opinfo *oi)
+static void op_ld(unsigned char op, const struct opinfo *oi)
 {
 	int src = op & 7;
 	int dst = (op >> 3) & 7;
@@ -888,63 +888,63 @@ static void op_ld(unsigned char op, struct opinfo *oi)
 	put_reg(dst, get_reg(src));
 }
 
-static void op_ld_imm(unsigned char op, struct opinfo *oi)
+static void op_ld_imm(unsigned char op, const struct opinfo *oi)
 {
 	int ofs = get_imm16();
 
 	DPRINTF(" %s  A, [0x%04x]", oi->name, ofs);
-	regs.rn.a = mem_get(ofs);
+	gbcpu_regs.rn.a = mem_get(ofs);
 }
 
-static void op_ld_ind16_a(unsigned char op, struct opinfo *oi)
+static void op_ld_ind16_a(unsigned char op, const struct opinfo *oi)
 {
 	int ofs = get_imm16();
 
 	DPRINTF(" %s  [0x%04x], A", oi->name, ofs);
-	mem_put(ofs, regs.rn.a);
+	mem_put(ofs, gbcpu_regs.rn.a);
 }
 
-static void op_ld_ind16_sp(unsigned char op, struct opinfo *oi)
+static void op_ld_ind16_sp(unsigned char op, const struct opinfo *oi)
 {
 	int ofs = get_imm16();
-	int sp = REGS16_R(regs, SP);
+	int sp = REGS16_R(gbcpu_regs, SP);
 
 	DPRINTF(" %s  [0x%04x], SP", oi->name, ofs);
 	mem_put(ofs, sp & 0xff);
 	mem_put(ofs+1, sp >> 8);
 }
 
-static void op_ld_hlsp(unsigned char op, struct opinfo *oi)
+static void op_ld_hlsp(unsigned char op, const struct opinfo *oi)
 {
 	char ofs = get_imm8();
-	unsigned short old = REGS16_R(regs, SP);
+	unsigned short old = REGS16_R(gbcpu_regs, SP);
 	unsigned short new = old + ofs;
 
 	if (ofs>0) DPRINTF(" %s  HL, SP+0x%02x", oi->name, ofs);
 	else DPRINTF(" %s  HL, SP-0x%02x", oi->name, -ofs);
-	REGS16_W(regs, HL, new);
-	regs.rn.f = 0;
-	if (old > new) regs.rn.f |= CF;
-	if ((old & 0xfff) > (new & 0xfff)) regs.rn.f |= HF;
+	REGS16_W(gbcpu_regs, HL, new);
+	gbcpu_regs.rn.f = 0;
+	if (old > new) gbcpu_regs.rn.f |= CF;
+	if ((old & 0xfff) > (new & 0xfff)) gbcpu_regs.rn.f |= HF;
 }
 
-static void op_ld_sphl(unsigned char op, struct opinfo *oi)
+static void op_ld_sphl(unsigned char op, const struct opinfo *oi)
 {
 	DPRINTF(" %s  SP, HL", oi->name);
-	REGS16_W(regs, SP, REGS16_R(regs, HL));
+	REGS16_W(gbcpu_regs, SP, REGS16_R(gbcpu_regs, HL));
 }
 
-static void op_ld_reg16_imm(unsigned char op, struct opinfo *oi)
+static void op_ld_reg16_imm(unsigned char op, const struct opinfo *oi)
 {
 	int val = get_imm16();
 	int reg = (op >> 4) & 3;
 
 	reg += reg > 2; /* skip over FA */
 	DPRINTF(" %s  %s, 0x%04x", oi->name, regnamech16[reg], val);
-	REGS16_W(regs, reg, val);
+	REGS16_W(gbcpu_regs, reg, val);
 }
 
-static void op_ld_reg16_a(unsigned char op, struct opinfo *oi)
+static void op_ld_reg16_a(unsigned char op, const struct opinfo *oi)
 {
 	int reg = (op >> 4) & 3;
 	unsigned short r;
@@ -952,19 +952,19 @@ static void op_ld_reg16_a(unsigned char op, struct opinfo *oi)
 	reg -= reg > 2;
 	if (op & 8) {
 		DPRINTF(" %s  A, [%s]", oi->name, regnamech16[reg]);
-		regs.rn.a = mem_get(r = REGS16_R(regs, reg));
+		gbcpu_regs.rn.a = mem_get(r = REGS16_R(gbcpu_regs, reg));
 	} else {
 		DPRINTF(" %s  [%s], A", oi->name, regnamech16[reg]);
-		mem_put(r = REGS16_R(regs, reg), regs.rn.a);
+		mem_put(r = REGS16_R(gbcpu_regs, reg), gbcpu_regs.rn.a);
 	}
 
 	if (reg == 2) {
 		r += (((op & 0x10) == 0) << 1)-1;
-		REGS16_W(regs, reg, r);
+		REGS16_W(gbcpu_regs, reg, r);
 	}
 }
 
-static void op_ld_reg8_imm(unsigned char op, struct opinfo *oi)
+static void op_ld_reg8_imm(unsigned char op, const struct opinfo *oi)
 {
 	int val = get_imm8();
 	int reg = (op >> 3) & 7;
@@ -975,7 +975,7 @@ static void op_ld_reg8_imm(unsigned char op, struct opinfo *oi)
 	DPRINTF(", 0x%02x", val);
 }
 
-static void op_ldh(unsigned char op, struct opinfo *oi)
+static void op_ldh(unsigned char op, const struct opinfo *oi)
 {
 	int ofs = op & 2 ? 0 : get_imm8();
 
@@ -984,22 +984,22 @@ static void op_ldh(unsigned char op, struct opinfo *oi)
 		if ((op & 2) == 0) {
 			DPRINTF("[%02x]", ofs);
 		} else {
-			ofs = regs.rn.c;
+			ofs = gbcpu_regs.rn.c;
 			DPRINTF("[C]");
 		}
-		regs.rn.a = mem_get(0xff00 + ofs);
+		gbcpu_regs.rn.a = mem_get(0xff00 + ofs);
 	} else {
 		if ((op & 2) == 0) {
 			DPRINTF(" %s  [%02x], A", oi->name, ofs);
 		} else {
-			ofs = regs.rn.c;
+			ofs = gbcpu_regs.rn.c;
 			DPRINTF(" %s  [C], A", oi->name);
 		}
-		mem_put(0xff00 + ofs, regs.rn.a);
+		mem_put(0xff00 + ofs, gbcpu_regs.rn.a);
 	}
 }
 
-static void op_inc(unsigned char op, struct opinfo *oi)
+static void op_inc(unsigned char op, const struct opinfo *oi)
 {
 	int reg = (op >> 3) & 7;
 	unsigned char res;
@@ -1010,22 +1010,22 @@ static void op_inc(unsigned char op, struct opinfo *oi)
 	old = res = get_reg(reg);
 	res++;
 	put_reg(reg, res);
-	regs.rn.f &= ~(NF | ZF | HF);
-	if (res == 0) regs.rn.f |= ZF;
-	if ((old & 15) > (res & 15)) regs.rn.f |= HF;
+	gbcpu_regs.rn.f &= ~(NF | ZF | HF);
+	if (res == 0) gbcpu_regs.rn.f |= ZF;
+	if ((old & 15) > (res & 15)) gbcpu_regs.rn.f |= HF;
 }
 
-static void op_inc16(unsigned char op, struct opinfo *oi)
+static void op_inc16(unsigned char op, const struct opinfo *oi)
 {
 	int reg = (op >> 4) & 3;
-	unsigned short res = REGS16_R(regs, reg);
+	unsigned short res = REGS16_R(gbcpu_regs, reg);
 
 	DPRINTF(" %s %s\t", oi->name, regnamech16[reg]);
 	res++;
-	REGS16_W(regs, reg, res);
+	REGS16_W(gbcpu_regs, reg, res);
 }
 
-static void op_dec(unsigned char op, struct opinfo *oi)
+static void op_dec(unsigned char op, const struct opinfo *oi)
 {
 	int reg = (op >> 3) & 7;
 	unsigned char res;
@@ -1036,383 +1036,383 @@ static void op_dec(unsigned char op, struct opinfo *oi)
 	old = res = get_reg(reg);
 	res--;
 	put_reg(reg, res);
-	regs.rn.f |= NF;
-	regs.rn.f &= ~(ZF | HF);
-	if (res == 0) regs.rn.f |= ZF;
-	if ((old & 15) > (res & 15)) regs.rn.f |= HF;
+	gbcpu_regs.rn.f |= NF;
+	gbcpu_regs.rn.f &= ~(ZF | HF);
+	if (res == 0) gbcpu_regs.rn.f |= ZF;
+	if ((old & 15) > (res & 15)) gbcpu_regs.rn.f |= HF;
 }
 
-static void op_dec16(unsigned char op, struct opinfo *oi)
+static void op_dec16(unsigned char op, const struct opinfo *oi)
 {
 	int reg = (op >> 4) & 3;
-	unsigned short res = REGS16_R(regs, reg);
+	unsigned short res = REGS16_R(gbcpu_regs, reg);
 
 	DPRINTF(" %s %s", oi->name, regnamech16[reg]);
 	res--;
-	REGS16_W(regs, reg, res);
+	REGS16_W(gbcpu_regs, reg, res);
 }
 
-static void op_add_sp_imm(unsigned char op, struct opinfo *oi)
+static void op_add_sp_imm(unsigned char op, const struct opinfo *oi)
 {
 	char imm = get_imm8();
-	unsigned short old = REGS16_R(regs, SP);
+	unsigned short old = REGS16_R(gbcpu_regs, SP);
 	unsigned short new = old;
 
 	DPRINTF(" %s SP, %02x", oi->name, imm);
 	new += imm;
-	REGS16_W(regs, SP, new);
-	regs.rn.f = 0;
-	if (old > new) regs.rn.f |= CF;
-	if ((old & 0xfff) > (new & 0xfff)) regs.rn.f |= HF;
+	REGS16_W(gbcpu_regs, SP, new);
+	gbcpu_regs.rn.f = 0;
+	if (old > new) gbcpu_regs.rn.f |= CF;
+	if ((old & 0xfff) > (new & 0xfff)) gbcpu_regs.rn.f |= HF;
 }
 
-static void op_add(unsigned char op, struct opinfo *oi)
+static void op_add(unsigned char op, const struct opinfo *oi)
 {
-	unsigned char old = regs.rn.a;
+	unsigned char old = gbcpu_regs.rn.a;
 	unsigned char new;
 
 	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
-	regs.rn.a += get_reg(op & 7);
-	new = regs.rn.a;
-	regs.rn.f = 0;
-	if (old > new) regs.rn.f |= CF;
-	if ((old & 15) > (new & 15)) regs.rn.f |= HF;
-	if (new == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.a += get_reg(op & 7);
+	new = gbcpu_regs.rn.a;
+	gbcpu_regs.rn.f = 0;
+	if (old > new) gbcpu_regs.rn.f |= CF;
+	if ((old & 15) > (new & 15)) gbcpu_regs.rn.f |= HF;
+	if (new == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static void op_add_imm(unsigned char op, struct opinfo *oi)
+static void op_add_imm(unsigned char op, const struct opinfo *oi)
 {
 	unsigned char imm = get_imm8();
-	unsigned char old = regs.rn.a;
+	unsigned char old = gbcpu_regs.rn.a;
 	unsigned char new = old;
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new += imm;
-	regs.rn.a = new;
-	regs.rn.f = 0;
-	if (old > new) regs.rn.f |= CF;
-	if ((old & 15) > (new & 15)) regs.rn.f |= HF;
-	if (new == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.a = new;
+	gbcpu_regs.rn.f = 0;
+	if (old > new) gbcpu_regs.rn.f |= CF;
+	if ((old & 15) > (new & 15)) gbcpu_regs.rn.f |= HF;
+	if (new == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static void op_add_hl(unsigned char op, struct opinfo *oi)
+static void op_add_hl(unsigned char op, const struct opinfo *oi)
 {
 	int reg = (op >> 4) & 3;
-	unsigned short old = REGS16_R(regs, HL);
+	unsigned short old = REGS16_R(gbcpu_regs, HL);
 	unsigned short new = old;
 
 	reg += reg > 2;
 	DPRINTF(" %s HL, %s", oi->name, regnamech16[reg]);
 
-	new += REGS16_R(regs, reg);
-	REGS16_W(regs, HL, new);
+	new += REGS16_R(gbcpu_regs, reg);
+	REGS16_W(gbcpu_regs, HL, new);
 
-	regs.rn.f &= ~(NF | CF | HF);
-	if (old > new) regs.rn.f |= CF;
-	if ((old & 0xfff) > (new & 0xfff)) regs.rn.f |= HF;
+	gbcpu_regs.rn.f &= ~(NF | CF | HF);
+	if (old > new) gbcpu_regs.rn.f |= CF;
+	if ((old & 0xfff) > (new & 0xfff)) gbcpu_regs.rn.f |= HF;
 }
 
-static void op_adc(unsigned char op, struct opinfo *oi)
+static void op_adc(unsigned char op, const struct opinfo *oi)
 {
-	unsigned char old = regs.rn.a;
+	unsigned char old = gbcpu_regs.rn.a;
 	unsigned char new;
 
 	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
-	regs.rn.a += get_reg(op & 7);
-	regs.rn.a += (regs.rn.f & CF) > 0;
-	regs.rn.f &= ~NF;
-	new = regs.rn.a;
-	if (old > new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
-	if ((old & 15) > (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
-	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	gbcpu_regs.rn.a += get_reg(op & 7);
+	gbcpu_regs.rn.a += (gbcpu_regs.rn.f & CF) > 0;
+	gbcpu_regs.rn.f &= ~NF;
+	new = gbcpu_regs.rn.a;
+	if (old > new) gbcpu_regs.rn.f |= CF; else gbcpu_regs.rn.f &= ~CF;
+	if ((old & 15) > (new & 15)) gbcpu_regs.rn.f |= HF; else gbcpu_regs.rn.f &= ~HF;
+	if (new == 0) gbcpu_regs.rn.f |= ZF; else gbcpu_regs.rn.f &= ~ZF;
 }
 
-static void op_adc_imm(unsigned char op, struct opinfo *oi)
+static void op_adc_imm(unsigned char op, const struct opinfo *oi)
 {
 	unsigned char imm = get_imm8();
-	unsigned char old = regs.rn.a;
+	unsigned char old = gbcpu_regs.rn.a;
 	unsigned char new = old;
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new += imm;
-	new += (regs.rn.f & CF) > 0;
-	regs.rn.f &= ~NF;
-	regs.rn.a = new;
-	if (old > new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
-	if ((old & 15) > (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
-	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	new += (gbcpu_regs.rn.f & CF) > 0;
+	gbcpu_regs.rn.f &= ~NF;
+	gbcpu_regs.rn.a = new;
+	if (old > new) gbcpu_regs.rn.f |= CF; else gbcpu_regs.rn.f &= ~CF;
+	if ((old & 15) > (new & 15)) gbcpu_regs.rn.f |= HF; else gbcpu_regs.rn.f &= ~HF;
+	if (new == 0) gbcpu_regs.rn.f |= ZF; else gbcpu_regs.rn.f &= ~ZF;
 }
 
-static void op_cp(unsigned char op, struct opinfo *oi)
+static void op_cp(unsigned char op, const struct opinfo *oi)
 {
-	unsigned char old = regs.rn.a;
+	unsigned char old = gbcpu_regs.rn.a;
 	unsigned char new = old;
 
 	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
 	new -= get_reg(op & 7);
-	regs.rn.f = NF;
-	if (old < new) regs.rn.f |= CF;
-	if ((old & 15) < (new & 15)) regs.rn.f |= HF;
-	if (new == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.f = NF;
+	if (old < new) gbcpu_regs.rn.f |= CF;
+	if ((old & 15) < (new & 15)) gbcpu_regs.rn.f |= HF;
+	if (new == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static void op_cp_imm(unsigned char op, struct opinfo *oi)
+static void op_cp_imm(unsigned char op, const struct opinfo *oi)
 {
 	unsigned char imm = get_imm8();
-	unsigned char old = regs.rn.a;
+	unsigned char old = gbcpu_regs.rn.a;
 	unsigned char new = old;
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new -= imm;
-	regs.rn.f = NF;
-	if (old < new) regs.rn.f |= CF;
-	if ((old & 15) < (new & 15)) regs.rn.f |= HF;
-	if (new == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.f = NF;
+	if (old < new) gbcpu_regs.rn.f |= CF;
+	if ((old & 15) < (new & 15)) gbcpu_regs.rn.f |= HF;
+	if (new == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static void op_sub(unsigned char op, struct opinfo *oi)
+static void op_sub(unsigned char op, const struct opinfo *oi)
 {
-	unsigned char old = regs.rn.a;
+	unsigned char old = gbcpu_regs.rn.a;
 	unsigned char new;
 
 	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
-	regs.rn.a -= get_reg(op & 7);
-	new = regs.rn.a;
-	regs.rn.f = NF;
-	if (old < new) regs.rn.f |= CF;
-	if ((old & 15) < (new & 15)) regs.rn.f |= HF;
-	if (new == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.a -= get_reg(op & 7);
+	new = gbcpu_regs.rn.a;
+	gbcpu_regs.rn.f = NF;
+	if (old < new) gbcpu_regs.rn.f |= CF;
+	if ((old & 15) < (new & 15)) gbcpu_regs.rn.f |= HF;
+	if (new == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static void op_sub_imm(unsigned char op, struct opinfo *oi)
+static void op_sub_imm(unsigned char op, const struct opinfo *oi)
 {
 	unsigned char imm = get_imm8();
-	unsigned char old = regs.rn.a;
+	unsigned char old = gbcpu_regs.rn.a;
 	unsigned char new = old;
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new -= imm;
-	regs.rn.a = new;
-	regs.rn.f = NF;
-	if (old < new) regs.rn.f |= CF;
-	if ((old & 15) < (new & 15)) regs.rn.f |= HF;
-	if (new == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.a = new;
+	gbcpu_regs.rn.f = NF;
+	if (old < new) gbcpu_regs.rn.f |= CF;
+	if ((old & 15) < (new & 15)) gbcpu_regs.rn.f |= HF;
+	if (new == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static void op_sbc(unsigned char op, struct opinfo *oi)
+static void op_sbc(unsigned char op, const struct opinfo *oi)
 {
-	unsigned char old = regs.rn.a;
+	unsigned char old = gbcpu_regs.rn.a;
 	unsigned char new;
 
 	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
-	regs.rn.a -= get_reg(op & 7);
-	regs.rn.a -= (regs.rn.f & CF) > 0;
-	new = regs.rn.a;
-	regs.rn.f = NF;
-	if (old < new) regs.rn.f |= CF;
-	if ((old & 15) < (new & 15)) regs.rn.f |= HF;
-	if (new == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.a -= get_reg(op & 7);
+	gbcpu_regs.rn.a -= (gbcpu_regs.rn.f & CF) > 0;
+	new = gbcpu_regs.rn.a;
+	gbcpu_regs.rn.f = NF;
+	if (old < new) gbcpu_regs.rn.f |= CF;
+	if ((old & 15) < (new & 15)) gbcpu_regs.rn.f |= HF;
+	if (new == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static void op_sbc_imm(unsigned char op, struct opinfo *oi)
+static void op_sbc_imm(unsigned char op, const struct opinfo *oi)
 {
 	unsigned char imm = get_imm8();
-	unsigned char old = regs.rn.a;
+	unsigned char old = gbcpu_regs.rn.a;
 	unsigned char new = old;
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new -= imm;
-	new -= (regs.rn.f & CF) > 0;
-	regs.rn.a = new;
-	regs.rn.f = NF;
-	if (old < new) regs.rn.f |= CF;
-	if ((old & 15) < (new & 15)) regs.rn.f |= HF;
-	if (new == 0) regs.rn.f |= ZF;
+	new -= (gbcpu_regs.rn.f & CF) > 0;
+	gbcpu_regs.rn.a = new;
+	gbcpu_regs.rn.f = NF;
+	if (old < new) gbcpu_regs.rn.f |= CF;
+	if ((old & 15) < (new & 15)) gbcpu_regs.rn.f |= HF;
+	if (new == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static void op_and(unsigned char op, struct opinfo *oi)
+static void op_and(unsigned char op, const struct opinfo *oi)
 {
 	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
-	regs.rn.a &= get_reg(op & 7);
-	regs.rn.f = HF;
-	if (regs.rn.a == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.a &= get_reg(op & 7);
+	gbcpu_regs.rn.f = HF;
+	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static void op_and_imm(unsigned char op, struct opinfo *oi)
+static void op_and_imm(unsigned char op, const struct opinfo *oi)
 {
 	unsigned char imm = get_imm8();
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
-	regs.rn.a &= imm;
-	regs.rn.f = HF;
-	if (regs.rn.a == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.a &= imm;
+	gbcpu_regs.rn.f = HF;
+	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static void op_or(unsigned char op, struct opinfo *oi)
+static void op_or(unsigned char op, const struct opinfo *oi)
 {
 	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
-	regs.rn.a |= get_reg(op & 7);
-	regs.rn.f = 0;
-	if (regs.rn.a == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.a |= get_reg(op & 7);
+	gbcpu_regs.rn.f = 0;
+	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static void op_or_imm(unsigned char op, struct opinfo *oi)
+static void op_or_imm(unsigned char op, const struct opinfo *oi)
 {
 	unsigned char imm = get_imm8();
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
-	regs.rn.a |= imm;
-	regs.rn.f = 0;
-	if (regs.rn.a == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.a |= imm;
+	gbcpu_regs.rn.f = 0;
+	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static void op_xor(unsigned char op, struct opinfo *oi)
+static void op_xor(unsigned char op, const struct opinfo *oi)
 {
 	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
-	regs.rn.a ^= get_reg(op & 7);
-	regs.rn.f = 0;
-	if (regs.rn.a == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.a ^= get_reg(op & 7);
+	gbcpu_regs.rn.f = 0;
+	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static void op_xor_imm(unsigned char op, struct opinfo *oi)
+static void op_xor_imm(unsigned char op, const struct opinfo *oi)
 {
 	unsigned char imm = get_imm8();
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
-	regs.rn.a ^= imm;
-	regs.rn.f = 0;
-	if (regs.rn.a == 0) regs.rn.f |= ZF;
+	gbcpu_regs.rn.a ^= imm;
+	gbcpu_regs.rn.f = 0;
+	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static void op_push(unsigned char op, struct opinfo *oi)
+static void op_push(unsigned char op, const struct opinfo *oi)
 {
 	int reg = op >> 4 & 3;
 
-	push(REGS16_R(regs, reg));
+	push(REGS16_R(gbcpu_regs, reg));
 	DPRINTF(" %s %s\t", oi->name, regnamech16[reg]);
 }
 
-static void op_pop(unsigned char op, struct opinfo *oi)
+static void op_pop(unsigned char op, const struct opinfo *oi)
 {
 	int reg = op >> 4 & 3;
 
-	REGS16_W(regs, reg, pop());
+	REGS16_W(gbcpu_regs, reg, pop());
 	DPRINTF(" %s %s\t", oi->name, regnamech16[reg]);
 }
 
-static void op_cpl(unsigned char op, struct opinfo *oi)
+static void op_cpl(unsigned char op, const struct opinfo *oi)
 {
 	DPRINTF(" %s", oi->name);
-	regs.rn.a = ~regs.rn.a;
-	regs.rn.f |= NF | HF;
+	gbcpu_regs.rn.a = ~gbcpu_regs.rn.a;
+	gbcpu_regs.rn.f |= NF | HF;
 }
 
-static void op_ccf(unsigned char op, struct opinfo *oi)
+static void op_ccf(unsigned char op, const struct opinfo *oi)
 {
 	DPRINTF(" %s", oi->name);
-	regs.rn.f ^= CF;
-	regs.rn.f &= ~(NF | HF);
+	gbcpu_regs.rn.f ^= CF;
+	gbcpu_regs.rn.f &= ~(NF | HF);
 }
 
-static void op_scf(unsigned char op, struct opinfo *oi)
+static void op_scf(unsigned char op, const struct opinfo *oi)
 {
 	DPRINTF(" %s", oi->name);
-	regs.rn.f |= CF;
-	regs.rn.f &= ~(NF | HF);
+	gbcpu_regs.rn.f |= CF;
+	gbcpu_regs.rn.f &= ~(NF | HF);
 }
 
-static void op_call(unsigned char op, struct opinfo *oi)
+static void op_call(unsigned char op, const struct opinfo *oi)
 {
 	unsigned short ofs = get_imm16();
 
 	DPRINTF(" %s 0x%04x", oi->name, ofs);
-	push(REGS16_R(regs, PC));
-	REGS16_W(regs, PC, ofs);
+	push(REGS16_R(gbcpu_regs, PC));
+	REGS16_W(gbcpu_regs, PC, ofs);
 }
 
-static void op_call_cond(unsigned char op, struct opinfo *oi)
+static void op_call_cond(unsigned char op, const struct opinfo *oi)
 {
 	unsigned short ofs = get_imm16();
 	int cond = (op >> 3) & 3;
 
 	DPRINTF(" %s %s 0x%04x", oi->name, conds[cond], ofs);
 	switch (cond) {
-		case 0: if ((regs.rn.f & ZF) != 0) return; break;
-		case 1: if ((regs.rn.f & ZF) == 0) return; break;
-		case 2: if ((regs.rn.f & CF) != 0) return; break;
-		case 3: if ((regs.rn.f & CF) == 0) return; break;
+		case 0: if ((gbcpu_regs.rn.f & ZF) != 0) return; break;
+		case 1: if ((gbcpu_regs.rn.f & ZF) == 0) return; break;
+		case 2: if ((gbcpu_regs.rn.f & CF) != 0) return; break;
+		case 3: if ((gbcpu_regs.rn.f & CF) == 0) return; break;
 	}
-	push(REGS16_R(regs, PC));
-	REGS16_W(regs, PC, ofs);
+	push(REGS16_R(gbcpu_regs, PC));
+	REGS16_W(gbcpu_regs, PC, ofs);
 }
 
-static void op_ret(unsigned char op, struct opinfo *oi)
+static void op_ret(unsigned char op, const struct opinfo *oi)
 {
-	REGS16_W(regs, PC, pop());
+	REGS16_W(gbcpu_regs, PC, pop());
 	DPRINTF(" %s", oi->name);
 }
 
-static void op_reti(unsigned char op, struct opinfo *oi)
+static void op_reti(unsigned char op, const struct opinfo *oi)
 {
-	REGS16_W(regs, PC, pop());
+	REGS16_W(gbcpu_regs, PC, pop());
 	DPRINTF(" %s", oi->name);
 }
 
-static void op_ret_cond(unsigned char op, struct opinfo *oi)
+static void op_ret_cond(unsigned char op, const struct opinfo *oi)
 {
 	int cond = (op >> 3) & 3;
 
 	DPRINTF(" %s %s", oi->name, conds[cond]);
 	switch (cond) {
-		case 0: if ((regs.rn.f & ZF) != 0) return; break;
-		case 1: if ((regs.rn.f & ZF) == 0) return; break;
-		case 2: if ((regs.rn.f & CF) != 0) return; break;
-		case 3: if ((regs.rn.f & CF) == 0) return; break;
+		case 0: if ((gbcpu_regs.rn.f & ZF) != 0) return; break;
+		case 1: if ((gbcpu_regs.rn.f & ZF) == 0) return; break;
+		case 2: if ((gbcpu_regs.rn.f & CF) != 0) return; break;
+		case 3: if ((gbcpu_regs.rn.f & CF) == 0) return; break;
 	}
-	REGS16_W(regs, PC, pop());
+	REGS16_W(gbcpu_regs, PC, pop());
 }
 
-static void op_halt(unsigned char op, struct opinfo *oi)
+static void op_halt(unsigned char op, const struct opinfo *oi)
 {
-	halted = 1;
+	gbcpu_halted = 1;
 	DPRINTF(" %s", oi->name);
 }
 
-static void op_stop(unsigned char op, struct opinfo *oi)
+static void op_stop(unsigned char op, const struct opinfo *oi)
 {
 	DPRINTF(" %s", oi->name);
 }
 
-static void op_di(unsigned char op, struct opinfo *oi)
+static void op_di(unsigned char op, const struct opinfo *oi)
 {
-	interrupts = 0;
+	gbcpu_if = 0;
 	DPRINTF(" %s", oi->name);
 }
 
-static void op_ei(unsigned char op, struct opinfo *oi)
+static void op_ei(unsigned char op, const struct opinfo *oi)
 {
-	interrupts = 1;
+	gbcpu_if = 1;
 	DPRINTF(" %s", oi->name);
 }
 
-static void op_jr(unsigned char op, struct opinfo *oi)
+static void op_jr(unsigned char op, const struct opinfo *oi)
 {
 	short ofs = (char) get_imm8();
 
 	if (ofs < 0) DPRINTF(" %s $-0x%02x", oi->name, -ofs);
 	else DPRINTF(" %s $+0x%02x", oi->name, ofs);
-	REGS16_W(regs, PC, REGS16_R(regs, PC) + ofs);
+	REGS16_W(gbcpu_regs, PC, REGS16_R(gbcpu_regs, PC) + ofs);
 }
 
-static void op_jr_cond(unsigned char op, struct opinfo *oi)
+static void op_jr_cond(unsigned char op, const struct opinfo *oi)
 {
 	short ofs = (char) get_imm8();
 	int cond = (op >> 3) & 3;
@@ -1420,58 +1420,58 @@ static void op_jr_cond(unsigned char op, struct opinfo *oi)
 	if (ofs < 0) DPRINTF(" %s %s $-0x%02x", oi->name, conds[cond], -ofs);
 	else DPRINTF(" %s %s $+0x%02x", oi->name, conds[cond], ofs);
 	switch (cond) {
-		case 0: if ((regs.rn.f & ZF) != 0) return; break;
-		case 1: if ((regs.rn.f & ZF) == 0) return; break;
-		case 2: if ((regs.rn.f & CF) != 0) return; break;
-		case 3: if ((regs.rn.f & CF) == 0) return; break;
+		case 0: if ((gbcpu_regs.rn.f & ZF) != 0) return; break;
+		case 1: if ((gbcpu_regs.rn.f & ZF) == 0) return; break;
+		case 2: if ((gbcpu_regs.rn.f & CF) != 0) return; break;
+		case 3: if ((gbcpu_regs.rn.f & CF) == 0) return; break;
 	}
-	REGS16_W(regs, PC, REGS16_R(regs, PC) + ofs);
+	REGS16_W(gbcpu_regs, PC, REGS16_R(gbcpu_regs, PC) + ofs);
 }
 
-static void op_jp(unsigned char op, struct opinfo *oi)
+static void op_jp(unsigned char op, const struct opinfo *oi)
 {
 	unsigned short ofs = get_imm16();
 
 	DPRINTF(" %s 0x%04x", oi->name, ofs);
-	REGS16_W(regs, PC, ofs);
+	REGS16_W(gbcpu_regs, PC, ofs);
 }
 
-static void op_jp_hl(unsigned char op, struct opinfo *oi)
+static void op_jp_hl(unsigned char op, const struct opinfo *oi)
 {
 	DPRINTF(" %s HL", oi->name);
-	REGS16_W(regs, PC, REGS16_R(regs, HL));
+	REGS16_W(gbcpu_regs, PC, REGS16_R(gbcpu_regs, HL));
 }
 
-static void op_jp_cond(unsigned char op, struct opinfo *oi)
+static void op_jp_cond(unsigned char op, const struct opinfo *oi)
 {
 	unsigned short ofs = get_imm16();
 	int cond = (op >> 3) & 3;
 
 	DPRINTF(" %s %s 0x%04x", oi->name, conds[cond], ofs);
 	switch (cond) {
-		case 0: if ((regs.rn.f & ZF) != 0) return; break;
-		case 1: if ((regs.rn.f & ZF) == 0) return; break;
-		case 2: if ((regs.rn.f & CF) != 0) return; break;
-		case 3: if ((regs.rn.f & CF) == 0) return; break;
+		case 0: if ((gbcpu_regs.rn.f & ZF) != 0) return; break;
+		case 1: if ((gbcpu_regs.rn.f & ZF) == 0) return; break;
+		case 2: if ((gbcpu_regs.rn.f & CF) != 0) return; break;
+		case 3: if ((gbcpu_regs.rn.f & CF) == 0) return; break;
 	}
-	REGS16_W(regs, PC, ofs);
+	REGS16_W(gbcpu_regs, PC, ofs);
 }
 
-static void op_rst(unsigned char op, struct opinfo *oi)
+static void op_rst(unsigned char op, const struct opinfo *oi)
 {
 	short ofs = op & 0x38;
 
 	DPRINTF(" %s 0x%02x", oi->name, ofs);
-	push(REGS16_R(regs, PC));
-	REGS16_W(regs, PC, ofs);
+	push(REGS16_R(gbcpu_regs, PC));
+	REGS16_W(gbcpu_regs, PC, ofs);
 }
 
-static void op_nop(unsigned char op, struct opinfo *oi)
+static void op_nop(unsigned char op, const struct opinfo *oi)
 {
 	DPRINTF(" %s", oi->name);
 }
 
-static struct opinfo ops[256] = {
+static const struct opinfo ops[256] = {
 	OPINFO("\tNOP", &op_nop),		/* opcode 00 */
 	OPINFO("\tLD", &op_ld_reg16_imm),		/* opcode 01 */
 	OPINFO("\tLD", &op_ld_reg16_a),		/* opcode 02 */
@@ -1731,7 +1731,7 @@ static struct opinfo ops[256] = {
 };
 
 #if DEBUG == 1
-static struct regs oldregs;
+static struct gbcpu_regs oldregs;
 
 static void dump_regs(void)
 {
@@ -1739,13 +1739,13 @@ static void dump_regs(void)
 
 	DPRINTF("; ");
 	for (i=0; i<8; i++) {
-		DPRINTF("%c=%02x ", regnames[i], REGS8_R(regs, i));
+		DPRINTF("%c=%02x ", regnames[i], REGS8_R(gbcpu_regs, i));
 	}
 	for (i=5; i<6; i++) {
-		DPRINTF("%s=%04x ", regnamech16[i], REGS16_R(regs, i));
+		DPRINTF("%s=%04x ", regnamech16[i], REGS16_R(gbcpu_regs, i));
 	}
 	DPRINTF("\n");
-	oldregs = regs;
+	oldregs = gbcpu_regs;
 }
 
 static void show_reg_diffs(void)
@@ -1755,40 +1755,40 @@ static void show_reg_diffs(void)
 
 	DPRINTF("\t\t; ");
 	for (i=0; i<3; i++) {
-		if (REGS16_R(regs, i) != REGS16_R(oldregs, i)) {
-			DPRINTF("%s=%04x ", regnamech16[i], REGS16_R(regs, i));
-			REGS16_W(oldregs, i, REGS16_R(regs, i));
+		if (REGS16_R(gbcpu_regs, i) != REGS16_R(oldregs, i)) {
+			DPRINTF("%s=%04x ", regnamech16[i], REGS16_R(gbcpu_regs, i));
+			REGS16_W(oldregs, i, REGS16_R(gbcpu_regs, i));
 		}
 	}
 	for (i=6; i<8; i++) {
-		if (REGS8_R(regs, i) != REGS8_R(oldregs, i)) {
+		if (REGS8_R(gbcpu_regs, i) != REGS8_R(oldregs, i)) {
 			if (i == 6) { /* Flags */
-				if (regs.rn.f & ZF) DPRINTF("Z");
+				if (gbcpu_regs.rn.f & ZF) DPRINTF("Z");
 				else DPRINTF("z");
-				if (regs.rn.f & NF) DPRINTF("N");
+				if (gbcpu_regs.rn.f & NF) DPRINTF("N");
 				else DPRINTF("n");
-				if (regs.rn.f & HF) DPRINTF("H");
+				if (gbcpu_regs.rn.f & HF) DPRINTF("H");
 				else DPRINTF("h");
-				if (regs.rn.f & CF) DPRINTF("C");
+				if (gbcpu_regs.rn.f & CF) DPRINTF("C");
 				else DPRINTF("c");
 				DPRINTF(" ");
 			} else {
-				DPRINTF("%c=%02x ", regnames[i], REGS8_R(regs,i));
+				DPRINTF("%c=%02x ", regnames[i], REGS8_R(gbcpu_regs,i));
 			}
-			REGS8_W(oldregs, i, REGS8_R(regs, i));
+			REGS8_W(oldregs, i, REGS8_R(gbcpu_regs, i));
 		}
 	}
 	for (i=4; i<5; i++) {
-		if (REGS16_R(regs, i) != REGS16_R(oldregs, i)) {
-			DPRINTF("%s=%04x ", regnamech16[i], REGS16_R(regs, i));
-			REGS16_W(oldregs, i, REGS16_R(regs, i));
+		if (REGS16_R(gbcpu_regs, i) != REGS16_R(oldregs, i)) {
+			DPRINTF("%s=%04x ", regnamech16[i], REGS16_R(gbcpu_regs, i));
+			REGS16_W(oldregs, i, REGS16_R(gbcpu_regs, i));
 		}
 	}
 	DPRINTF("\n");
 }
 #endif
 
-void gbcpu_addmem(int start, int end, put_fn putfn, get_fn getfn)
+void gbcpu_addmem(int start, int end, gbcpu_put_fn putfn, gbcpu_get_fn getfn)
 {
 	int i;
 
@@ -1805,18 +1805,18 @@ void gbcpu_init(void)
 
 void gbcpu_intr(int vec)
 {
-	halted = 0;
-	push(REGS16_R(regs, PC));
-	REGS16_W(regs, PC, vec);
+	gbcpu_halted = 0;
+	push(REGS16_R(gbcpu_regs, PC));
+	REGS16_W(gbcpu_regs, PC, vec);
 }
 
 int gbcpu_step(void)
 {
 	unsigned char op;
 
-	if (!halted) {
-		op = mem_get(regs.rn.pc++);
-		DPRINTF("%04x: %02x", regs.rn.pc - 1, op);
+	if (!gbcpu_halted) {
+		op = mem_get(gbcpu_regs.rn.pc++);
+		DPRINTF("%04x: %02x", gbcpu_regs.rn.pc - 1, op);
 		ops[op].fn(op, &ops[op]);
 
 		DEB(show_reg_diffs());

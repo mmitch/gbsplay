@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.25 2003/08/24 09:55:06 ranma Exp $
+/* $Id: gbsplay.c,v 1.26 2003/08/24 10:56:13 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -21,7 +21,7 @@
 #include "gbhw.h"
 #include "gbcpu.h"
 
-static char playercode[] = {
+static const char playercode[] = {
 	0xf5,              /* 0050:  push af         */
 	0xe5,              /* 0051:  push hl         */
 	0x01, 0x30, 0x00,  /* 0052:  ld   bc, 0x0030 */
@@ -162,10 +162,10 @@ static void open_gbs(char *name, int i)
 	rom[0x40] = 0xc9; /* reti */
 	rom[0x48] = 0xc9; /* reti */
 
-	REGS16_W(regs, PC, 0x0050); /* playercode entry point */
-	REGS16_W(regs, SP, gbs_stack);
-	REGS16_W(regs, HL, gbs_base - 0x70);
-	regs.rn.a = i - 1;
+	REGS16_W(gbcpu_regs, PC, 0x0050); /* playercode entry point */
+	REGS16_W(gbcpu_regs, SP, gbs_stack);
+	REGS16_W(gbcpu_regs, HL, gbs_base - 0x70);
+	gbcpu_regs.rn.a = i - 1;
 
 	close(fd);
 }
@@ -190,7 +190,7 @@ static int getnote(int div)
 	return n;
 }
 
-static char notes[7] = "CDEFGAH";
+static const char notes[7] = "CDEFGAH";
 static char notelookup[4*MAXOCTAVE*12];
 static void precalc_notes(void)
 {
@@ -207,7 +207,7 @@ static void precalc_notes(void)
 	}
 }
 
-static char vols[5] = " -=#%";
+static const char vols[5] = " -=#%";
 static char vollookup[5*16];
 static void precalc_vols(void)
 {
