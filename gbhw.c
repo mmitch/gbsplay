@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.17 2003/11/28 20:52:05 ranma Exp $
+/* $Id: gbhw.c,v 1.18 2003/11/30 13:57:32 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -168,7 +168,7 @@ static void io_put(unsigned int addr, unsigned char val)
 				    addr == 0xff18 ||
 				    addr == 0xff1e) break;
 			}
-			gbhw_ch[chn].len_enable = (val & 0x40) > 0;
+			gbhw_ch[chn].len_enable = (ioregs[0x14 + 5*chn] & 0x40) > 0;
 
 //			printf(" ch%d: vol=%02d envd=%d envspd=%d duty_ctr=%d len=%03d len_en=%d key=%04d gate=%d%d\n", chn, gbhw_ch[chn].volume, gbhw_ch[chn].env_dir, gbhw_ch[chn].env_tc, gbhw_ch[chn].duty_ctr, gbhw_ch[chn].len, gbhw_ch[chn].len_enable, gbhw_ch[chn].div_tc, gbhw_ch[chn].leftgate, gbhw_ch[chn].rightgate);
 			break;
