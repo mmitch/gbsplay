@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.2 2003/08/31 17:46:34 ranma Exp $
+/* $Id: gbs.c,v 1.3 2003/08/31 23:52:08 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -172,7 +172,7 @@ int gbs_write(struct gbs *gbs, char *name, int version)
 
 	memset(pad, 0xff, sizeof(pad));
 
-	if ((fd = open(name, O_WRONLY|O_CREAT, 0644)) == -1) {
+	if ((fd = open(name, O_WRONLY|O_CREAT|O_TRUNC, 0644)) == -1) {
 		fprintf(stderr, "Could not open %s: %s\n", name, strerror(errno));
 		return 0;
 	}
@@ -209,7 +209,8 @@ int gbs_write(struct gbs *gbs, char *name, int version)
 		for (i=0; i<gbs->songs; i++) {
 			writeint(&gbs->exthdr[0x10+4*i],
 			         gbs->subsong_info[i].len, 2);
-			if (gbs->subsong_info[i].title) {
+			if (gbs->subsong_info[i].title &&
+			    strcmp(gbs->subsong_info[i].title, "") != 0) {
 				len = strlen(gbs->subsong_info[i].title)+1;
 				memcpy(strings+stringofs, gbs->subsong_info[i].title, len);
 				writeint(&gbs->exthdr[0x10+4*i+2],
