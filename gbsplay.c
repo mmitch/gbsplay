@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.39 2003/08/31 17:46:34 ranma Exp $
+/* $Id: gbsplay.c,v 1.40 2003/08/31 17:49:48 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -239,7 +239,7 @@ static void handleuserinput(struct gbs *gbs)
 		switch (c) {
 		case 'p':
 		case 'n':
-			subsong += c == 'n' ? 1 : -1;
+			subsong += c == 'n' ? 1 : gbs->songs-1;
 			subsong %= gbs->songs;
 			silencectr = 0;
 			clock = 0;
