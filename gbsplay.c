@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.19 2003/08/23 22:36:07 ranma Exp $
+/* $Id: gbsplay.c,v 1.20 2003/08/23 23:03:03 ikari Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <sys/param.h>
 #include <sys/soundcard.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -166,7 +167,7 @@ struct channel ch3;
 struct channel ch4;
 
 static unsigned int cycles;
-static unsigned long long clock;
+static unsigned long long gb_clk;
 static int halted;
 static int interrupts;
 static int timertc = 70256; /* ~59.7 Hz (vblank)*/
@@ -2672,7 +2673,7 @@ int main(int argc, char **argv)
 			decode_ins();
 			DEB(show_reg_diffs());
 		} else cycles = 16;
-		clock += cycles;
+		gb_clk += cycles;
 		statuscnt -= cycles;
 		if (timer > 0) timer -= cycles;
 		if (timer <= 0 && interrupts && (ioregs[0x7f] & 4)) {
