@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.71 2004/01/20 20:51:26 ranma Exp $
+# $Id: Makefile,v 1.72 2004/01/20 20:52:36 ranma Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -108,7 +108,7 @@ distclean: clean
 clean:
 	find . -regex ".*\.\([aos]\|lo\|mo\|pot\|so\(\.[0-9]\)?\)" -exec rm -f "{}" \;
 	find . -name "*~" -exec rm -f "{}" \;
-	rm -f libgbs
+	rm -f libgbs libgbspic
 	rm -f $(mans)
 	rm -f $(gbsplaybin) $(gbsinfobin)
 
