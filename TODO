@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.44 2003/12/25 10:18:49 mitch Exp $>>
+<<$Id: TODO,v 1.45 2003/12/26 15:00:07 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -8,9 +8,12 @@ TODO list for gbsplay.
 
 ( )  gbsplay: screen scrolls up one line on resume
 
+( )  XMMS reports error on exit when gbsxmms was loaded:
+     Gtk-CRITICAL **: file gtkobject.c: line 1179 (gtk_object_unref): assertion `object->ref_count > 0' failed.
+
 ### unspecified: (bits'n'ideas)
 
-( )  generate 1 dynamic library that is used by gbsplay, gbsinfo and gbsxmms
+( )  generate a dynamic library that is used by gbsplay, gbsinfo and gbsxmms
 
 ( )  gbsplay: add repeat mode for module
      (after the last subsong subsong 1 starts over)
@@ -45,4 +48,7 @@ TODO list for gbsplay.
 
 (X)  gbs2ogg.sh: fix script (wrong path to gbsinfo)
 
-( )  build process: fixes for FreeBSD
+(X)  build process: fixes for non-GNU find
+
+(X)  gbsxmms: now works on FreeBSD
+

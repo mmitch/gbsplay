@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.60 2003/12/25 10:16:09 mitch Exp $
+# $Id: Makefile,v 1.61 2003/12/26 15:00:07 mitch Exp $
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
@@ -151,7 +151,7 @@ gbsplay: $(objs_gbsplay) libgbs
 	$(CC) -o $@ $(objs_gbsplay) $(LDFLAGS) -lm
 
 gbsxmms.so: $(objs_gbsxmms) libgbs
-	$(CC) -shared -fPIC -o $@ $(objs_gbsxmms) $(LDFLAGS) -lpthread
+	$(CC) -shared -fPIC -o $@ $(objs_gbsxmms) $(LDFLAGS) $(PTHREAD)
 
 # rules for suffixes
 

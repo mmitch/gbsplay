@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.28 2003/12/14 00:25:36 ranma Exp $
+# $Id: configure,v 1.29 2003/12/26 15:00:07 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -194,10 +194,46 @@ else
     die
 fi
 
+## check for various headers
+
 need_include inttypes.h
 check_include sys/soundcard.h
 check_include locale.h
 check_include libintl.h
+
+## check for pthread
+
+check_include pthread.h
+if [ "$have_pthread_h" = "yes" ]; then
+    cc_check "checking for Linux flavoured pthread" have_pthread "-lpthread" found no <<EOF
+#include <pthread.h>
+int main(int argc, char **argv)
+{
+    pthread_self();
+    return 0;
+}
+EOF
+    if [ $? -eq 0 ]; then
+	PTHREAD="-lpthread"
+    else
+	cc_check "checking FreeBSD-flavoured pthread" have_pthread "-pthread" found no <<EOF
+#include <pthread.h>
+int main(int argc, char **argv)
+{
+    pthread_self();
+    return 0;
+}
+EOF
+	if [ $? -eq 0 ]; then
+	    PTHREAD="-pthread"
+	else
+	    echo "no known pthread implementation found!"
+	fi
+    fi
+    
+fi
+
+## check for gettext
 
 echo -n "checking for gettext tools:  "
 have_xgettext=yes
@@ -211,7 +247,7 @@ done
 test "$have_xgettext" = "yes" && echo "ok"
 
 if [ "$have_locale_h" = "yes" -a "$have_libintl_h" = "yes" ]; then
-    cc_check "Do we need -lintl" need_lintl "-lintl" yes no <<EOF
+    cc_check "do we need -lintl" need_lintl "-lintl" yes no <<EOF
 #include <libintl.h>
 int main(int argc, char **argv)
 {
@@ -261,7 +297,7 @@ fi
 
 ## everything ok?
 
-if [ "$GLIB_CFLAGS" -a "$XMMS_CFLAGS" -a "XMMS_INPUT_PLUGIN_DIR" ]; then
+if [ "$GLIB_CFLAGS" -a "$XMMS_CFLAGS" -a "XMMS_INPUT_PLUGIN_DIR" -a "$PTHREAD" ]; then
     EXTRA_CFLAGS="$EXTRA_CFLAGS $GLIB_CFLAGS $XMMS_CFLAGS"
     EXTRA_INSTALL="$EXTRA_INSTALL install-gbsxmms.so"
     EXTRA_UNINSTALL="$EXTRA_UNINSTALL uninstall-gbsxmms.so"
@@ -280,6 +316,7 @@ fi
     echo EXTRA_LDFLAGS := $EXTRA_LDFLAGS
     echo EXTRA_SRCS := $EXTRA_SRCS
     echo EXTRA_UNINSTALL := $EXTRA_UNINSTALL
+    echo PTHREAD := $PTHREAD
     echo XMMS_INPUT_PLUGIN_DIR := $XMMS_INPUT_PLUGIN_DIR
     echo VERSION := $VERSION
     echo build_xmmsplugin := $build_xmmsplugin
