@@ -32,8 +32,8 @@ static inline void foo(void)
 {
 }
 
-#define DEBUG(...) printf(__VA_ARGS__)
-//#define DEBUG(...) foo()
+//#define DEBUG(...) printf(__VA_ARGS__)
+#define DEBUG(...) foo()
 
 static struct regs {
 	union {
@@ -427,10 +427,8 @@ static void vidram_put(unsigned short addr, unsigned char val)
 
 static void rom_put(unsigned short addr, unsigned char val)
 {
-	if (addr >= 0x2000 && addr <= 0x3fff) {
+	if (addr >= 0x2000 && addr <= 0x3fff)
 		rombank = val;
-		printf("Bank switch to %d\n", val);
-	}
 }
 
 static void io_put(unsigned short addr, unsigned char val)
@@ -439,10 +437,9 @@ static void io_put(unsigned short addr, unsigned char val)
 		hiram[addr & 0x7f] = val;
 		return;
 	} else if (addr >= 0xff00 && addr <= 0xff7f) {
-		int temp;
+		DEBUG(" ([0x%04x]=%02x) ", addr, val);
 		switch (addr) {
 			case 0xff14:
-				printf(" ([0x%04x]=%02x) ", addr, val);
 				if (val & 0x80) {
 					int vol = ioregs[0x12] >> 4;
 					int envdir = (ioregs[0x12] >> 3) & 1;
@@ -451,20 +448,22 @@ static void io_put(unsigned short addr, unsigned char val)
 					int len = ioregs[0x11] & 0x3f;
 					int div = ioregs[0x13];
 					div |= ((int)val & 7) << 8;
-					ch1.volume = 16 - vol;
+					ch1.volume = vol;
 					ch1.master = ch1.volume > 1; 
 					ch1.env_dir = envdir;
-					ch1.env_speed_tc = envspd;
+					ch1.env_speed = ch1.env_speed_tc = envspd;
 					ch1.div_tc = 2048 - div;
 					ch1.duty = dutylookup[duty];
 					ch1.duty_tc = ch1.div_tc*ch1.duty/8;
 					ch1.len = 64 - len;
-					ch1.len_enable = (val & 0x40) == 0;
-					printf(" ch1: vol=%d envd=%d envspd=%d duty=%d len=%d len_en=%d key=%d \n", ch1.volume, ch1.env_dir, ch1.env_speed_tc, ch1.duty, ch1.len, ch1.len_enable, ch1.div_tc);
+					ch1.len_enable = (val & 0x40) > 0;
+					printf(" ch1: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch1.volume, ch1.env_dir, ch1.env_speed_tc, ch1.duty, ch1.len, ch1.len_enable, ch1.div_tc);
+					ch1.len *=2;
+					ch1.env_speed *= 8;
+					ch1.env_speed_tc *= 8;
 				}
 				break;
 			case 0xff19:
-				printf(" ([0x%04x]=%02x) ", addr, val);
 				if (val & 0x80) {
 					int vol = ioregs[0x17] >> 4;
 					int envdir = (ioregs[0x17] >> 3) & 1;
@@ -473,40 +472,68 @@ static void io_put(unsigned short addr, unsigned char val)
 					int len = ioregs[0x16] & 0x3f;
 					int div = ioregs[0x18];
 					div |= ((int)val & 7) << 8;
-					ch2.volume = 16 - vol;
+					ch2.volume = vol;
 					ch2.master = ch2.volume > 1; 
 					ch2.env_dir = envdir;
-					ch2.env_speed_tc = envspd;
+					ch2.env_speed = ch2.env_speed_tc = envspd;
 					ch2.div_tc = 2048 - div;
 					ch2.duty = dutylookup[duty];
 					ch2.duty_tc = ch2.div_tc*ch2.duty/8;
 					ch2.len = 64 - len;
-					ch2.len_enable = (val & 0x40) == 0;
-					printf(" ch2: vol=%d envd=%d envspd=%d duty=%d len=%d len_en=%d key=%d \n", ch2.volume, ch2.env_dir, ch2.env_speed, ch2.duty, ch2.len, ch2.len_enable, ch2.div_tc);
+					ch2.len_enable = (val & 0x40) > 0;
+					printf(" ch2: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch2.volume, ch2.env_dir, ch2.env_speed, ch2.duty, ch2.len, ch2.len_enable, ch2.div_tc);
+					ch2.len *=2;
+					ch2.env_speed *= 8;
+					ch2.env_speed_tc *= 8;
 				}
 				break;
-			case 0xff21:
-				printf(" ([0x%04x]=%02x) ", addr, val);
+			case 0xff1e:
+				if (val & 0x80) {
+					int vol = (ioregs[0x1c] >> 5) & 3;
+					int envdir = (ioregs[0x1c] >> 3) & 1;
+					int envspd = ioregs[0x1c] & 7;
+//					int duty = ioregs[0x1b] >> 6;
+					int len = ioregs[0x1b] & 0x3f;
+					int div = ioregs[0x1d];
+					int i;
+					div |= ((int)val & 7) << 8;
+					ch3.master = (ioregs[0x1a] & 0x80) > 0; 
+					ch3.env_dir = envdir;
+					ch3.env_speed = ch3.env_speed_tc = envspd;
+					ch3.div_tc = 2048 - div;
+					ch3.len = 64 - len;
+					ch3.len_enable = (val & 0x40) > 0;
+					printf(" ch3: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch3.volume, ch3.env_dir, ch3.env_speed, ch3.duty, ch3.len, ch3.len_enable, ch3.div_tc);
+					ch3.len *=2;
+					ch3.env_speed *= 8;
+					ch3.env_speed_tc *= 8;
+				}
+				break;
+			case 0xff23:
 				if (val & 0x80) {
 					int vol = ioregs[0x21] >> 4;
 					int envdir = (ioregs[0x21] >> 3) & 1;
 					int envspd = ioregs[0x21] & 7;
-					int duty = ioregs[0x20] >> 6;
-					int len = ioregs[0x20] & 0x3f;
+//					int duty = ioregs[0x20] >> 6;
+					int len = ioregs[0x20];
 					int div = ioregs[0x22];
 					div |= ((int)val & 7) << 8;
-					ch4.volume = 16 - vol;
+					ch4.volume = vol;
 					ch4.master = ch4.volume > 1; 
 					ch4.env_dir = envdir;
-					ch4.env_speed_tc = envspd;
-					ch4.div_tc = 2048 - div;
+					ch4.env_speed = ch4.env_speed_tc = envspd;
+					ch4.div_tc = 2 << (div >> 5);
+					if (div & 7) ch4.div_tc *= div & 7;
+					else ch4.div_tc /= 2;
 					ch4.len = 64 - len;
-					ch4.len_enable = (val & 0x40) == 0;
-					printf(" ch4: vol=%d envd=%d envspd=%d duty=%d len=%d len_en=%d key=%d \n", ch4.volume, ch4.env_dir, ch4.env_speed, ch4.duty, ch4.len, ch4.len_enable, ch4.div_tc);
+					ch4.len_enable = (val & 0x40) > 0;
+					printf(" ch4: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch4.volume, ch4.env_dir, ch4.env_speed, ch4.duty, ch4.len, ch4.len_enable, ch4.div_tc);
+					ch4.len *=2;
+					ch4.env_speed *= 8;
+					ch4.env_speed_tc *= 8;
 				}
 				break;
 			case 0xff25:
-				printf(" ([0x%04x]=%02x) ", addr, val);
 				ch1.leftgate = val & 0x10;
 				ch1.rightgate = val & 0x01;
 				ch2.leftgate = val & 0x20;
@@ -515,9 +542,6 @@ static void io_put(unsigned short addr, unsigned char val)
 				ch3.rightgate = val & 0x04;
 				ch4.leftgate = val & 0x80;
 				ch4.rightgate = val & 0x08;
-				break;
-			default:
-				printf(" ([0x%04x]=%02x) ", addr, val);
 				break;
 		}
 		ioregs[addr & 0x7f] = val;
@@ -1348,24 +1372,6 @@ static void op_adc_imm(unsigned char op, struct opinfo *oi)
 	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
 }
 
-static void op_adc_hl(unsigned char op, struct opinfo *oi)
-{
-	int reg = (op >> 4) & 3;
-	unsigned short old = REGS16_R(regs, HL);
-	unsigned short new = old;
-
-	reg += reg > 2;
-	DEBUG(" %s HL, %s", oi->name, regnamech16[reg]);
-
-	new += REGS16_R(regs, reg);
-	new += (regs.rn.f & CF) > 0;
-	REGS16_W(regs, HL, new);
-
-	regs.rn.f &= ~SF;
-	if (old > new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
-	if ((old & 0xfff) > (new & 0xfff)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
-}
-
 static void op_cp(unsigned char op, struct opinfo *oi)
 {
 	unsigned char old = regs.rn.a;
@@ -1390,21 +1396,6 @@ static void op_cp_imm(unsigned char op, struct opinfo *oi)
 	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
 	if ((old & 15) < (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
 	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
-}
-
-static void op_cp_hl(unsigned char op, struct opinfo *oi)
-{
-	int reg = (op >> 4) & 3;
-	unsigned short old = REGS16_R(regs, HL);
-	unsigned short new = old;
-
-	reg += reg > 2;
-	DEBUG(" %s HL, %s", oi->name, regnamech16[reg]);
-
-	new -= REGS16_R(regs, reg);
-
-	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
-	if ((old & 0xfff) < (new & 0xfff)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
 }
 
 static void op_sub(unsigned char op, struct opinfo *oi)
@@ -1437,23 +1428,6 @@ static void op_sub_imm(unsigned char op, struct opinfo *oi)
 	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
 }
 
-static void op_sub_hl(unsigned char op, struct opinfo *oi)
-{
-	int reg = (op >> 4) & 3;
-	unsigned short old = REGS16_R(regs, HL);
-	unsigned short new = old;
-
-	reg += reg > 2;
-	DEBUG(" %s HL, %s", oi->name, regnamech16[reg]);
-
-	new -= REGS16_R(regs, reg);
-	REGS16_W(regs, HL, new);
-
-	regs.rn.f |= SF;
-	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
-	if ((old & 0xfff) < (new & 0xfff)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
-}
-
 static void op_sbc(unsigned char op, struct opinfo *oi)
 {
 	unsigned char old = regs.rn.a;
@@ -1484,24 +1458,6 @@ static void op_sbc_imm(unsigned char op, struct opinfo *oi)
 	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
 	if ((old & 15) < (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
 	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
-}
-
-static void op_sbc_hl(unsigned char op, struct opinfo *oi)
-{
-	int reg = (op >> 4) & 3;
-	unsigned short old = REGS16_R(regs, HL);
-	unsigned short new = old;
-
-	reg += reg > 2;
-	DEBUG(" %s HL, %s", oi->name, regnamech16[reg]);
-
-	new -= REGS16_R(regs, reg);
-	new -= (regs.rn.f & CF) > 0;
-	REGS16_W(regs, HL, new);
-
-	regs.rn.f |= SF;
-	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
-	if ((old & 0xfff) < (new & 0xfff)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
 }
 
 static void op_and(unsigned char op, struct opinfo *oi)
@@ -2073,9 +2029,11 @@ int smpldivisor;
 int dspfd;
 
 static unsigned int lfsr = 0xffff;
+static int ch3pos;
 
 static void do_sound(int cycles)
 {
+	int i;
 	sound_div += (cycles * 65536);
 	while (sound_div > sound_div_tc) {
 		sound_div -= sound_div_tc;
@@ -2094,23 +2052,17 @@ static void do_sound(int cycles)
 			write(dspfd, soundbuf, sizeof(soundbuf));
 		}
 	}
+	if (ch3.master) for (i=0; i<cycles; i++) {
+		ch3.div--;
+		if (ch3.div <= 0) {
+			ch3.div = ch3.div_tc;
+			ch3pos = ++ch3pos;
+		}
+	}
 	main_div += cycles;
 	while (main_div > main_div_tc) {
 		main_div -= main_div_tc;
 
-		lfsr = (lfsr << 1) | (((lfsr >> 15) ^ (lfsr >> 16)) & 1);
-
-/*		fprintf(stderr, "ch1=%d/%d/%d/%d/%d ch2=%d/%d/%d/%d/%d\n",
-				ch1.volume,
-				ch1.master,
-				ch1.div,
-				ch1.div_tc,
-				ch1.duty_tc,
-				ch2.volume,
-				ch2.master,
-				ch2.div,
-				ch2.div_tc,
-				ch2.duty_tc);*/
 		if (ch1.master) {
 			int val = ch1.volume;
 			if (ch1.div > ch1.duty_tc) {
@@ -2135,10 +2087,25 @@ static void do_sound(int cycles)
 				ch2.div = ch2.div_tc;
 			}
 		}
+		if (ch3.master) {
+			int val = ((ioregs[0x30 + ((ch3pos >> 2) & 0xf)] >> ((~ch3pos & 2)*2)) & 0xf)*2 - 16;
+			val = val >> ch3.volume;
+//			val = val * ch3.volume/15;
+			if (ch3.leftgate) l_smpl += val;
+			if (ch3.rightgate) r_smpl += val;
+		}
 		if (ch4.master) {
 			int val = ch4.volume * (((lfsr >> 13) & 2)-1);
+//			int val = ch4.volume * ((random() & 2)-1);
+//			static int val;
 			if (ch4.leftgate) l_smpl += val;
 			if (ch4.rightgate) r_smpl += val;
+			ch4.div--;
+			if (ch4.div <= 0) {
+				ch4.div = ch4.div_tc;
+				lfsr = (lfsr << 1) | (((lfsr >> 15) ^ (lfsr >> 14)) & 1);
+//				val = ch4.volume * ((random() & 2)-1);
+			}
 		}
 		smpldivisor++;
 		sweep_div += 1;
@@ -2151,7 +2118,7 @@ static void do_sound(int cycles)
 			if (ch1.env_speed_tc) {
 				ch1.env_speed--;
 				if (ch1.env_speed <=0) {
-					ch1.env_speed = ch1.env_speed_tc*4;
+					ch1.env_speed = ch1.env_speed_tc;
 					if (!ch1.env_dir) {
 						if (ch1.volume > 0)
 							ch1.volume--;
@@ -2168,12 +2135,29 @@ static void do_sound(int cycles)
 			if (ch2.env_speed_tc) {
 				ch2.env_speed--;
 				if (ch2.env_speed <=0) {
-					ch2.env_speed = ch2.env_speed_tc*4;
+					ch2.env_speed = ch2.env_speed_tc;
 					if (!ch2.env_dir) {
 						if (ch2.volume > 0)
 							ch2.volume--;
 					} else {
 						if (ch2.volume < 15)
+							ch2.volume++;
+					}
+				}
+			}
+			if (ch3.len > 0 && ch3.len_enable) {
+				ch3.len--;
+				if (ch3.len == 0) ch3.master = 0;
+			}
+			if (ch3.env_speed_tc) {
+				ch3.env_speed--;
+				if (ch3.env_speed <=0) {
+					ch3.env_speed = ch3.env_speed_tc;
+					if (!ch3.env_dir) {
+						if (ch3.volume > 0)
+							ch2.volume--;
+					} else {
+						if (ch3.volume < 15)
 							ch2.volume++;
 					}
 				}
@@ -2268,7 +2252,7 @@ int main(int argc, char **argv)
 	ch1.duty = 4;
 	ch2.duty = 4;
 	if (argc != 3) {
-		printf("Usage: %s <gbs-file> <subsong>\n");
+		printf("Usage: %s <gbs-file> <subsong>\n", argv[0]);
 		exit(1);
 	}
 	open_gbs(argv[1], argv[2][0]-'0');
@@ -2279,7 +2263,7 @@ int main(int argc, char **argv)
 			decode_ins();
 			clock += cycles;
 			timerdiv += cycles;
-			show_reg_diffs();
+//			show_reg_diffs();
 		} else {
 			clock += 16;
 			timerdiv += 16;
