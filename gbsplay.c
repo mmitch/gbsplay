@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.45 2003/09/13 16:19:21 ranma Exp $
+/* $Id: gbsplay.c,v 1.46 2003/09/14 15:51:26 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -378,6 +378,7 @@ int main(int argc, char **argv)
 	gbs_playsong(gbs, subsong);
 	if (!quiet) {
 		gbs_printinfo(gbs, 0);
+		printf("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player\n");
 		printf("\n\n\n");
 	}
 	tcgetattr(STDIN_FILENO, &ts);
