@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.62 2003/12/26 15:07:42 mitch Exp $
+# $Id: Makefile,v 1.63 2003/12/29 18:53:32 mitch Exp $
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
@@ -121,6 +121,9 @@ dist:	distclean
 	install -m 644 $(docs) INSTALL ./$(DISTDIR)/
 	install -d ./$(DISTDIR)/contrib
 	install -m 755 contrib/gbs2ogg.sh ./$(DISTDIR)/contrib
+	install -d ./$(DISTDIR)/po
+	install -m 644 po/*.po ./$(DISTDIR)/po
+	install -m 644 po/subdir.mk ./$(DISTDIR)/po
 	tar -c $(DISTDIR)/ -vzf ../$(DISTDIR).tar.gz
 	rm -rf ./$(DISTDIR)
 
