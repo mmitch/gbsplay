@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.8 2003/10/27 16:06:58 ranma Exp $
+/* $Id: gbs.c,v 1.9 2003/10/27 20:56:50 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -199,6 +199,7 @@ int gbs_write(struct gbs *gbs, char *name, int version)
 	char pad[16];
 	char strings[65536];
 	int stringofs = 0;
+	int newlen = gbs->filesize;
 
 	memset(pad, 0xff, sizeof(pad));
 
@@ -210,19 +211,18 @@ int gbs_write(struct gbs *gbs, char *name, int version)
 	if (version == 2) {
 		int len,i;
 		int ehdrlen = 32 + 8*gbs->songs;
-		int newlen = 0x70 + codelen*16 + ehdrlen;
 		unsigned int hdrcrc;
 
+		newlen = 0x70 + codelen*16 + ehdrlen;
 		gbs->buf[3] = 1;
 		gbs->buf = realloc(gbs->buf, newlen + 65536);
 		gbs->code = gbs->buf + 0x70;
 		gbs->exthdr = gbs->code + codelen*16;
 		writeint(gbs->buf + 0x6e, codelen, 2);
-		gbs->filesize = newlen;
 		memset(&gbs->code[gbs->codelen], 0x00, codelen*16 - gbs->codelen);
 		memset(gbs->exthdr, 0x00, ehdrlen + 65536);
 		strncpy(gbs->exthdr, GBS_EXTHDR_MAGIC, 4);
-		gbs->exthdr[0x1a] = gbs->songs;
+		gbs->exthdr[0x1c] = gbs->songs;
 		if ((len = strlen(gbs->title)) > 32) {
 			memcpy(strings+stringofs, gbs->title, len+1);
 			writeint(&gbs->exthdr[0x14], stringofs, 2);
@@ -251,8 +251,8 @@ int gbs_write(struct gbs *gbs, char *name, int version)
 				stringofs += len;
 			} else writeint(&gbs->exthdr[0x20+8*i+4], 0xffff, 2);
 		}
-		memcpy(gbs->buf + gbs->filesize, strings, stringofs);
-		gbs->filesize += stringofs;
+		memcpy(gbs->buf + newlen, strings, stringofs);
+		newlen += stringofs;
 
 		writeint(&gbs->exthdr[0x04], ehdrlen+stringofs-8, 4);
 		writeint(&gbs->exthdr[0x0c], gbs->filesize, 4);
@@ -264,10 +264,9 @@ int gbs_write(struct gbs *gbs, char *name, int version)
 	} else {
 		if (gbs->version == 2) {
 			gbs->buf[3] = 1;
-			gbs->filesize = 0x70 + gbs->codelen;
 		}
 	}
-	write(fd, gbs->buf, gbs->filesize);
+	write(fd, gbs->buf, newlen);
 	close(fd);
 
 	return 1;
@@ -350,15 +349,15 @@ struct gbs *gbs_open(char *name)
 		int gbs_titleex;
 		int gbs_authorex;
 		int gbs_copyex;
+		int entries;
 
 		gbs->version = 2;
-		gbs->strings = gbs->exthdr + 32 + 8*gbs->songs;
+		entries = buf2[0x1c];
+		gbs->strings = gbs->exthdr + 32 + 8*entries;
 
 		gbs_titleex = readint(&buf2[0x14], 2);
 		gbs_authorex = readint(&buf2[0x16], 2);
 		gbs_copyex = readint(&buf2[0x18], 2);
-		if (gbs->filesize != st.st_size)
-			fprintf(stderr, "Warning: file size does not match: %d != %ld\n", gbs->filesize, st.st_size);
 		if (gbs_titleex != 0xffff)
 			gbs->title = gbs->strings + gbs_titleex;
 		if (gbs_authorex != 0xffff)
@@ -366,7 +365,7 @@ struct gbs *gbs_open(char *name)
 		if (gbs_copyex != 0xffff)
 			gbs->copyright = gbs->strings + gbs_copyex;
 
-		for (i=0; i<gbs->songs; i++) {
+		for (i=0; i<entries; i++) {
 			int ofs = readint(&buf2[32 + 8*i + 4], 2);
 			gbs->subsong_info[i].len = readint(&buf2[32 + 8*i], 4);
 			if (ofs == 0xffff)
@@ -375,7 +374,7 @@ struct gbs *gbs_open(char *name)
 		}
 
 		if (gbs->crc != gbs->crcnow) {
-			fprintf(stderr, "File CRC does not match: 0x%08x != 0x%08x\n", gbs->crc, gbs->crcnow);
+			fprintf(stderr, "Warning: File CRC does not match (0x%08x != 0x%08x).\n", gbs->crc, gbs->crcnow);
 		}
 	}
 
