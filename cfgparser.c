@@ -1,3 +1,11 @@
+/* $Id: cfgparser.c,v 1.7 2004/01/11 21:03:15 mitch Exp $
+ *
+ * gbsplay is a Gameboy sound player
+ *
+ * 2003 (C) by Tobias Diedrich <ranma@gmx.at>
+ * Licensed under GNU GPL.
+ */
+
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
