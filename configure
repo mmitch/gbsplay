@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.15 2003/09/22 18:18:10 mitch Exp $
+# $Id: configure,v 1.16 2003/10/21 22:34:29 ranma Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -126,27 +126,6 @@ else
     echo "xmms-config not found!"
 fi
 
-## check for zlib development files
-
-echo -n "checking for zlib-dev:  "
-
-INFILE="$TEMPDIR/zlib.c"
-OUTFILE="$TEMPDIR/zlib"
-
-cat > "$INFILE" <<EOF
-#include <zlib.h>
-int main(char argc, char **argv) {
-    return 0;
-}
-EOF
-$CC -o "$OUTFILE" "$INFILE"
-if [ $? -eq 0 ]; then
-    ZLIB_FOUND=yes
-    echo "ok"
-else
-    echo "not found"
-fi
-
 ## everything ok?
 
 if [ "$GLIB_CFLAGS" -a "$XMMS_CFLAGS" -a "XMMS_INPUT_PLUGIN_DIR" ]; then
@@ -157,14 +136,6 @@ if [ "$GLIB_CFLAGS" -a "$XMMS_CFLAGS" -a "XMMS_INPUT_PLUGIN_DIR" ]; then
     echo "xmms support enabled."
 else
     echo "no xmms support."
-fi
-
-if [ "$ZLIB_FOUND" = "yes" ]; then
-    EXTRA_CFLAGS="$EXTRA_CFLAGS -DHAVE_ZLIB"
-    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lz"
-    echo "crc32 support enabled."
-else
-    echo "no crc32 support."
 fi
 
 ## write configuration

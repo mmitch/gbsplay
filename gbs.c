@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.5 2003/10/11 20:04:41 mitch Exp $
+/* $Id: gbs.c,v 1.6 2003/10/21 22:34:29 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -16,18 +16,10 @@
 #include <errno.h>
 #include <string.h>
 
-#ifdef HAVE_ZLIB
-#include <zlib.h>
-#else
-/* fake CRC32 routine when zlib is not present */
-unsigned int crc32(unsigned char a, unsigned char* b, unsigned int c) {
-  return 0;
-}
-#endif
-
 #include "gbhw.h"
 #include "gbcpu.h"
 #include "gbs.h"
+#include "crc32.h"
 
 static const char playercode[] = {
 	0xf5,              /* 0050:  push af         */
@@ -119,17 +111,17 @@ int gbs_playsong(struct gbs *gbs, int i)
 
 void gbs_printinfo(struct gbs *gbs, int verbose)
 {
-	printf("GBSVersion: %d.\n"
-	       "Title:     \"%s\".\n"
-	       "Author:    \"%s\".\n"
-	       "Copyright: \"%s\".\n"
-	       "Load address:  0x%04x.\n"
-	       "Init address:  0x%04x.\n"
-	       "Play address:  0x%04x.\n"
-	       "Stack pointer: 0x%04x.\n"
-	       "File size: 0x%08x.\n"
-	       "ROM size:  0x%08x (%d banks).\n"
-	       "Subsongs: %d.\n",
+	printf("GBSVersion:	%d.\n"
+	       "Title:		\"%s\".\n"
+	       "Author:		\"%s\".\n"
+	       "Copyright:	\"%s\".\n"
+	       "Load address:	0x%04x.\n"
+	       "Init address:	0x%04x.\n"
+	       "Play address:	0x%04x.\n"
+	       "Stack pointer:	0x%04x.\n"
+	       "File size:	0x%08x.\n"
+	       "ROM size:	0x%08x (%d banks).\n"
+	       "Subsongs:	%d.\n",
 	       gbs->version,
 	       gbs->title,
 	       gbs->author,
@@ -143,16 +135,26 @@ void gbs_printinfo(struct gbs *gbs, int verbose)
 	       gbs->romsize/0x4000,
 	       gbs->songs);
 	if (gbs->version == 2) {
-		printf("CRC32:     0x%08x/0x%08x (%s).\n",
+		printf("CRC32:		0x%08x/0x%08x (%s).\n",
 		       gbs->crc, gbs->crcnow,
 		       gbs->crc == gbs->crcnow ? "OK" : "Failed");
 	}
 	if (verbose && gbs->version == 2) {
 		int i;
-		for (i=0; i<gbs->songs; i++)
-			printf("Subsong %03d: Lenght=%d Title=%s\n",
-			       i, gbs->subsong_info[i].len,
-			       gbs->subsong_info[i].title);
+		for (i=0; i<gbs->songs; i++) {
+			printf("Subsong %03d:	", i);
+			if (gbs->subsong_info[i].title) {
+				printf("\"%s\" ", gbs->subsong_info[i].title);
+			} else {
+				printf("untitled ");
+			}
+			if (gbs->subsong_info[i].len) {
+				printf("(%d seconds).\n",
+				       gbs->subsong_info[i].len);
+			} else {
+				printf("(no timelimit).\n");
+			}
+		}
 	}
 }
 
@@ -235,7 +237,7 @@ int gbs_write(struct gbs *gbs, char *name, int version)
 		writeint(&gbs->exthdr[0x00], gbs->filesize, 4);
 		gbs->buf[3] = 2;
 
-		gbs->crc = crc32(0, gbs->buf, gbs->filesize);
+		gbs->crc = gbs_crc32(0, gbs->buf, gbs->filesize);
 		writeint(&gbs->exthdr[0x04], gbs->crc, 4);
 	} else {
 		if (gbs->version == 2) {
@@ -342,7 +344,7 @@ struct gbs *gbs_open(char *name)
 		}
 	}
 
-	gbs->crcnow = crc32(0, buf, gbs->filesize);
+	gbs->crcnow = gbs_crc32(0, buf, gbs->filesize);
 
 	gbs->romsize = (gbs->codelen + gbs->load + 0x3fff) & ~0x3fff;
 
