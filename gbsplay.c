@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.18 2003/08/23 19:17:30 ranma Exp $
+/* $Id: gbsplay.c,v 1.19 2003/08/23 22:36:07 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -192,10 +192,13 @@ static unsigned char io_get(unsigned short addr)
 {
 	if (addr >= 0xff80 && addr <= 0xfffe) {
 		return hiram[addr & 0x7f];
-	} else if (addr >= 0xff10 &&
+	}
+	if (addr >= 0xff10 &&
 	           addr <= 0xff3f) {
 		return ioregs[addr & 0x7f];
 	}
+	if (addr == 0xff00) return 0;
+	if (addr == 0xffff) return ioregs[0x7f];
 	printf("ioread from 0x%04x unimplemented.\n", addr);
 	DPRINTF("io_get(%04x)\n", addr);
 	return 0xff;
@@ -506,6 +509,8 @@ static void io_put(unsigned short addr, unsigned char val)
 		ioregs[addr & 0x7f] = val;
 		DPRINTF(" ([0x%04x]=%02x) ", addr, val);
 		switch (addr) {
+			case 0xff00:
+				break;
 			case 0xff06:
 			case 0xff07:
 				timertc = (256-ioregs[0x06]) * (16 << (((ioregs[0x07]+3) & 3) << 1));
@@ -570,7 +575,7 @@ static void io_put(unsigned short addr, unsigned char val)
 					ch1.len = (64 - len)*2;
 					ch1.len_enable = (val & 0x40) > 0;
 
-//					printf(" ch1: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch1.volume, ch1.env_dir, ch1.env_speed_tc, ch1.duty, ch1.len, ch1.len_enable, ch1.div_tc);
+//					printf(" ch1: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d gate=%d%d\n", ch1.volume, ch1.env_dir, ch1.env_speed_tc, ch1.duty, ch1.len, ch1.len_enable, ch1.div_tc, ch1.leftgate, ch1.rightgate);
 				}
 				break;
 			case 0xff15:
@@ -628,7 +633,7 @@ static void io_put(unsigned short addr, unsigned char val)
 					ch2.len = (64 - len)*2;
 					ch2.len_enable = (val & 0x40) > 0;
 
-//					printf(" ch2: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch2.volume, ch2.env_dir, ch2.env_speed, ch2.duty, ch2.len, ch2.len_enable, ch2.div_tc);
+//					printf(" ch2: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d gate=%d%d\n", ch2.volume, ch2.env_dir, ch2.env_speed, ch2.duty, ch2.len, ch2.len_enable, ch2.div_tc, ch2.leftgate, ch2.rightgate);
 				}
 				break;
 			case 0xff1a:
@@ -636,12 +641,9 @@ static void io_put(unsigned short addr, unsigned char val)
 				break;
 			case 0xff1b:
 				{
-					int duty = ioregs[0x1b] >> 6;
-					int len = ioregs[0x1b] & 0x3f;
+					int len = ioregs[0x1b];
 
-					ch3.duty = dutylookup[duty];
-					ch3.duty_tc = ch3.div_tc*ch3.duty/8;
-					ch3.len = (64 - len)*2;
+					ch3.len = (256 - len)*2;
 
 					break;
 				}
@@ -661,15 +663,13 @@ static void io_put(unsigned short addr, unsigned char val)
 				}
 				if (val & 0x80) {
 					int vol = (ioregs[0x1c] >> 5) & 3;
-					int len = ioregs[0x1b] & 0x3f;
 					int div = ioregs[0x1d];
 					div |= ((int)val & 7) << 8;
 					ch3.master = (ioregs[0x1a] & 0x80) > 0;
 					ch3.volume = vol;
 					ch3.div_tc = 2048 - div;
-					ch3.len = (64 - len)*2;
 					ch3.len_enable = (val & 0x40) > 0;
-//					printf(" ch3: sft=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch3.volume, ch3.env_dir, ch3.env_speed, ch3.duty, ch3.len, ch3.len_enable, ch3.div_tc);
+//					printf(" ch3: sft=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d gate=%d%d\n", ch3.volume, ch3.env_dir, ch3.env_speed, ch3.duty, ch3.len, ch3.len_enable, ch3.div_tc, ch3.leftgate, ch3.rightgate);
 				}
 				break;
 			case 0xff1f:
@@ -678,7 +678,7 @@ static void io_put(unsigned short addr, unsigned char val)
 				{
 					int len = ioregs[0x20] & 0x3f;
 
-					ch3.len = (64 - len)*2;
+					ch4.len = (64 - len)*2;
 
 					break;
 				}
@@ -694,24 +694,23 @@ static void io_put(unsigned short addr, unsigned char val)
 				}
 				break;
 			case 0xff22:
+			case 0xff23:
 				{
 					int div = ioregs[0x22];
-					div |= ((int)val & 7) << 8;
+					int shift = div >> 5;
+					int rate = div & 7;
 					ch4.div = 0;
-					ch4.div_tc = 1 << (div >> 5);
-					if (div & 7) ch4.div_tc *= div & 7;
+					ch4.div_tc = 1 << shift;
+					if (rate) ch4.div_tc *= rate;
 					else ch4.div_tc /= 2;
+					if (addr == 0xff22) break;
 				}
-				break;
-			case 0xff23:
 				if (val & 0x80) {
 					int vol = ioregs[0x21] >> 4;
 					int envdir = (ioregs[0x21] >> 3) & 1;
 					int envspd = ioregs[0x21] & 7;
 					int len = ioregs[0x20] & 0x3f;
-					int div = ioregs[0x22];
 
-					div |= ((int)val & 7) << 8;
 					ch4.volume = vol;
 					ch4.master = 1;
 					ch4.env_dir = envdir;
@@ -719,22 +718,33 @@ static void io_put(unsigned short addr, unsigned char val)
 					ch4.len = (64 - len)*2;
 					ch4.len_enable = (val & 0x40) > 0;
 
-//					printf(" ch4: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch4.volume, ch4.env_dir, ch4.env_speed, ch4.duty, ch4.len, ch4.len_enable, ch4.div_tc);
+//					printf(" ch4: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d gate=%d%d\n", ch4.volume, ch4.env_dir, ch4.env_speed, ch4.duty, ch4.len, ch4.len_enable, ch4.div_tc, ch4.leftgate, ch4.rightgate);
 				}
 				break;
 			case 0xff24:
 				break;
 			case 0xff25:
-				ch1.leftgate = val & 0x10;
-				ch1.rightgate = val & 0x01;
-				ch2.leftgate = val & 0x20;
-				ch2.rightgate = val & 0x02;
-				ch3.leftgate = val & 0x40;
-				ch3.rightgate = val & 0x04;
-				ch4.leftgate = val & 0x80;
-				ch4.rightgate = val & 0x08;
+				ch1.leftgate = (val & 0x10) > 0;
+				ch1.rightgate = (val & 0x01) > 0;
+				ch2.leftgate = (val & 0x20) > 0;
+				ch2.rightgate = (val & 0x02) > 0;
+				ch3.leftgate = (val & 0x40) > 0;
+				ch3.rightgate = (val & 0x04) > 0;
+				ch4.leftgate = (val & 0x80) > 0;
+				ch4.rightgate = (val & 0x08) > 0;
 				break;
 			case 0xff26:
+				ioregs[0x26] = 0x80;
+				break;
+			case 0xff27:
+			case 0xff28:
+			case 0xff29:
+			case 0xff2a:
+			case 0xff2b:
+			case 0xff2c:
+			case 0xff2d:
+			case 0xff2e:
+			case 0xff2f:
 				break;
 			case 0xff30:
 			case 0xff31:
@@ -752,6 +762,8 @@ static void io_put(unsigned short addr, unsigned char val)
 			case 0xff3d:
 			case 0xff3e:
 			case 0xff3f:
+				break;
+			case 0xffff:
 				break;
 			default:
 				printf("iowrite to 0x%04x unimplemented (val=%02x).\n", addr, val);
@@ -1380,6 +1392,26 @@ static void op_ld_ind16_sp(unsigned char op, struct opinfo *oi)
 	mem_put(ofs+1, sp >> 8);
 }
 
+static void op_ld_hlsp(unsigned char op, struct opinfo *oi)
+{
+	char ofs = get_imm8();
+	unsigned short old = REGS16_R(regs, SP);
+	unsigned short new = old + ofs;
+
+	if (ofs>0) DPRINTF(" %s  HL, SP+0x%02x", oi->name, ofs);
+	else DPRINTF(" %s  HL, SP-0x%02x", oi->name, -ofs);
+	REGS16_W(regs, HL, new);
+	regs.rn.f = 0;
+	if (old > new) regs.rn.f |= CF;
+	if ((old & 0xfff) > (new & 0xfff)) regs.rn.f |= HF;
+}
+
+static void op_ld_sphl(unsigned char op, struct opinfo *oi)
+{
+	DPRINTF(" %s  SP, HL", oi->name);
+	REGS16_W(regs, SP, REGS16_R(regs, HL));
+}
+
 static void op_ld_reg16_imm(unsigned char op, struct opinfo *oi)
 {
 	int val = get_imm16();
@@ -1426,7 +1458,7 @@ static void op_ldh(unsigned char op, struct opinfo *oi)
 	int ofs = op & 2 ? 0 : get_imm8();
 
 	if (op & 0x10) {
-		DPRINTF(" %s  A,", oi->name);
+		DPRINTF(" %s  A, ", oi->name);
 		if ((op & 2) == 0) {
 			DPRINTF("[%02x]", ofs);
 		} else {
@@ -1915,7 +1947,7 @@ static void op_rst(unsigned char op, struct opinfo *oi)
 
 	DPRINTF(" %s 0x%02x", oi->name, ofs);
 	push(REGS16_R(regs, PC));
-	REGS16_W(regs, PC, gbs_base + ofs);
+	REGS16_W(regs, PC, ofs);
 }
 
 static void op_nop(unsigned char op, struct opinfo *oi)
@@ -2172,8 +2204,8 @@ static struct opinfo ops[256] = {
 	OPINFO("\tPUSH", &op_push),		/* opcode f5 */
 	OPINFO("\tOR", &op_or_imm),		/* opcode f6 */
 	OPINFO("\tRST", &op_rst),		/* opcode f7 */
-	OPINFO("\tUNKN", &op_unknown),		/* opcode f8 */
-	OPINFO("\tUNKN", &op_unknown),		/* opcode f9 */
+	OPINFO("\tLD", &op_ld_hlsp),		/* opcode f8 */
+	OPINFO("\tLD", &op_ld_sphl),		/* opcode f9 */
 	OPINFO("\tLD", &op_ld_imm),		/* opcode fa */
 	OPINFO("\tEI", &op_ei),		/* opcode fb */
 	OPINFO("\tUNKN", &op_unknown),		/* opcode fc */
@@ -2436,13 +2468,42 @@ static void do_sound(int cycles)
 }
 
 static char playercode[] = {
-	0x76,       /* halt */
-	0x18, 0xfd, /* jr $-3 */
+	0x01, 0x30, 0x00,  /* 0050:  ld   bc, 0x0030 */
+	0x11, 0x10, 0xff,  /* 0053:  ld   de, 0xff10 */
+	0x21, 0x72, 0x00,  /* 0056:  ld   hl, 0x0072 */
+	0x2a,              /* 0059:  ldi  a, [hl]    */
+	0x12,              /* 005a:  ld   [de], a    */
+	0x13,              /* 005b:  inc  de         */
+	0x0b,              /* 005c:  dec  bc         */
+	0x78,              /* 005d:  ld   a, b       */
+	0xb1,              /* 005e:  or   a, c       */
+	0x20, 0xf8,        /* 005f:  jr nz $-0x08    */
+	0x1e, 0xff,        /* 0061:  ld   e, 0xff    */
+	0x3e, 0x06,        /* 0063:  ld   a, 0x06    */
+	0x12,              /* 0065:  ld   [de], a    */
+	0x3e, 0x00,        /* 0066:  ld   a, 0x00    */
+	0xcd, 0x00, 0x00,  /* 0068:  call init       */
+	0xfb,              /* 006b:  ei              */
+	0x76,              /* 006c:  halt            */
+	0xcd, 0x00, 0x00,  /* 006d:  call play       */
+	0x18, 0xfa,        /* 0070:  jr $-6          */
+
+	0x80, 0xbf, 0x00, 0x00, 0xbf, /* 0072: initdata */
+	0x00, 0x3f, 0x00, 0x00, 0xbf,
+	0x7f, 0xff, 0x9f, 0x00, 0xbf,
+	0x00, 0xff, 0x00, 0x00, 0xbf,
+	0x77, 0xf3, 0xf1, 0x00,
+	0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00,
+	0xac, 0xdd, 0xda, 0x48,
+	0x36, 0x02, 0xcf, 0x16,
+	0x2c, 0x04, 0xe5, 0x2c,
+	0xac, 0xdd, 0xda, 0x48
 };
 
 static void open_gbs(char *name, int i)
 {
-	int fd;
+	int fd, j;
 	unsigned char buf[0x70];
 	struct stat st;
 
@@ -2501,7 +2562,7 @@ static void open_gbs(char *name, int i)
 		ioregs[0x06] = buf[0x0e];
 		ioregs[0x07] = buf[0x0f];
 		timertc = (256-buf[0x0e]) * (16 << (((buf[0x0f]+3) & 3) << 1));
-		if (buf[0x0f] & 0x80) timertc /= 2;
+		if ((buf[0x0f] & 0xf0) == 0x80) timertc /= 2;
 		printf("Callback rate %2.2fHz (Custom).\n", 4194304/(float)timertc);
 	} else {
 		timertc = 70256;
@@ -2511,12 +2572,25 @@ static void open_gbs(char *name, int i)
 	rom = malloc(romsize);
 	read(fd, &rom[gbs_base], st.st_size - 0x70);
 
-	memcpy(rom, playercode, sizeof(playercode));
+	for (j=0; j<8; j++) {
+		int addr = gbs_base + 8*j; /* jump address */
+		rom[8*j]   = 0xc3; /* jr imm16 */
+		rom[8*j+1] = addr & 0xff;
+		rom[8*j+2] = addr >> 8;
+	}
+	rom[0x40] = 0xc9; /* reti */
+	rom[0x48] = 0xc9; /* reti */
 
-	REGS16_W(regs, PC, gbs_init);
+	memcpy(&rom[0x50], playercode, sizeof(playercode));
+
+	rom[0x67] = i - 1;
+	rom[0x69] = gbs_init & 0xff;
+	rom[0x6a] = gbs_init >> 8;
+	rom[0x6e] = gbs_play & 0xff;
+	rom[0x6f] = gbs_play >> 8;
+
+	REGS16_W(regs, PC, 0x0050); /* playercode entry point */
 	REGS16_W(regs, SP, gbs_stack);
-	regs.rn.a  = (i - 1);
-	push(0x0000); /* call return address */
 
 	close(fd);
 }
@@ -2556,13 +2630,6 @@ static void setvols(char *s, int i)
 static int statustc = 83886;
 static int statuscnt;
 
-static unsigned char dmgwave[16] = {
-	0xac, 0xdd, 0xda, 0x48,
-	0x36, 0x02, 0xcf, 0x16,
-	0x2c, 0x04, 0xe5, 0x2c,
-	0xac, 0xdd, 0xda, 0x48
-};
-
 static char n1[4];
 static char n2[4];
 static char n3[4];
@@ -2591,10 +2658,6 @@ int main(int argc, char **argv)
 	ch1.duty = 4;
 	ch2.duty = 4;
 	ch1.div_tc = ch2.div_tc = ch3.div_tc = 1;
-	ch1.master = ch2.master = ch4.master = 1;
-
-	memcpy(&ioregs[0x30], dmgwave, sizeof(dmgwave));
-//	memset(ram, 0xff, sizeof(ram));
 
 	if (argc < 2) {
 		printf("Usage: %s <gbs-file> [<subsong>]\n", argv[0]);
@@ -2610,13 +2673,13 @@ int main(int argc, char **argv)
 			DEB(show_reg_diffs());
 		} else cycles = 16;
 		clock += cycles;
-		timer -= cycles;
 		statuscnt -= cycles;
-		if (timer < 0) {
+		if (timer > 0) timer -= cycles;
+		if (timer <= 0 && interrupts && (ioregs[0x7f] & 4)) {
 			timer += timertc;
 			halted = 0;
 			push(REGS16_R(regs, PC));
-			REGS16_W(regs, PC, gbs_play);
+			REGS16_W(regs, PC, 0x0048); /* timer int handler */
 		}
 		if (statuscnt < 0) {
 			int ni1 = (int)NOTE(ch1.div_tc);
