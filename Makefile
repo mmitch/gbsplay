@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.52 2003/11/30 15:03:49 ranma Exp $
+# $Id: Makefile,v 1.53 2003/11/30 15:10:28 ranma Exp $
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
@@ -162,7 +162,7 @@ config.mk: configure
 
 %.d: %.c config.mk
 	@echo DEP $< -o $@
-	@./depend.sh $< > $@
+	@./depend.sh $< config.mk > $@
 
 %.1: %.in.1
 	sed -f config.sed $< > $@
