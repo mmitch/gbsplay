@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: gbs2ogg.sh,v 1.2 2003/12/05 22:22:30 mitch Exp $
+# $Id: gbs2ogg.sh,v 1.3 2003/12/19 21:46:10 mitch Exp $
 #
 # Automatically convert all subsongs from .gbs file to .ogg files.
 # 
@@ -26,7 +26,7 @@ FILEBASE=`echo "$FILEBASE"|sed 's/.gbs$//'`
 
 # get subsong count
 # get song info
-../gbsinfo "$FILENAME" | cut -c 17- | sed -e 's/^"//' -e 's/"$//' | (
+    gbsinfo "$FILENAME" | cut -c 17- | sed -e 's/^"//' -e 's/"$//' | (
     read GBSVERSION
     read TITLE
     read AUTHOR
