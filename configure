@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.51.2.9 2004/04/13 19:08:45 mitch Exp $
+# $Id: configure,v 1.51.2.10 2004/04/14 17:44:25 ranmachan Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -12,7 +12,7 @@
 EXTRA_ALL=
 EXTRA_CFLAGS="$CFLAGS"
 EXTRA_INSTALL=
-EXTRA_LDFLAGS=
+EXTRA_LDFLAGS="$LDFLAGS"
 EXTRA_SRCS=
 EXTRA_UNINSTALL=
 XMMS_INPUT_PLUGIN_DIR=
@@ -59,7 +59,7 @@ int main(char argc, char **argv) {
 }
 EOF
         if [ $? -eq 0 ]; then
-            eval "include${includename}_path=\"$dir \""
+            eval "include_${includename}_path=\"$dir \""
             return 0
         fi
     done
@@ -131,11 +131,9 @@ check_libs()
     done
     extraflags=`remove_dupes "$extraflags"`
 
+    cat > "$INFILE"
     minerrs=`$CC -o "$OUTFILE" "$INFILE" -l$checklib $extraflags 2>&1 | wc -l`
     for extralib in $extralibs; do
-        cat > "$INFILE" <<EOF
-int main(char argc, char **argv) { return 0; }
-EOF
         errs=`$CC -o "$OUTFILE" "$INFILE" -l$checklib -l$extralib $extraflags 2>&1 | wc -l`
         if [ $errs -lt $minerrs ]; then
             minerrs=$errs
@@ -511,12 +509,14 @@ if [ "$use_nas" != no ]; then
     retval1=$?
     retval2=1
     if [ $retval1 -eq 0 ]; then
-        check_libs audio "X11 Xt m" "/usr/X11R6/lib /usr/X11/lib /usr/lib/X11"
+        check_libs audio "X11 Xt" "/usr/X11R6/lib /usr/X11/lib /usr/lib/X11" <<EOF
+int main(char argc, char **argv) { return 0; }
+EOF
         retval2=$?
     fi
     if [ $retval1 -eq 0 -a $retval2 -eq 0 ]; then
-        if [ "$includeaudiolib_path" != " " ]; then
-            EXTRA_CFLAGS="$EXTRA_CFLAGS -I$includeaudiolib_path"
+        if [ "$include_audio_audiolib_h_path" != " " ]; then
+            EXTRA_CFLAGS="$EXTRA_CFLAGS -I$include_audio_audiolib_h_path"
         fi
         use_nas=yes
     fi
@@ -546,7 +546,7 @@ if [ "$use_i18n" != no ]; then
 fi
 
 if [ "$use_i18n" = "yes" ]; then
-    cc_check "do we need -lintl" need_lintl "-lintl" yes no <<EOF
+    check_libs c "intl" "/usr/local/lib" <<EOF
 #include <libintl.h>
 int main(int argc, char **argv)
 {
@@ -554,9 +554,23 @@ int main(int argc, char **argv)
 	return 0;
 }
 EOF
-    if [ $? -eq 0 ]; then
-	EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lintl"
+    if [ $? -eq 0 -a "$libc_flags" != "" ]; then
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS $libc_flags"
     fi
+#    find_lib intl "/usr/local/lib"
+#    flags="-lintl"
+#    test -z "$libintl_path" || flags="-L$libintl_path $flags"
+#    cc_check "do we need -lintl" need_lintl "$flags" yes no <<EOF
+##include <libintl.h>
+#int main(int argc, char **argv)
+#{
+#	bindtextdomain("foo", "bar");
+#	return 0;
+#}
+#EOF
+#    if [ $? -eq 0 ]; then
+#	EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lintl"
+#    fi
 fi
 
 if [ "$build_xmmsplugin" != "no" ]; then
@@ -685,6 +699,7 @@ else
 fi
 
 echo "EXTRA_CFLAGS=$EXTRA_CFLAGS"
+echo "EXTRA_LDFLAGS=$EXTRA_LDFLAGS"
 
 ## write configuration
 
