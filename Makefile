@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.26 2003/08/30 19:30:03 mitch Exp $
+# $Id: Makefile,v 1.27 2003/08/30 19:36:10 mitch Exp $
 
 include config.mk
 
@@ -55,8 +55,8 @@ install: all install-default $(EXTRA_INSTALL)
 install-default:
 	install -d $(bindir)
 	install -d $(man1dir)
-	install -m 755 gbsplay   gbsinfo   $(bindir)/gbsplay
-	install -m 644 gbsplay.1 gbsinfo.1 $(man1dir)/gbsplay.1
+	install -m 755 gbsplay   gbsinfo   $(bindir)
+	install -m 644 gbsplay.1 gbsinfo.1 $(man1dir)
 
 install-gbsxmms.so:
 	install -d $(DESTDIR)$(XMMS_INPUT_PLUGIN_DIR)
