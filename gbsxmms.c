@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.8 2003/08/31 23:52:08 ranma Exp $
+/* $Id: gbsxmms.c,v 1.9 2003/09/01 00:01:16 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -39,6 +39,7 @@ char *fileinfo_filename;
 static struct gbs *gbs;
 static int gbs_subsong = 0;
 static long long gbclock = 0;
+static pthread_mutex_t gbs_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static int silencectr = 0;
 static int silencetimeout = 2;
@@ -227,12 +228,16 @@ void tableenum(gpointer data, gpointer user_data)
 
 void on_button_next_clicked(GtkButton *button, gpointer user_data)
 {
+	pthread_mutex_lock(&gbs_mutex);
 	next_subsong(1);
+	pthread_mutex_unlock(&gbs_mutex);
 }
 
 void on_button_prev_clicked(GtkButton *button, gpointer user_data)
 {
+	pthread_mutex_lock(&gbs_mutex);
 	prev_subsong();
+	pthread_mutex_unlock(&gbs_mutex);
 }
 
 void on_button_save_clicked(GtkButton *button, gpointer user_data)
@@ -501,7 +506,10 @@ void *playloop(void *priv)
 		return 0;
 	}
 	while (!stopthread) {
-		int cycles = gbhw_step();
+		int cycles;
+		pthread_mutex_lock(&gbs_mutex);
+		cycles = gbhw_step();
+		pthread_mutex_unlock(&gbs_mutex);
 		if (cycles<0) {
 			stopthread = 1;
 		} else {
@@ -600,8 +608,10 @@ static void get_song_info(char *filename, char **title, int *length)
 
 static void seek(int time)
 {
+	pthread_mutex_lock(&gbs_mutex);
 	if (time > get_time()/1000) next_subsong(1);
 	else prev_subsong();
+	pthread_mutex_unlock(&gbs_mutex);
 }
 
 InputPlugin gbs_ip = {
