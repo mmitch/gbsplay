@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.32 2004/10/22 22:51:55 ranmachan Exp $
+/* $Id: gbhw.c,v 1.33 2004/10/22 22:53:50 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -57,6 +57,20 @@ static void *callbackpriv;
 static uint32_t tap1 = TAP1_15;
 static uint32_t tap2 = TAP2_15;
 static uint32_t lfsr = 0xffffffff;
+
+static struct gbhw_buffer *soundbuf = NULL;
+static int sound_div_tc;
+static int sound_div;
+static const int main_div_tc = 32;
+static int main_div;
+static const int sweep_div_tc = 256;
+static int sweep_div;
+
+static int r_smpl;
+static int l_smpl;
+static int smpldivisor;
+
+static int ch3pos;
 
 static regparm uint32_t rom_get(uint32_t addr)
 {
@@ -275,20 +289,6 @@ static regparm void extram_put(uint32_t addr, uint8_t val)
 {
 	extram[addr & 0x1fff] = val;
 }
-
-static struct gbhw_buffer *soundbuf = NULL;
-static int sound_div_tc;
-static int sound_div;
-static const int main_div_tc = 32;
-static int main_div;
-static const int sweep_div_tc = 256;
-static int sweep_div;
-
-static int r_smpl;
-static int l_smpl;
-static int smpldivisor;
-
-static int ch3pos;
 
 static regparm void gb_sound_sweep(void)
 {
@@ -510,10 +510,11 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 	gbcpu_addmem(0xff, 0xff, io_put, io_get);
 }
 
-regparm int gbhw_step(int time_to_work)
-/*
- * Rückgabewert: Anzahl gelaufener CPU-Cycles
+/**
+ * @param time_to_work  emulated time in milliseconds
+ * @return  elapsed cpu cycles
  */
+regparm int gbhw_step(int time_to_work)
 {
 	int cycles_total = 0;
 
