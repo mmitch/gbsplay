@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.34 2003/08/25 09:05:27 ranma Exp $
+/* $Id: gbsplay.c,v 1.35 2003/08/25 09:07:23 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -147,8 +147,7 @@ static void open_gbs(char *name)
 	gbs_songcnt = buf[0x04];
 	gbs_songdefault = buf[0x05];
 
-	printf("Subsongs: %d.\n"
-	       "Title:     \"%.32s\"\n"
+	printf("Title:     \"%.32s\"\n"
 	       "Author:    \"%.32s\"\n"
 	       "Copyright: \"%.32s\"\n"
 	       "Load address %04x.\n"
@@ -157,7 +156,6 @@ static void open_gbs(char *name)
 	       "Stack pointer %04x.\n"
 	       "File size %08lx.\n"
 	       "ROM size %08x (%d banks).\n",
-	       gbs_songcnt,
 	       &buf[0x10],
 	       &buf[0x30],
 	       &buf[0x50],
@@ -333,7 +331,7 @@ int main(int argc, char **argv)
 			if (!gbhw_ch[1].volume) n2 = "---";
 			if (!gbhw_ch[2].volume) n3 = "---";
 
-			printf("song %d/%d %02d:%02d ch1: %s %s  ch2: %s %s  ch3: %s %s  ch4: %s\r",
+			printf("Song %d/%d  %02d:%02d  ch1: %s %s  ch2: %s %s  ch3: %s %s  ch4: %s\r",
 			       	subsong, gbs_songcnt, timem, times, n1, v1, n2, v2, n3, v3, v4);
 			fflush(stdout);
 
@@ -348,7 +346,7 @@ int main(int argc, char **argv)
 				silencectr++;
 			} else silencectr = 0;
 
-			if (time > 2*60 || silencectr > 100) {
+			if (time >= 2*60 || silencectr > 100) {
 				subsong++;
 				silencectr = 0;
 				clock = 0;
