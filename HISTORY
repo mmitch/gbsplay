@@ -1,11 +1,19 @@
-<<$Id: HISTORY,v 1.12.2.2 2004/04/08 21:53:32 mitch Exp $>>
+<<$Id: HISTORY,v 1.12.2.3 2004/04/13 13:23:04 mitch Exp $>>
 
 
 gbsplay HISTORY
 
 
-2004/04/07  -  0.0.6-rc1
+2004/04/13  -  0.0.6-rc2
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+Known gotchas:
+
+- Building the NAS output plugin does not always work.  On FreeBSD,
+  Cygwin and Debian Woody some additional compile and link parameters
+  needed which are not auto-configured yet.  Thus the nas plugin is
+  not enabled by default.
+- Some compile warnings on Cygwin.  Nothing serious.
 
 Bugfixes:
 
