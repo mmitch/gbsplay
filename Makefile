@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.57 2003/12/13 16:05:00 ranma Exp $
+# $Id: Makefile,v 1.58 2003/12/13 23:49:10 ranma Exp $
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
@@ -46,7 +46,7 @@ objs += $(objs_gbsxmms)
 dsts += gbsxmms.so
 endif
 
-.PHONY: all default distclean clean install dist libgbs
+.PHONY: all default distclean clean install dist
 
 all: default
 
@@ -68,6 +68,7 @@ distclean: clean
 clean:
 	find -regex ".*\.\([aos]\|lo\|mo\|so\(\.[0-9]\)?\)" -exec rm -f "{}" \;
 	find -name "*~" -exec rm -f "{}" \;
+	rm -f libgbs
 	rm -f $(mans)
 	rm -f ./gbsplay ./gbsinfo
 
@@ -137,18 +138,19 @@ objs_gbsplay    += libgbs.a
 objs_gbsxmms    += libgbspic.a
 
 libgbs: libgbs.a libgbspic.a
+	touch libgbs
 endif
 
 libgbspic.a: $(objs_libgbspic)
 	$(AR) r $@ $+
 libgbs.a: $(objs_libgbs)
 	$(AR) r $@ $+
-gbsinfo: $(objs_gbsinfo) | libgbs
+gbsinfo: $(objs_gbsinfo) libgbs
 	$(CC) -o $@ $(objs_gbsinfo) $(LDFLAGS)
-gbsplay: $(objs_gbsplay) | libgbs
+gbsplay: $(objs_gbsplay) libgbs
 	$(CC) -o $@ $(objs_gbsplay) $(LDFLAGS) -lm
 
-gbsxmms.so: $(objs_gbsxmms) | libgbs
+gbsxmms.so: $(objs_gbsxmms) libgbs
 	$(CC) -shared -fPIC -o $@ $(objs_gbsxmms) $(LDFLAGS) -lpthread
 
 # rules for suffixes
