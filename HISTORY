@@ -1,4 +1,4 @@
-<<$Id: HISTORY,v 1.4 2003/12/05 21:37:33 mitch Exp $>>
+<<$Id: HISTORY,v 1.5 2003/12/05 21:40:13 mitch Exp $>>
 
 
 gbsplay HISTORY
@@ -31,6 +31,7 @@ gbsplay HISTORY
   - generate versioned manpages
   - generate versioned directory in archive
   - no need for zlib any more
+  - don't check dependencies for 'clean' and 'distclean' targets
 
 
 2003/09/21  -  0.0.2
