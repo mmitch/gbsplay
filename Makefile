@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.41 2003/10/11 20:22:39 mitch Exp $
+# $Id: Makefile,v 1.42 2003/10/11 20:45:53 mitch Exp $
 
 include config.mk
 
@@ -94,13 +94,16 @@ uninstall-gbsxmms.so:
 
 dist:	distclean
 	install -d ./$(DISTDIR)
-	install -m 755 configure ./$(DISTDIR)/
+	sed 's/^VERSION=.*/VERSION=$(VERSION)/' < configure > ./$(DISTDIR)/configure
+	chmod 755 ./$(DISTDIR)/configure
 	install -m 755 depend.sh ./$(DISTDIR)/
 	install -m 644 Makefile ./$(DISTDIR)/
 	install -m 644 *.c ./$(DISTDIR)/
 	install -m 644 *.h ./$(DISTDIR)/
 	install -m 644 $(mans_src) ./$(DISTDIR)/
 	install -m 644 $(docs) ./$(DISTDIR)/
+	install -d ./$(DISTDIR)/contrib
+	install -m 755 contrib/gbs2ogg.sh ./$(DISTDIR)/contrib
 	tar -c $(DISTDIR)/ -vzf ../$(DISTDIR).tar.gz
 	rm -rf ./$(DISTDIR)
 
