@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.47 2003/09/17 21:19:10 mitch Exp $
+/* $Id: gbsplay.c,v 1.48 2003/09/17 21:25:56 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -34,24 +34,57 @@
 
 #define MAXOCTAVE 9
 
-/* Player modes */
+/* player modes */
 #define PLAYMODE_LINEAR  1
 #define PLAYMODE_SHUFFLE 2
 #define PLAYMODE_RANDOM  3
+
+/* lookup tables */
+static char notelookup[4*MAXOCTAVE*12];
+static char vollookup[5*16];
+static const char vols[5] = " -=#%";
+
+/* global variables */
+static char *myname;
+static int dspfd;
+static int quit = 0;
+static int silencectr = 0;
+static int statuscnt;
+static long long clock = 0;
+static struct termios ots;
+
+
+/* default values */
+static int playmode = PLAYMODE_LINEAR;
+static int quiet = 0;
+static int rate = 44100;
+static int silence_timeout = 2;
+static int subsong = -1;
+static int subsong_stop = -1;
+static int subsong_timeout = 2*60;
+static int usestdout = 0;
+
+static char *cfgfile = ".gbsplayrc";
+static int statustc = 83886;
+
 
 static int getnote(int div)
 {
 	int n = 0;
 
-	if (div>0) n = NOTE(div);
+	if (div>0) {
+		n = NOTE(div);
+	}
 
-	if (n < 0) n = 0;
-	else if (n >= MAXOCTAVE*12) n = MAXOCTAVE-1;
+	if (n < 0) {
+		n = 0;
+	} else if (n >= MAXOCTAVE*12) {
+		n = MAXOCTAVE-1;
+	}
 
 	return n;
 }
 
-static char notelookup[4*MAXOCTAVE*12];
 static void precalc_notes(void)
 {
 	int i;
@@ -62,13 +95,14 @@ static void precalc_notes(void)
 		s[2] = '0' + i / 12;
 		n += (n > 2) + (n > 7);
 		s[0] = 'A' + (n >> 1);
-		if (n & 1) s[1] = '#';
-		else s[1] = '-';
+		if (n & 1) {
+			s[1] = '#';
+		} else {
+			s[1] = '-';
+		}
 	}
 }
 
-static const char vols[5] = " -=#%";
-static char vollookup[5*16];
 static void precalc_vols(void)
 {
 	int i, k;
@@ -88,27 +122,16 @@ static void precalc_vols(void)
 	}
 }
 
-static int dspfd;
-
 void callback(void *buf, int len, void *priv)
 {
 	write(dspfd, buf, len);
 }
 
-static int rate = 44100;
-static int usestdout = 0;
-static int quiet = 0;
-static int subsongtimeout = 2*60;
-static int silencetimeout = 2;
-static int subsong = -1;
-
-static int playmode = PLAYMODE_LINEAR;
-
 static struct cfg_option options[] = {
 	{ "rate", &rate, cfg_int },
 	{ "quiet", &quiet, cfg_int },
-	{ "subsong_timeout", &subsongtimeout, cfg_int },
-	{ "silence_timeout", &silencetimeout, cfg_int },
+	{ "subsong_timeout", &subsong_timeout, cfg_int },
+	{ "silence_timeout", &silence_timeout, cfg_int },
 	{ NULL, NULL, NULL }
 };
 
@@ -174,8 +197,6 @@ void open_dsp(void)
 		fprintf(stderr, "ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n", c, strerror(errno));
 }
 
-static char *myname;
-
 void usage(int exitcode)
 {
 	FILE *out = exitcode ? stderr : stdout;
@@ -192,8 +213,8 @@ void usage(int exitcode)
 	        "  -V	print version and exit\n",
 	        myname,
 	        rate,
-	        subsongtimeout,
-	        silencetimeout);
+	        subsong_timeout,
+	        silence_timeout);
 	exit(exitcode);
 }
 
@@ -226,10 +247,10 @@ void parseopts(int *argc, char ***argv)
 			quiet = 1;
 			break;
 		case 't':
-			sscanf(optarg, "%d", &subsongtimeout);
+			sscanf(optarg, "%d", &subsong_timeout);
 			break;
 		case 'T':
-			sscanf(optarg, "%d", &silencetimeout);
+			sscanf(optarg, "%d", &silence_timeout);
 			break;
 		case 'V':
 			version();
@@ -239,11 +260,6 @@ void parseopts(int *argc, char ***argv)
 	*argc -= optind;
 	*argv += optind;
 }
-
-static int quit = 0;
-static int silencectr = 0;
-static long long clock = 0;
-static int subsong_stop = -1;
 
 static void handletimeouts(struct gbs *gbs)
 {
@@ -261,8 +277,8 @@ static void handletimeouts(struct gbs *gbs)
 		silencectr++;
 	} else silencectr = 0;
 
-	if ((subsongtimeout && time >= subsongtimeout) ||
-	    (silencetimeout && silencectr > 50*silencetimeout)) {
+	if ((subsong_timeout && time >= subsong_timeout) ||
+	    (silence_timeout && silencectr > 50*silence_timeout)) {
 		if (subsong == subsong_stop) {
 			quit = 1;
 		}
@@ -282,7 +298,7 @@ static void handleuserinput(struct gbs *gbs)
 {
 	char c;
 
-	if (read(STDIN_FILENO, &c, 1) != -1){
+	if (read(STDIN_FILENO, &c, 1) != -1) {
 		switch (c) {
 		case 'p':
 		case 'n':
@@ -319,7 +335,9 @@ static void printstatus(struct gbs *gbs)
 	int len = gbs->subsong_info[subsong].len / 128;
 	int lenm, lens;
 
-	if (len == 0) len = subsongtimeout;
+	if (len == 0) {
+		len = subsong_timeout;
+	}
 	lenm = len / 60;
 	lens = len % 60;
 
@@ -328,7 +346,9 @@ static void printstatus(struct gbs *gbs)
 	if (!gbhw_ch[2].volume) n3 = "---";
 
 	songtitle = gbs->subsong_info[subsong].title;
-	if (!songtitle) songtitle="Untitled";
+	if (!songtitle) {
+		songtitle="Untitled";
+	}
 	printf("\r\033[A\033[A"
 	       "Song %3d/%3d (%s)\033[K\n"
 	       "%02d:%02d/%02d:%02d  ch1: %s %s  ch2: %s %s  ch3: %s %s  ch4: %s\n",
@@ -337,13 +357,6 @@ static void printstatus(struct gbs *gbs)
 	       n1, v1, n2, v2, n3, v3, v4);
 	fflush(stdout);
 }
-
-static int statustc = 83886;
-static int statuscnt;
-
-static char *cfgfile = ".gbsplayrc";
-
-static struct termios ots;
 
 void exit_handler(int signum)
 {
@@ -381,7 +394,9 @@ int main(int argc, char **argv)
 	cfg_parse(usercfg, options);
 	parseopts(&argc, &argv);
 
-	if (argc < 1) usage(1);
+	if (argc < 1) {
+		usage(1);
+	}
 
 	precalc_notes();
 	precalc_vols();
@@ -401,8 +416,12 @@ int main(int argc, char **argv)
 	}
 
 	gbs = gbs_open(argv[0]);
-	if (gbs == NULL) exit(1);
-	if (subsong == -1) subsong = gbs->defaultsong - 1;
+	if (gbs == NULL) {
+		exit(1);
+	}
+	if (subsong == -1) {
+		subsong = gbs->defaultsong - 1;
+	}
 	gbs_playsong(gbs, subsong);
 	if (!quiet) {
 		gbs_printinfo(gbs, 0);
@@ -428,7 +447,9 @@ int main(int argc, char **argv)
 	while (!quit) {
 		int cycles = gbhw_step();
 
-		if (cycles < 0) quit = 1;
+		if (cycles < 0) {
+			quit = 1;
+		}
 
 		statuscnt -= cycles;
 		clock += cycles;
