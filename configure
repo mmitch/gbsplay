@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.47 2004/04/03 13:53:37 mitch Exp $
+# $Id: configure,v 1.48 2004/04/05 10:34:48 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -538,7 +538,7 @@ setdefault use_debug no
 
 setdefault use_devdsp yes
 setdefault use_stdout yes
-setdefault use_nas no
+setdefault use_nas yes
 
 printoptional modules build
 printoptional features use
