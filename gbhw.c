@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.31 2004/06/06 00:03:09 ranmachan Exp $
+/* $Id: gbhw.c,v 1.32 2004/10/22 22:51:55 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -411,6 +411,7 @@ static regparm void gb_sound(int cycles)
 		}
 		if (gbhw_ch[2].master) {
 			int val = ((ioregs[0x30 + ((ch3pos >> 2) & 0xf)] >> ((~ch3pos & 2)*2)) & 0xf)*2;
+			val -= 15;
 			if (gbhw_ch[2].volume) {
 				val = val >> (gbhw_ch[2].volume-1);
 			} else val = 0;
