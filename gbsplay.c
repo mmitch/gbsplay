@@ -28,12 +28,20 @@
 	r.ri[(i)*2+1] = v & 0xff; \
 } while (0)
 
+#define DEBUG 0
+
+#if DEBUG == 1
+#define DPRINTF(...) printf(__VA_ARGS__)
+#define DEB(x) x
+#else
+
 static inline void foo(void)
 {
 }
 
-//#define DEBUG(...) printf(__VA_ARGS__)
-#define DEBUG(...) foo()
+#define DPRINTF(...) foo()
+#define DEB(x) foo()
+#endif
 
 static struct regs {
 	union {
@@ -66,10 +74,12 @@ struct opinfo {
 	ex_fn fn;
 };
 
+#if DEBUG == 1
 static char regnames[12] = "BCDEHLFASPPC";
 static char *regnamech16[6] = {
 	"BC", "DE", "HL", "FA", "SP", "PC"
 };
+#endif
 
 static unsigned char *rom;
 static unsigned char ram[0x4000];
@@ -111,20 +121,18 @@ static unsigned int cycles;
 static unsigned long long clock;
 static int halted;
 static int interrupts;
-static unsigned int timerdiv_tc = 1024;
-static unsigned int timerdiv;
-static unsigned int timertc = 69;
-static unsigned int timer = 69;
+static int timertc = 70256; /* ~59.7 Hz (vblank)*/
+static int timer = 70256;
 
 static unsigned char vidram_get(unsigned short addr)
 {
-//	DEBUG("vidram_get(%04x)\n", addr);
+//	DPRINTF("vidram_get(%04x)\n", addr);
 	return 0xff;
 }
 
 static unsigned char rom_get(unsigned short addr)
 {
-//	DEBUG("rom_get(%04x)\n", addr);
+//	DPRINTF("rom_get(%04x)\n", addr);
 	if (addr < 0x4000) {
 		return rom[addr];
 	} else {
@@ -139,19 +147,19 @@ static unsigned char io_get(unsigned short addr)
 	} else if (addr >= 0xff00 && addr <= 0xff7f) {
 		return ioregs[addr & 0x7f];
 	}
-	DEBUG("io_get(%04x)\n", addr);
+	DPRINTF("io_get(%04x)\n", addr);
 	return 0xff;
 }
 
 static unsigned char intram_get(unsigned short addr)
 {
-//	DEBUG("intram_get(%04x)\n", addr);
+//	DPRINTF("intram_get(%04x)\n", addr);
 	return ram[0x2000 + (addr & 0x1fff)];
 }
 
 static unsigned char extram_get(unsigned short addr)
 {
-//	DEBUG("extram_get(%04x)\n", addr);
+//	DPRINTF("extram_get(%04x)\n", addr);
 	return ram[addr & 0x1fff];
 }
 
@@ -437,7 +445,7 @@ static void io_put(unsigned short addr, unsigned char val)
 		hiram[addr & 0x7f] = val;
 		return;
 	} else if (addr >= 0xff00 && addr <= 0xff7f) {
-		DEBUG(" ([0x%04x]=%02x) ", addr, val);
+		DPRINTF(" ([0x%04x]=%02x) ", addr, val);
 		switch (addr) {
 			case 0xff14:
 				if (val & 0x80) {
@@ -492,12 +500,12 @@ static void io_put(unsigned short addr, unsigned char val)
 					int vol = (ioregs[0x1c] >> 5) & 3;
 					int envdir = (ioregs[0x1c] >> 3) & 1;
 					int envspd = ioregs[0x1c] & 7;
-//					int duty = ioregs[0x1b] >> 6;
 					int len = ioregs[0x1b] & 0x3f;
 					int div = ioregs[0x1d];
-					int i;
 					div |= ((int)val & 7) << 8;
 					ch3.master = (ioregs[0x1a] & 0x80) > 0; 
+					if (vol == 0) ch3.master = 0;
+					ch3.volume = vol - 1;
 					ch3.env_dir = envdir;
 					ch3.env_speed = ch3.env_speed_tc = envspd;
 					ch3.div_tc = 2048 - div;
@@ -547,7 +555,7 @@ static void io_put(unsigned short addr, unsigned char val)
 		ioregs[addr & 0x7f] = val;
 		return;
 	}
-	DEBUG("io_put(%04x, %02x)\n", addr, val);
+	DPRINTF("io_put(%04x, %02x)\n", addr, val);
 }
 
 static void intram_put(unsigned short addr, unsigned char val)
@@ -851,7 +859,7 @@ static unsigned char get_imm8(void)
 	unsigned char res;
 	REGS16_W(regs, PC, pc + 1);
 	res = mem_get(pc);
-	DEBUG("%02x", res);
+	DPRINTF("%02x", res);
 	return res;
 }
 
@@ -862,8 +870,8 @@ static unsigned short get_imm16(void)
 
 static void print_reg(int i)
 {
-	if (i == 6) DEBUG("[HL]"); /* indirect memory access by [HL] */
-	else DEBUG("%c", regnames[i]);
+	if (i == 6) DPRINTF("[HL]"); /* indirect memory access by [HL] */
+	else DPRINTF("%c", regnames[i]);
 }
 
 static unsigned char get_reg(int i)
@@ -891,7 +899,7 @@ static void op_set(unsigned char op)
 	int reg = op & 7;
 	int bit = (op >> 3) & 7;
 
-	DEBUG(" SET %d,", bit);
+	DPRINTF(" SET %d,", bit);
 	print_reg(reg);
 	put_reg(reg, get_reg(reg) | (1 << bit));
 }
@@ -901,7 +909,7 @@ static void op_res(unsigned char op)
 	int reg = op & 7;
 	int bit = (op >> 3) & 7;
 
-	DEBUG(" RES %d,", bit);
+	DPRINTF(" RES %d,", bit);
 	print_reg(reg);
 	put_reg(reg, get_reg(reg) & ~(1 << bit));
 }
@@ -912,7 +920,7 @@ static void op_bit(unsigned char op)
 	int bit = (op >> 3) & 7;
 	unsigned char res;
 
-	DEBUG(" BIT %d,", bit);
+	DPRINTF(" BIT %d,", bit);
 	print_reg(reg);
 	res = get_reg(reg) & (1 << bit);
 	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
@@ -924,7 +932,7 @@ static void op_rlc(unsigned char op, struct opinfo *oi)
 	unsigned short res;
 	unsigned char val;
 
-	DEBUG(" %s ", oi->name);
+	DPRINTF(" %s ", oi->name);
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res << 1;
@@ -938,7 +946,7 @@ static void op_rlca(unsigned char op, struct opinfo *oi)
 {
 	unsigned short res;
 
-	DEBUG(" %s", oi->name);
+	DPRINTF(" %s", oi->name);
 	res  = regs.rn.a;
 	res  = res << 1;
 	res |= (((unsigned short)regs.rn.f & CF) >> 4);
@@ -953,7 +961,7 @@ static void op_rrc(unsigned char op, struct opinfo *oi)
 	unsigned short res;
 	unsigned char val;
 
-	DEBUG(" %s ", oi->name);
+	DPRINTF(" %s ", oi->name);
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res |= (((unsigned short)regs.rn.f & CF) << 4);
@@ -967,7 +975,7 @@ static void op_rrca(unsigned char op, struct opinfo *oi)
 {
 	unsigned short res;
 
-	DEBUG(" %s", oi->name);
+	DPRINTF(" %s", oi->name);
 	res  = regs.rn.a;
 	res += (((unsigned short)regs.rn.f & CF) << 4);
 	res  = res >> 1;
@@ -982,7 +990,7 @@ static void op_rl(unsigned char op, struct opinfo *oi)
 	unsigned short res;
 	unsigned char val;
 
-	DEBUG(" %s ", oi->name);
+	DPRINTF(" %s ", oi->name);
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res << 1;
@@ -996,7 +1004,7 @@ static void op_rla(unsigned char op, struct opinfo *oi)
 {
 	unsigned short res;
 
-	DEBUG(" %s", oi->name);
+	DPRINTF(" %s", oi->name);
 	res  = regs.rn.a;
 	res  = res << 1;
 	res |= (regs.rn.a >> 7);
@@ -1011,7 +1019,7 @@ static void op_rr(unsigned char op, struct opinfo *oi)
 	unsigned short res;
 	unsigned char val;
 
-	DEBUG(" %s ", oi->name);
+	DPRINTF(" %s ", oi->name);
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res >> 1;
@@ -1025,7 +1033,7 @@ static void op_rra(unsigned char op, struct opinfo *oi)
 {
 	unsigned short res;
 
-	DEBUG(" %s", oi->name);
+	DPRINTF(" %s", oi->name);
 	res  = regs.rn.a;
 	res  = res >> 1;
 	res |= (regs.rn.a << 7);
@@ -1040,7 +1048,7 @@ static void op_sla(unsigned char op, struct opinfo *oi)
 	unsigned short res;
 	unsigned char val;
 
-	DEBUG(" %s ", oi->name);
+	DPRINTF(" %s ", oi->name);
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res << 1;
@@ -1055,7 +1063,7 @@ static void op_sra(unsigned char op, struct opinfo *oi)
 	unsigned short res;
 	unsigned char val;
 
-	DEBUG(" %s ", oi->name);
+	DPRINTF(" %s ", oi->name);
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res >> 1;
@@ -1071,7 +1079,7 @@ static void op_srl(unsigned char op, struct opinfo *oi)
 	unsigned short res;
 	unsigned char val;
 
-	DEBUG(" %s ", oi->name);
+	DPRINTF(" %s ", oi->name);
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res >> 1;
@@ -1086,7 +1094,7 @@ static void op_swap(unsigned char op, struct opinfo *oi)
 	unsigned short res;
 	unsigned char val;
 
-	DEBUG(" %s ", oi->name);
+	DPRINTF(" %s ", oi->name);
 	print_reg(reg);
 	val = get_reg(reg);
 	res = ((val & 0x80) >> 7) +
@@ -1134,11 +1142,11 @@ static void op_ld(unsigned char op, struct opinfo *oi)
 	int dst = (op >> 3) & 7;
 
 	if (dst == 6) { /* indirect memory access by [HL] */
-		DEBUG(" %s [HL],", oi->name);
+		DPRINTF(" %s [HL],", oi->name);
 		print_reg(src);
 		mem_put(REGS16_R(regs, HL), get_reg(src));
 	} else {
-		DEBUG(" %s %c,", oi->name, regnames[dst]);
+		DPRINTF(" %s %c,", oi->name, regnames[dst]);
 		print_reg(src);
 		regs.ri[dst] = get_reg(src);
 	}
@@ -1148,7 +1156,7 @@ static void op_ld_imm(unsigned char op, struct opinfo *oi)
 {
 	int ofs = get_imm16();
 
-	DEBUG(" %s A, [0x%04x] ", oi->name, ofs);
+	DPRINTF(" %s A, [0x%04x] ", oi->name, ofs);
 	regs.rn.a = mem_get(ofs);
 }
 
@@ -1156,7 +1164,7 @@ static void op_ld_ind16_a(unsigned char op, struct opinfo *oi)
 {
 	int ofs = get_imm16();
 
-	DEBUG(" %s [0x%04x], A", oi->name, ofs);
+	DPRINTF(" %s [0x%04x], A", oi->name, ofs);
 	mem_put(ofs, regs.rn.a);
 }
 
@@ -1165,7 +1173,7 @@ static void op_ld_ind16_sp(unsigned char op, struct opinfo *oi)
 	int ofs = get_imm16();
 	int sp = REGS16_R(regs, SP);
 
-	DEBUG(" %s [0x%04x], A", oi->name, ofs);
+	DPRINTF(" %s [0x%04x], A", oi->name, ofs);
 	mem_put(ofs, sp & 0xff);
 	mem_put(ofs+1, sp >> 8);
 }
@@ -1176,7 +1184,7 @@ static void op_ld_reg16_imm(unsigned char op, struct opinfo *oi)
 	int reg = (op >> 4) & 3;
 
 	reg += reg > 2; /* skip over FA */
-	DEBUG(" %s %s, 0x%02x", oi->name, regnamech16[reg], val);
+	DPRINTF(" %s %s, 0x%02x", oi->name, regnamech16[reg], val);
 	REGS16_W(regs, reg, val);
 }
 
@@ -1187,10 +1195,10 @@ static void op_ld_reg16_a(unsigned char op, struct opinfo *oi)
 
 	reg -= reg > 2;
 	if (op & 8) {
-		DEBUG(" %s A, [%s]", oi->name, regnamech16[reg]);
+		DPRINTF(" %s A, [%s]", oi->name, regnamech16[reg]);
 		regs.rn.a = mem_get(r = REGS16_R(regs, reg));
 	} else {
-		DEBUG(" %s [%s], A", oi->name, regnamech16[reg]);
+		DPRINTF(" %s [%s], A", oi->name, regnamech16[reg]);
 		mem_put(r = REGS16_R(regs, reg), regs.rn.a);
 	}
 
@@ -1205,10 +1213,10 @@ static void op_ld_reg8_imm(unsigned char op, struct opinfo *oi)
 	int val = get_imm8();
 	int reg = (op >> 3) & 7;
 
-	DEBUG(" %s ", oi->name);
+	DPRINTF(" %s ", oi->name);
 	print_reg(reg);
 	put_reg(reg, val);
-	DEBUG(",%02x", val);
+	DPRINTF(",%02x", val);
 }
 
 static void op_ldh(unsigned char op, struct opinfo *oi)
@@ -1216,20 +1224,20 @@ static void op_ldh(unsigned char op, struct opinfo *oi)
 	int ofs = op & 2 ? 0 : get_imm8();
 
 	if (op & 0x10) {
-		DEBUG(" %s A,", oi->name);
+		DPRINTF(" %s A,", oi->name);
 		if ((op & 2) == 0) {
-			DEBUG("[%02x]", ofs);
+			DPRINTF("[%02x]", ofs);
 		} else {
 			ofs = regs.rn.c;
-			DEBUG("[C]");
+			DPRINTF("[C]");
 		}
 		regs.rn.a = mem_get(0xff00 + ofs);
 	} else {
 		if ((op & 2) == 0) {
-			DEBUG(" %s [%02x], A", oi->name, ofs);
+			DPRINTF(" %s [%02x], A", oi->name, ofs);
 		} else {
 			ofs = regs.rn.c;
-			DEBUG(" %s [C], A", oi->name);
+			DPRINTF(" %s [C], A", oi->name);
 		}
 		mem_put(0xff00 + ofs, regs.rn.a);
 	}
@@ -1241,13 +1249,13 @@ static void op_inc(unsigned char op, struct opinfo *oi)
 	unsigned char res;
 
 	if (reg != 6) {
-		DEBUG(" %s %c", oi->name, regnames[reg]);
+		DPRINTF(" %s %c", oi->name, regnames[reg]);
 		res = ++regs.ri[reg];
 	} else {
 		unsigned short hl = REGS16_R(regs, HL);
 
 		res = mem_get(hl) + 1;
-		DEBUG(" %s [HL]", oi->name);
+		DPRINTF(" %s [HL]", oi->name);
 		mem_put(hl, res);
 	}
 	if (res == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
@@ -1258,7 +1266,7 @@ static void op_inc16(unsigned char op, struct opinfo *oi)
 	int reg = (op >> 4) & 3;
 	unsigned short res = REGS16_R(regs, reg);
 
-	DEBUG(" %s %s", oi->name, regnamech16[reg]);
+	DPRINTF(" %s %s", oi->name, regnamech16[reg]);
 	res++;
 	REGS16_W(regs, reg, res);
 	if (res == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
@@ -1270,13 +1278,13 @@ static void op_dec(unsigned char op, struct opinfo *oi)
 	unsigned char res;
 
 	if (reg != 6) {
-		DEBUG(" %s %c", oi->name, regnames[reg]);
+		DPRINTF(" %s %c", oi->name, regnames[reg]);
 		res = --regs.ri[reg];
 	} else {
 		unsigned short hl = REGS16_R(regs, HL);
 
 		res = mem_get(hl) - 1;
-		DEBUG(" %s [HL]", oi->name);
+		DPRINTF(" %s [HL]", oi->name);
 		mem_put(hl, res);
 	}
 	if (res == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
@@ -1287,7 +1295,7 @@ static void op_dec16(unsigned char op, struct opinfo *oi)
 	int reg = (op >> 4) & 3;
 	unsigned short res = REGS16_R(regs, reg);
 
-	DEBUG(" %s %s", oi->name, regnamech16[reg]);
+	DPRINTF(" %s %s", oi->name, regnamech16[reg]);
 	res--;
 	REGS16_W(regs, reg, res);
 	if (res == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
@@ -1298,7 +1306,7 @@ static void op_add(unsigned char op, struct opinfo *oi)
 	unsigned char old = regs.rn.a;
 	unsigned char new;
 
-	DEBUG(" %s A,", oi->name);
+	DPRINTF(" %s A,", oi->name);
 	print_reg(op & 7);
 	regs.rn.a += get_reg(op & 7);
 	regs.rn.f &= ~SF;
@@ -1314,7 +1322,7 @@ static void op_add_imm(unsigned char op, struct opinfo *oi)
 	unsigned char old = regs.rn.a;
 	unsigned char new = old;
 
-	DEBUG(" %s A, $0x%02x", oi->name, imm);
+	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new += imm;
 	regs.rn.f &= ~SF;
 	regs.rn.a = new;
@@ -1330,7 +1338,7 @@ static void op_add_hl(unsigned char op, struct opinfo *oi)
 	unsigned short new = old;
 
 	reg += reg > 2;
-	DEBUG(" %s HL, %s", oi->name, regnamech16[reg]);
+	DPRINTF(" %s HL, %s", oi->name, regnamech16[reg]);
 
 	new += REGS16_R(regs, reg);
 	REGS16_W(regs, HL, new);
@@ -1345,7 +1353,7 @@ static void op_adc(unsigned char op, struct opinfo *oi)
 	unsigned char old = regs.rn.a;
 	unsigned char new;
 
-	DEBUG(" %s A,", oi->name);
+	DPRINTF(" %s A,", oi->name);
 	print_reg(op & 7);
 	regs.rn.a += get_reg(op & 7);
 	regs.rn.a += (regs.rn.f & CF) > 0;
@@ -1362,7 +1370,7 @@ static void op_adc_imm(unsigned char op, struct opinfo *oi)
 	unsigned char old = regs.rn.a;
 	unsigned char new = old;
 
-	DEBUG(" %s A, $0x%02x", oi->name, imm);
+	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new += imm;
 	new += (regs.rn.f & CF) > 0;
 	regs.rn.f &= ~SF;
@@ -1377,7 +1385,7 @@ static void op_cp(unsigned char op, struct opinfo *oi)
 	unsigned char old = regs.rn.a;
 	unsigned char new = old;
 
-	DEBUG(" %s A,", oi->name);
+	DPRINTF(" %s A,", oi->name);
 	print_reg(op & 7);
 	new -= get_reg(op & 7);
 	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
@@ -1391,7 +1399,7 @@ static void op_cp_imm(unsigned char op, struct opinfo *oi)
 	unsigned char old = regs.rn.a;
 	unsigned char new = old;
 
-	DEBUG(" %s A, $0x%02x", oi->name, imm);
+	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new -= imm;
 	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
 	if ((old & 15) < (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
@@ -1403,7 +1411,7 @@ static void op_sub(unsigned char op, struct opinfo *oi)
 	unsigned char old = regs.rn.a;
 	unsigned char new;
 
-	DEBUG(" %s A,", oi->name);
+	DPRINTF(" %s A,", oi->name);
 	print_reg(op & 7);
 	regs.rn.a -= get_reg(op & 7);
 	regs.rn.f |= SF;
@@ -1419,7 +1427,7 @@ static void op_sub_imm(unsigned char op, struct opinfo *oi)
 	unsigned char old = regs.rn.a;
 	unsigned char new = old;
 
-	DEBUG(" %s A, $0x%02x", oi->name, imm);
+	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new -= imm;
 	regs.rn.f |= SF;
 	regs.rn.a = new;
@@ -1433,7 +1441,7 @@ static void op_sbc(unsigned char op, struct opinfo *oi)
 	unsigned char old = regs.rn.a;
 	unsigned char new;
 
-	DEBUG(" %s A,", oi->name);
+	DPRINTF(" %s A,", oi->name);
 	print_reg(op & 7);
 	regs.rn.a -= get_reg(op & 7);
 	regs.rn.a -= (regs.rn.f & CF) > 0;
@@ -1450,7 +1458,7 @@ static void op_sbc_imm(unsigned char op, struct opinfo *oi)
 	unsigned char old = regs.rn.a;
 	unsigned char new = old;
 
-	DEBUG(" %s A, $0x%02x", oi->name, imm);
+	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new -= imm;
 	new -= (regs.rn.f & CF) > 0;
 	regs.rn.f |= SF;
@@ -1462,7 +1470,7 @@ static void op_sbc_imm(unsigned char op, struct opinfo *oi)
 
 static void op_and(unsigned char op, struct opinfo *oi)
 {
-	DEBUG(" %s A,", oi->name);
+	DPRINTF(" %s A,", oi->name);
 	print_reg(op & 7);
 	regs.rn.a &= get_reg(op & 7);
 	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
@@ -1472,14 +1480,14 @@ static void op_and_imm(unsigned char op, struct opinfo *oi)
 {
 	unsigned char imm = get_imm8();
 
-	DEBUG(" %s A, $0x%02x", oi->name, imm);
+	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	regs.rn.a &= imm;
 	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
 }
 
 static void op_or(unsigned char op, struct opinfo *oi)
 {
-	DEBUG(" %s A,", oi->name);
+	DPRINTF(" %s A,", oi->name);
 	print_reg(op & 7);
 	regs.rn.a |= get_reg(op & 7);
 	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
@@ -1489,14 +1497,14 @@ static void op_or_imm(unsigned char op, struct opinfo *oi)
 {
 	unsigned char imm = get_imm8();
 
-	DEBUG(" %s A, $0x%02x", oi->name, imm);
+	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	regs.rn.a |= imm;
 	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
 }
 
 static void op_xor(unsigned char op, struct opinfo *oi)
 {
-	DEBUG(" %s A,", oi->name);
+	DPRINTF(" %s A,", oi->name);
 	print_reg(op & 7);
 	regs.rn.a ^= get_reg(op & 7);
 	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
@@ -1506,7 +1514,7 @@ static void op_xor_imm(unsigned char op, struct opinfo *oi)
 {
 	unsigned char imm = get_imm8();
 
-	DEBUG(" %s A, $0x%02x", oi->name, imm);
+	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	regs.rn.a ^= imm;
 	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
 }
@@ -1516,7 +1524,7 @@ static void op_push(unsigned char op, struct opinfo *oi)
 	int reg = op >> 4 & 3;
 
 	push(REGS16_R(regs, reg));
-	DEBUG(" %s %s", oi->name, regnamech16[reg]);
+	DPRINTF(" %s %s", oi->name, regnamech16[reg]);
 }
 
 static void op_pop(unsigned char op, struct opinfo *oi)
@@ -1524,36 +1532,38 @@ static void op_pop(unsigned char op, struct opinfo *oi)
 	int reg = op >> 4 & 3;
 
 	REGS16_W(regs, reg, pop());
-	DEBUG(" %s %s", oi->name, regnamech16[reg]);
+	DPRINTF(" %s %s", oi->name, regnamech16[reg]);
 }
 
 static void op_cpl(unsigned char op, struct opinfo *oi)
 {
-	DEBUG(" %s", oi->name);
+	DPRINTF(" %s", oi->name);
 	regs.rn.a = ~regs.rn.a;
 }
 
 static void op_ccf(unsigned char op, struct opinfo *oi)
 {
-	DEBUG(" %s", oi->name);
+	DPRINTF(" %s", oi->name);
 	regs.rn.f &= ~CF;
 }
 
 static void op_scf(unsigned char op, struct opinfo *oi)
 {
-	DEBUG(" %s", oi->name);
+	DPRINTF(" %s", oi->name);
 	regs.rn.f |= CF;
 }
 
+#if DEBUG == 1
 static char *conds[4] = {
 	"NZ", "Z", "NC", "C"
 };
+#endif
 
 static void op_call(unsigned char op, struct opinfo *oi)
 {
 	unsigned short ofs = get_imm16();
 
-	DEBUG(" %s 0x%04x", oi->name, ofs);
+	DPRINTF(" %s 0x%04x", oi->name, ofs);
 	push(REGS16_R(regs, PC));
 	REGS16_W(regs, PC, ofs);
 }
@@ -1563,7 +1573,7 @@ static void op_call_cond(unsigned char op, struct opinfo *oi)
 	unsigned short ofs = get_imm16();
 	int cond = (op >> 3) & 3;
 
-	DEBUG(" %s %s 0x%04x", oi->name, conds[cond], ofs);
+	DPRINTF(" %s %s 0x%04x", oi->name, conds[cond], ofs);
 	switch (cond) {
 		case 0: if ((regs.rn.f & ZF) != 0) return; break;
 		case 1: if ((regs.rn.f & ZF) == 0) return; break;
@@ -1577,20 +1587,20 @@ static void op_call_cond(unsigned char op, struct opinfo *oi)
 static void op_ret(unsigned char op, struct opinfo *oi)
 {
 	REGS16_W(regs, PC, pop());
-	DEBUG(" %s", oi->name);
+	DPRINTF(" %s", oi->name);
 }
 
 static void op_reti(unsigned char op, struct opinfo *oi)
 {
 	REGS16_W(regs, PC, pop());
-	DEBUG(" %s", oi->name);
+	DPRINTF(" %s", oi->name);
 }
 
 static void op_ret_cond(unsigned char op, struct opinfo *oi)
 {
 	int cond = (op >> 3) & 3;
 
-	DEBUG(" %s %s", oi->name, conds[cond]);
+	DPRINTF(" %s %s", oi->name, conds[cond]);
 	switch (cond) {
 		case 0: if ((regs.rn.f & ZF) != 0) return; break;
 		case 1: if ((regs.rn.f & ZF) == 0) return; break;
@@ -1603,32 +1613,32 @@ static void op_ret_cond(unsigned char op, struct opinfo *oi)
 static void op_halt(unsigned char op, struct opinfo *oi)
 {
 	halted = 1;
-	DEBUG(" %s", oi->name);
+	DPRINTF(" %s", oi->name);
 }
 
 static void op_stop(unsigned char op, struct opinfo *oi)
 {
-	DEBUG(" %s", oi->name);
+	DPRINTF(" %s", oi->name);
 }
 
 static void op_di(unsigned char op, struct opinfo *oi)
 {
 	interrupts = 0;
-	DEBUG(" %s", oi->name);
+	DPRINTF(" %s", oi->name);
 }
 
 static void op_ei(unsigned char op, struct opinfo *oi)
 {
 	interrupts = 1;
-	DEBUG(" %s", oi->name);
+	DPRINTF(" %s", oi->name);
 }
 
 static void op_jr(unsigned char op, struct opinfo *oi)
 {
 	short ofs = (char) get_imm8();
 
-	if (ofs < 0) DEBUG(" %s $-0x%02x", oi->name, -ofs);
-	else DEBUG(" %s $+0x%02x", oi->name, ofs);
+	if (ofs < 0) DPRINTF(" %s $-0x%02x", oi->name, -ofs);
+	else DPRINTF(" %s $+0x%02x", oi->name, ofs);
 	REGS16_W(regs, PC, REGS16_R(regs, PC) + ofs);
 }
 
@@ -1637,8 +1647,8 @@ static void op_jr_cond(unsigned char op, struct opinfo *oi)
 	short ofs = (char) get_imm8();
 	int cond = (op >> 3) & 3;
 
-	if (ofs < 0) DEBUG(" %s %s $-0x%02x", oi->name, conds[cond], -ofs);
-	else DEBUG(" %s %s $+0x%02x", oi->name, conds[cond], ofs);
+	if (ofs < 0) DPRINTF(" %s %s $-0x%02x", oi->name, conds[cond], -ofs);
+	else DPRINTF(" %s %s $+0x%02x", oi->name, conds[cond], ofs);
 	switch (cond) {
 		case 0: if ((regs.rn.f & ZF) != 0) return; break;
 		case 1: if ((regs.rn.f & ZF) == 0) return; break;
@@ -1652,13 +1662,13 @@ static void op_jp(unsigned char op, struct opinfo *oi)
 {
 	unsigned short ofs = get_imm16();
 
-	DEBUG(" %s 0x%04x", oi->name, ofs);
+	DPRINTF(" %s 0x%04x", oi->name, ofs);
 	REGS16_W(regs, PC, ofs);
 }
 
 static void op_jp_hl(unsigned char op, struct opinfo *oi)
 {
-	DEBUG(" %s HL", oi->name);
+	DPRINTF(" %s HL", oi->name);
 	REGS16_W(regs, PC, REGS16_R(regs, HL));
 }
 
@@ -1667,7 +1677,7 @@ static void op_jp_cond(unsigned char op, struct opinfo *oi)
 	unsigned short ofs = get_imm16();
 	int cond = (op >> 3) & 3;
 
-	DEBUG(" %s %s 0x%04x", oi->name, conds[cond], ofs);
+	DPRINTF(" %s %s 0x%04x", oi->name, conds[cond], ofs);
 	switch (cond) {
 		case 0: if ((regs.rn.f & ZF) != 0) return; break;
 		case 1: if ((regs.rn.f & ZF) == 0) return; break;
@@ -1681,14 +1691,14 @@ static void op_rst(unsigned char op, struct opinfo *oi)
 {
 	short ofs = op & 0x38;
 
-	DEBUG(" %s 0x%02x", oi->name, ofs);
+	DPRINTF(" %s 0x%02x", oi->name, ofs);
 	push(REGS16_R(regs, PC));
 	REGS16_W(regs, PC, gbs_base + ofs);
 }
 
 static void op_nop(unsigned char op, struct opinfo *oi)
 {
-	DEBUG(" %s", oi->name);
+	DPRINTF(" %s", oi->name);
 }
 
 static struct opinfo ops[256] = {
@@ -1954,52 +1964,54 @@ static void dump_regs(void)
 {
 	int i;
 
-	DEBUG("; ");
+	DPRINTF("; ");
 	for (i=0; i<8; i++) {
-		DEBUG("%c=%02x ", regnames[i], regs.ri[i]);
+		DPRINTF("%c=%02x ", regnames[i], regs.ri[i]);
 	}
 	for (i=5; i<6; i++) {
-		DEBUG("%s=%04x ", regnamech16[i], REGS16_R(regs, i));
+		DPRINTF("%s=%04x ", regnamech16[i], REGS16_R(regs, i));
 	}
-	DEBUG("\n");
+	DPRINTF("\n");
 }
 
+#if DEBUG == 1
 static void show_reg_diffs(void)
 {
 	int i;
 
-	DEBUG("\t\t; ");
+	DPRINTF("\t\t; ");
 	for (i=0; i<3; i++) {
 		if (REGS16_R(regs, i) != REGS16_R(oldregs, i)) {
-			DEBUG("%s=%04x ", regnamech16[i], REGS16_R(regs, i));
+			DPRINTF("%s=%04x ", regnamech16[i], REGS16_R(regs, i));
 			REGS16_W(oldregs, i, REGS16_R(regs, i));
 		}
 	}
 	for (i=6; i<8; i++) {
 		if (regs.ri[i] != oldregs.ri[i]) {
 			if (i == 6) { /* Flags */
-				if (regs.rn.f & ZF) DEBUG("ZF ");
-				else DEBUG("zf ");
-				if (regs.rn.f & SF) DEBUG("SF ");
-				else DEBUG("sf ");
-				if (regs.rn.f & HF) DEBUG("HF ");
-				else DEBUG("hf ");
-				if (regs.rn.f & CF) DEBUG("CF ");
-				else DEBUG("cf ");
+				if (regs.rn.f & ZF) DPRINTF("ZF ");
+				else DPRINTF("zf ");
+				if (regs.rn.f & SF) DPRINTF("SF ");
+				else DPRINTF("sf ");
+				if (regs.rn.f & HF) DPRINTF("HF ");
+				else DPRINTF("hf ");
+				if (regs.rn.f & CF) DPRINTF("CF ");
+				else DPRINTF("cf ");
 			} else {
-				DEBUG("%c=%02x ", regnames[i], regs.ri[i]);
+				DPRINTF("%c=%02x ", regnames[i], regs.ri[i]);
 			}
 			oldregs.ri[i] = regs.ri[i];
 		}
 	}
 	for (i=4; i<5; i++) {
 		if (REGS16_R(regs, i) != REGS16_R(oldregs, i)) {
-			DEBUG("%s=%04x ", regnamech16[i], REGS16_R(regs, i));
+			DPRINTF("%s=%04x ", regnamech16[i], REGS16_R(regs, i));
 			REGS16_W(oldregs, i, REGS16_R(regs, i));
 		}
 	}
-	DEBUG("\n");
+	DPRINTF("\n");
 }
+#endif
 
 static void decode_ins(void)
 {
@@ -2008,7 +2020,7 @@ static void decode_ins(void)
 
 	REGS16_W(regs, PC, pc + 1);
 	op = mem_get(pc);
-	DEBUG("%04x: %02x", pc, op);
+	DPRINTF("%04x: %02x", pc, op);
 	ops[op].fn(op, &ops[op]);
 }
 
@@ -2056,7 +2068,7 @@ static void do_sound(int cycles)
 		ch3.div--;
 		if (ch3.div <= 0) {
 			ch3.div = ch3.div_tc;
-			ch3pos = ++ch3pos;
+			ch3pos++;
 		}
 	}
 	main_div += cycles;
@@ -2183,7 +2195,7 @@ static void open_gbs(char *name, int i)
 	unsigned int romsize;
 
 	if ((fd = open(name, O_RDONLY)) == -1) {
-		DEBUG("Could not open %s: %s\n", name, strerror(errno));
+		DPRINTF("Could not open %s: %s\n", name, strerror(errno));
 		exit(1);
 	}
 	fstat(fd, &st);
@@ -2192,7 +2204,7 @@ static void open_gbs(char *name, int i)
 	    buf[1] != 'B' ||
 	    buf[2] != 'S' ||
 	    buf[3] != 1) {
-		DEBUG("Not a GBS-File: %s\n", name);
+		DPRINTF("Not a GBS-File: %s\n", name);
 		exit(1);
 	}
 
@@ -2223,6 +2235,12 @@ static void open_gbs(char *name, int i)
 	       gbs_stack,
 	       st.st_size,
 	       romsize);
+
+	if (buf[0x0f] & 4) {
+		timertc = (256-buf[0x0e]) * (16 << (((buf[0x0f]+3) & 3) << 1));
+	}
+	printf("timertc=%d (%2.2fHz)\n", timertc, 4194304/(float)timertc);
+	fflush(stdout);
 
 	rom = malloc(romsize);
 	read(fd, &rom[gbs_base], st.st_size - 0x70);
@@ -2261,24 +2279,15 @@ int main(int argc, char **argv)
 	while (1) {
 		if (!halted) {
 			decode_ins();
-			clock += cycles;
-			timerdiv += cycles;
-//			show_reg_diffs();
-		} else {
-			clock += 16;
-			timerdiv += 16;
-			cycles = 16;
-		}
-		if (timerdiv > timerdiv_tc) {
-			timerdiv = 0;
-			if (timer > 0) {
-				timer--;
-			} else {
-				timer = timertc;
-				halted = 0;
-				push(REGS16_R(regs, PC));
-				REGS16_W(regs, PC, gbs_play);
-			}
+			DEB(show_reg_diffs());
+		} else cycles = 16;
+		clock += cycles;
+		timer -= cycles;
+		if (timer < 0) {
+			timer += timertc;
+			halted = 0;
+			push(REGS16_R(regs, PC));
+			REGS16_W(regs, PC, gbs_play);
 		}
 		do_sound(cycles);
 		cycles = 0;
