@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.36 2003/12/05 21:36:56 mitch Exp $>>
+<<$Id: TODO,v 1.37 2003/12/05 22:03:44 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -19,7 +19,10 @@ TODO list for gbsplay.
 
 ( )  gbsplay: make refresh_delay a commandline argument
 
+( )  gbsinfo: add --help option
+
 ### version 0.0.4:
 
 ( )  set up feature list for 0.0.4 release
 
+(X)  make gbsinfo output *really* script friendly
