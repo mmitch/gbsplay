@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.22 2003/12/07 09:49:14 mitch Exp $
+# $Id: configure,v 1.23 2003/12/08 20:04:50 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -86,16 +86,31 @@ have_x() {
 ERRORLOG=config.err
 exec 2> $ERRORLOG
 
+## find a path for tmp directory
+
+TMPPATH="/tmp"
+if [ "$TEMP" ]; then
+    TMPPATH="$TEMP"
+fi
+if [ "$TMP" ]; then
+    TMPPATH="$TMP"
+fi
+
+if [ ! -d "$TMPPATH" ]; then
+    TMPPATH="."
+fi
+
 ## generate tmp directory
 
+BASENAME="`basename $0`"
 if [ "`which mktemp`" != "" ]; then
-    TEMPDIR=`mktemp -d`
+    TEMPDIR="`mktemp -d "$TMPPATH/$BASENAME.XXXXXX"`"
 else
-    TEMPDIR="`basename $0`.$$"
+    TEMPDIR="$TMPPATH/$BASENAME.$$"
     mkdir "$TEMPDIR"
 fi
 if [ $? -ne 0 ]; then
-    echo "can't create temporary directory!"
+    echo "can't create temporary directory at <$TMPPATH>!"
     exit 1;
 fi
 
