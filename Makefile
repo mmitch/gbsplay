@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.45 2003/10/24 00:25:55 ranma Exp $
+# $Id: Makefile,v 1.46 2003/10/27 21:52:29 ranma Exp $
 
 include config.mk
 
@@ -15,7 +15,7 @@ DESTDIR :=
 
 DISTDIR := gbsplay-$(VERSION)
 
-CFLAGS  := -Wall -Wstrict-prototypes -Os -fomit-frame-pointer
+CFLAGS  := -Wall -std=gnu99 -Wstrict-prototypes -g -Os
 LDFLAGS :=
 
 CFLAGS  += $(EXTRA_CFLAGS)

@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.15 2003/10/11 18:25:25 ranma Exp $
+/* $Id: gbhw.c,v 1.16 2003/10/27 21:52:29 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -28,8 +28,14 @@ static const char dutylookup[4] = {
 };
 
 struct gbhw_channel gbhw_ch[4];
-int master_volume;
-int master_fade;
+
+static int lminval, lmaxval, rminval, rmaxval;
+
+#define MASTER_VOL_MIN	0
+#define MASTER_VOL_MAX	256*256
+static int master_volume;
+static int master_fade;
+static int master_dstvol;
 
 static const int vblanktc = 70256; /* ~59.7 Hz (vblankctr)*/
 static int vblankctr = 70256;
@@ -313,10 +319,25 @@ static void gb_sound_sweep(void)
 	}
 	if (master_fade) {
 		master_volume += master_fade;
-		if (master_volume < 0) master_volume = 0;
-		if (master_volume > 256*256) master_volume = 256*256;
+		if ((master_fade > 0 &&
+		     master_volume >= master_dstvol) ||
+		    (master_fade < 0 &&
+		     master_volume <= master_dstvol)) {
+			master_fade = 0;
+			master_volume = master_dstvol;
+		}
 	}
 
+}
+
+void gbhw_master_fade(int speed, int dstvol)
+{
+	if (dstvol < MASTER_VOL_MIN) dstvol = MASTER_VOL_MIN;
+	if (dstvol > MASTER_VOL_MAX) dstvol = MASTER_VOL_MAX;
+	master_dstvol = dstvol;
+	if (dstvol > master_volume)
+		master_fade = speed;
+	else master_fade = -speed;
 }
 
 static void gb_sound(int cycles)
@@ -335,6 +356,10 @@ static void gb_sound(int cycles)
 		l_smpl /= 256;
 		soundbuf[soundbufpos++] = l_smpl;
 		soundbuf[soundbufpos++] = r_smpl;
+		if (l_smpl > lmaxval) lmaxval = l_smpl;
+		if (l_smpl < lminval) lminval = l_smpl;
+		if (r_smpl > rmaxval) rmaxval = r_smpl;
+		if (r_smpl < rminval) rminval = r_smpl;
 		smpldivisor = 0;
 		l_smpl = 0;
 		r_smpl = 0;
@@ -359,8 +384,10 @@ static void gb_sound(int cycles)
 			if (gbhw_ch[i].div_ctr > gbhw_ch[i].duty_tc) {
 				val = -val;
 			}
-			if (gbhw_ch[i].leftgate) l_smpl += val;
-			if (gbhw_ch[i].rightgate) r_smpl += val;
+			if (!gbhw_ch[i].mute) {
+				if (gbhw_ch[i].leftgate) l_smpl += val;
+				if (gbhw_ch[i].rightgate) r_smpl += val;
+			}
 			gbhw_ch[i].div_ctr--;
 			if (gbhw_ch[i].div_ctr <= 0) {
 				gbhw_ch[i].div_ctr = gbhw_ch[i].div_tc;
@@ -371,16 +398,19 @@ static void gb_sound(int cycles)
 			if (gbhw_ch[2].volume) {
 				val = val >> (gbhw_ch[2].volume-1);
 			} else val = 0;
-//			val = val * gbhw_ch[2].volume/15;
-			if (gbhw_ch[2].leftgate) l_smpl += val;
-			if (gbhw_ch[2].rightgate) r_smpl += val;
+			if (!gbhw_ch[2].mute) {
+				if (gbhw_ch[2].leftgate) l_smpl += val;
+				if (gbhw_ch[2].rightgate) r_smpl += val;
+			}
 		}
 		if (gbhw_ch[3].master) {
 //			int val = gbhw_ch[3].volume * (((lfsr >> 13) & 2)-1);
 //			int val = gbhw_ch[3].volume * ((random() & 2)-1);
 			static int val;
-			if (gbhw_ch[3].leftgate) l_smpl += val;
-			if (gbhw_ch[3].rightgate) r_smpl += val;
+			if (!gbhw_ch[3].mute) {
+				if (gbhw_ch[3].leftgate) l_smpl += val;
+				if (gbhw_ch[3].rightgate) r_smpl += val;
+			}
 			gbhw_ch[3].div_ctr--;
 			if (gbhw_ch[3].div_ctr <= 0) {
 				gbhw_ch[3].div_ctr = gbhw_ch[3].div_tc;
@@ -410,25 +440,35 @@ void gbhw_setrate(int rate)
 	sound_div_tc = (long long)HW_CLOCK*65536/rate;
 }
 
+void gbhw_getminmax(int *lmin, int *lmax, int *rmin, int *rmax)
+{
+	*lmin = lminval;
+	*lmax = lmaxval;
+	*rmin = rminval;
+	*rmax = rmaxval;
+	lminval = rminval = INT_MAX;
+	lmaxval = rmaxval = INT_MIN;
+}
+
 void gbhw_init(unsigned char *rombuf, unsigned int size)
 {
+	int i;
+
 	rom = rombuf;
 	romsize = (size + 0x3fff) & ~0x3fff;
 	lastbank = (romsize / 0x4000) - 1;
 	memset(gbhw_ch, 0, sizeof(gbhw_ch));
-	master_volume = 256*256;
+	master_volume = MASTER_VOL_MAX;
 	master_fade = 0;
 	soundbufpos = 0;
-	gbhw_ch[0].duty_ctr = 4;
-	gbhw_ch[1].duty_ctr = 4;
-	gbhw_ch[0].div_tc = 1;
-	gbhw_ch[1].div_tc = 1;
-	gbhw_ch[2].div_tc = 1;
-	gbhw_ch[3].div_tc = 1;
-	gbhw_ch[0].master = 1;
-	gbhw_ch[1].master = 1;
-	gbhw_ch[2].master = 1;
-	gbhw_ch[3].master = 1;
+	lminval = rminval = INT_MAX;
+	lmaxval = rmaxval = INT_MIN;
+	for (i=0; i<4; i++) {
+		gbhw_ch[i].duty_ctr = 4;
+		gbhw_ch[i].div_tc = 1;
+		gbhw_ch[i].master = 1;
+		gbhw_ch[i].mute = 0;
+	}
 	memset(extram, 0, sizeof(extram));
 	memset(intram, 0, sizeof(intram));
 	memset(hiram, 0, sizeof(hiram));

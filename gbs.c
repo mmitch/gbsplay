@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.9 2003/10/27 20:56:50 ranma Exp $
+/* $Id: gbs.c,v 1.10 2003/10/27 21:52:29 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -24,7 +24,7 @@
 #define GBS_MAGIC		"GBS"
 #define GBS_EXTHDR_MAGIC	"GBSX"
 
-static const char playercode[] = {
+static const unsigned char playercode[] = {
 	0xf5,              /* 0050:  push af         */
 	0xe5,              /* 0051:  push hl         */
 	0x01, 0x30, 0x00,  /* 0052:  ld   bc, 0x0030 */

@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.61 2003/10/21 22:56:20 ranma Exp $
+/* $Id: gbsplay.c,v 1.62 2003/10/27 21:52:29 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -32,7 +32,7 @@
 #define LN2 .69314718055994530941
 #define MAGIC 5.78135971352465960412
 #define FREQ(x) (262144 / x)
-// #define NOTE(x) ((log(FREQ(x))/LN2 - log(55)/LN2)*12 + .2)
+/* #define NOTE(x) ((log(FREQ(x))/LN2 - log(55)/LN2)*12 + .2) */
 #define NOTE(x) ((int)((log(FREQ(x))/LN2 - MAGIC)*12 + .2))
 
 #define MAXOCTAVE 9
@@ -58,7 +58,10 @@ static int *subsong_playlist;
 static int subsong_playlist_idx = 0;
 static int pause_mode = 0;
 
-static int refresh_delay = 33; /* msec */
+#define DEFAULT_REFRESH_DELAY 33
+
+static int refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
+static int refresh_freq = 1000 / DEFAULT_REFRESH_DELAY;
 
 /* default values */
 static int playmode = PLAYMODE_LINEAR;
@@ -108,6 +111,19 @@ static void precalc_notes(void)
 			s[1] = '-';
 		}
 	}
+}
+
+static char *reverse_vol(char *s)
+{
+	static char buf[5];
+	int i;
+
+	for (i=0; i<4; i++) {
+		buf[i] = s[3-i];
+	}
+	buf[4] = 0;
+
+	return buf;
 }
 
 static void precalc_vols(void)
@@ -348,29 +364,24 @@ void parseopts(int *argc, char ***argv)
 	*argv += optind;
 }
 
+static int lmin, lmax, rmin, rmax, lvol, rvol;
+
 static void handletimeouts(struct gbs *gbs)
 {
 	int time = ticks / 4194304;
 	int next_subsong;
 
-	if ((gbhw_ch[0].volume == 0 ||
-	     gbhw_ch[0].master == 0) &&
-	    (gbhw_ch[1].volume == 0 ||
-	     gbhw_ch[1].master == 0) &&
-	    (gbhw_ch[2].volume == 0 ||
-	     gbhw_ch[2].master == 0) &&
-	    (gbhw_ch[3].volume == 0 ||
-	     gbhw_ch[3].master == 0)) {
+	if (lmin == lmax && rmin == rmax) {
 		silencectr++;
 	} else silencectr = 0;
 
 	if (fadeout && subsong_timeout && time >= subsong_timeout)
-		master_fade = -(128/fadeout);
+		gbhw_master_fade(128/fadeout, 0);
 	if (subsong_timeout && time >= (subsong_timeout+fadeout))
-		master_fade = -128*16;
+		gbhw_master_fade(128*16, 0);
 
 	if ((subsong_timeout && time >= (subsong_timeout+fadeout+subsong_gap)) ||
-	    (silence_timeout && silencectr > 50*silence_timeout)) {
+	    (silence_timeout && silencectr > refresh_freq*silence_timeout)) {
 		if (subsong == subsong_stop) {
 			quit = 1;
 		}
@@ -408,8 +419,50 @@ static void handleuserinput(struct gbs *gbs)
 			pause_mode = !pause_mode;
 			gbhw_pause(pause_mode);
 			break;
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+			gbhw_ch[c-'1'].mute ^= 1;
+			break;
 		}
 	}
+}
+
+static char *notestring(int ch)
+{
+	int n;
+
+	if (gbhw_ch[ch].mute) return "-M-";
+
+	if (gbhw_ch[ch].volume == 0 ||
+	    gbhw_ch[ch].master == 0) return "---";
+
+	n = getnote(gbhw_ch[ch].div_tc);
+	if (ch != 3) return &notelookup[4*n];
+	else return "nse";
+}
+
+static int chvol(int ch)
+{
+	int v;
+
+	if (gbhw_ch[ch].mute ||
+	    gbhw_ch[ch].master == 0) return 0;
+
+	if (ch == 2)
+		v = (3-((gbhw_ch[2].volume+3)&3)) << 2;
+	else v = gbhw_ch[ch].volume;
+
+	return v;
+}
+
+static char *volstring(int v)
+{
+	if (v < 0) v = 0;
+	if (v > 15) v = 15;
+
+	return &vollookup[5*v];
 }
 
 static void printstatus(struct gbs *gbs)
@@ -417,18 +470,8 @@ static void printstatus(struct gbs *gbs)
 	int time = ticks / 4194304;
 	int timem = time / 60;
 	int times = time % 60;
-	int ni1 = getnote(gbhw_ch[0].div_tc);
-	int ni2 = getnote(gbhw_ch[1].div_tc);
-	int ni3 = getnote(gbhw_ch[2].div_tc);
-	char *n1 = &notelookup[4*ni1];
-	char *n2 = &notelookup[4*ni2];
-	char *n3 = &notelookup[4*ni3];
-	char *v1 = &vollookup[5* (gbhw_ch[0].volume & 15)];
-	char *v2 = &vollookup[5* (gbhw_ch[1].volume & 15)];
-	char *v3 = &vollookup[5* (((3-((gbhw_ch[2].volume+3)&3)) << 2) & 15)];
-	char *v4 = &vollookup[5* (gbhw_ch[3].volume & 15)];
 	char *songtitle;
-	int len = gbs->subsong_info[subsong].len / 128;
+	int len = gbs->subsong_info[subsong].len / 1024;
 	int lenm, lens;
 
 	if (len == 0) {
@@ -437,20 +480,21 @@ static void printstatus(struct gbs *gbs)
 	lenm = len / 60;
 	lens = len % 60;
 
-	if (!gbhw_ch[0].volume) n1 = "---";
-	if (!gbhw_ch[1].volume) n2 = "---";
-	if (!gbhw_ch[2].volume) n3 = "---";
-
 	songtitle = gbs->subsong_info[subsong].title;
 	if (!songtitle) {
 		songtitle="Untitled";
 	}
 	printf("\r\033[A\033[A"
 	       "Song %3d/%3d (%s)\033[K\n"
-	       "%02d:%02d/%02d:%02d  ch1: %s %s  ch2: %s %s  ch3: %s %s  ch4: %s\n",
+	       "%02d:%02d/%02d:%02d  %s %s  %s %s  %s %s  %s %s  [%s|%s]\n",
 	       subsong+1, gbs->songs, songtitle,
 	       timem, times, lenm, lens,
-	       n1, v1, n2, v2, n3, v3, v4);
+	       notestring(0), volstring(chvol(0)),
+	       notestring(1), volstring(chvol(1)),
+	       notestring(2), volstring(chvol(2)),
+	       notestring(3), volstring(chvol(3)),
+	       reverse_vol(volstring(lvol/1024)),
+	       volstring(rvol/1024));
 	fflush(stdout);
 }
 
@@ -534,8 +578,9 @@ int main(int argc, char **argv)
 	gbs_playsong(gbs, subsong);
 	if (!quiet) {
 		gbs_printinfo(gbs, 0);
-		printf("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player\n");
-		printf("\n\n\n");
+		puts("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player");
+		puts(  "           [ ] pause/resume   [1-4] mute channel");
+		puts("\n\n"); /* additional newlines for the status display */
 	}
 	tcgetattr(STDIN_FILENO, &ts);
 	ots = ts;
@@ -562,6 +607,9 @@ int main(int argc, char **argv)
 
 		ticks += cycles;
 
+		gbhw_getminmax(&lmin, &lmax, &rmin, &rmax);
+		lvol = (-lmin > lmax) ? -lmin : lmax;
+		rvol = (-rmin > rmax) ? -rmin : rmax;
 		if (!quiet) printstatus(gbs);
 		handletimeouts(gbs);
 		handleuserinput(gbs);
