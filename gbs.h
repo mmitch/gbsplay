@@ -1,4 +1,4 @@
-/* $Id: gbs.h,v 1.7 2003/12/14 16:25:52 ranma Exp $
+/* $Id: gbs.h,v 1.8 2003/12/28 18:37:45 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -10,12 +10,10 @@
 #define _GBS_H_
 
 #include <inttypes.h>
+#include "common.h"
 
 #define GBS_LEN_SHIFT	10
 #define GBS_LEN_DIV	(1 << GBS_LEN_SHIFT)
-
-#define true (0==0)
-#define false (!true)
 
 struct gbs;
 

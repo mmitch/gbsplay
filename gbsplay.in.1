@@ -1,4 +1,4 @@
-.\" $Id: gbsplay.in.1,v 1.7 2003/12/26 12:37:24 mitch Exp $
+.\" $Id: gbsplay.in.1,v 1.8 2003/12/28 18:37:45 ranma Exp $
 .\" This manpage 2003 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
 .TH "gbsplay" "1" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
@@ -12,6 +12,9 @@ gbsplay emulates the sound hardware of the Nintendo Gameboy.  It
 is able to play the sounds from a Gameboy module dump (.GBS format)
 over /dev/dsp.
 .SH "OPTIONS"
+.TP
+\fI\-E endian\fR
+Set endian to \fIendian\fR.  Valid values are \fIb\fR, \fIl\fR and \fIn\fR for big, little and native endian respectively.
 .TP
 \fI\-f fadeout\-time\fR
 Set fadeout time to \fIsubsong\-gap\fR seconds.  Instead of cutting of the subsong hard, do a soft fadeout.  Default value is 3 seconds.

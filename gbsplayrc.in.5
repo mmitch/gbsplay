@@ -1,4 +1,4 @@
-.\" $Id: gbsplayrc.in.5,v 1.2 2003/10/11 18:25:25 ranma Exp $
+.\" $Id: gbsplayrc.in.5,v 1.3 2003/12/28 18:37:45 ranma Exp $
 .\" This manpage 2003 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
 .TH "gbsplayrc" "5" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
@@ -16,6 +16,8 @@ types are:
 An integer number in decimal.
 .IP Boolean
 An integer number in decimal. 0 is considered \fIfalse\fR, everything else is \fItrue\fR.
+.IP Endian
+A single character denoting the endianness. n == native endian, l == little endian and b == big endian.
 .SH "OPTIONS"
 .IP "rate = \fIInteger\fR"
 The samplerate to be used.
@@ -32,6 +34,8 @@ The fadeout time in seconds.  Instead of cutting of the subso
 ng hard, do a soft fadeout.
 .IP "quiet = \fIBoolean\fR"
 In quiet mode, the player will only show error messages.
+.IP "endian = \fIEndian\fR"
+The output endianness.
 .SH "FILES"
 .TP
 \fI/etc/gbsplayrc\fR

@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.74 2003/12/26 22:16:03 mitch Exp $
+/* $Id: gbsplay.c,v 1.75 2003/12/28 18:37:45 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -66,6 +66,7 @@ static int refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
 
 /* default values */
 static int playmode = PLAYMODE_LINEAR;
+static int endian = CFG_ENDIAN_NE;
 static int quiet = 0;
 static int rate = 44100;
 static int silence_timeout = 2;
@@ -151,16 +152,32 @@ static void precalc_vols(void)
 	}
 }
 
-void callback(struct gbhw_buffer *buf, void *priv)
+static void swap_endian(struct gbhw_buffer *buf)
 {
-	if (dspfd != -1)
+	int i;
+
+	for (i=0; i<buf->pos; i++) {
+		short x = buf->data[i];
+		buf->data[i] = ((x & 0xff) << 8) | (x >> 8);
+	}
+}
+
+static void callback(struct gbhw_buffer *buf, void *priv)
+{
+	if (dspfd != -1) {
+		if ((is_le_machine() && endian == CFG_ENDIAN_BE) ||
+		    (is_be_machine() && endian == CFG_ENDIAN_LE)) {
+			swap_endian(buf);
+		}
 		write(dspfd, buf->data, buf->pos*sizeof(int16_t));
+	}
 	buf->pos = 0;
 }
 
 static struct cfg_option options[] = {
 	{ "rate", &rate, cfg_int },
 	{ "quiet", &quiet, cfg_int },
+	{ "endian", &endian, cfg_endian },
 	{ "subsong_timeout", &subsong_timeout, cfg_int },
 	{ "subsong_gap", &subsong_gap, cfg_int },
 	{ "fadeout", &fadeout, cfg_int },
@@ -304,7 +321,11 @@ void open_dsp(void)
 		fprintf(stderr, _("fcntl(F_SETFL, flags&~O_NONBLOCK) failed: %s\n"), strerror(errno));
 	}
 
-	c=AFMT_S16_NE; /* Native endian */
+	switch (endian) {
+	case CFG_ENDIAN_BE: c = AFMT_S16_BE; break;
+	case CFG_ENDIAN_LE: c = AFMT_S16_LE; break;
+	case CFG_ENDIAN_NE: c = AFMT_S16_NE; break;
+	}
 	if ((ioctl(dspfd, SNDCTL_DSP_SETFMT, &c)) == -1) {
 		fprintf(stderr, _("ioctl(dspfd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"), c, strerror(errno));
 		exit(1);
@@ -332,6 +353,16 @@ void open_dsp(void)
 #endif
 }
 
+char *endian_str(int endian)
+{
+	switch (endian) {
+	case CFG_ENDIAN_BE: return "big";
+	case CFG_ENDIAN_LE: return "little";
+	case CFG_ENDIAN_NE: return "native";
+	default: return "invalid";
+	}
+}
+
 void usage(int exitcode)
 {
 	FILE *out = exitcode ? stderr : stdout;
@@ -346,6 +377,7 @@ void usage(int exitcode)
 	        "  -r  set samplerate (%dHz)\n"
 	        "  -s  write to stdout\n"
 	        "  -t  set subsong timeout (%d seconds)\n"
+	        "  -E  endian, b == big, l == little, n == native (%s)\n"
 	        "  -T  set silence timeout (%d seconds)\n"
 	        "  -V  print version and exit\n"
 		"  -z  play subsongs in shuffle mode\n"
@@ -355,6 +387,7 @@ void usage(int exitcode)
 		subsong_gap,
 	        rate,
 		subsong_timeout,
+	        endian_str(endian),
 	        silence_timeout);
 	exit(exitcode);
 }
@@ -369,7 +402,7 @@ void parseopts(int *argc, char ***argv)
 {
 	int res;
 	myname = *argv[0];
-	while ((res = getopt(*argc, *argv, "hqr:st:T:f:g:VzZ")) != -1) {
+	while ((res = getopt(*argc, *argv, "hqr:st:T:f:g:VzZE:")) != -1) {
 		switch (res) {
 		default:
 			usage(1);
@@ -403,11 +436,22 @@ void parseopts(int *argc, char ***argv)
 			version();
 			break;
 		case 'z':
-		  playmode = PLAYMODE_SHUFFLE;
-		  break;
+			playmode = PLAYMODE_SHUFFLE;
+			break;
 		case 'Z':
-		  playmode = PLAYMODE_RANDOM;
-		  break;
+			playmode = PLAYMODE_RANDOM;
+			break;
+		case 'E':
+			if (strcasecmp(optarg, "b") == 0) {
+				endian = CFG_ENDIAN_BE;
+			} else if (strcasecmp(optarg, "l") == 0) {
+				endian = CFG_ENDIAN_LE;
+			} else if (strcasecmp(optarg, "n") == 0) {
+				endian = CFG_ENDIAN_NE;
+			} else {
+				usage(1);
+			}
+			break;
 		}
 	}
 	*argc -= optind;

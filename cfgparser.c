@@ -57,6 +57,25 @@ static void err_expect(char *s)
 	nextstate = 1;
 }
 
+void cfg_endian(void *ptr)
+{
+	c = tolower(c);
+	if (c != 'b' && c != 'l' && c!= 'n') {
+		err_expect("[bln]");
+		return;
+	}
+
+	switch (c) {
+	case 'b': *((int*)ptr) = CFG_ENDIAN_BE; break;
+	case 'l': *((int*)ptr) = CFG_ENDIAN_LE; break;
+	default: *((int*)ptr) = CFG_ENDIAN_NE; break;
+	}
+
+	c = nextchar();
+	state = 0;
+	nextstate = 1;
+}
+
 void cfg_int(void *ptr)
 {
 	char num[20];
