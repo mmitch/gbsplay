@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.86 2004/03/21 02:46:14 ranmachan Exp $
+/* $Id: gbsplay.c,v 1.87 2004/04/05 11:24:20 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -62,12 +62,14 @@ static int refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
 
 /* default values */
 static int playmode = PLAYMODE_LINEAR;
+static int loopmode = 0;
 static int endian = CFG_ENDIAN_NE;
 static int quiet = 0;
 static int rate = 44100;
 static int silence_timeout = 2;
 static int fadeout = 3;
 static int subsong_gap = 2;
+static int subsong_start = -1;
 static int subsong_stop = -1;
 static int subsong_timeout = 2*60;
 static int redraw = false;
@@ -301,8 +303,14 @@ static regparm int nextsubsong_cb(struct gbs *gbs, void *priv)
 	int subsong = get_next_subsong(gbs);
 
 	if (gbs->subsong == subsong_stop ||
-	    subsong >= gbs->songs)
-		return false;
+	    subsong >= gbs->songs) {
+		if (loopmode) {
+			subsong = subsong_start;
+			setup_playmode(gbs);
+		} else {
+			return false;
+		}
+	}
 
 	gbs_init(gbs, subsong);
 	return true;
@@ -323,22 +331,23 @@ static regparm void usage(int exitcode)
 	FILE *out = exitcode ? stderr : stdout;
 	fprintf(out,
 	        _("Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
-	        "\n"
-	        "Available options are:\n"
-	        "  -E  endian, b == big, l == little, n == native (%s)\n"
-	        "  -f  set fadeout (%d seconds)\n"
-	        "  -g  set subsong gap (%d seconds)\n"
-	        "  -h  display this help and exit\n"
-	        "  -o  select output plugin (%s)\n"
-	        "      'list' shows available plugins\n"
-	        "  -q  quiet\n"
-	        "  -r  set samplerate (%dHz)\n"
-	        "  -R  set refresh delay (%d milliseconds)\n"
-	        "  -t  set subsong timeout (%d seconds)\n"
-	        "  -T  set silence timeout (%d seconds)\n"
-	        "  -V  print version and exit\n"
-		"  -z  play subsongs in shuffle mode\n"
-		"  -Z  play subsongs in random mode (repetitions possible)\n"),
+		  "\n"
+		  "Available options are:\n"
+		  "  -E  endian, b == big, l == little, n == native (%s)\n"
+		  "  -f  set fadeout (%d seconds)\n"
+		  "  -g  set subsong gap (%d seconds)\n"
+		  "  -h  display this help and exit\n"
+		  "  -l  loop mode\n"
+		  "  -o  select output plugin (%s)\n"
+		  "      'list' shows available plugins\n"
+		  "  -q  quiet\n"
+		  "  -r  set samplerate (%dHz)\n"
+		  "  -R  set refresh delay (%d milliseconds)\n"
+		  "  -t  set subsong timeout (%d seconds)\n"
+		  "  -T  set silence timeout (%d seconds)\n"
+		  "  -V  print version and exit\n"
+		  "  -z  play subsongs in shuffle mode\n"
+		  "  -Z  play subsongs in random mode (repetitions possible)\n"),
 	        myname,
 	        endian_str(endian),
 		fadeout,
@@ -361,7 +370,7 @@ static regparm void parseopts(int *argc, char ***argv)
 {
 	int res;
 	myname = *argv[0];
-	while ((res = getopt(*argc, *argv, "E:f:g:hqo:r:R:t:T:VzZ")) != -1) {
+	while ((res = getopt(*argc, *argv, "E:f:g:hlo:qr:R:t:T:VzZ")) != -1) {
 		switch (res) {
 		default:
 			usage(1);
@@ -386,6 +395,9 @@ static regparm void parseopts(int *argc, char ***argv)
 			break;
 		case 'h':
 			usage(0);
+			break;
+		case 'l':
+			loopmode = 1;
 			break;
 		case 'o':
 			sound_name = optarg;
@@ -597,7 +609,6 @@ int main(int argc, char **argv)
 	char *usercfg;
 	struct termios ts;
 	struct sigaction sa;
-	int subsong = -1;
 
 	i18n_init();
 
@@ -629,8 +640,8 @@ int main(int argc, char **argv)
 	gbhw_setrate(rate);
 
 	if (argc >= 2) {
-		sscanf(argv[1], "%d", &subsong);
-		subsong--;
+		sscanf(argv[1], "%d", &subsong_start);
+		subsong_start--;
 	}
 
 	if (argc >= 3) {
@@ -644,10 +655,10 @@ int main(int argc, char **argv)
 	}
 
 	/* sanitize commandline values */
-	if (subsong < -1) {
-		subsong = 0;
-	} else if (subsong >= gbs->songs) {
-		subsong = gbs->songs-1;
+	if (subsong_start < -1) {
+		subsong_start = 0;
+	} else if (subsong_start >= gbs->songs) {
+		subsong_start = gbs->songs-1;
 	}
 	if (subsong_stop <  0) {
 		subsong_stop = -1;
@@ -655,7 +666,7 @@ int main(int argc, char **argv)
 		subsong_stop = -1;
 	}
 	
-	gbs->subsong = subsong;
+	gbs->subsong = subsong_start;
 	gbs->subsong_timeout = subsong_timeout;
 	gbs->silence_timeout = silence_timeout;
 	gbs->gap = subsong_gap;
