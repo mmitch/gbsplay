@@ -1,4 +1,4 @@
-/* $Id: gbcpu.c,v 1.4 2003/08/24 11:59:58 ranma Exp $
+/* $Id: gbcpu.c,v 1.5 2003/08/29 16:32:37 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -39,12 +39,12 @@ struct gbcpu_regs gbcpu_regs;
 int gbcpu_halted;
 int gbcpu_if;
 
-static unsigned char none_get(unsigned short addr)
+static unsigned char none_get(unsigned int addr)
 {
 	return 0xff;
 }
 
-static void none_put(unsigned short addr, unsigned char val)
+static void none_put(unsigned int addr, unsigned char val)
 {
 }
 
@@ -566,13 +566,13 @@ static gbcpu_put_fn putlookup[256] = {
 	&none_put
 };
 
-static inline unsigned char mem_get(unsigned short addr)
+static inline unsigned char mem_get(unsigned int addr)
 {
 	unsigned char res = getlookup[addr >> 8](addr);
 	return res;
 }
 
-static inline void mem_put(unsigned short addr, unsigned char val)
+static inline void mem_put(unsigned int addr, unsigned char val)
 {
 	putlookup[addr >> 8](addr, val);
 }
@@ -634,8 +634,8 @@ static void put_reg(int i, unsigned char val)
 
 static void op_unknown(unsigned char op, const struct opinfo *oi)
 {
-	printf(" Unknown opcode %02x.\n", op);
-	exit(0);
+	printf("\n\nUnknown opcode %02x.\n", op);
+	exit(1);
 }
 
 static void op_set(unsigned char op)
@@ -872,8 +872,8 @@ static void op_cbprefix(unsigned char op, const struct opinfo *oi)
 		case 2: op_res(op); return;
 		case 3: op_set(op); return;
 	}
-	printf(" Unknown CB subopcode %02x.\n", op);
-	exit(0);
+	printf("\n\nUnknown CB subopcode %02x.\n", op);
+	exit(1);
 }
 
 static void op_ld(unsigned char op, const struct opinfo *oi)

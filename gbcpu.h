@@ -1,4 +1,4 @@
-/* $Id: gbcpu.h,v 1.3 2003/08/24 10:56:13 ranma Exp $
+/* $Id: gbcpu.h,v 1.4 2003/08/29 16:35:11 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -101,8 +101,8 @@ struct gbcpu_regs {
 
 #endif
 
-typedef void (*gbcpu_put_fn)(unsigned short addr, unsigned char val);
-typedef unsigned char (*gbcpu_get_fn)(unsigned short addr);
+typedef void (*gbcpu_put_fn)(unsigned int addr, unsigned char val);
+typedef unsigned char (*gbcpu_get_fn)(unsigned int addr);
 
 extern struct gbcpu_regs gbcpu_regs;
 extern int gbcpu_halted;

@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.10 2003/08/27 15:07:03 ranma Exp $
+/* $Id: gbhw.c,v 1.11 2003/08/29 16:32:37 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -19,7 +19,7 @@ static unsigned char intram[0x2000];
 static unsigned char extram[0x2000];
 static unsigned char ioregs[0x80];
 static unsigned char hiram[0x80];
-static unsigned char rombank = 1;
+static unsigned int rombank = 1;
 static unsigned int romsize;
 static unsigned int lastbank;
 
@@ -37,19 +37,19 @@ static int timerctr = 70256;
 static gbhw_callback_fn callback;
 static void *callbackpriv;
 
-static unsigned char rom_get(unsigned short addr)
+static unsigned char rom_get(unsigned int addr)
 {
 //	DPRINTF("rom_get(%04x)\n", addr);
 	return rom[addr & 0x3fff];
 }
 
-static unsigned char rombank_get(unsigned short addr)
+static unsigned char rombank_get(unsigned int addr)
 {
 //	DPRINTF("rombank_get(%04x)\n", addr);
 	return rom[(addr & 0x3fff) + 0x4000*rombank];
 }
 
-static unsigned char io_get(unsigned short addr)
+static unsigned char io_get(unsigned int addr)
 {
 	if (addr >= 0xff80 && addr <= 0xfffe) {
 		return hiram[addr & 0x7f];
@@ -65,19 +65,19 @@ static unsigned char io_get(unsigned short addr)
 	return 0xff;
 }
 
-static unsigned char intram_get(unsigned short addr)
+static unsigned char intram_get(unsigned int addr)
 {
 //	DPRINTF("intram_get(%04x)\n", addr);
 	return intram[addr & 0x1fff];
 }
 
-static unsigned char extram_get(unsigned short addr)
+static unsigned char extram_get(unsigned int addr)
 {
 //	DPRINTF("extram_get(%04x)\n", addr);
 	return extram[addr & 0x1fff];
 }
 
-static void rom_put(unsigned short addr, unsigned char val)
+static void rom_put(unsigned int addr, unsigned char val)
 {
 	if (addr >= 0x2000 && addr <= 0x3fff) {
 		val &= 0x1f;
@@ -89,7 +89,7 @@ static void rom_put(unsigned short addr, unsigned char val)
 	}
 }
 
-static void io_put(unsigned short addr, unsigned char val)
+static void io_put(unsigned int addr, unsigned char val)
 {
 	int chn = (addr - 0xff10)/5;
 	if (addr >= 0xff80 && addr <= 0xfffe) {
@@ -238,12 +238,12 @@ static void io_put(unsigned short addr, unsigned char val)
 	}
 }
 
-static void intram_put(unsigned short addr, unsigned char val)
+static void intram_put(unsigned int addr, unsigned char val)
 {
 	intram[addr & 0x1fff] = val;
 }
 
-static void extram_put(unsigned short addr, unsigned char val)
+static void extram_put(unsigned int addr, unsigned char val)
 {
 	extram[addr & 0x1fff] = val;
 }
