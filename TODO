@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.20 2003/09/21 16:04:36 mitch Exp $>>
+<<$Id: TODO,v 1.21 2003/09/21 16:11:57 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -24,6 +24,8 @@ TODO list for gbsplay.
 ( )  gbsplay: add restart subsong keyboard command
 
 ( )  update version number in manpages via configue/Makefile
+
+( )  create versioned directory on 'make dist'
 
 
 ### version 0.0.3:
