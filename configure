@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.23 2003/12/08 20:04:50 mitch Exp $
+# $Id: configure,v 1.24 2003/12/09 21:21:36 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -7,14 +7,12 @@
 #             Tobias Diedrich <ranma@gmx.at>
 # Licensed under GNU GPL.
 
-#
+## initialize variables
 
 VERSION=0.0.3
 if [ -f CVS/Entries ]; then
     VERSION=${VERSION}+cvs`date -r CVS/Entries +%Y%m%d`
 fi
-
-#
 
 EXTRA_ALL=
 EXTRA_CFLAGS=
@@ -25,6 +23,8 @@ EXTRA_UNINSTALL=
 XMMS_INPUT_PLUGIN_DIR=
 
 build_xmmsplugin=n
+
+##### begin of subroutines
 
 ## die with error
 die ()
@@ -81,6 +81,8 @@ have_x() {
     fi
 }
 
+##### end of subroutines
+
 ## enable logging of errors
 
 ERRORLOG=config.err
@@ -89,11 +91,8 @@ exec 2> $ERRORLOG
 ## find a path for tmp directory
 
 TMPPATH="/tmp"
-if [ "$TEMP" ]; then
-    TMPPATH="$TEMP"
-fi
-if [ "$TMP" ]; then
-    TMPPATH="$TMP"
+if [ "$TMPDIR" ]; then
+    TMPPATH="$TMPDIR"
 fi
 
 if [ ! -d "$TMPPATH" ]; then
@@ -104,7 +103,7 @@ fi
 
 BASENAME="`basename $0`"
 if [ "`which mktemp`" != "" ]; then
-    TEMPDIR="`mktemp -d "$TMPPATH/$BASENAME.XXXXXX"`"
+    TEMPDIR="`mktemp -d "$TMPPATH/$BASENAME.XXXXXXXXXX"`"
 else
     TEMPDIR="$TMPPATH/$BASENAME.$$"
     mkdir "$TEMPDIR"
