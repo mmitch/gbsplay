@@ -1,0 +1,22 @@
+#
+# Example gbsplay configuration file
+#
+rate = 48000           # this is a comment
+quiet=0                # should work without whitespace too
+
+# this should fail:
+
+# '\' can be used as escape and tabs are whitespace
+
+subsong_timeout \
+	= \ # whee
+	\1\2\0
+silence_timeout	=	2
+
+# this works too, but you probably should not rely on that
+subsong_timeout
+
+=
+
+200
+
