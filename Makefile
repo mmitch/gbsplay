@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.58 2003/12/13 23:49:10 ranma Exp $
+# $Id: Makefile,v 1.59 2003/12/14 16:42:10 ranma Exp $
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
@@ -19,7 +19,7 @@ localedir   := $(prefix)/share/locale
 DESTDIR :=
 DISTDIR := gbsplay-$(VERSION)
 
-CFLAGS  := -Wall -std=gnu99 -Wstrict-prototypes -g -Os
+CFLAGS  := -Wall -g -Os
 LDFLAGS :=
 
 CFLAGS  += $(EXTRA_CFLAGS)
