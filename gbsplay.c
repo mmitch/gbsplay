@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.28 2003/08/24 12:19:41 ranma Exp $
+/* $Id: gbsplay.c,v 1.29 2003/08/24 12:26:47 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -317,10 +317,14 @@ int main(int argc, char **argv)
 				timem, times, n1, v1, n2, v2, n3, v3, v4);
 			fflush(stdout);
 
-			if (gbhw_ch[0].volume == 0 &&
-			    gbhw_ch[1].volume == 0 &&
-			    gbhw_ch[2].volume == 0 &&
-			    gbhw_ch[3].volume == 0) {
+			if ((gbhw_ch[0].volume == 0 ||
+			     gbhw_ch[0].master == 0) &&
+			    (gbhw_ch[1].volume == 0 ||
+			     gbhw_ch[1].master == 0) &&
+			    (gbhw_ch[2].volume == 0 ||
+			     gbhw_ch[2].master == 0) &&
+			    (gbhw_ch[3].volume == 0 ||
+			     gbhw_ch[3].master == 0)) {
 				silencectr++;
 			} else silencectr = 0;
 
