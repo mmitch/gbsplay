@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.79 2004/03/17 14:17:43 mitch Exp $
+/* $Id: gbsplay.c,v 1.80 2004/03/20 18:50:02 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -12,10 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
-#include <sys/ioctl.h>
-#ifdef HAVE_SYS_SOUNDCARD_H
-#include <sys/soundcard.h>
-#endif
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -29,7 +25,12 @@
 #include "gbcpu.h"
 #include "gbs.h"
 #include "cfgparser.h"
+#include "plugins.h"
 #include "util.h"
+#include "plugout_stdout.h"
+#ifdef HAVE_SYS_SOUNDCARD_H
+#include "plugout_devdsp.h"
+#endif
 
 #define LN2 .69314718055994530941
 #define MAGIC 5.78135971352465960412
@@ -85,6 +86,32 @@ static struct gbhw_buffer buf = {
 .pos  = 0,
 .len  = sizeof(samples)/sizeof(int16_t),
 };
+
+/* configuration directives */
+static struct cfg_option options[] = {
+	{ "rate", &rate, cfg_int },
+	{ "refresh_delay", &refresh_delay, cfg_int },
+	{ "quiet", &quiet, cfg_int },
+	{ "endian", &endian, cfg_endian },
+	{ "subsong_timeout", &subsong_timeout, cfg_int },
+	{ "subsong_gap", &subsong_gap, cfg_int },
+	{ "fadeout", &fadeout, cfg_int },
+	{ "silence_timeout", &silence_timeout, cfg_int },
+	/* playmode not implemented yet */
+	{ NULL, NULL, NULL }
+};
+
+/* sound output plugins */
+static struct output_plugin plugouts[] = {
+#ifdef HAVE_SYS_SOUNDCARD_H
+	{ "dsp", "/dev/dsp sound driver", &devdsp_open, &devdsp_write, &devdsp_close },
+#endif
+	{ "stdout", "STDOUT file writer", &stdout_open, &stdout_write, &stdout_close },
+	{ NULL, NULL, NULL, NULL, NULL }
+};
+static plugout_open_fn  sound_open;
+static plugout_write_fn sound_write;
+static plugout_close_fn sound_close;
 
 static regparm int getnote(int div)
 {
@@ -170,23 +197,10 @@ static regparm void callback(struct gbhw_buffer *buf, void *priv)
 		    (is_be_machine() && endian == CFG_ENDIAN_LE)) {
 			swap_endian(buf);
 		}
-		write(dspfd, buf->data, buf->pos*sizeof(int16_t));
+		sound_write(dspfd, buf->data, buf->pos*sizeof(int16_t));
 	}
 	buf->pos = 0;
 }
-
-static struct cfg_option options[] = {
-	{ "rate", &rate, cfg_int },
-	{ "refresh_delay", &refresh_delay, cfg_int },
-	{ "quiet", &quiet, cfg_int },
-	{ "endian", &endian, cfg_endian },
-	{ "subsong_timeout", &subsong_timeout, cfg_int },
-	{ "subsong_gap", &subsong_gap, cfg_int },
-	{ "fadeout", &fadeout, cfg_int },
-	{ "silence_timeout", &silence_timeout, cfg_int },
-	/* playmode not implemented yet */
-	{ NULL, NULL, NULL }
-};
 
 static regparm int *setup_playlist(int songs)
 /* setup a playlist in shuffle mode */
@@ -305,54 +319,6 @@ static regparm int nextsubsong_cb(struct gbs *gbs, void *priv)
 
 	gbs_init(gbs, subsong);
 	return true;
-}
-
-static regparm void open_dsp(void)
-{
-#ifdef HAVE_SYS_SOUNDCARD_H
-	int c;
-	int flags;
-
-	if ((dspfd = open("/dev/dsp", O_WRONLY|O_NONBLOCK)) == -1) {
-		fprintf(stderr, _("Could not open /dev/dsp: %s\n"), strerror(errno));
-		exit(1);
-	}
-	if ((flags = fcntl(dspfd, F_GETFL)) == -1) {
-		fprintf(stderr, _("fcntl(F_GETFL) failed: %s\n"), strerror(errno));
-	} else if (fcntl(dspfd, F_SETFL, flags & ~O_NONBLOCK) == -1) {
-		fprintf(stderr, _("fcntl(F_SETFL, flags&~O_NONBLOCK) failed: %s\n"), strerror(errno));
-	}
-
-	switch (endian) {
-	case CFG_ENDIAN_BE: c = AFMT_S16_BE; break;
-	case CFG_ENDIAN_LE: c = AFMT_S16_LE; break;
-	case CFG_ENDIAN_NE: c = AFMT_S16_NE; break;
-	}
-	if ((ioctl(dspfd, SNDCTL_DSP_SETFMT, &c)) == -1) {
-		fprintf(stderr, _("ioctl(dspfd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"), c, strerror(errno));
-		exit(1);
-	}
-	c = rate;
-	if ((ioctl(dspfd, SNDCTL_DSP_SPEED, &c)) == -1) {
-		fprintf(stderr, _("ioctl(dspfd, SNDCTL_DSP_SPEED, %d) failed: %s\n"), rate, strerror(errno));
-		exit(1);
-	}
-	if (c != rate) {
-		fprintf(stderr, _("Requested rate %dHz, got %dHz.\n"), rate, c);
-		rate = c;
-	}
-	c=1;
-	if ((ioctl(dspfd, SNDCTL_DSP_STEREO, &c)) == -1) {
-		fprintf(stderr, _("ioctl(dspfd, SNDCTL_DSP_STEREO, %d) failed: %s\n"), c, strerror(errno));
-		exit(1);
-	}
-	c=(4 << 16) + 11;
-	if ((ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, &c)) == -1)
-		fprintf(stderr, _("ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n"), c, strerror(errno));
-#else
-	puts(_("No sound support on this platform.\n" \
-	       "Use 'gbsplay -s' for stdout output."));
-#endif
 }
 
 char *endian_str(int endian)
@@ -611,6 +577,33 @@ static regparm void printinfo(struct gbs *gbs)
 	redraw = false;
 }
 
+static regparm void select_plugin_by_index(int idx)
+{
+	sound_open  = plugouts[idx].open_fn;
+	sound_write = plugouts[idx].write_fn;
+	sound_close = plugouts[idx].close_fn;
+}
+
+static regparm void select_plugin()
+{
+	/* autoselect:  (make this more intelligent) */
+	select_plugin_by_index(0);
+}
+
+static regparm void select_plugin_by_id(char *id)
+{
+	int idx;
+
+	/* fallback: autoselect*/
+	select_plugin();
+
+	for (idx = 0; plugouts[idx].id != NULL; idx++) {
+		if ( strcmp(plugouts[idx].id, id) == 0 ) {
+			select_plugin_by_index(idx);
+		}
+	}
+}
+
 int main(int argc, char **argv)
 {
 	struct gbs *gbs;
@@ -638,11 +631,16 @@ int main(int argc, char **argv)
 	precalc_notes();
 	precalc_vols();
 
+
 	if (usestdout) {
-		dspfd = STDOUT_FILENO;
+		select_plugin_by_id( "stdout" );
 	} else {
-		open_dsp();
+		select_plugin();
 	}
+
+	dspfd = sound_open(endian, rate);
+
+
 	gbhw_setcallback(callback, NULL);
 	gbhw_setrate(rate);
 
@@ -710,5 +708,6 @@ int main(int argc, char **argv)
 		handleuserinput(gbs);
 	}
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
+	sound_close(dspfd);
 	return 0;
 }

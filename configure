@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.43 2004/03/17 19:04:52 ranmachan Exp $
+# $Id: configure,v 1.44 2004/03/20 18:50:02 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -555,6 +555,7 @@ echo "EXTRA_CFLAGS=$EXTRA_CFLAGS"
     echo CC := $CC
     echo build_xmmsplugin := $build_xmmsplugin
     echo have_xgettext := $have_xgettext
+    echo dsp_plugin := $have_sys_soundcard_h
     echo use_i18n := $use_i18n
     echo use_sharedlibgbs := $use_sharedlibgbs
     echo cygwin_build := $cygwin_build

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.76 2004/03/17 19:03:27 ranmachan Exp $
+# $Id: Makefile,v 1.77 2004/03/20 18:50:02 mitch Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -41,6 +41,12 @@ objs_libgbs    := gbcpu.o  gbhw.o  gbs.o  cfgparser.o  crc32.o
 objs_gbsplay   := gbsplay.o util.o
 objs_gbsinfo   := gbsinfo.o
 objs_gbsxmms   := gbsxmms.lo
+
+# gbsplay output plugins
+objs_gbsplay +=  plugout_stdout.o
+ifeq ($(dsp_plugin),yes)
+objs_gbsplay += plugout_devdsp.o
+endif
 
 # Cygwin automatically adds .exe to binaries.
 # We should notice that or we can't rm the files later!
