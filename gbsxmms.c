@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.30 2003/12/28 19:42:48 ranma Exp $
+/* $Id: gbsxmms.c,v 1.31 2004/01/07 22:42:26 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -19,6 +19,8 @@
 
 #include <xmms/plugin.h>
 #include <gtk/gtk.h>
+
+#define NO_GLOBAL_TEXTDOMAIN 1
 
 #include "common.h"
 #include "gbhw.h"
@@ -500,8 +502,6 @@ static void init(void)
 {
 	char *homedir = getenv("HOME");
 	char *usercfg = malloc(strlen(homedir) + strlen(cfgfile) + 2);
-
-	i18n_init();
 
 	sprintf(usercfg, "%s/%s", homedir, cfgfile);
 	cfg_parse(usercfg, options);

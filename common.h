@@ -15,7 +15,25 @@
 
 #  include <locale.h>
 #  include <libintl.h>
-#  define _(x) gettext(x)
+
+#  if NO_GLOBAL_TEXTDOMAIN == 1
+
+static inline char* _(const char *msgid)
+{
+	char *olddomain = textdomain(NULL);
+	char *olddir = bindtextdomain(olddomain, NULL);
+	char *res;
+
+	bindtextdomain(TEXTDOMAIN, LOCALE_PREFIX);
+	res = dgettext(TEXTDOMAIN, msgid);
+	bindtextdomain(olddomain, olddir);
+
+	return res;
+}
+
+#  else
+
+#    define _(x) gettext(x)
 
 static inline void i18n_init(void)
 {
@@ -23,6 +41,8 @@ static inline void i18n_init(void)
 	bindtextdomain(TEXTDOMAIN, LOCALE_PREFIX);
 	textdomain(TEXTDOMAIN);
 }
+
+#  endif
 
 #else
 
