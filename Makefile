@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.66 2004/01/06 21:16:30 ranma Exp $
+# $Id: Makefile,v 1.67 2004/01/07 22:41:45 ranma Exp $
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
@@ -41,7 +41,7 @@ objs_gbsxmms   := gbsxmms.lo
 objs := $(objs_libgbs) $(objs_gbsplay) $(objs_gbsinfo)
 dsts := gbsplay gbsinfo
 
-ifeq ($(build_xmmsplugin),y)
+ifeq ($(build_xmmsplugin),yes)
 objs += $(objs_gbsxmms)
 dsts += gbsxmms.so
 endif
