@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.42 2003/10/11 20:45:53 mitch Exp $
+# $Id: Makefile,v 1.43 2003/10/17 23:02:33 ranma Exp $
 
 include config.mk
 
@@ -141,7 +141,7 @@ config.mk: configure
 
 %.d: %.c config.mk
 	@echo DEP $< -o $@
-	@./depend.sh $< $(CFLAGS) > $@
+	@./depend.sh $< > $@
 
 %.1: %.in.1
 	sed -f config.sed $< > $@
