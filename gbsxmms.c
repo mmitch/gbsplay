@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.9 2003/09/01 00:01:16 ranma Exp $
+/* $Id: gbsxmms.c,v 1.10 2003/09/01 00:10:45 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -47,20 +47,33 @@ static int subsongtimeout = 2*60;
 
 static int stopthread = 1;
 
+static int gbs_time(struct gbs *gbs, int subsong) {
+	int res = 0;
+	int i;
+
+	if (!gbs) return 0;
+
+	for (i=0; i<subsong && i<gbs->songs; i++) {
+		if (gbs->subsong_info[i].len)
+			res += (gbs->subsong_info[i].len * 1000) / 128;
+		else res += subsongtimeout * 1000;
+	}
+	return res;
+}
+
 static void next_subsong(int flush)
 {
-	if (gbs_ip.output) {
-		if (!flush) {
-			gbs_ip.output->buffer_free();
-			gbs_ip.output->buffer_free();
-			while (gbs_ip.output->buffer_playing() && !stopthread) usleep(10000);
-		}
-		gbs_ip.output->flush(0);
+	if (!(gbs_ip.output && gbs)) return;
+	if (!flush) {
+		gbs_ip.output->buffer_free();
+		gbs_ip.output->buffer_free();
+		while (gbs_ip.output->buffer_playing() && !stopthread) usleep(10000);
 	}
 	gbclock = 0;
 	gbs_subsong++;
 	gbs_subsong %= gbs->songs;
 	gbs_playsong(gbs, gbs_subsong);
+	gbs_ip.output->flush(gbs_time(gbs, gbs_subsong));
 }
 
 static void prev_subsong(void)
@@ -525,23 +538,8 @@ void *playloop(void *priv)
 				silencectr = 0;
 		}
 	}
-	printf("Exiting playthread...\n");
 	gbs_ip.output->close_audio();
 	return 0;
-}
-
-static int gbs_time(struct gbs *gbs, int subsong) {
-	int res = 0;
-	int i;
-
-	if (!gbs) return 0;
-
-	for (i=0; i<subsong && i<gbs->songs; i++) {
-		if (gbs->subsong_info[i].len)
-			res += (gbs->subsong_info[i].len * 1000) / 128;
-		else res += subsongtimeout * 1000;
-	}
-	return res;
 }
 
 static void play_file(char *filename)
@@ -582,8 +580,7 @@ static void stop(void)
 static int get_time(void)
 {
 	if (stopthread) return -1;
-	return gbs_ip.output->output_time() +
-	       gbs_time(gbs, gbs_subsong);
+	return gbs_ip.output->output_time();
 }
 
 static void cleanup(void)
