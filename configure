@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.54 2004/04/14 16:29:09 ranmachan Exp $
+# $Id: configure,v 1.55 2004/04/14 17:20:05 ranmachan Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -43,8 +43,8 @@ check_include()
 {
     include="$1"
     includedirs="$2 /usr/local/include"
-    name="`echo $include | sed -e 's@[/\.]@_@g'`"
-    eval "value=\$have_$name"
+    includename="`echo $include | sed -e 's@[/\.]@_@g'`"
+    eval "value=\$have_$includename"
     test -z $value || return
 
     flags=""
@@ -52,14 +52,14 @@ check_include()
         msg="checking for $include"
         test -z "$dir" || msg="$msg in $dir"
         test -z "$dir" || flags="-I$dir"
-        cc_check "$msg" have_$name "$flags" ok <<EOF
+        cc_check "$msg" have_$includename "$flags" ok <<EOF
 #include <$include>
 int main(char argc, char **argv) {
     return 0;
 }
 EOF
         if [ $? -eq 0 ]; then
-            eval "include${name}_path=\"$dir \""
+            eval "include${includename}_path=\"$dir \""
             return 0
         fi
     done
