@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.49 2003/12/28 19:29:53 mitch Exp $>>
+<<$Id: TODO,v 1.50 2003/12/28 21:36:42 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -6,10 +6,6 @@ TODO list for gbsplay.
 
 ### bugs
 
-( )  gbsplay: screen scrolls up one line on resume
-
-( )  XMMS reports error on exit when gbsxmms was loaded:
-     Gtk-CRITICAL **: file gtkobject.c: line 1179 (gtk_object_unref): assertion `object->ref_count > 0' failed.
 
 ### unspecified: (bits'n'ideas)
 
