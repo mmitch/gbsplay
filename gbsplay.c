@@ -2065,7 +2065,6 @@ static void do_sound(int cycles)
 		l_smpl /= smpldivisor;
 		soundbuf[soundbufpos++] = l_smpl;
 		soundbuf[soundbufpos++] = r_smpl;
-/*		fprintf(stderr, "l=%8d r=%8d\n", l_smpl, r_smpl);*/
 		smpldivisor = 0;
 		l_smpl = 0;
 		r_smpl = 0;
@@ -2110,7 +2109,7 @@ static void do_sound(int cycles)
 			}
 		}
 		if (ch3.master) {
-			int val = ((ioregs[0x30 + ((ch3pos >> 2) & 0xf)] >> ((~ch3pos & 2)*2)) & 0xf)*2 - 16;
+			int val = ((ioregs[0x30 + ((ch3pos >> 2) & 0xf)] >> ((~ch3pos & 2)*2)) & 0xf)*2;
 			val = val >> ch3.volume;
 //			val = val * ch3.volume/15;
 			if (ch3.leftgate) l_smpl += val;
@@ -2299,6 +2298,13 @@ char *vols[] = {
 static int statustc = 83886;
 static int statuscnt;
 
+static unsigned char dmgwave[16] = {
+	0xac, 0xdd, 0xda, 0x48,
+	0x36, 0x02, 0xcf, 0x16,
+	0x2c, 0x04, 0xe5, 0x2c,
+	0xac, 0xdd, 0xda, 0x48
+};
+
 int main(int argc, char **argv)
 {
 	dspfd = open("/dev/dsp", O_WRONLY);
@@ -2312,10 +2318,15 @@ int main(int argc, char **argv)
 	ioctl(dspfd, SNDCTL_DSP_SPEED, &c);
 	c=(4 << 16) + 11;
 	ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, &c);
+	
 	sound_div_tc = (long long)4194304*65536/sound_rate;
+	
 	ch1.duty = 4;
 	ch2.duty = 4;
 	ch1.div_tc = ch2.div_tc = ch3.div_tc = 1;
+
+	memcpy(&ioregs[0x30], dmgwave, sizeof(dmgwave));
+
 	if (argc != 3) {
 		printf("Usage: %s <gbs-file> <subsong>\n", argv[0]);
 		exit(1);
