@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.30 2003/10/11 20:22:39 mitch Exp $>>
+<<$Id: TODO,v 1.31 2003/10/11 20:46:25 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -42,3 +42,5 @@ TODO list for gbsplay.
 (X)  gbsplay: add fadeout and subsong gap
 
 (X)  Makefile: fix dist target (manpages were broken)
+
+(X)  gbs2ogg.sh: contributed script to convert .gbs to .ogg
