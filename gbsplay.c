@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.17 2003/08/23 17:45:34 ranma Exp $
+/* $Id: gbsplay.c,v 1.18 2003/08/23 19:17:30 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -1103,7 +1103,7 @@ static void op_set(unsigned char op)
 	int reg = op & 7;
 	int bit = (op >> 3) & 7;
 
-	DPRINTF(" SET %d,", bit);
+	DPRINTF("\tSET %d, ", bit);
 	print_reg(reg);
 	put_reg(reg, get_reg(reg) | (1 << bit));
 }
@@ -1113,7 +1113,7 @@ static void op_res(unsigned char op)
 	int reg = op & 7;
 	int bit = (op >> 3) & 7;
 
-	DPRINTF(" RES %d,", bit);
+	DPRINTF("\tRES %d, ", bit);
 	print_reg(reg);
 	put_reg(reg, get_reg(reg) & ~(1 << bit));
 }
@@ -1123,14 +1123,14 @@ static void op_bit(unsigned char op)
 	int reg = op & 7;
 	int bit = (op >> 3) & 7;
 
-	DPRINTF(" BIT %d,", bit);
+	DPRINTF("\tBIT %d, ", bit);
 	print_reg(reg);
 	regs.rn.f &= ~NF;
 	regs.rn.f |= HF | ZF;
 	regs.rn.f ^= ((get_reg(reg) << 8) >> (bit+1)) & ZF;
 }
 
-static void op_rlc(unsigned char op, struct opinfo *oi)
+static void op_rl(unsigned char op, struct opinfo *oi)
 {
 	int reg = op & 7;
 	unsigned short res;
@@ -1146,7 +1146,7 @@ static void op_rlc(unsigned char op, struct opinfo *oi)
 	put_reg(reg, res);
 }
 
-static void op_rlca(unsigned char op, struct opinfo *oi)
+static void op_rla(unsigned char op, struct opinfo *oi)
 {
 	unsigned short res;
 
@@ -1159,7 +1159,7 @@ static void op_rlca(unsigned char op, struct opinfo *oi)
 	regs.rn.a = res;
 }
 
-static void op_rl(unsigned char op, struct opinfo *oi)
+static void op_rlc(unsigned char op, struct opinfo *oi)
 {
 	int reg = op & 7;
 	unsigned short res;
@@ -1175,7 +1175,7 @@ static void op_rl(unsigned char op, struct opinfo *oi)
 	put_reg(reg, res);
 }
 
-static void op_rla(unsigned char op, struct opinfo *oi)
+static void op_rlca(unsigned char op, struct opinfo *oi)
 {
 	unsigned short res;
 
@@ -1203,7 +1203,7 @@ static void op_sla(unsigned char op, struct opinfo *oi)
 	put_reg(reg, res);
 }
 
-static void op_rrc(unsigned char op, struct opinfo *oi)
+static void op_rr(unsigned char op, struct opinfo *oi)
 {
 	int reg = op & 7;
 	unsigned short res;
@@ -1219,7 +1219,7 @@ static void op_rrc(unsigned char op, struct opinfo *oi)
 	put_reg(reg, res);
 }
 
-static void op_rrca(unsigned char op, struct opinfo *oi)
+static void op_rra(unsigned char op, struct opinfo *oi)
 {
 	unsigned short res;
 
@@ -1232,7 +1232,7 @@ static void op_rrca(unsigned char op, struct opinfo *oi)
 	regs.rn.a = res;
 }
 
-static void op_rr(unsigned char op, struct opinfo *oi)
+static void op_rrc(unsigned char op, struct opinfo *oi)
 {
 	int reg = op & 7;
 	unsigned short res;
@@ -1248,7 +1248,7 @@ static void op_rr(unsigned char op, struct opinfo *oi)
 	put_reg(reg, res);
 }
 
-static void op_rra(unsigned char op, struct opinfo *oi)
+static void op_rrca(unsigned char op, struct opinfo *oi)
 {
 	unsigned short res;
 
@@ -1315,14 +1315,14 @@ static void op_swap(unsigned char op, struct opinfo *oi)
 #endif
 
 static struct opinfo cbops[8] = {
-	OPINFO("RLC", &op_rlc),		/* opcode cb00-cb07 */
-	OPINFO("RRC", &op_rrc),		/* opcode cb08-cb0f */
-	OPINFO("RL", &op_rl),		/* opcode cb10-cb17 */
-	OPINFO("RR", &op_rr),		/* opcode cb18-cb1f */
-	OPINFO("SLA", &op_sla),		/* opcode cb20-cb27 */
-	OPINFO("SRA", &op_sra),		/* opcode cb28-cb2f */
-	OPINFO("SWAP", &op_swap),		/* opcode cb30-cb37 */
-	OPINFO("SRL", &op_srl),		/* opcode cb38-cb3f */
+	OPINFO("\tRLC", &op_rlc),		/* opcode cb00-cb07 */
+	OPINFO("\tRRC", &op_rrc),		/* opcode cb08-cb0f */
+	OPINFO("\tRL", &op_rl),		/* opcode cb10-cb17 */
+	OPINFO("\tRR", &op_rr),		/* opcode cb18-cb1f */
+	OPINFO("\tSLA", &op_sla),		/* opcode cb20-cb27 */
+	OPINFO("\tSRA", &op_sra),		/* opcode cb28-cb2f */
+	OPINFO("\tSWAP", &op_swap),		/* opcode cb30-cb37 */
+	OPINFO("\tSRL", &op_srl),		/* opcode cb38-cb3f */
 };
 
 static void op_cbprefix(unsigned char op, struct opinfo *oi)
@@ -1347,9 +1347,9 @@ static void op_ld(unsigned char op, struct opinfo *oi)
 	int src = op & 7;
 	int dst = (op >> 3) & 7;
 
-	DPRINTF(" %s ", oi->name);
+	DPRINTF(" %s  ", oi->name);
 	print_reg(dst);
-	DPRINTF(", ", oi->name);
+	DPRINTF(", ");
 	print_reg(src);
 	put_reg(dst, get_reg(src));
 }
@@ -1358,7 +1358,7 @@ static void op_ld_imm(unsigned char op, struct opinfo *oi)
 {
 	int ofs = get_imm16();
 
-	DPRINTF(" %s A, [0x%04x] ", oi->name, ofs);
+	DPRINTF(" %s  A, [0x%04x]", oi->name, ofs);
 	regs.rn.a = mem_get(ofs);
 }
 
@@ -1366,7 +1366,7 @@ static void op_ld_ind16_a(unsigned char op, struct opinfo *oi)
 {
 	int ofs = get_imm16();
 
-	DPRINTF(" %s [0x%04x], A", oi->name, ofs);
+	DPRINTF(" %s  [0x%04x], A", oi->name, ofs);
 	mem_put(ofs, regs.rn.a);
 }
 
@@ -1375,7 +1375,7 @@ static void op_ld_ind16_sp(unsigned char op, struct opinfo *oi)
 	int ofs = get_imm16();
 	int sp = REGS16_R(regs, SP);
 
-	DPRINTF(" %s [0x%04x], SP", oi->name, ofs);
+	DPRINTF(" %s  [0x%04x], SP", oi->name, ofs);
 	mem_put(ofs, sp & 0xff);
 	mem_put(ofs+1, sp >> 8);
 }
@@ -1386,7 +1386,7 @@ static void op_ld_reg16_imm(unsigned char op, struct opinfo *oi)
 	int reg = (op >> 4) & 3;
 
 	reg += reg > 2; /* skip over FA */
-	DPRINTF(" %s %s, 0x%02x", oi->name, regnamech16[reg], val);
+	DPRINTF(" %s  %s, 0x%02x", oi->name, regnamech16[reg], val);
 	REGS16_W(regs, reg, val);
 }
 
@@ -1397,10 +1397,10 @@ static void op_ld_reg16_a(unsigned char op, struct opinfo *oi)
 
 	reg -= reg > 2;
 	if (op & 8) {
-		DPRINTF(" %s A, [%s]", oi->name, regnamech16[reg]);
+		DPRINTF(" %s  A, [%s]", oi->name, regnamech16[reg]);
 		regs.rn.a = mem_get(r = REGS16_R(regs, reg));
 	} else {
-		DPRINTF(" %s [%s], A", oi->name, regnamech16[reg]);
+		DPRINTF(" %s  [%s], A", oi->name, regnamech16[reg]);
 		mem_put(r = REGS16_R(regs, reg), regs.rn.a);
 	}
 
@@ -1415,10 +1415,10 @@ static void op_ld_reg8_imm(unsigned char op, struct opinfo *oi)
 	int val = get_imm8();
 	int reg = (op >> 3) & 7;
 
-	DPRINTF(" %s ", oi->name);
+	DPRINTF(" %s  ", oi->name);
 	print_reg(reg);
 	put_reg(reg, val);
-	DPRINTF(",%02x", val);
+	DPRINTF(", 0x%02x", val);
 }
 
 static void op_ldh(unsigned char op, struct opinfo *oi)
@@ -1426,7 +1426,7 @@ static void op_ldh(unsigned char op, struct opinfo *oi)
 	int ofs = op & 2 ? 0 : get_imm8();
 
 	if (op & 0x10) {
-		DPRINTF(" %s A,", oi->name);
+		DPRINTF(" %s  A,", oi->name);
 		if ((op & 2) == 0) {
 			DPRINTF("[%02x]", ofs);
 		} else {
@@ -1436,10 +1436,10 @@ static void op_ldh(unsigned char op, struct opinfo *oi)
 		regs.rn.a = mem_get(0xff00 + ofs);
 	} else {
 		if ((op & 2) == 0) {
-			DPRINTF(" %s [%02x], A", oi->name, ofs);
+			DPRINTF(" %s  [%02x], A", oi->name, ofs);
 		} else {
 			ofs = regs.rn.c;
-			DPRINTF(" %s [C], A", oi->name);
+			DPRINTF(" %s  [C], A", oi->name);
 		}
 		mem_put(0xff00 + ofs, regs.rn.a);
 	}
@@ -1451,19 +1451,11 @@ static void op_inc(unsigned char op, struct opinfo *oi)
 	unsigned char res;
 	unsigned char old;
 
-	if (reg != 6) {
-		DPRINTF(" %s %c", oi->name, regnames[reg]);
-		res = old = REGS8_R(regs, reg);
-		res++;
-		REGS8_W(regs, reg, res);
-	} else {
-		unsigned short hl = REGS16_R(regs, HL);
-
-		DPRINTF(" %s [HL]", oi->name);
-		res = old = mem_get(hl);
-		res++;
-		mem_put(hl, res);
-	}
+	DPRINTF(" %s ", oi->name);
+	print_reg(reg);
+	old = res = get_reg(reg);
+	res++;
+	put_reg(reg, res);
 	regs.rn.f &= ~(NF | ZF | HF);
 	if (res == 0) regs.rn.f |= ZF;
 	if ((old & 15) > (res & 15)) regs.rn.f |= HF;
@@ -1474,7 +1466,7 @@ static void op_inc16(unsigned char op, struct opinfo *oi)
 	int reg = (op >> 4) & 3;
 	unsigned short res = REGS16_R(regs, reg);
 
-	DPRINTF(" %s %s", oi->name, regnamech16[reg]);
+	DPRINTF(" %s %s\t", oi->name, regnamech16[reg]);
 	res++;
 	REGS16_W(regs, reg, res);
 }
@@ -1485,19 +1477,11 @@ static void op_dec(unsigned char op, struct opinfo *oi)
 	unsigned char res;
 	unsigned char old;
 
-	if (reg != 6) {
-		DPRINTF(" %s %c", oi->name, regnames[reg]);
-		old = res = REGS8_R(regs, reg);
-		res--;
-		REGS8_W(regs, reg, res);
-	} else {
-		unsigned short hl = REGS16_R(regs, HL);
-
-		DPRINTF(" %s [HL]", oi->name);
-		res = old = mem_get(hl);
-		res--;
-		mem_put(hl, res);
-	}
+	DPRINTF(" %s ", oi->name);
+	print_reg(reg);
+	old = res = get_reg(reg);
+	res--;
+	put_reg(reg, res);
 	regs.rn.f |= NF;
 	regs.rn.f &= ~(ZF | HF);
 	if (res == 0) regs.rn.f |= ZF;
@@ -1533,7 +1517,7 @@ static void op_add(unsigned char op, struct opinfo *oi)
 	unsigned char old = regs.rn.a;
 	unsigned char new;
 
-	DPRINTF(" %s A,", oi->name);
+	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
 	regs.rn.a += get_reg(op & 7);
 	new = regs.rn.a;
@@ -1580,7 +1564,7 @@ static void op_adc(unsigned char op, struct opinfo *oi)
 	unsigned char old = regs.rn.a;
 	unsigned char new;
 
-	DPRINTF(" %s A,", oi->name);
+	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
 	regs.rn.a += get_reg(op & 7);
 	regs.rn.a += (regs.rn.f & CF) > 0;
@@ -1612,7 +1596,7 @@ static void op_cp(unsigned char op, struct opinfo *oi)
 	unsigned char old = regs.rn.a;
 	unsigned char new = old;
 
-	DPRINTF(" %s A,", oi->name);
+	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
 	new -= get_reg(op & 7);
 	regs.rn.f = NF;
@@ -1640,7 +1624,7 @@ static void op_sub(unsigned char op, struct opinfo *oi)
 	unsigned char old = regs.rn.a;
 	unsigned char new;
 
-	DPRINTF(" %s A,", oi->name);
+	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
 	regs.rn.a -= get_reg(op & 7);
 	new = regs.rn.a;
@@ -1670,7 +1654,7 @@ static void op_sbc(unsigned char op, struct opinfo *oi)
 	unsigned char old = regs.rn.a;
 	unsigned char new;
 
-	DPRINTF(" %s A,", oi->name);
+	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
 	regs.rn.a -= get_reg(op & 7);
 	regs.rn.a -= (regs.rn.f & CF) > 0;
@@ -1699,7 +1683,7 @@ static void op_sbc_imm(unsigned char op, struct opinfo *oi)
 
 static void op_and(unsigned char op, struct opinfo *oi)
 {
-	DPRINTF(" %s A,", oi->name);
+	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
 	regs.rn.a &= get_reg(op & 7);
 	regs.rn.f = HF;
@@ -1718,7 +1702,7 @@ static void op_and_imm(unsigned char op, struct opinfo *oi)
 
 static void op_or(unsigned char op, struct opinfo *oi)
 {
-	DPRINTF(" %s A,", oi->name);
+	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
 	regs.rn.a |= get_reg(op & 7);
 	regs.rn.f = 0;
@@ -1737,7 +1721,7 @@ static void op_or_imm(unsigned char op, struct opinfo *oi)
 
 static void op_xor(unsigned char op, struct opinfo *oi)
 {
-	DPRINTF(" %s A,", oi->name);
+	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
 	regs.rn.a ^= get_reg(op & 7);
 	regs.rn.f = 0;
@@ -1759,7 +1743,7 @@ static void op_push(unsigned char op, struct opinfo *oi)
 	int reg = op >> 4 & 3;
 
 	push(REGS16_R(regs, reg));
-	DPRINTF(" %s %s", oi->name, regnamech16[reg]);
+	DPRINTF(" %s %s\t", oi->name, regnamech16[reg]);
 }
 
 static void op_pop(unsigned char op, struct opinfo *oi)
@@ -1767,7 +1751,7 @@ static void op_pop(unsigned char op, struct opinfo *oi)
 	int reg = op >> 4 & 3;
 
 	REGS16_W(regs, reg, pop());
-	DPRINTF(" %s %s", oi->name, regnamech16[reg]);
+	DPRINTF(" %s %s\t", oi->name, regnamech16[reg]);
 }
 
 static void op_cpl(unsigned char op, struct opinfo *oi)
@@ -1940,262 +1924,262 @@ static void op_nop(unsigned char op, struct opinfo *oi)
 }
 
 static struct opinfo ops[256] = {
-	OPINFO("NOP", &op_nop),		/* opcode 00 */
-	OPINFO("LD", &op_ld_reg16_imm),		/* opcode 01 */
-	OPINFO("LD", &op_ld_reg16_a),		/* opcode 02 */
-	OPINFO("INC", &op_inc16),		/* opcode 03 */
-	OPINFO("INC", &op_inc),		/* opcode 04 */
-	OPINFO("DEC", &op_dec),		/* opcode 05 */
-	OPINFO("LD", &op_ld_reg8_imm),		/* opcode 06 */
-	OPINFO("RLCA", &op_rlca),		/* opcode 07 */
-	OPINFO("LD", &op_ld_ind16_sp),		/* opcode 08 */
-	OPINFO("ADD", &op_add_hl),		/* opcode 09 */
-	OPINFO("LD", &op_ld_reg16_a),		/* opcode 0a */
-	OPINFO("DEC", &op_dec16),		/* opcode 0b */
-	OPINFO("INC", &op_inc),		/* opcode 0c */
-	OPINFO("DEC", &op_dec),		/* opcode 0d */
-	OPINFO("LD", &op_ld_reg8_imm),		/* opcode 0e */
-	OPINFO("RRCA", &op_rrca),		/* opcode 0f */
-	OPINFO("STOP", &op_stop),		/* opcode 10 */
-	OPINFO("LD", &op_ld_reg16_imm),		/* opcode 11 */
-	OPINFO("LD", &op_ld_reg16_a),		/* opcode 12 */
-	OPINFO("INC", &op_inc16),		/* opcode 13 */
-	OPINFO("INC", &op_inc),		/* opcode 14 */
-	OPINFO("DEC", &op_dec),		/* opcode 15 */
-	OPINFO("LD", &op_ld_reg8_imm),		/* opcode 16 */
-	OPINFO("RLA", &op_rla),		/* opcode 17 */
-	OPINFO("JR", &op_jr),		/* opcode 18 */
-	OPINFO("ADD", &op_add_hl),		/* opcode 19 */
-	OPINFO("LD", &op_ld_reg16_a),		/* opcode 1a */
-	OPINFO("DEC", &op_dec16),		/* opcode 1b */
-	OPINFO("INC", &op_inc),		/* opcode 1c */
-	OPINFO("DEC", &op_dec),		/* opcode 1d */
-	OPINFO("LD", &op_ld_reg8_imm),		/* opcode 1e */
-	OPINFO("RRA", &op_rra),		/* opcode 1f */
-	OPINFO("JR", &op_jr_cond),		/* opcode 20 */
-	OPINFO("LD", &op_ld_reg16_imm),		/* opcode 21 */
-	OPINFO("LDI", &op_ld_reg16_a),		/* opcode 22 */
-	OPINFO("INC", &op_inc16),		/* opcode 23 */
-	OPINFO("INC", &op_inc),		/* opcode 24 */
-	OPINFO("DEC", &op_dec),		/* opcode 25 */
-	OPINFO("LD", &op_ld_reg8_imm),		/* opcode 26 */
-	OPINFO("UNKN", &op_unknown),		/* opcode 27 */
-	OPINFO("JR", &op_jr_cond),		/* opcode 28 */
-	OPINFO("ADD", &op_add_hl),		/* opcode 29 */
-	OPINFO("LDI", &op_ld_reg16_a),		/* opcode 2a */
-	OPINFO("DEC", &op_dec16),		/* opcode 2b */
-	OPINFO("INC", &op_inc),		/* opcode 2c */
-	OPINFO("DEC", &op_dec),		/* opcode 2d */
-	OPINFO("LD", &op_ld_reg8_imm),		/* opcode 2e */
-	OPINFO("CPL", &op_cpl),		/* opcode 2f */
-	OPINFO("JR", &op_jr_cond),		/* opcode 30 */
-	OPINFO("LD", &op_ld_reg16_imm),		/* opcode 31 */
-	OPINFO("LDD", &op_ld_reg16_a),		/* opcode 32 */
-	OPINFO("INC", &op_inc16),		/* opcode 33 */
-	OPINFO("INC", &op_inc),		/* opcode 34 */
-	OPINFO("DEC", &op_dec),		/* opcode 35 */
-	OPINFO("LD", &op_ld_reg8_imm),		/* opcode 36 */
-	OPINFO("SCF", &op_scf),		/* opcode 37 */
-	OPINFO("JR", &op_jr_cond),		/* opcode 38 */
-	OPINFO("ADD", &op_add_hl),		/* opcode 39 */
-	OPINFO("LDD", &op_ld_reg16_a),		/* opcode 3a */
-	OPINFO("DEC", &op_dec16),		/* opcode 3b */
-	OPINFO("INC", &op_inc),		/* opcode 3c */
-	OPINFO("DEC", &op_dec),		/* opcode 3d */
-	OPINFO("LD", &op_ld_reg8_imm),		/* opcode 3e */
-	OPINFO("CCF", &op_ccf),		/* opcode 3f */
-	OPINFO("LD", &op_ld),		/* opcode 40 */
-	OPINFO("LD", &op_ld),		/* opcode 41 */
-	OPINFO("LD", &op_ld),		/* opcode 42 */
-	OPINFO("LD", &op_ld),		/* opcode 43 */
-	OPINFO("LD", &op_ld),		/* opcode 44 */
-	OPINFO("LD", &op_ld),		/* opcode 45 */
-	OPINFO("LD", &op_ld),		/* opcode 46 */
-	OPINFO("LD", &op_ld),		/* opcode 47 */
-	OPINFO("LD", &op_ld),		/* opcode 48 */
-	OPINFO("LD", &op_ld),		/* opcode 49 */
-	OPINFO("LD", &op_ld),		/* opcode 4a */
-	OPINFO("LD", &op_ld),		/* opcode 4b */
-	OPINFO("LD", &op_ld),		/* opcode 4c */
-	OPINFO("LD", &op_ld),		/* opcode 4d */
-	OPINFO("LD", &op_ld),		/* opcode 4e */
-	OPINFO("LD", &op_ld),		/* opcode 4f */
-	OPINFO("LD", &op_ld),		/* opcode 50 */
-	OPINFO("LD", &op_ld),		/* opcode 51 */
-	OPINFO("LD", &op_ld),		/* opcode 52 */
-	OPINFO("LD", &op_ld),		/* opcode 53 */
-	OPINFO("LD", &op_ld),		/* opcode 54 */
-	OPINFO("LD", &op_ld),		/* opcode 55 */
-	OPINFO("LD", &op_ld),		/* opcode 56 */
-	OPINFO("LD", &op_ld),		/* opcode 57 */
-	OPINFO("LD", &op_ld),		/* opcode 58 */
-	OPINFO("LD", &op_ld),		/* opcode 59 */
-	OPINFO("LD", &op_ld),		/* opcode 5a */
-	OPINFO("LD", &op_ld),		/* opcode 5b */
-	OPINFO("LD", &op_ld),		/* opcode 5c */
-	OPINFO("LD", &op_ld),		/* opcode 5d */
-	OPINFO("LD", &op_ld),		/* opcode 5e */
-	OPINFO("LD", &op_ld),		/* opcode 5f */
-	OPINFO("LD", &op_ld),		/* opcode 60 */
-	OPINFO("LD", &op_ld),		/* opcode 61 */
-	OPINFO("LD", &op_ld),		/* opcode 62 */
-	OPINFO("LD", &op_ld),		/* opcode 63 */
-	OPINFO("LD", &op_ld),		/* opcode 64 */
-	OPINFO("LD", &op_ld),		/* opcode 65 */
-	OPINFO("LD", &op_ld),		/* opcode 66 */
-	OPINFO("LD", &op_ld),		/* opcode 67 */
-	OPINFO("LD", &op_ld),		/* opcode 68 */
-	OPINFO("LD", &op_ld),		/* opcode 69 */
-	OPINFO("LD", &op_ld),		/* opcode 6a */
-	OPINFO("LD", &op_ld),		/* opcode 6b */
-	OPINFO("LD", &op_ld),		/* opcode 6c */
-	OPINFO("LD", &op_ld),		/* opcode 6d */
-	OPINFO("LD", &op_ld),		/* opcode 6e */
-	OPINFO("LD", &op_ld),		/* opcode 6f */
-	OPINFO("LD", &op_ld),		/* opcode 70 */
-	OPINFO("LD", &op_ld),		/* opcode 71 */
-	OPINFO("LD", &op_ld),		/* opcode 72 */
-	OPINFO("LD", &op_ld),		/* opcode 73 */
-	OPINFO("LD", &op_ld),		/* opcode 74 */
-	OPINFO("LD", &op_ld),		/* opcode 75 */
-	OPINFO("HALT", &op_halt),		/* opcode 76 */
-	OPINFO("LD", &op_ld),		/* opcode 77 */
-	OPINFO("LD", &op_ld),		/* opcode 78 */
-	OPINFO("LD", &op_ld),		/* opcode 79 */
-	OPINFO("LD", &op_ld),		/* opcode 7a */
-	OPINFO("LD", &op_ld),		/* opcode 7b */
-	OPINFO("LD", &op_ld),		/* opcode 7c */
-	OPINFO("LD", &op_ld),		/* opcode 7d */
-	OPINFO("LD", &op_ld),		/* opcode 7e */
-	OPINFO("LD", &op_ld),		/* opcode 7f */
-	OPINFO("ADD", &op_add),		/* opcode 80 */
-	OPINFO("ADD", &op_add),		/* opcode 81 */
-	OPINFO("ADD", &op_add),		/* opcode 82 */
-	OPINFO("ADD", &op_add),		/* opcode 83 */
-	OPINFO("ADD", &op_add),		/* opcode 84 */
-	OPINFO("ADD", &op_add),		/* opcode 85 */
-	OPINFO("ADD", &op_add),		/* opcode 86 */
-	OPINFO("ADD", &op_add),		/* opcode 87 */
-	OPINFO("ADC", &op_adc),		/* opcode 88 */
-	OPINFO("ADC", &op_adc),		/* opcode 89 */
-	OPINFO("ADC", &op_adc),		/* opcode 8a */
-	OPINFO("ADC", &op_adc),		/* opcode 8b */
-	OPINFO("ADC", &op_adc),		/* opcode 8c */
-	OPINFO("ADC", &op_adc),		/* opcode 8d */
-	OPINFO("ADC", &op_adc),		/* opcode 8e */
-	OPINFO("ADC", &op_adc),		/* opcode 8f */
-	OPINFO("SUB", &op_sub),		/* opcode 90 */
-	OPINFO("SUB", &op_sub),		/* opcode 91 */
-	OPINFO("SUB", &op_sub),		/* opcode 92 */
-	OPINFO("SUB", &op_sub),		/* opcode 93 */
-	OPINFO("SUB", &op_sub),		/* opcode 94 */
-	OPINFO("SUB", &op_sub),		/* opcode 95 */
-	OPINFO("SUB", &op_sub),		/* opcode 96 */
-	OPINFO("SUB", &op_sub),		/* opcode 97 */
-	OPINFO("SBC", &op_sbc),		/* opcode 98 */
-	OPINFO("SBC", &op_sbc),		/* opcode 99 */
-	OPINFO("SBC", &op_sbc),		/* opcode 9a */
-	OPINFO("SBC", &op_sbc),		/* opcode 9b */
-	OPINFO("SBC", &op_sbc),		/* opcode 9c */
-	OPINFO("SBC", &op_sbc),		/* opcode 9d */
-	OPINFO("SBC", &op_sbc),		/* opcode 9e */
-	OPINFO("SBC", &op_sbc),		/* opcode 9f */
-	OPINFO("AND", &op_and),		/* opcode a0 */
-	OPINFO("AND", &op_and),		/* opcode a1 */
-	OPINFO("AND", &op_and),		/* opcode a2 */
-	OPINFO("AND", &op_and),		/* opcode a3 */
-	OPINFO("AND", &op_and),		/* opcode a4 */
-	OPINFO("AND", &op_and),		/* opcode a5 */
-	OPINFO("AND", &op_and),		/* opcode a6 */
-	OPINFO("AND", &op_and),		/* opcode a7 */
-	OPINFO("XOR", &op_xor),		/* opcode a8 */
-	OPINFO("XOR", &op_xor),		/* opcode a9 */
-	OPINFO("XOR", &op_xor),		/* opcode aa */
-	OPINFO("XOR", &op_xor),		/* opcode ab */
-	OPINFO("XOR", &op_xor),		/* opcode ac */
-	OPINFO("XOR", &op_xor),		/* opcode ad */
-	OPINFO("XOR", &op_xor),		/* opcode ae */
-	OPINFO("XOR", &op_xor),		/* opcode af */
-	OPINFO("OR", &op_or),		/* opcode b0 */
-	OPINFO("OR", &op_or),		/* opcode b1 */
-	OPINFO("OR", &op_or),		/* opcode b2 */
-	OPINFO("OR", &op_or),		/* opcode b3 */
-	OPINFO("OR", &op_or),		/* opcode b4 */
-	OPINFO("OR", &op_or),		/* opcode b5 */
-	OPINFO("OR", &op_or),		/* opcode b6 */
-	OPINFO("OR", &op_or),		/* opcode b7 */
-	OPINFO("CP", &op_cp),		/* opcode b8 */
-	OPINFO("CP", &op_cp),		/* opcode b9 */
-	OPINFO("CP", &op_cp),		/* opcode ba */
-	OPINFO("CP", &op_cp),		/* opcode bb */
-	OPINFO("CP", &op_cp),		/* opcode bc */
-	OPINFO("CP", &op_cp),		/* opcode bd */
-	OPINFO("CP", &op_cp),		/* opcode be */
-	OPINFO("UNKN", &op_unknown),		/* opcode bf */
-	OPINFO("RET", &op_ret_cond),		/* opcode c0 */
-	OPINFO("POP", &op_pop),		/* opcode c1 */
-	OPINFO("JP", &op_jp_cond),		/* opcode c2 */
-	OPINFO("JP", &op_jp),		/* opcode c3 */
-	OPINFO("CALL", &op_call_cond),		/* opcode c4 */
-	OPINFO("PUSH", &op_push),		/* opcode c5 */
-	OPINFO("ADD", &op_add_imm),		/* opcode c6 */
-	OPINFO("RST", &op_rst),		/* opcode c7 */
-	OPINFO("RET", &op_ret_cond),		/* opcode c8 */
-	OPINFO("RET", &op_ret),		/* opcode c9 */
-	OPINFO("JP", &op_jp_cond),		/* opcode ca */
-	OPINFO("CBPREFIX", &op_cbprefix),		/* opcode cb */
-	OPINFO("CALL", &op_call_cond),		/* opcode cc */
-	OPINFO("CALL", &op_call),		/* opcode cd */
-	OPINFO("ADC", &op_adc_imm),		/* opcode ce */
-	OPINFO("RST", &op_rst),		/* opcode cf */
-	OPINFO("RET", &op_ret_cond),		/* opcode d0 */
-	OPINFO("POP", &op_pop),		/* opcode d1 */
-	OPINFO("JP", &op_jp_cond),		/* opcode d2 */
-	OPINFO("UNKN", &op_unknown),		/* opcode d3 */
-	OPINFO("CALL", &op_call_cond),		/* opcode d4 */
-	OPINFO("PUSH", &op_push),		/* opcode d5 */
-	OPINFO("SUB", &op_sub_imm),		/* opcode d6 */
-	OPINFO("RST", &op_rst),		/* opcode d7 */
-	OPINFO("RET", &op_ret_cond),		/* opcode d8 */
-	OPINFO("RETI", &op_reti),		/* opcode d9 */
-	OPINFO("JP", &op_jp_cond),		/* opcode da */
-	OPINFO("UNKN", &op_unknown),		/* opcode db */
-	OPINFO("CALL", &op_call_cond),		/* opcode dc */
-	OPINFO("UNKN", &op_unknown),		/* opcode dd */
-	OPINFO("SBC", &op_sbc_imm),		/* opcode de */
-	OPINFO("RST", &op_rst),		/* opcode df */
-	OPINFO("LDH", &op_ldh),		/* opcode e0 */
-	OPINFO("POP", &op_pop),		/* opcode e1 */
-	OPINFO("LDH", &op_ldh),		/* opcode e2 */
-	OPINFO("UNKN", &op_unknown),		/* opcode e3 */
-	OPINFO("UNKN", &op_unknown),		/* opcode e4 */
-	OPINFO("PUSH", &op_push),		/* opcode e5 */
-	OPINFO("AND", &op_and_imm),		/* opcode e6 */
-	OPINFO("RST", &op_rst),		/* opcode e7 */
-	OPINFO("ADD", &op_add_sp_imm),		/* opcode e8 */
-	OPINFO("JP", &op_jp_hl),		/* opcode e9 */
-	OPINFO("LD", &op_ld_ind16_a),		/* opcode ea */
-	OPINFO("UNKN", &op_unknown),		/* opcode eb */
-	OPINFO("UNKN", &op_unknown),		/* opcode ec */
-	OPINFO("UNKN", &op_unknown),		/* opcode ed */
-	OPINFO("XOR", &op_xor_imm),		/* opcode ee */
-	OPINFO("RST", &op_rst),		/* opcode ef */
-	OPINFO("LDH", &op_ldh),		/* opcode f0 */
-	OPINFO("POP", &op_pop),		/* opcode f1 */
-	OPINFO("LDH", &op_ldh),		/* opcode f2 */
-	OPINFO("DI", &op_di),		/* opcode f3 */
-	OPINFO("UNKN", &op_unknown),		/* opcode f4 */
-	OPINFO("PUSH", &op_push),		/* opcode f5 */
-	OPINFO("OR", &op_or_imm),		/* opcode f6 */
-	OPINFO("RST", &op_rst),		/* opcode f7 */
-	OPINFO("UNKN", &op_unknown),		/* opcode f8 */
-	OPINFO("UNKN", &op_unknown),		/* opcode f9 */
-	OPINFO("LD", &op_ld_imm),		/* opcode fa */
-	OPINFO("EI", &op_ei),		/* opcode fb */
-	OPINFO("UNKN", &op_unknown),		/* opcode fc */
-	OPINFO("UNKN", &op_unknown),		/* opcode fd */
-	OPINFO("CP", &op_cp_imm),		/* opcode fe */
-	OPINFO("RST", &op_rst),		/* opcode ff */
+	OPINFO("\tNOP", &op_nop),		/* opcode 00 */
+	OPINFO("\tLD", &op_ld_reg16_imm),		/* opcode 01 */
+	OPINFO("\tLD", &op_ld_reg16_a),		/* opcode 02 */
+	OPINFO("\tINC", &op_inc16),		/* opcode 03 */
+	OPINFO("\tINC", &op_inc),		/* opcode 04 */
+	OPINFO("\tDEC", &op_dec),		/* opcode 05 */
+	OPINFO("\tLD", &op_ld_reg8_imm),		/* opcode 06 */
+	OPINFO("\tRLCA", &op_rlca),		/* opcode 07 */
+	OPINFO("\tLD", &op_ld_ind16_sp),		/* opcode 08 */
+	OPINFO("\tADD", &op_add_hl),		/* opcode 09 */
+	OPINFO("\tLD", &op_ld_reg16_a),		/* opcode 0a */
+	OPINFO("\tDEC", &op_dec16),		/* opcode 0b */
+	OPINFO("\tINC", &op_inc),		/* opcode 0c */
+	OPINFO("\tDEC", &op_dec),		/* opcode 0d */
+	OPINFO("\tLD", &op_ld_reg8_imm),		/* opcode 0e */
+	OPINFO("\tRRCA", &op_rrca),		/* opcode 0f */
+	OPINFO("\tSTOP", &op_stop),		/* opcode 10 */
+	OPINFO("\tLD", &op_ld_reg16_imm),		/* opcode 11 */
+	OPINFO("\tLD", &op_ld_reg16_a),		/* opcode 12 */
+	OPINFO("\tINC", &op_inc16),		/* opcode 13 */
+	OPINFO("\tINC", &op_inc),		/* opcode 14 */
+	OPINFO("\tDEC", &op_dec),		/* opcode 15 */
+	OPINFO("\tLD", &op_ld_reg8_imm),		/* opcode 16 */
+	OPINFO("\tRLA", &op_rla),		/* opcode 17 */
+	OPINFO("\tJR", &op_jr),		/* opcode 18 */
+	OPINFO("\tADD", &op_add_hl),		/* opcode 19 */
+	OPINFO("\tLD", &op_ld_reg16_a),		/* opcode 1a */
+	OPINFO("\tDEC", &op_dec16),		/* opcode 1b */
+	OPINFO("\tINC", &op_inc),		/* opcode 1c */
+	OPINFO("\tDEC", &op_dec),		/* opcode 1d */
+	OPINFO("\tLD", &op_ld_reg8_imm),		/* opcode 1e */
+	OPINFO("\tRRA", &op_rra),		/* opcode 1f */
+	OPINFO("\tJR", &op_jr_cond),		/* opcode 20 */
+	OPINFO("\tLD", &op_ld_reg16_imm),		/* opcode 21 */
+	OPINFO("\tLDI", &op_ld_reg16_a),		/* opcode 22 */
+	OPINFO("\tINC", &op_inc16),		/* opcode 23 */
+	OPINFO("\tINC", &op_inc),		/* opcode 24 */
+	OPINFO("\tDEC", &op_dec),		/* opcode 25 */
+	OPINFO("\tLD", &op_ld_reg8_imm),		/* opcode 26 */
+	OPINFO("\tUNKN", &op_unknown),		/* opcode 27 */
+	OPINFO("\tJR", &op_jr_cond),		/* opcode 28 */
+	OPINFO("\tADD", &op_add_hl),		/* opcode 29 */
+	OPINFO("\tLDI", &op_ld_reg16_a),		/* opcode 2a */
+	OPINFO("\tDEC", &op_dec16),		/* opcode 2b */
+	OPINFO("\tINC", &op_inc),		/* opcode 2c */
+	OPINFO("\tDEC", &op_dec),		/* opcode 2d */
+	OPINFO("\tLD", &op_ld_reg8_imm),		/* opcode 2e */
+	OPINFO("\tCPL", &op_cpl),		/* opcode 2f */
+	OPINFO("\tJR", &op_jr_cond),		/* opcode 30 */
+	OPINFO("\tLD", &op_ld_reg16_imm),		/* opcode 31 */
+	OPINFO("\tLDD", &op_ld_reg16_a),		/* opcode 32 */
+	OPINFO("\tINC", &op_inc16),		/* opcode 33 */
+	OPINFO("\tINC", &op_inc),		/* opcode 34 */
+	OPINFO("\tDEC", &op_dec),		/* opcode 35 */
+	OPINFO("\tLD", &op_ld_reg8_imm),		/* opcode 36 */
+	OPINFO("\tSCF", &op_scf),		/* opcode 37 */
+	OPINFO("\tJR", &op_jr_cond),		/* opcode 38 */
+	OPINFO("\tADD", &op_add_hl),		/* opcode 39 */
+	OPINFO("\tLDD", &op_ld_reg16_a),		/* opcode 3a */
+	OPINFO("\tDEC", &op_dec16),		/* opcode 3b */
+	OPINFO("\tINC", &op_inc),		/* opcode 3c */
+	OPINFO("\tDEC", &op_dec),		/* opcode 3d */
+	OPINFO("\tLD", &op_ld_reg8_imm),		/* opcode 3e */
+	OPINFO("\tCCF", &op_ccf),		/* opcode 3f */
+	OPINFO("\tLD", &op_ld),		/* opcode 40 */
+	OPINFO("\tLD", &op_ld),		/* opcode 41 */
+	OPINFO("\tLD", &op_ld),		/* opcode 42 */
+	OPINFO("\tLD", &op_ld),		/* opcode 43 */
+	OPINFO("\tLD", &op_ld),		/* opcode 44 */
+	OPINFO("\tLD", &op_ld),		/* opcode 45 */
+	OPINFO("\tLD", &op_ld),		/* opcode 46 */
+	OPINFO("\tLD", &op_ld),		/* opcode 47 */
+	OPINFO("\tLD", &op_ld),		/* opcode 48 */
+	OPINFO("\tLD", &op_ld),		/* opcode 49 */
+	OPINFO("\tLD", &op_ld),		/* opcode 4a */
+	OPINFO("\tLD", &op_ld),		/* opcode 4b */
+	OPINFO("\tLD", &op_ld),		/* opcode 4c */
+	OPINFO("\tLD", &op_ld),		/* opcode 4d */
+	OPINFO("\tLD", &op_ld),		/* opcode 4e */
+	OPINFO("\tLD", &op_ld),		/* opcode 4f */
+	OPINFO("\tLD", &op_ld),		/* opcode 50 */
+	OPINFO("\tLD", &op_ld),		/* opcode 51 */
+	OPINFO("\tLD", &op_ld),		/* opcode 52 */
+	OPINFO("\tLD", &op_ld),		/* opcode 53 */
+	OPINFO("\tLD", &op_ld),		/* opcode 54 */
+	OPINFO("\tLD", &op_ld),		/* opcode 55 */
+	OPINFO("\tLD", &op_ld),		/* opcode 56 */
+	OPINFO("\tLD", &op_ld),		/* opcode 57 */
+	OPINFO("\tLD", &op_ld),		/* opcode 58 */
+	OPINFO("\tLD", &op_ld),		/* opcode 59 */
+	OPINFO("\tLD", &op_ld),		/* opcode 5a */
+	OPINFO("\tLD", &op_ld),		/* opcode 5b */
+	OPINFO("\tLD", &op_ld),		/* opcode 5c */
+	OPINFO("\tLD", &op_ld),		/* opcode 5d */
+	OPINFO("\tLD", &op_ld),		/* opcode 5e */
+	OPINFO("\tLD", &op_ld),		/* opcode 5f */
+	OPINFO("\tLD", &op_ld),		/* opcode 60 */
+	OPINFO("\tLD", &op_ld),		/* opcode 61 */
+	OPINFO("\tLD", &op_ld),		/* opcode 62 */
+	OPINFO("\tLD", &op_ld),		/* opcode 63 */
+	OPINFO("\tLD", &op_ld),		/* opcode 64 */
+	OPINFO("\tLD", &op_ld),		/* opcode 65 */
+	OPINFO("\tLD", &op_ld),		/* opcode 66 */
+	OPINFO("\tLD", &op_ld),		/* opcode 67 */
+	OPINFO("\tLD", &op_ld),		/* opcode 68 */
+	OPINFO("\tLD", &op_ld),		/* opcode 69 */
+	OPINFO("\tLD", &op_ld),		/* opcode 6a */
+	OPINFO("\tLD", &op_ld),		/* opcode 6b */
+	OPINFO("\tLD", &op_ld),		/* opcode 6c */
+	OPINFO("\tLD", &op_ld),		/* opcode 6d */
+	OPINFO("\tLD", &op_ld),		/* opcode 6e */
+	OPINFO("\tLD", &op_ld),		/* opcode 6f */
+	OPINFO("\tLD", &op_ld),		/* opcode 70 */
+	OPINFO("\tLD", &op_ld),		/* opcode 71 */
+	OPINFO("\tLD", &op_ld),		/* opcode 72 */
+	OPINFO("\tLD", &op_ld),		/* opcode 73 */
+	OPINFO("\tLD", &op_ld),		/* opcode 74 */
+	OPINFO("\tLD", &op_ld),		/* opcode 75 */
+	OPINFO("\tHALT", &op_halt),		/* opcode 76 */
+	OPINFO("\tLD", &op_ld),		/* opcode 77 */
+	OPINFO("\tLD", &op_ld),		/* opcode 78 */
+	OPINFO("\tLD", &op_ld),		/* opcode 79 */
+	OPINFO("\tLD", &op_ld),		/* opcode 7a */
+	OPINFO("\tLD", &op_ld),		/* opcode 7b */
+	OPINFO("\tLD", &op_ld),		/* opcode 7c */
+	OPINFO("\tLD", &op_ld),		/* opcode 7d */
+	OPINFO("\tLD", &op_ld),		/* opcode 7e */
+	OPINFO("\tLD", &op_ld),		/* opcode 7f */
+	OPINFO("\tADD", &op_add),		/* opcode 80 */
+	OPINFO("\tADD", &op_add),		/* opcode 81 */
+	OPINFO("\tADD", &op_add),		/* opcode 82 */
+	OPINFO("\tADD", &op_add),		/* opcode 83 */
+	OPINFO("\tADD", &op_add),		/* opcode 84 */
+	OPINFO("\tADD", &op_add),		/* opcode 85 */
+	OPINFO("\tADD", &op_add),		/* opcode 86 */
+	OPINFO("\tADD", &op_add),		/* opcode 87 */
+	OPINFO("\tADC", &op_adc),		/* opcode 88 */
+	OPINFO("\tADC", &op_adc),		/* opcode 89 */
+	OPINFO("\tADC", &op_adc),		/* opcode 8a */
+	OPINFO("\tADC", &op_adc),		/* opcode 8b */
+	OPINFO("\tADC", &op_adc),		/* opcode 8c */
+	OPINFO("\tADC", &op_adc),		/* opcode 8d */
+	OPINFO("\tADC", &op_adc),		/* opcode 8e */
+	OPINFO("\tADC", &op_adc),		/* opcode 8f */
+	OPINFO("\tSUB", &op_sub),		/* opcode 90 */
+	OPINFO("\tSUB", &op_sub),		/* opcode 91 */
+	OPINFO("\tSUB", &op_sub),		/* opcode 92 */
+	OPINFO("\tSUB", &op_sub),		/* opcode 93 */
+	OPINFO("\tSUB", &op_sub),		/* opcode 94 */
+	OPINFO("\tSUB", &op_sub),		/* opcode 95 */
+	OPINFO("\tSUB", &op_sub),		/* opcode 96 */
+	OPINFO("\tSUB", &op_sub),		/* opcode 97 */
+	OPINFO("\tSBC", &op_sbc),		/* opcode 98 */
+	OPINFO("\tSBC", &op_sbc),		/* opcode 99 */
+	OPINFO("\tSBC", &op_sbc),		/* opcode 9a */
+	OPINFO("\tSBC", &op_sbc),		/* opcode 9b */
+	OPINFO("\tSBC", &op_sbc),		/* opcode 9c */
+	OPINFO("\tSBC", &op_sbc),		/* opcode 9d */
+	OPINFO("\tSBC", &op_sbc),		/* opcode 9e */
+	OPINFO("\tSBC", &op_sbc),		/* opcode 9f */
+	OPINFO("\tAND", &op_and),		/* opcode a0 */
+	OPINFO("\tAND", &op_and),		/* opcode a1 */
+	OPINFO("\tAND", &op_and),		/* opcode a2 */
+	OPINFO("\tAND", &op_and),		/* opcode a3 */
+	OPINFO("\tAND", &op_and),		/* opcode a4 */
+	OPINFO("\tAND", &op_and),		/* opcode a5 */
+	OPINFO("\tAND", &op_and),		/* opcode a6 */
+	OPINFO("\tAND", &op_and),		/* opcode a7 */
+	OPINFO("\tXOR", &op_xor),		/* opcode a8 */
+	OPINFO("\tXOR", &op_xor),		/* opcode a9 */
+	OPINFO("\tXOR", &op_xor),		/* opcode aa */
+	OPINFO("\tXOR", &op_xor),		/* opcode ab */
+	OPINFO("\tXOR", &op_xor),		/* opcode ac */
+	OPINFO("\tXOR", &op_xor),		/* opcode ad */
+	OPINFO("\tXOR", &op_xor),		/* opcode ae */
+	OPINFO("\tXOR", &op_xor),		/* opcode af */
+	OPINFO("\tOR", &op_or),		/* opcode b0 */
+	OPINFO("\tOR", &op_or),		/* opcode b1 */
+	OPINFO("\tOR", &op_or),		/* opcode b2 */
+	OPINFO("\tOR", &op_or),		/* opcode b3 */
+	OPINFO("\tOR", &op_or),		/* opcode b4 */
+	OPINFO("\tOR", &op_or),		/* opcode b5 */
+	OPINFO("\tOR", &op_or),		/* opcode b6 */
+	OPINFO("\tOR", &op_or),		/* opcode b7 */
+	OPINFO("\tCP", &op_cp),		/* opcode b8 */
+	OPINFO("\tCP", &op_cp),		/* opcode b9 */
+	OPINFO("\tCP", &op_cp),		/* opcode ba */
+	OPINFO("\tCP", &op_cp),		/* opcode bb */
+	OPINFO("\tCP", &op_cp),		/* opcode bc */
+	OPINFO("\tCP", &op_cp),		/* opcode bd */
+	OPINFO("\tCP", &op_cp),		/* opcode be */
+	OPINFO("\tUNKN", &op_unknown),		/* opcode bf */
+	OPINFO("\tRET", &op_ret_cond),		/* opcode c0 */
+	OPINFO("\tPOP", &op_pop),		/* opcode c1 */
+	OPINFO("\tJP", &op_jp_cond),		/* opcode c2 */
+	OPINFO("\tJP", &op_jp),		/* opcode c3 */
+	OPINFO("\tCALL", &op_call_cond),		/* opcode c4 */
+	OPINFO("\tPUSH", &op_push),		/* opcode c5 */
+	OPINFO("\tADD", &op_add_imm),		/* opcode c6 */
+	OPINFO("\tRST", &op_rst),		/* opcode c7 */
+	OPINFO("\tRET", &op_ret_cond),		/* opcode c8 */
+	OPINFO("\tRET", &op_ret),		/* opcode c9 */
+	OPINFO("\tJP", &op_jp_cond),		/* opcode ca */
+	OPINFO("\tCBPREFIX", &op_cbprefix),		/* opcode cb */
+	OPINFO("\tCALL", &op_call_cond),		/* opcode cc */
+	OPINFO("\tCALL", &op_call),		/* opcode cd */
+	OPINFO("\tADC", &op_adc_imm),		/* opcode ce */
+	OPINFO("\tRST", &op_rst),		/* opcode cf */
+	OPINFO("\tRET", &op_ret_cond),		/* opcode d0 */
+	OPINFO("\tPOP", &op_pop),		/* opcode d1 */
+	OPINFO("\tJP", &op_jp_cond),		/* opcode d2 */
+	OPINFO("\tUNKN", &op_unknown),		/* opcode d3 */
+	OPINFO("\tCALL", &op_call_cond),		/* opcode d4 */
+	OPINFO("\tPUSH", &op_push),		/* opcode d5 */
+	OPINFO("\tSUB", &op_sub_imm),		/* opcode d6 */
+	OPINFO("\tRST", &op_rst),		/* opcode d7 */
+	OPINFO("\tRET", &op_ret_cond),		/* opcode d8 */
+	OPINFO("\tRETI", &op_reti),		/* opcode d9 */
+	OPINFO("\tJP", &op_jp_cond),		/* opcode da */
+	OPINFO("\tUNKN", &op_unknown),		/* opcode db */
+	OPINFO("\tCALL", &op_call_cond),		/* opcode dc */
+	OPINFO("\tUNKN", &op_unknown),		/* opcode dd */
+	OPINFO("\tSBC", &op_sbc_imm),		/* opcode de */
+	OPINFO("\tRST", &op_rst),		/* opcode df */
+	OPINFO("\tLDH", &op_ldh),		/* opcode e0 */
+	OPINFO("\tPOP", &op_pop),		/* opcode e1 */
+	OPINFO("\tLDH", &op_ldh),		/* opcode e2 */
+	OPINFO("\tUNKN", &op_unknown),		/* opcode e3 */
+	OPINFO("\tUNKN", &op_unknown),		/* opcode e4 */
+	OPINFO("\tPUSH", &op_push),		/* opcode e5 */
+	OPINFO("\tAND", &op_and_imm),		/* opcode e6 */
+	OPINFO("\tRST", &op_rst),		/* opcode e7 */
+	OPINFO("\tADD", &op_add_sp_imm),		/* opcode e8 */
+	OPINFO("\tJP", &op_jp_hl),		/* opcode e9 */
+	OPINFO("\tLD", &op_ld_ind16_a),		/* opcode ea */
+	OPINFO("\tUNKN", &op_unknown),		/* opcode eb */
+	OPINFO("\tUNKN", &op_unknown),		/* opcode ec */
+	OPINFO("\tUNKN", &op_unknown),		/* opcode ed */
+	OPINFO("\tXOR", &op_xor_imm),		/* opcode ee */
+	OPINFO("\tRST", &op_rst),		/* opcode ef */
+	OPINFO("\tLDH", &op_ldh),		/* opcode f0 */
+	OPINFO("\tPOP", &op_pop),		/* opcode f1 */
+	OPINFO("\tLDH", &op_ldh),		/* opcode f2 */
+	OPINFO("\tDI", &op_di),		/* opcode f3 */
+	OPINFO("\tUNKN", &op_unknown),		/* opcode f4 */
+	OPINFO("\tPUSH", &op_push),		/* opcode f5 */
+	OPINFO("\tOR", &op_or_imm),		/* opcode f6 */
+	OPINFO("\tRST", &op_rst),		/* opcode f7 */
+	OPINFO("\tUNKN", &op_unknown),		/* opcode f8 */
+	OPINFO("\tUNKN", &op_unknown),		/* opcode f9 */
+	OPINFO("\tLD", &op_ld_imm),		/* opcode fa */
+	OPINFO("\tEI", &op_ei),		/* opcode fb */
+	OPINFO("\tUNKN", &op_unknown),		/* opcode fc */
+	OPINFO("\tUNKN", &op_unknown),		/* opcode fd */
+	OPINFO("\tCP", &op_cp_imm),		/* opcode fe */
+	OPINFO("\tRST", &op_rst),		/* opcode ff */
 };
 
 static void dump_regs(void)
