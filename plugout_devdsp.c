@@ -1,4 +1,4 @@
-/* $ID$
+/* $Id: plugout_devdsp.c,v 1.3 2004/03/20 20:08:47 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
