@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.44 2003/09/13 16:00:30 mitch Exp $
+/* $Id: gbsplay.c,v 1.45 2003/09/13 16:19:21 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -16,6 +16,8 @@
 #include <errno.h>
 #include <string.h>
 #include <math.h>
+#include <term.h>
+#include <signal.h>
 
 #include "gbhw.h"
 #include "gbcpu.h"
@@ -313,11 +315,38 @@ static int statuscnt;
 
 static char *cfgfile = ".gbsplayrc";
 
+static struct termios ots;
+
+void exit_handler(int signum)
+{
+	printf("\nCatched signal %d, exiting...\n", signum);
+	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
+	exit(1);
+}
+
+void stop_handler(int signum)
+{
+	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
+}
+
+void cont_handler(int signum)
+{
+	struct termios ts;
+
+	tcgetattr(STDIN_FILENO, &ts);
+	ots = ts;
+	ts.c_lflag &= ~(ICANON | ECHO | ECHONL);
+	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ts);
+	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+}
+
 int main(int argc, char **argv)
 {
 	struct gbs *gbs;
 	char *homedir = getenv("HOME");
 	char *usercfg = malloc(strlen(homedir) + strlen(cfgfile) + 2);
+	struct termios ts;
+	struct sigaction sa;
 
 	sprintf(usercfg, "%s/%s", homedir, cfgfile);
 	cfg_parse("/etc/gbsplayrc", options);
@@ -351,6 +380,21 @@ int main(int argc, char **argv)
 		gbs_printinfo(gbs, 0);
 		printf("\n\n\n");
 	}
+	tcgetattr(STDIN_FILENO, &ts);
+	ots = ts;
+	ts.c_lflag &= ~(ICANON | ECHO | ECHONL);
+	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ts);
+
+	memset(&sa, 0, sizeof(sa));
+	sa.sa_handler = exit_handler;
+	sigaction(SIGTERM, &sa, NULL);
+	sigaction(SIGINT, &sa, NULL);
+	sigaction(SIGSEGV, &sa, NULL);
+	sa.sa_handler = stop_handler;
+	sigaction(SIGSTOP, &sa, NULL);
+	sa.sa_handler = cont_handler;
+	sigaction(SIGCONT, &sa, NULL);
+
 	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
 	while (!quit) {
 		int cycles = gbhw_step();
@@ -367,5 +411,6 @@ int main(int argc, char **argv)
 			handletimeouts(gbs);
 		}
 	}
+	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
 	return 0;
 }
