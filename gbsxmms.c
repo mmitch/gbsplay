@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.16 2003/09/22 13:38:22 ranma Exp $
+/* $Id: gbsxmms.c,v 1.17 2003/10/11 18:25:09 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -536,6 +536,8 @@ static int is_our_file(char *filename)
 
 static pthread_t playthread;
 
+static int workunit = 50; /* in msec */
+
 void *playloop(void *priv)
 {
 	if (!gbs_ip.output->open_audio(FMT_S16_LE, rate, 2)) {
@@ -545,7 +547,7 @@ void *playloop(void *priv)
 	while (!stopthread) {
 		int cycles;
 		pthread_mutex_lock(&gbs_mutex);
-		cycles = gbhw_step();
+		cycles = gbhw_step(workunit);
 		pthread_mutex_unlock(&gbs_mutex);
 		if (cycles<0) {
 			stopthread = 1;
