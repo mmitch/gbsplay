@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.68 2004/01/11 20:15:33 mitch Exp $
+# $Id: Makefile,v 1.69 2004/01/19 20:20:20 mitch Exp $
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
@@ -38,6 +38,15 @@ objs_gbsplay   := gbsplay.o util.o
 objs_gbsinfo   := gbsinfo.o
 objs_gbsxmms   := gbsxmms.lo
 
+# Cygwin automatically adds .exe to binaries.
+# We should notice that or we can't rm the files later!
+gbsplaybin     := gbsplay
+gbsinfobin     := gbsinfo
+ifeq ($(cygwin_build),yes)
+gbsplaybin     :=$(gbsplaybin).exe
+gbsinfobin     :=$(gbsinfobin).exe
+endif
+
 objs := $(objs_libgbs) $(objs_gbsplay) $(objs_gbsinfo)
 dsts := gbsplay gbsinfo
 
@@ -70,7 +79,8 @@ clean:
 	find . -name "*~" -exec rm -f "{}" \;
 	rm -f libgbs
 	rm -f $(mans)
-	rm -f ./gbsplay ./gbsinfo
+	rm -f ./gbsplay     ./gbsinfo
+	rm -f ./gbsplay.exe ./gbsinfo.exe
 
 install: all install-default $(EXTRA_INSTALL)
 
@@ -79,7 +89,7 @@ install-default:
 	install -d $(man1dir)
 	install -d $(man5dir)
 	install -d $(docdir)
-	install -m 755 gbsplay   gbsinfo   $(bindir)
+	install -m 755 $(gbsplaybin) $(gbsinfobin) $(bindir)
 	install -m 644 gbsplay.1 gbsinfo.1 $(man1dir)
 	install -m 644 gbsplayrc.5 $(man5dir)
 	install -m 644 $(docs) $(docdir)
@@ -96,7 +106,7 @@ install-gbsxmms.so:
 uninstall: uninstall-default $(EXTRA_UNINSTALL)
 
 uninstall-default:
-	rm -f $(bindir)/gbsplay    $(bindir)/gbsinfo
+	rm -f $(bindir)/$(gbsplaybin) $(bindir)/$(gbsinfobin)
 	-rmdir -p $(bindir)
 	rm -f $(man1dir)/gbsplay.1 $(man1dir)/gbsinfo.1
 	-rmdir -p $(man1dir)
@@ -155,9 +165,9 @@ libgbspic.a: $(objs_libgbspic)
 libgbs.a: $(objs_libgbs)
 	$(AR) r $@ $+
 gbsinfo: $(objs_gbsinfo) libgbs
-	$(CC) -o $@ $(objs_gbsinfo) $(LDFLAGS)
+	$(CC) -o $(gbsinfobin) $(objs_gbsinfo) $(LDFLAGS)
 gbsplay: $(objs_gbsplay) libgbs
-	$(CC) -o $@ $(objs_gbsplay) $(LDFLAGS) -lm
+	$(CC) -o $(gbsplaybin) $(objs_gbsplay) $(LDFLAGS) -lm
 
 gbsxmms.so: $(objs_gbsxmms) libgbs
 	$(CC) -shared -fPIC -o $@ $(objs_gbsxmms) $(LDFLAGS) $(PTHREAD)

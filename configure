@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.36 2004/01/17 18:57:46 mitch Exp $
+# $Id: configure,v 1.37 2004/01/19 20:20:20 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -21,11 +21,12 @@ CC="${CC-gcc}" # use gcc by default
 package=gbsplay
 prefix=/usr/local
 
-## Sane echo is in /usr/ucb on Solaris
+## sane echo is in /usr/ucb on Solaris
 if [ -d /usr/ucb ]; then
     PATH="/usr/ucb:$PATH"
 fi
 
+## set version number
 VERSION=0.0.5
 if [ -f CVS/Entries ]; then
     VERSION=${VERSION}+cvs`find CVS/Entries -printf "%TY%Tm%Td"`
@@ -394,7 +395,18 @@ EOF
     fi
 fi
 
-## everything ok?
+## check for cygwin environment
+
+echo -n "checking for Cygwin environment:  "
+if [ "`uname -o`" = "Cygwin" ]; then
+    cygwin_build=yes
+    echo "ok"
+else
+    cygwin_build=no
+    echo "no"
+fi
+
+## can XMMS be built?
 
 echo -n "xmms support "
 if [ "$build_xmmsplugin" != "no" -a "$GLIB_CFLAGS" -a "$XMMS_CFLAGS" -a "XMMS_INPUT_PLUGIN_DIR" -a "$PTHREAD" ]; then
@@ -408,7 +420,7 @@ else
     echo "disabled."
 fi
 
-# set variables we have no test for to default values if not set
+## set variables we have no test for to default values if not set
 
 setdefault exec_prefix "$prefix"
 setdefault bindir      "$exec_prefix/bin"
@@ -445,6 +457,7 @@ setdefault use_sharedlibgbs no
     echo have_xgettext := $have_xgettext
     echo use_i18n := $use_i18n
     echo use_sharedlibgbs := $use_sharedlibgbs
+    echo cygwin_build := $cygwin_build
 ) > config.mk
 
 (
