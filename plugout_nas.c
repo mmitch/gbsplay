@@ -1,4 +1,4 @@
-/* $Id: plugout_nas.c,v 1.7 2004/04/05 10:34:17 mitch Exp $
+/* $Id: plugout_nas.c,v 1.8 2004/10/23 20:49:40 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -24,7 +24,7 @@
 
 #include "plugout.h"
 
-#define NAS_BUFFER_SAMPLES 8192
+#define NAS_BUFFER_SAMPLES 65536
 
 /* global variables */
 static AuServer      *nas_server;
@@ -45,8 +45,15 @@ struct output_plugin plugout_nas = {
 	.close = nas_close,
 };
 
+/**
+ * Use AuGetErrorText to convert NAS status code into
+ * readable error message.
+ * NOTE: This function is not thread-safe.
+ *
+ * @param status  NAS status code to convert
+ * @return  Pointer to static buffer with the resulting error message
+ */
 static char regparm *nas_error(AuStatus status)
-/* convert AuStatus to error string */
 {
 	static char s[100];
 
@@ -55,8 +62,13 @@ static char regparm *nas_error(AuStatus status)
 	return s;
 }
 
+/**
+ * Get ID of first NAS device supporting 2 channels (we need stereo sound)
+ *
+ * @param aud  NAS server connection handle
+ * @return  Device ID or AuNone if 2 channels are not supported on this server
+ */
 static AuDeviceID regparm nas_find_device(AuServer *aud)
-/* look for a NAS device that supports 2 channels (we need stereo sound) */
 {
 	int i;
 	for (i=0; i < AuServerNumDevices(aud); i++) {
@@ -70,8 +82,14 @@ static AuDeviceID regparm nas_find_device(AuServer *aud)
 }
 
 
+/**
+ * open NAS output
+ *
+ * @param endian  (0 == big, 1 == little, 2 == native endian)
+ * BUGBUGBUG:  endian is ignored ATM
+ * @param rate  requested samplerate
+ */
 static int regparm nas_open(int endian, int rate)
-/* open NAS output */
 {
 	char *text;
 	AuElement nas_elements[3];
@@ -99,7 +117,12 @@ static int regparm nas_open(int endian, int rate)
 		goto err_close;
 	}
 
-	/* create elements(?) */
+	/*
+	 * fill audio flow chain
+	 *
+	 * We only use an import client and export device, for volume
+	 * control a MultipyConstant could be added.
+	 */
 	AuMakeElementImportClient(nas_elements, rate, nas_format, 2, AuTrue,
 	                          NAS_BUFFER_SAMPLES, NAS_BUFFER_SAMPLES / 2,
 	                          0, NULL);
@@ -126,8 +149,20 @@ err:
 	return -1;
 }
 
+/**
+ * send count bytes of audio data to NAS server
+ *
+ * We unconditionally use AuWriteElement and look
+ * at the error code to determine wether or not
+ * the servers internal buffers are filled.
+ * If they are we use sleep to wait and retry
+ * until the server accepts data again.
+ *
+ * @param buf  pointer to 16bit stereo audio data
+ * @param count  length of audio data in bytes
+ * @return  the number of bytes actually written
+ */
 static ssize_t regparm nas_write(const void *buf, size_t count)
-/* write audio data to NAS device */
 {
 	int maxlen = NAS_BUFFER_SAMPLES * 2;
 	int numwritten = 0;
@@ -139,6 +174,10 @@ static ssize_t regparm nas_write(const void *buf, size_t count)
 		if (writelen > maxlen) writelen = maxlen;
 
 		AuWriteElement(nas_server, nas_flow, 0, writelen, (void*)buf, AuFalse, &as);
+		/*
+		 * Dispose of waiting event messages as we don't implement
+		 * event handling for simplicity reasons.
+		 */
 		AuSync(nas_server, AuTrue);
 		if (as == AuBadValue) {
 			/*
@@ -162,8 +201,10 @@ static ssize_t regparm nas_write(const void *buf, size_t count)
 	return numwritten;
 }
 
+/**
+ * stop flow and close NAS server connection.
+ */
 static void regparm nas_close()
-/* close NAS device */
 {
 	if (nas_server) {
 		AuStopFlow(nas_server, nas_flow, NULL);
