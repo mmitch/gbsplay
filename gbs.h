@@ -1,4 +1,4 @@
-/* $Id: gbs.h,v 1.1 2003/08/27 15:07:03 ranma Exp $
+/* $Id: gbs.h,v 1.2 2003/10/24 08:56:53 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -8,6 +8,9 @@
 
 #ifndef _GBS_H_
 #define _GBS_H_
+
+#define GBS_LEN_SHIFT	10
+#define GBS_LEN_DIV	(1 << (GBS_LEN_SHIFT-1))
 
 struct gbs_subsong_info {
 	unsigned int len;

@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.17 2003/10/11 18:25:09 ranma Exp $
+/* $Id: gbsxmms.c,v 1.18 2003/10/24 08:56:53 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -64,7 +64,7 @@ static int gbs_time(struct gbs *gbs, int subsong) {
 
 	for (i=0; i<subsong && i<gbs->songs; i++) {
 		if (gbs->subsong_info[i].len)
-			res += (gbs->subsong_info[i].len * 1000) / 128;
+			res += (gbs->subsong_info[i].len * 1000) >> GBS_LEN_SHIFT;
 		else res += subsongtimeout * 1000;
 	}
 	return res;
@@ -167,7 +167,7 @@ static void file_info_box(char *filename)
 			GtkWidget *label;
 			GtkWidget *entry = gtk_entry_new();
 			GtkObject *sb_adj = gtk_adjustment_new(
-			                     file_info_gbs->subsong_info[i].len/ 128.0,
+			                     file_info_gbs->subsong_info[i].len >> GBS_LEN_SHIFT,
 			                     0, 1800, 1, 10, 10);
 			GtkWidget *spinbutton = gtk_spin_button_new(GTK_ADJUSTMENT(sb_adj), 1, 2);
 
@@ -202,7 +202,7 @@ static void file_info_box(char *filename)
 static void callback(void *buf, int len, void *priv)
 {
 	int time = gbclock / 4194304;
-	int time128 = (gbclock * 128) / 4194304;
+	int time1024 = (gbclock * 1024) / 4194304;
 	int gbslen = gbs->subsong_info[gbs_subsong].len;
 
 	gbs_ip.add_vis_pcm(gbs_ip.output->written_time(),
@@ -223,7 +223,7 @@ static void callback(void *buf, int len, void *priv)
 	} else silencectr = 0;
 
 	if ((subsongtimeout && time > subsongtimeout) ||
-	    (gbslen && time128 > gbslen) ||
+	    (gbslen && time1024 > gbslen) ||
 	    (silencetimeout && silencectr > silencetimeout*50)) {
 		next_subsong(0);
 	}
@@ -243,7 +243,7 @@ void tableenum(gpointer data, gpointer user_data)
 	case 2:
 		{
 			float value = gtk_spin_button_get_value_as_float(GTK_SPIN_BUTTON(child->widget));
-			value *= 128.0;
+			value *= (float)GBS_LEN_DIV;
 			file_info_gbs->subsong_info[i-1].len = (int) value;
 		}
 		break;
