@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.16 2003/09/19 22:11:46 mitch Exp $>>
+<<$Id: TODO,v 1.17 2003/09/20 10:55:56 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -32,6 +32,9 @@ TODO list for gbsplay.
 
 (X)  BUGFIX gbsplay:
      segmentation fault on startup when $start_subsong is out-of-bounds
+
+(X)  BUGFIX configure:
+     Not all temporary files were deleted.
 
 ( )  make gbsinfo output more script friendly
      (perhaps via with commandline switch)

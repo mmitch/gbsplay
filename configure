@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.9 2003/09/19 18:51:42 mitch Exp $
+# $Id: configure,v 1.10 2003/09/20 10:55:12 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -18,10 +18,25 @@ ZLIB_FOUND=
 
 build_xmmsplugin=n
 
+## die with error
+die ()
+{
+    rm -rf "$TEMPDIR"
+    exit 1
+}
+
 ## enable logging of errors
 
 ERRORLOG=config.err
 exec 2> $ERRORLOG
+
+## generate tmp directory
+
+TEMPDIR=$(mktemp -d)
+if [ $? -ne 0 ]; then
+    echo "can't create temporary directory!"
+    exit 1;
+fi
 
 ## check for C compiler
 
@@ -35,12 +50,12 @@ Environment variable CC is not set.
 Pleasy point it to a working C compiler.
 You probably want to run 'make' instead of './configure'.
 EOF
-    exit 1
+    die
 fi
 
 echo -n "checking for working compiler:  "
-INFILE=$(mktemp).c
-OUTFILE=$(mktemp)
+INFILE="$TEMPDIR/cc.c"
+OUTFILE="$TEMPDIR/cc"
 
 cat > "$INFILE" <<EOF
 int main(char argc, char **argv) {
@@ -49,27 +64,23 @@ int main(char argc, char **argv) {
 EOF
 $CC -o "$OUTFILE" "$INFILE"
 RESULT=$?
-rm -f "$INFILE"
 if [ $RESULT -eq 0 ]; then
     if [ -s "$OUTFILE" ]; then
 	"$OUTFILE"
-	rm -f "$OUTFILE"
 	if [ $? -eq 0 ]; then
 	    echo "ok"
 	else
 	    echo "can't execute generated code"
-	    exit 1
+	    die
 	fi
     else
-	rm -f "$OUTFILE"
 	echo "no code generated"
-	exit 1
+	die
     fi
 else
     echo "error executing $CC"
-    exit 1
+    die
 fi
-
 
 ## check for glib development files
 
@@ -110,8 +121,8 @@ fi
 
 echo -n "checking for zlib-dev:  "
 
-INFILE=$(mktemp).c
-OUTFILE=$(mktemp)
+INFILE="$TEMPDIR/zlib.c"
+OUTFILE="$TEMPDIR/zlib"
 
 cat > "$INFILE" <<EOF
 #include <zlib.h>
@@ -126,7 +137,6 @@ if [ $? -eq 0 ]; then
 else
     echo "not found"
 fi
-rm -f "$INFILE" "$OUTFILE"
 
 ## everything ok?
 
@@ -171,5 +181,6 @@ fi
 
 ## end
 
+rm -rf "$TEMPDIR"
 test -s $ERRORLOG || rm $ERRORLOG
 echo "end."
