@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.89 2004/06/03 16:19:38 ranmachan Exp $
+/* $Id: gbsplay.c,v 1.90 2004/06/03 18:39:03 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -341,12 +341,12 @@ static regparm void usage(int exitcode)
 		  "  -l  loop mode\n"
 		  "  -o  select output plugin (%s)\n"
 		  "      'list' shows available plugins\n"
-		  "  -q  reduce verboseness\n"
+		  "  -q  reduce verbosity\n"
 		  "  -r  set samplerate (%dHz)\n"
 		  "  -R  set refresh delay (%d milliseconds)\n"
 		  "  -t  set subsong timeout (%d seconds)\n"
 		  "  -T  set silence timeout (%d seconds)\n"
-		  "  -v  increase verboseness\n"
+		  "  -v  increase verbosity\n"
 		  "  -V  print version and exit\n"
 		  "  -z  play subsongs in shuffle mode\n"
 		  "  -Z  play subsongs in random mode (repetitions possible)\n"),
