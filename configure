@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.27 2003/12/14 00:12:07 ranma Exp $
+# $Id: configure,v 1.28 2003/12/14 00:25:36 ranma Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -41,30 +41,15 @@ die ()
 ## check for presence of include files
 check_include()
 {
-    INFILE="$TEMPDIR/cc.c"
-    OUTFILE="$TEMPDIR/cc"
     include="$1"
-    varname="`echo $include | sed -e 's@[/\.]@_@g'`"
+    name="`echo $include | sed -e 's@[/\.]@_@g'`"
 
-    echo -n "checking for $include:  "
-
-    cat > "$INFILE" <<EOF
+    cc_check "checking for $include" have_$name <<EOF
 #include <$include>
 int main(char argc, char **argv) {
     return 0;
 }
 EOF
-    $CC -o "$OUTFILE" "$INFILE"
-    RESULT=$?
-    if [ $RESULT -eq 0 ]; then
-	echo "ok"
-	eval "have_$varname=yes"
-	return 0
-    else
-	echo "not found"
-	eval "have_$varname=no"
-	return 1
-    fi
 }
 
 ## generalized 'does it compile' check
@@ -98,7 +83,7 @@ need_include() {
     check_include "$1"
     if [ $? -ne 0 ]; then
 	echo "Could not find $1, which is needed for compilation."
-	exit 1
+	die
     fi
 }
 
@@ -118,13 +103,14 @@ which()
 {
     IFS_SAVE="$IFS"
     IFS=:
+    PROGRAM="$1"
     for ELEMENT in $PATH; do
 	if [ -z "$ELEMENT" ]; then
 	    ELEMENT=.
 	fi
 	if [ -f "$ELEMENT/$PROGRAM" ] && [ -x "$ELEMENT/$PROGRAM" ]; then
 	    IFS="$IFS_SAVE"
-	    echo -n "$ELEMENT/$PROGRAM"
+	    echo "$ELEMENT/$PROGRAM"
 	    return 0
 	fi
     done
@@ -212,13 +198,23 @@ need_include inttypes.h
 check_include sys/soundcard.h
 check_include locale.h
 check_include libintl.h
+
+echo -n "checking for gettext tools:  "
+have_xgettext=yes
+for i in xgettext msgmerge msgfmt msgen; do
+    if [ "`which $i`" = "" ]; then
+	test "$have_xgettext" = "yes" && echo "not ok"
+	have_xgettext=no
+	echo "$i is missing"
+    fi
+done
+test "$have_xgettext" = "yes" && echo "ok"
+
 if [ "$have_locale_h" = "yes" -a "$have_libintl_h" = "yes" ]; then
     cc_check "Do we need -lintl" need_lintl "-lintl" yes no <<EOF
-#include <locale.h>
 #include <libintl.h>
 int main(int argc, char **argv)
 {
-	setlocale(LC_ALL, "");
 	bindtextdomain("foo", "bar");
 	return 0;
 }
@@ -287,6 +283,7 @@ fi
     echo XMMS_INPUT_PLUGIN_DIR := $XMMS_INPUT_PLUGIN_DIR
     echo VERSION := $VERSION
     echo build_xmmsplugin := $build_xmmsplugin
+    echo have_xgettext := $have_xgettext
 ) > config.mk
 
 (
