@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.64 2003/12/29 19:08:22 mitch Exp $
+# $Id: Makefile,v 1.65 2004/01/04 09:02:13 mitch Exp $
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
@@ -24,6 +24,10 @@ LDFLAGS :=
 
 CFLAGS  += $(EXTRA_CFLAGS)
 LDFLAGS += $(EXTRA_LDFLAGS)
+
+ifeq ($(have_xgettext),yes)
+CFLAGS  += -DLOCALE_PREFIX=\"$(localedir)\"
+endif
 
 export CC CFLAGS LDFLAGS
 

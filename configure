@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.32 2004/01/04 08:38:11 mitch Exp $
+# $Id: configure,v 1.33 2004/01/04 09:02:13 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -325,7 +325,6 @@ fi
 
 (
     echo "#define GBS_VERSION \"$VERSION\""
-    echo "#define LOCALE_PREFIX \"/usr/local/share/locale\""
     have_x SYS_SOUNDCARD_H
     have_x LOCALE_H
     have_x LIBINTL_H
