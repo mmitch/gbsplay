@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.46 2004/04/02 10:40:44 mitch Exp $
+# $Id: configure,v 1.47 2004/04/03 13:53:37 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -312,6 +312,7 @@ Optional Packages:
 Output Plugins:
   --disable-devdsp       omit /dev/dsp sound output plugin
   --disable-stdout       omit stdout file writer plugin
+  --enable-nas           build NAS sound output plugin
 EOF
 	exit $1
 }
@@ -384,6 +385,13 @@ if [ "$use_devdsp" != no ]; then
     check_include sys/soundcard.h
     if [ "$have_sys_soundcard_h" = "no" ]; then
 	use_devdsp=no
+    fi
+fi
+
+if [ "$use_nas" != no ]; then
+    check_include audio/audiolib.h
+    if [ "$have_audio_audiolib_h" = "no" ]; then
+	use_nas=no
     fi
 fi
 
@@ -530,6 +538,7 @@ setdefault use_debug no
 
 setdefault use_devdsp yes
 setdefault use_stdout yes
+setdefault use_nas no
 
 printoptional modules build
 printoptional features use
