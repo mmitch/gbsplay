@@ -1,4 +1,4 @@
-<<$Id: HISTORY,v 1.7 2003/12/28 16:10:12 mitch Exp $>>
+<<$Id: HISTORY,v 1.8 2003/12/28 19:32:31 mitch Exp $>>
 
 
 gbsplay HISTORY
@@ -11,6 +11,7 @@ gbsplay HISTORY
   - improved buffer handling
   - changed -z and -Z description
   - shuffled playlists are reproducible over playlist boundaries
+  - output endianess can be selected
 
 - gbsxmms:
   - builds on FreeBSD
