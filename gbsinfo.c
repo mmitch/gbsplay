@@ -1,4 +1,4 @@
-/* $Id: gbsinfo.c,v 1.6 2004/04/08 16:54:36 yuuhi Exp $
+/* $Id: gbsinfo.c,v 1.7 2004/04/13 14:14:43 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *

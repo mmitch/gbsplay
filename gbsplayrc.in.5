@@ -1,4 +1,4 @@
-.\" $Id: gbsplayrc.in.5,v 1.9 2004/04/05 12:11:58 mitch Exp $
+.\" $Id: gbsplayrc.in.5,v 1.10 2004/04/13 14:14:43 mitch Exp $
 .\" This manpage 2003-2004 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
 .TH "gbsplayrc" "5" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
@@ -39,7 +39,7 @@ time, the player will skip to the next subsong.
 The subsong gap in seconds.  Before playing the next subsong after the subsong timeout, play \fIsubsong_gap\fR seconds of silence.
 .IP "subsong_timeout = \fIInteger\fR"
 The subsong timeout in seconds.  When a subsong has been played for the given
-time, the player will skip to the next subsong.
+time, the player will skip to the next subsong.  A timeout of 0 seconds disables automatic subsong changes.
 .SH "FILES"
 .TP
 \fI/etc/gbsplayrc\fR

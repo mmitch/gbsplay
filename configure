@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.52 2004/04/08 15:50:04 mitch Exp $
+# $Id: configure,v 1.53 2004/04/13 14:14:43 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -27,7 +27,7 @@ if [ -d /usr/ucb ]; then
 fi
 
 ## set version number
-VERSION=0.0.5
+VERSION=0.0.6-rc2
 
 ##### begin of subroutines
 
@@ -409,7 +409,7 @@ if [ "$use_devdsp" != no ]; then
     use_devdsp=$have_sys_soundcard_h
 fi
 
-if [ "$use_nas" != no ]; then
+if [ "$use_nas" = yes ]; then
     check_include audio/audiolib.h
     use_nas=$have_audio_audiolib_h
 fi
@@ -547,8 +547,6 @@ setdefault exec_prefix "$prefix"
 setdefault bindir      "$exec_prefix/bin"
 setdefault libdir      "$exec_prefix/lib"
 setdefault mandir      "$prefix/man"
-setdefault man1dir     "$mandir/man1"
-setdefault man5dir     "$mandir/man5"
 setdefault docdir      "$prefix/share/doc/$package"
 setdefault localedir   "$prefix/share/locale"
 
@@ -597,8 +595,6 @@ echo "EXTRA_CFLAGS=$EXTRA_CFLAGS"
     echo bindir := $bindir
     echo libdir := $libdir
     echo mandir := $mandir
-    echo man1dir := $man1dir
-    echo man5dir := $man5dir
     echo docdir := $docdir
     echo localedir := $localedir
     echo CC := $CC

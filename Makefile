@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.81 2004/04/07 17:28:51 ranmachan Exp $
+# $Id: Makefile,v 1.82 2004/04/13 14:14:43 mitch Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -10,9 +10,8 @@ prefix      := /usr/local
 exec_prefix := $(prefix)
 
 bindir      := $(exec_prefix)/bin
+libdir      := $(exec_prefix)/lib
 mandir      := $(prefix)/man
-man1dir     := $(mandir)/man1
-man5dir     := $(mandir)/man5
 docdir      := $(prefix)/share/doc/gbsplay
 localedir   := $(prefix)/share/locale
 
@@ -23,6 +22,11 @@ ifneq ($(noincludes),yes)
 -include config.mk
 endif
 
+man1dir     := $(mandir)/man1
+man5dir     := $(mandir)/man5
+contribdir  := $(docdir)/contrib
+exampledir  := $(docdir)/examples
+
 DESTDIR :=
 DISTDIR := gbsplay-$(VERSION)
 
@@ -31,7 +35,9 @@ GBSLDFLAGS += $(EXTRA_LDFLAGS)
 
 export CC GBSCFLAGS GBSLDFLAGS
 
-docs           := README HISTORY gbsplayrc_sample
+docs           := README HISTORY COPYRIGHT
+contribs       := contrib/gbs2ogg.sh
+examples       := examples/nightmode.gbs examples/gbsplayrc_sample
 
 mans           := gbsplay.1    gbsinfo.1    gbsplayrc.5
 mans_src       := gbsplay.in.1 gbsinfo.in.1 gbsplayrc.in.5
@@ -143,10 +149,14 @@ install-default:
 	install -d $(man1dir)
 	install -d $(man5dir)
 	install -d $(docdir)
+	install -d $(contribdir)
+	install -d $(exampledir)
 	install -m 755 $(gbsplaybin) $(gbsinfobin) $(bindir)
 	install -m 644 gbsplay.1 gbsinfo.1 $(man1dir)
 	install -m 644 gbsplayrc.5 $(man5dir)
 	install -m 644 $(docs) $(docdir)
+	install -m 644 $(contribs) $(contribdir)
+	install -m 644 $(examples) $(exampledir)
 	for i in $(mos); do \
 		base=`basename $$i`; \
 		install -d $(localedir)/$${base%.mo}/LC_MESSAGES; \
@@ -166,6 +176,10 @@ uninstall-default:
 	-rmdir -p $(man1dir)
 	rm -f $(man5dir)/gbsplayrc.5 $(man5dir)/gbsplayrc.5	
 	-rmdir -p $(man5dir)
+	rm -rf $(contribdir)
+	-rmdir -p $(contribdir)
+	rm -rf $(exampledir)
+	-rmdir -p $(exampledir)
 	rm -rf $(docdir)
 	-mkdir -p $(docdir)
 	-rmdir -p $(docdir)
@@ -189,8 +203,10 @@ dist:	distclean
 	install -m 644 *.h ./$(DISTDIR)/
 	install -m 644 $(mans_src) ./$(DISTDIR)/
 	install -m 644 $(docs) INSTALL CODINGSTYLE ./$(DISTDIR)/
+	install -d ./$(DISTDIR)/examples
+	install -m 644 $(examples) ./$(DISTDIR)/examples
 	install -d ./$(DISTDIR)/contrib
-	install -m 755 contrib/gbs2ogg.sh ./$(DISTDIR)/contrib
+	install -m 644 $(contribs) ./$(DISTDIR)/contrib
 	install -d ./$(DISTDIR)/po
 	install -m 644 po/*.po ./$(DISTDIR)/po
 	install -m 644 po/subdir.mk ./$(DISTDIR)/po

@@ -1,4 +1,4 @@
-.\" $Id: gbsplay.in.1,v 1.13 2004/04/05 12:08:36 mitch Exp $
+.\" $Id: gbsplay.in.1,v 1.14 2004/04/13 14:14:43 mitch Exp $
 .\" This manpage 2003-2004 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
 .TH "gbsplay" "1" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
@@ -41,7 +41,7 @@ Set the samplerate to \fIsamplerate\fR Hz.  Default value is 44100Hz.
 Set the refresh delay to \fIrefresh\-delay\fR milliseconds.  Default value is 33 milliseconds.  Larger values will lower CPU usage, but things as subsong changes, fadeouts, reactions to keypresses and the on\-screen display will be delayed.
 .TP
 \fI\-t subsong\-timeout\fR
-Set subsong timeout to \fIsubsong\-timeout\fR seconds.  When a subsong has been played for the given time, the player will skip to the next subsong.  Default value is 120 seconds.
+Set subsong timeout to \fIsubsong\-timeout\fR seconds.  When a subsong has been played for the given time, the player will skip to the next subsong.  A timeout of 0 seconds disables automatic subsong changes.  Default value is 120 seconds.
 .TP
 \fI\-T silence\-timeout\fR
 Set silence timeout to \fIsilence\-timeout\fR seconds.  When a subsong contains silence for the given time, the player will skip to the next subsong.  Default value is 2 seconds.

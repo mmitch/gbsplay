@@ -1,4 +1,4 @@
-/* $Id: cfgparser.c,v 1.10 2004/03/21 02:46:14 ranmachan Exp $
+/* $Id: cfgparser.c,v 1.11 2004/04/13 14:14:43 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -203,11 +203,12 @@ regparm char* get_userconfig(const char* cfgfile)
 	int length;
 
 	homedir = getenv("HOME");
+	if (!homedir || !cfgfile) return NULL;
+
 	length  = strlen(homedir) + strlen(cfgfile) + 2;
 	usercfg = malloc(length);
 	snprintf(usercfg, length, "%s/%s", homedir, cfgfile);
 
-	free(homedir);
 	return usercfg;
 }
 
