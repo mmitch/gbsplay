@@ -1,10 +1,10 @@
-<<$Id: HISTORY,v 1.9 2003/12/28 21:39:16 mitch Exp $>>
+<<$Id: HISTORY,v 1.10 2003/12/29 19:10:59 mitch Exp $>>
 
 
 gbsplay HISTORY
 
 
-2003/12/28  -  0.0.4-pre1
+2003/12/28  -  0.0.4-pre2
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 - gbsplay:
   - changed -z and -Z description
@@ -22,6 +22,7 @@ gbsplay HISTORY
   - change output to an even more script friendly format
 
 - gbs2ogg.sh:
+  - dump songs in desired length and with fadeout
   - fix path to gbsinfo
 
 - internationalization:
@@ -29,6 +30,7 @@ gbsplay HISTORY
   - German translation
 
 - build process:
+  - remove all files on uninstall
   - fixes for non-GNU find(1)
   - fixes for non-Debian mktemp(1)
   - rebuild only changed files
