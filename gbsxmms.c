@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.29 2003/12/18 17:11:23 ranma Exp $
+/* $Id: gbsxmms.c,v 1.30 2003/12/28 19:42:48 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -300,6 +300,7 @@ static void create_dialogs(void)
   GtkWidget *button_prev;
 
   dialog_fileinfo = gtk_dialog_new ();
+  gtk_widget_ref (dialog_fileinfo);
   gtk_object_set_data (GTK_OBJECT (dialog_fileinfo), "dialog_fileinfo", dialog_fileinfo);
   gtk_window_set_title (GTK_WINDOW (dialog_fileinfo), _("File Info"));
   gtk_window_set_policy (GTK_WINDOW (dialog_fileinfo), TRUE, TRUE, FALSE);
@@ -500,6 +501,8 @@ static void init(void)
 	char *homedir = getenv("HOME");
 	char *usercfg = malloc(strlen(homedir) + strlen(cfgfile) + 2);
 
+	i18n_init();
+
 	sprintf(usercfg, "%s/%s", homedir, cfgfile);
 	cfg_parse(usercfg, options);
 
@@ -648,7 +651,5 @@ seek:		seek,
 
 InputPlugin *get_iplugin_info(void)
 {
-	i18n_init();
-
 	return &gbs_ip;
 }
