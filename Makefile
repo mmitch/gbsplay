@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.56 2003/12/12 23:05:51 ranma Exp $
+# $Id: Makefile,v 1.57 2003/12/13 16:05:00 ranma Exp $
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
@@ -144,12 +144,12 @@ libgbspic.a: $(objs_libgbspic)
 libgbs.a: $(objs_libgbs)
 	$(AR) r $@ $+
 gbsinfo: $(objs_gbsinfo) | libgbs
-	$(CC) $(LDFLAGS) -o $@ $(objs_gbsinfo)
+	$(CC) -o $@ $(objs_gbsinfo) $(LDFLAGS)
 gbsplay: $(objs_gbsplay) | libgbs
-	$(CC) $(LDFLAGS) -o $@ $(objs_gbsplay) -lm
+	$(CC) -o $@ $(objs_gbsplay) $(LDFLAGS) -lm
 
 gbsxmms.so: $(objs_gbsxmms) | libgbs
-	$(CC) $(LDFLAGS) -shared -fPIC -o $@ $(objs_gbsxmms) -lpthread
+	$(CC) -shared -fPIC -o $@ $(objs_gbsxmms) $(LDFLAGS) -lpthread
 
 # rules for suffixes
 
