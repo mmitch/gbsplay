@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.72 2003/12/26 12:51:21 mitch Exp $
+/* $Id: gbsplay.c,v 1.73 2003/12/26 22:05:44 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -41,8 +41,8 @@
 
 /* player modes */
 #define PLAYMODE_LINEAR  1
-#define PLAYMODE_SHUFFLE 2
-#define PLAYMODE_RANDOM  3
+#define PLAYMODE_RANDOM 2
+#define PLAYMODE_SHUFFLE  3
 
 /* lookup tables */
 static char notelookup[4*MAXOCTAVE*12];
@@ -189,11 +189,11 @@ static int get_next_subsong(struct gbs *gbs)
 	int next = -1;
 	switch (playmode) {
 
-	case PLAYMODE_SHUFFLE:
+	case PLAYMODE_RANDOM:
 		next = rand_int(gbs->songs);
 		break;
 
-	case PLAYMODE_RANDOM:
+	case PLAYMODE_SHUFFLE:
 		subsong_playlist_idx++;
 		if (subsong_playlist_idx == gbs->songs) {
 			free(subsong_playlist);
@@ -216,11 +216,11 @@ static int get_prev_subsong(struct gbs *gbs)
 	int prev = -1;
 	switch (playmode) {
 
-	case PLAYMODE_SHUFFLE:
+	case PLAYMODE_RANDOM:
 		prev = rand_int(gbs->songs);
 		break;
 
-	case PLAYMODE_RANDOM:
+	case PLAYMODE_SHUFFLE:
 		subsong_playlist_idx--;
 		if (subsong_playlist_idx == -1) {
 			free(subsong_playlist);
@@ -244,12 +244,12 @@ static void setup_playmode(struct gbs *gbs)
 
 	switch (playmode) {
 
-	case PLAYMODE_SHUFFLE:
+	case PLAYMODE_RANDOM:
 		if (gbs->subsong == -1) {
 			gbs->subsong = get_next_subsong(gbs);
 		}
 
-	case PLAYMODE_RANDOM:
+	case PLAYMODE_SHUFFLE:
 		subsong_playlist = setup_playlist(gbs->songs);
 		subsong_playlist_idx = 0;
 		if (gbs->subsong == -1) {
@@ -398,10 +398,10 @@ void parseopts(int *argc, char ***argv)
 			version();
 			break;
 		case 'z':
-		  playmode = PLAYMODE_RANDOM;
+		  playmode = PLAYMODE_SHUFFLE;
 		  break;
 		case 'Z':
-		  playmode = PLAYMODE_SHUFFLE;
+		  playmode = PLAYMODE_RANDOM;
 		  break;
 		}
 	}
