@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.13 2003/12/05 22:02:19 mitch Exp $
+/* $Id: gbs.c,v 1.14 2003/12/07 01:39:04 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -92,24 +92,89 @@ static const uint8_t playercode[] = {
 	0xac, 0xdd, 0xda, 0x48
 };
 
-int gbs_playsong(struct gbs *gbs, int i)
+int gbs_init(struct gbs *gbs, int subsong)
 {
 	gbhw_init(gbs->rom, gbs->romsize);
 
-	if (i == -1) i = gbs->defaultsong - 1;
-	if (i >= gbs->songs) {
+	if (subsong == -1) subsong = gbs->defaultsong - 1;
+	if (subsong >= gbs->songs) {
 		fprintf(stderr, "Subsong number out of range (min=0, max=%d).\n", gbs->songs - 1);
 		return 0;
 	}
 
+	gbs->subsong = subsong;
 	gbcpu_if = 0;
 	gbcpu_halted = 0;
 	REGS16_W(gbcpu_regs, PC, 0x0050); /* playercode entry point */
 	REGS16_W(gbcpu_regs, SP, gbs->stack);
 	REGS16_W(gbcpu_regs, HL, gbs->load - 0x70);
-	gbcpu_regs.rn.a = i;
+	gbcpu_regs.rn.a = subsong;
+
+	gbs->ticks = 0;
 
 	return 1;
+}
+
+void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv)
+{
+	gbs->nextsubsong_cb = cb;
+	gbs->nextsubsong_cb_priv = priv;
+}
+
+static int gbs_nextsubsong(struct gbs *gbs)
+{
+	if (gbs->nextsubsong_cb != NULL) {
+		return gbs->nextsubsong_cb(gbs, gbs->nextsubsong_cb_priv);
+	} else {
+		gbs->subsong++;
+		if (gbs->subsong >= gbs->songs)
+			return false;
+		gbs_init(gbs, gbs->subsong);
+	}
+	return true;
+}
+
+int gbs_step(struct gbs *gbs, int time_to_work)
+{
+	int cycles = gbhw_step(time_to_work);
+	int time;
+
+	if (cycles < 0) {
+		return false;
+	}
+
+	gbs->ticks += cycles;
+
+	gbhw_getminmax(&gbs->lmin, &gbs->lmax, &gbs->rmin, &gbs->rmax);
+	gbs->lvol = -gbs->lmin > gbs->lmax ? -gbs->lmin : gbs->lmax;
+	gbs->rvol = -gbs->rmin > gbs->rmax ? -gbs->rmin : gbs->rmax;
+
+	time = gbs->ticks / GBHW_CLOCK;
+	if (gbs->silence_timeout) {
+		if (gbs->lmin == gbs->lmax && gbs->rmin == gbs->rmax) {
+			if (gbs->silence_start == 0)
+				gbs->silence_start = gbs->ticks;
+		} else gbs->silence_start = 0;
+	}
+
+	if (gbs->fadeout && gbs->subsong_timeout &&
+	    time >= gbs->subsong_timeout - gbs->fadeout - gbs->gap)
+		gbhw_master_fade(128/gbs->fadeout, 0);
+	if (gbs->subsong_timeout &&
+	    time >= gbs->subsong_timeout - gbs->gap)
+		gbhw_master_fade(128*16, 0);
+
+	if (gbs->silence_start &&
+	    (gbs->ticks - gbs->silence_start) / GBHW_CLOCK >= gbs->silence_timeout) {
+		if (gbs->subsong_info[gbs->subsong].len == 0) {
+			gbs->subsong_info[gbs->subsong].len = gbs->ticks * GBS_LEN_DIV / GBHW_CLOCK;
+		}
+		return gbs_nextsubsong(gbs);
+	}
+	if (gbs->subsong_timeout && time >= gbs->subsong_timeout)
+		return gbs_nextsubsong(gbs);
+
+	return true;
 }
 
 void gbs_printinfo(struct gbs *gbs, int verbose)
@@ -282,6 +347,10 @@ struct gbs *gbs_open(char *name)
 	int have_ehdr = 0;
 
 	memset(gbs, 0, sizeof(struct gbs));
+	gbs->silence_timeout = 2;
+	gbs->subsong_timeout = 2*60;
+	gbs->gap = 2;
+	gbs->fadeout = 3;
 	if ((fd = open(name, O_RDONLY)) == -1) {
 		fprintf(stderr, "Could not open %s: %s\n", name, strerror(errno));
 		return NULL;

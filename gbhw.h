@@ -1,4 +1,4 @@
-/* $Id: gbhw.h,v 1.10 2003/12/06 23:31:43 ranma Exp $
+/* $Id: gbhw.h,v 1.11 2003/12/07 01:39:04 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -10,6 +10,8 @@
 #define _GBHW_H_
 
 #include <inttypes.h>
+
+#define GBHW_CLOCK 4194304
 
 struct gbhw_buffer {
 	int16_t *data;
@@ -48,7 +50,7 @@ void gbhw_setbuffer(struct gbhw_buffer *buffer);
 void gbhw_init(uint8_t *rombuf, uint32_t size);
 void gbhw_pause(int new_pause);
 void gbhw_master_fade(int speed, int dstvol);
-void gbhw_getminmax(int *lmin, int *lmax, int *rmin, int *rmax);
+void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax);
 int gbhw_step(int time_to_work);
 
 #endif

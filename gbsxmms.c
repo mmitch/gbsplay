@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.21 2003/12/06 23:31:43 ranma Exp $
+/* $Id: gbsxmms.c,v 1.22 2003/12/07 01:39:04 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -38,13 +38,12 @@ GtkWidget *viewport1;
 char *fileinfo_filename;
 
 static struct gbs *gbs;
-static int gbs_subsong = 0;
-static long long gbclock = 0;
 static pthread_mutex_t gbs_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static int silencectr = 0;
-static int silencetimeout = 2;
-static int subsongtimeout = 2*60;
+static int subsong_gap = 2;
+static int fadeout = 3;
+static int silence_timeout = 2;
+static int subsong_timeout = 2*60;
 static int rate = 44100;
 
 static int stopthread = 1;
@@ -58,8 +57,10 @@ static struct gbhw_buffer buffer = {
 
 static struct cfg_option options[] = {
 	{ "rate", &rate, cfg_int },
-	{ "subsong_timeout", &subsongtimeout, cfg_int },
-	{ "silence_timeout", &silencetimeout, cfg_int },
+	{ "subsong_timeout", &subsong_timeout, cfg_int },
+	{ "silence_timeout", &silence_timeout, cfg_int },
+	{ "subsong_gap", &subsong_gap, cfg_int },
+	{ "fadeout", &fadeout, cfg_int },
 	{ NULL, NULL, NULL }
 };
 
@@ -72,7 +73,7 @@ static int gbs_time(struct gbs *gbs, int subsong) {
 	for (i=0; i<subsong && i<gbs->songs; i++) {
 		if (gbs->subsong_info[i].len)
 			res += (gbs->subsong_info[i].len * 1000) >> GBS_LEN_SHIFT;
-		else res += subsongtimeout * 1000;
+		else res += subsong_timeout * 1000;
 	}
 	return res;
 }
@@ -85,21 +86,19 @@ static void next_subsong(int flush)
 		gbs_ip.output->buffer_free();
 		while (gbs_ip.output->buffer_playing() && !stopthread) usleep(10000);
 	}
-	gbclock = 0;
-	gbs_subsong++;
-	gbs_subsong %= gbs->songs;
-	gbs_playsong(gbs, gbs_subsong);
-	gbs_ip.output->flush(gbs_time(gbs, gbs_subsong));
+	gbs->subsong++;
+	gbs->subsong %= gbs->songs;
+	gbs_init(gbs, gbs->subsong);
+	gbs_ip.output->flush(gbs_time(gbs, gbs->subsong));
 }
 
 static void prev_subsong(void)
 {
 	if (!(gbs_ip.output && gbs)) return;
-	gbclock = 0;
-	gbs_subsong += gbs->songs-1;
-	gbs_subsong %= gbs->songs;
-	gbs_playsong(gbs, gbs_subsong);
-	gbs_ip.output->flush(gbs_time(gbs, gbs_subsong));
+	gbs->subsong += gbs->songs-1;
+	gbs->subsong %= gbs->songs;
+	gbs_init(gbs, gbs->subsong);
+	gbs_ip.output->flush(gbs_time(gbs, gbs->subsong));
 }
 
 static void configure(void)
@@ -208,32 +207,11 @@ static void file_info_box(char *filename)
 
 static void writebuffer(void)
 {
-	int time = gbclock / 4194304;
-	int time1024 = (gbclock * 1024) / 4194304;
-	int gbslen = gbs->subsong_info[gbs_subsong].len;
-
 	gbs_ip.add_vis_pcm(gbs_ip.output->written_time(),
 	                   FMT_S16_NE, 2,
 	                   buffer.pos*sizeof(int16_t), buffer.data);
 	gbs_ip.output->write_audio(buffer.data, buffer.pos*sizeof(int16_t));
 	buffer.pos = 0;
-
-	if ((gbhw_ch[0].volume == 0 ||
-	     gbhw_ch[0].master == 0) &&
-	    (gbhw_ch[1].volume == 0 ||
-	     gbhw_ch[1].master == 0) &&
-	    (gbhw_ch[2].volume == 0 ||
-	     gbhw_ch[2].master == 0) &&
-	    (gbhw_ch[3].volume == 0 ||
-	     gbhw_ch[3].master == 0)) {
-		silencectr++;
-	} else silencectr = 0;
-
-	if ((subsongtimeout && time > subsongtimeout) ||
-	    (gbslen && time1024 > gbslen) ||
-	    (silencetimeout && silencectr > silencetimeout*50)) {
-		next_subsong(0);
-	}
 }
 
 void tableenum(gpointer data, gpointer user_data)
@@ -552,23 +530,16 @@ void *playloop(void *priv)
 		return 0;
 	}
 	while (!stopthread) {
-		int cycles;
-
 		if (gbs_ip.output->buffer_free() < buffer.len*sizeof(int16_t)) {
 			usleep(workunit*1000);
 			continue;
 		}
 
 		pthread_mutex_lock(&gbs_mutex);
-		cycles = gbhw_step(workunit);
+		if (!gbs_step(gbs, workunit)) stopthread = true;
 		pthread_mutex_unlock(&gbs_mutex);
 
-		if (cycles<0) {
-			stopthread = 1;
-		} else {
-			gbclock += cycles;
-			writebuffer();
-		}
+		if (!stopthread) writebuffer();
 	}
 	gbs_ip.output->close_audio();
 	return 0;
@@ -592,9 +563,11 @@ static void play_file(char *filename)
 		gbhw_setbuffer(&buffer);
 		gbhw_setrate(rate);
 		workunit = 1000*(buffer.len/2)/rate;
-		gbs_subsong = gbs->defaultsong - 1;
-		gbs_playsong(gbs, gbs_subsong);
-		gbclock = 0;
+		gbs_init(gbs, -1);
+		gbs->subsong_timeout = subsong_timeout;
+		gbs->gap = subsong_gap;
+		gbs->silence_timeout = silence_timeout;
+		gbs->fadeout = fadeout;
 		stopthread = 0;
 		pthread_create(&playthread, 0, playloop, 0);
 	}

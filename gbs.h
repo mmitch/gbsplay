@@ -1,4 +1,4 @@
-/* $Id: gbs.h,v 1.5 2003/11/30 14:35:59 ranma Exp $
+/* $Id: gbs.h,v 1.6 2003/12/07 01:39:04 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -12,7 +12,14 @@
 #include <inttypes.h>
 
 #define GBS_LEN_SHIFT	10
-#define GBS_LEN_DIV	(1 << (GBS_LEN_SHIFT-1))
+#define GBS_LEN_DIV	(1 << GBS_LEN_SHIFT)
+
+#define true (0==0)
+#define false (!true)
+
+struct gbs;
+
+typedef int (*gbs_nextsubsong_cb)(struct gbs *gbs, void *priv);
 
 struct gbs_subsong_info {
 	uint32_t len;
@@ -44,10 +51,20 @@ struct gbs {
 	char v1strings[33*3];
 	uint8_t *rom;
 	int romsize;
+
+	long long ticks;
+	int16_t lmin, lmax, lvol, rmin, rmax, rvol;
+	int subsong_timeout, silence_timeout, fadeout, gap;
+	long long silence_start;
+	int subsong;
+	gbs_nextsubsong_cb nextsubsong_cb;
+	void *nextsubsong_cb_priv;
 };
 
 struct gbs *gbs_open(char *name);
-int gbs_playsong(struct gbs *gbs, int i);
+int gbs_init(struct gbs *gbs, int subsong);
+int gbs_step(struct gbs *gbs, int time_to_work);
+void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv);
 void gbs_printinfo(struct gbs *gbs, int verbose);
 void gbs_close(struct gbs *gbs);
 int gbs_write(struct gbs *gbs, char *name, int version);

@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.66 2003/12/06 23:31:43 ranma Exp $
+/* $Id: gbsplay.c,v 1.67 2003/12/07 01:39:04 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -53,8 +53,6 @@ static const char vols[5] = " -=#%";
 static char *myname;
 static int dspfd = -1;
 static int quit = 0;
-static int silencectr = 0;
-static long long ticks = 0;
 static struct termios ots;
 static int *subsong_playlist;
 static int subsong_playlist_idx = 0;
@@ -63,7 +61,6 @@ static int pause_mode = 0;
 #define DEFAULT_REFRESH_DELAY 33
 
 static int refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
-static int refresh_freq = 1000 / DEFAULT_REFRESH_DELAY;
 
 /* default values */
 static int playmode = PLAYMODE_LINEAR;
@@ -72,7 +69,6 @@ static int rate = 44100;
 static int silence_timeout = 2;
 static int fadeout = 3;
 static int subsong_gap = 2;
-static int subsong = -1;
 static int subsong_stop = -1;
 static int subsong_timeout = 2*60;
 static int usestdout = 0;
@@ -208,7 +204,7 @@ static int get_next_subsong(struct gbs *gbs)
 		break;
 
 	case PLAYMODE_LINEAR:
-		next = subsong + 1;
+		next = gbs->subsong + 1;
 		break;
 	}
 	return next;
@@ -222,18 +218,18 @@ static void setup_playmode(struct gbs *gbs)
 	switch (playmode) {
 
 	case PLAYMODE_SHUFFLE:
-		if (subsong == -1) {
-			subsong = get_next_subsong(gbs);
+		if (gbs->subsong == -1) {
+			gbs->subsong = get_next_subsong(gbs);
 		}
 
 	case PLAYMODE_RANDOM:
 		subsong_playlist = setup_playlist(gbs->songs);
 		subsong_playlist_idx = 0;
-		if (subsong == -1) {
-			subsong = subsong_playlist[0];
+		if (gbs->subsong == -1) {
+			gbs->subsong = subsong_playlist[0];
 		} else {
 			/* rotate playlist until desired start song is first */
-			while (subsong_playlist[0] != subsong) {
+			while (subsong_playlist[0] != gbs->subsong) {
 				temp = subsong_playlist[gbs->songs-1];
 				memmove(subsong_playlist+1, subsong_playlist, (gbs->songs - 1) * sizeof(int));
 				subsong_playlist[0] = temp;
@@ -241,11 +237,23 @@ static void setup_playmode(struct gbs *gbs)
 		}
 
 	case PLAYMODE_LINEAR:
-		if (subsong == -1) {
-			subsong = gbs->defaultsong - 1;
+		if (gbs->subsong == -1) {
+			gbs->subsong = gbs->defaultsong - 1;
 		}
 		break;
 	}
+}
+
+static int nextsubsong_cb(struct gbs *gbs, void *priv)
+{
+	int subsong = get_next_subsong(gbs);
+
+	if (gbs->subsong == subsong_stop ||
+	    subsong >= gbs->songs)
+		return false;
+
+	gbs_init(gbs, subsong);
+	return true;
 }
 
 void open_dsp(void)
@@ -375,39 +383,6 @@ void parseopts(int *argc, char ***argv)
 	*argv += optind;
 }
 
-static int lmin, lmax, rmin, rmax, lvol, rvol;
-
-static void handletimeouts(struct gbs *gbs)
-{
-	int time = ticks / 4194304;
-	int next_subsong;
-
-	if (lmin == lmax && rmin == rmax) {
-		silencectr++;
-	} else silencectr = 0;
-
-	if (fadeout && subsong_timeout && time >= subsong_timeout)
-		gbhw_master_fade(128/fadeout, 0);
-	if (subsong_timeout && time >= (subsong_timeout+fadeout))
-		gbhw_master_fade(128*16, 0);
-
-	if ((subsong_timeout && time >= (subsong_timeout+fadeout+subsong_gap)) ||
-	    (silence_timeout && silencectr > refresh_freq*silence_timeout)) {
-		if (subsong == subsong_stop) {
-			quit = 1;
-		}
-		next_subsong = get_next_subsong(gbs);
-		if (next_subsong >= gbs->songs) {
-			quit = 1;
-		} else {
-			subsong = next_subsong;
-		}
-		silencectr = 0;
-		ticks = 0;
-		gbs_playsong(gbs, subsong);
-	}
-}
-
 static void handleuserinput(struct gbs *gbs)
 {
 	char c;
@@ -416,11 +391,9 @@ static void handleuserinput(struct gbs *gbs)
 		switch (c) {
 		case 'p':
 		case 'n':
-			subsong += c == 'n' ? 1 : gbs->songs-1;
-			subsong %= gbs->songs;
-			silencectr = 0;
-			ticks = 0;
-			gbs_playsong(gbs, subsong);
+			gbs->subsong += c == 'n' ? 1 : gbs->songs-1;
+			gbs->subsong %= gbs->songs;
+			gbs_init(gbs, gbs->subsong);
 			break;
 		case 'q':
 		case 27:
@@ -478,11 +451,11 @@ static char *volstring(int v)
 
 static void printstatus(struct gbs *gbs)
 {
-	int time = ticks / 4194304;
+	int time = gbs->ticks / GBHW_CLOCK;
 	int timem = time / 60;
 	int times = time % 60;
 	char *songtitle;
-	int len = gbs->subsong_info[subsong].len / 1024;
+	int len = gbs->subsong_info[gbs->subsong].len / 1024;
 	int lenm, lens;
 
 	if (len == 0) {
@@ -491,21 +464,21 @@ static void printstatus(struct gbs *gbs)
 	lenm = len / 60;
 	lens = len % 60;
 
-	songtitle = gbs->subsong_info[subsong].title;
+	songtitle = gbs->subsong_info[gbs->subsong].title;
 	if (!songtitle) {
 		songtitle="Untitled";
 	}
 	printf("\r\033[A\033[A"
 	       "Song %3d/%3d (%s)\033[K\n"
 	       "%02d:%02d/%02d:%02d  %s %s  %s %s  %s %s  %s %s  [%s|%s]\n",
-	       subsong+1, gbs->songs, songtitle,
+	       gbs->subsong+1, gbs->songs, songtitle,
 	       timem, times, lenm, lens,
 	       notestring(0), volstring(chvol(0)),
 	       notestring(1), volstring(chvol(1)),
 	       notestring(2), volstring(chvol(2)),
 	       notestring(3), volstring(chvol(3)),
-	       reverse_vol(volstring(lvol/1024)),
-	       volstring(rvol/1024));
+	       reverse_vol(volstring(gbs->lvol/1024)),
+	       volstring(gbs->rvol/1024));
 	fflush(stdout);
 }
 
@@ -539,6 +512,7 @@ int main(int argc, char **argv)
 	char *usercfg = malloc(strlen(homedir) + strlen(cfgfile) + 2);
 	struct termios ts;
 	struct sigaction sa;
+	int subsong = -1;
 
 	srand(time(0)+getpid());  /* initialize RNG */
 
@@ -578,7 +552,7 @@ int main(int argc, char **argv)
 	}
 
 	/* sanitize commandline values */
-	if (subsong <  0) {
+	if (subsong < -1) {
 		subsong = 0;
 	} else if (subsong >= gbs->songs) {
 		subsong = gbs->songs-1;
@@ -589,9 +563,15 @@ int main(int argc, char **argv)
 		subsong_stop = -1;
 	}
 	
+	gbs->subsong = subsong;
+	gbs->subsong_timeout = subsong_timeout;
+	gbs->silence_timeout = silence_timeout;
+	gbs->gap = subsong_gap;
+	gbs->fadeout = fadeout;
 	setup_playmode(gbs);
 	gbhw_setbuffer(&buf);
-	gbs_playsong(gbs, subsong);
+	gbs_set_nextsubsong_cb(gbs, nextsubsong_cb, NULL);
+	gbs_init(gbs, gbs->subsong);
 	if (!quiet) {
 		gbs_printinfo(gbs, 0);
 		puts("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player");
@@ -615,19 +595,12 @@ int main(int argc, char **argv)
 
 	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
 	while (!quit) {
-		int cycles = gbhw_step(refresh_delay);
-
-		if (cycles < 0) {
+		if (!gbs_step(gbs, refresh_delay)) {
 			quit = 1;
+			break;
 		}
 
-		ticks += cycles;
-
-		gbhw_getminmax(&lmin, &lmax, &rmin, &rmax);
-		lvol = (-lmin > lmax) ? -lmin : lmax;
-		rvol = (-rmin > rmax) ? -rmin : rmax;
 		if (!quiet) printstatus(gbs);
-		handletimeouts(gbs);
 		handleuserinput(gbs);
 	}
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);

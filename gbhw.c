@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.23 2003/12/06 23:31:43 ranma Exp $
+/* $Id: gbhw.c,v 1.24 2003/12/07 01:39:04 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -43,8 +43,7 @@ static int vblankctr = 70256;
 static int timertc = 70256;
 static int timerctr = 70256;
 
-#define HW_CLOCK 4194304
-static const int msec_cycles = HW_CLOCK/1000;
+static const int msec_cycles = GBHW_CLOCK/1000;
 
 static int pause_output = 0;
 
@@ -117,7 +116,7 @@ static void io_put(uint32_t addr, uint8_t val)
 		case 0xff07:
 			timertc = (256-ioregs[0x06]) * (16 << (((ioregs[0x07]+3) & 3) << 1));
 			if ((ioregs[0x07] & 0xf0) == 0x80) timertc /= 2;
-//			printf("Callback rate set to %2.2fHz.\n", HW_CLOCK/(float)timertc);
+//			printf("Callback rate set to %2.2fHz.\n", GBHW_CLOCK/(float)timertc);
 			break;
 		case 0xff10:
 			gbhw_ch[0].sweep_ctr = gbhw_ch[0].sweep_tc = ((val >> 4) & 7);
@@ -445,10 +444,10 @@ void gbhw_setbuffer(struct gbhw_buffer *buffer)
 
 void gbhw_setrate(int rate)
 {
-	sound_div_tc = (long long)HW_CLOCK*65536/rate;
+	sound_div_tc = (long long)GBHW_CLOCK*65536/rate;
 }
 
-void gbhw_getminmax(int *lmin, int *lmax, int *rmin, int *rmax)
+void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax)
 {
 	*lmin = lminval;
 	*lmax = lmaxval;
