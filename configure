@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.51.2.6 2004/04/13 18:03:46 ranmachan Exp $
+# $Id: configure,v 1.51.2.7 2004/04/13 18:29:40 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -406,7 +406,7 @@ Optional Packages:
 Output Plugins:
   --disable-devdsp       omit /dev/dsp sound output plugin
   --disable-stdout       omit stdout file writer plugin
-  --enable-nas           build NAS sound output plugin
+  --disable-nas          omit NAS sound output plugin
 EOF
 	exit $1
 }
