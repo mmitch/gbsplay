@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.2 2003/08/24 23:43:11 ranma Exp $
+/* $Id: gbsxmms.c,v 1.3 2003/08/25 00:07:21 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -98,6 +98,10 @@ static int gbs_play;
 static int gbs_stack;
 static int gbs_songdefault;
 static int gbs_songcnt;
+static int gbs_subsong;
+
+static int silencectr = 0;
+static long long gbclock = 0;
 
 static void gbs_playsong(int i)
 {
@@ -108,6 +112,9 @@ static void gbs_playsong(int i)
 		printf("Subsong number out of range (min=1, max=%d).\n", gbs_songcnt);
 		exit(1);
 	}
+
+	silencectr = 0;
+	gbclock = 0;
 
 	gbcpu_if = 0;
 	gbcpu_halted = 0;
@@ -191,14 +198,40 @@ static int open_gbs(char *name)
 	return 1;
 }
 
+static void file_info_box(char *filename)
+{
+	gbs_ip.output->flush(0);
+	gbs_subsong++;
+	if (gbs_subsong > gbs_songcnt) gbs_subsong = 1;
+	gbs_playsong(gbs_subsong);
+}
+
 static int stopthread = 1;
 
 static void callback(void *buf, int len, void *priv)
 {
+	int time = gbclock / 4194304;
+
 	while (gbs_ip.output->buffer_free() < len && !stopthread) usleep(10000);
 	gbs_ip.output->write_audio(buf, len);
 	gbs_ip.add_vis_pcm(gbs_ip.output->written_time(),
 	                   FMT_S16_LE, 2, len/4, buf);
+
+
+	if ((gbhw_ch[0].volume == 0 ||
+	     gbhw_ch[0].master == 0) &&
+	    (gbhw_ch[1].volume == 0 ||
+	     gbhw_ch[1].master == 0) &&
+	    (gbhw_ch[2].volume == 0 ||
+	     gbhw_ch[2].master == 0) &&
+	    (gbhw_ch[3].volume == 0 ||
+	     gbhw_ch[3].master == 0)) {
+		silencectr++;
+	} else silencectr = 0;
+
+	if (time > 2*60 || silencectr > 20) {
+		file_info_box(NULL);
+	}
 }
 
 static void init(void)
@@ -221,7 +254,6 @@ static int is_our_file(char *filename)
 }
 
 static pthread_t playthread;
-static long long gbclock = 0;
 
 void *playloop(void *priv)
 {
@@ -229,9 +261,8 @@ void *playloop(void *priv)
 		puts("Error opening output plugin.");
 		return 0;
 	}
-	while (!stopthread) {
+	while (!stopthread)
 		gbclock += gbhw_step();
-	}
 	gbs_ip.output->close_audio();
 	return 0;
 }
@@ -239,7 +270,8 @@ void *playloop(void *priv)
 static void play_file(char *filename)
 {
 	if (open_gbs(filename)) {
-		gbs_playsong(-1);
+		gbs_subsong = gbs_songdefault;
+		gbs_playsong(gbs_subsong);
 		gbclock = 0;
 		stopthread = 0;
 		pthread_create(&playthread, 0, playloop, 0);
@@ -250,6 +282,7 @@ static void stop(void)
 {
 	stopthread = 1;
 	pthread_join(playthread, 0);
+	gbhw_romfree();
 }
 
 static int get_time(void)
@@ -287,6 +320,7 @@ stop:		stop,
 get_time:	get_time,
 cleanup:	cleanup,
 get_song_info:	get_song_info,
+file_info_box:	file_info_box,
 };
 
 InputPlugin *get_iplugin_info(void)
