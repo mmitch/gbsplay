@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.15 2003/08/23 16:42:33 ranma Exp $
+/* $Id: gbsplay.c,v 1.16 2003/08/23 16:52:42 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -1127,7 +1127,7 @@ static void op_bit(unsigned char op)
 	print_reg(reg);
 	regs.rn.f &= ~NF;
 	regs.rn.f |= HF | ZF;
-	regs.rn.f ^= (get_reg(reg) >> (bit-4)) & ZF;
+	regs.rn.f ^= ((get_reg(reg) << 8) >> (bit+1)) & ZF;
 }
 
 static void op_rlc(unsigned char op, struct opinfo *oi)
