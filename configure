@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.56 2004/04/14 17:20:46 ranmachan Exp $
+# $Id: configure,v 1.57 2004/04/14 17:23:26 ranmachan Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -12,7 +12,7 @@
 EXTRA_ALL=
 EXTRA_CFLAGS="$CFLAGS"
 EXTRA_INSTALL=
-EXTRA_LDFLAGS=
+EXTRA_LDFLAGS="$LDFLAGS"
 EXTRA_SRCS=
 EXTRA_UNINSTALL=
 XMMS_INPUT_PLUGIN_DIR=
