@@ -1,7 +1,35 @@
-<<$Id: HISTORY,v 1.12 2004/01/17 18:58:03 mitch Exp $>>
+<<$Id: HISTORY,v 1.12.2.1 2004/04/07 20:17:36 mitch Exp $>>
 
 
 gbsplay HISTORY
+
+
+2004/04/07  -  0.0.6-rc1
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Bugfixes:
+
+- fix make errors on CygWin
+- fix "make dist" on FreeBSD
+- fix path errors in configure script
+
+Enhancements:
+
+- code optimizations (using regparm where available)
+
+- gbsplay:
+  - include a NAS driver
+  - repeat mode for inifinite playmode
+  - set screen refresh rate (refresh_delay)
+  - include a sound output plugin architecture
+
+- gbsinfo:
+  - add --help option
+
+- build process:
+  - print error on non-existing configure options
+  - print additional diagnostic messages during configure
+  - enable building of a shared library
 
 
 2004/01/16  -  0.0.5
