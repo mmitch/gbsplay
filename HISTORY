@@ -1,4 +1,4 @@
-<<$Id: HISTORY,v 1.12.2.1 2004/04/07 20:17:36 mitch Exp $>>
+<<$Id: HISTORY,v 1.12.2.2 2004/04/08 21:53:32 mitch Exp $>>
 
 
 gbsplay HISTORY
@@ -16,6 +16,8 @@ Bugfixes:
 Enhancements:
 
 - code optimizations (using regparm where available)
+
+- include example song "Nightmode" by Laxity
 
 - gbsplay:
   - include a NAS driver
