@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.60 2003/10/19 16:17:25 ranma Exp $
+/* $Id: gbsplay.c,v 1.61 2003/10/21 22:56:20 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -17,7 +17,7 @@
 #include <errno.h>
 #include <string.h>
 #include <math.h>
-#include <term.h>
+#include <termios.h>
 #include <signal.h>
 #include <time.h>
 
