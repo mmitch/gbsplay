@@ -1,4 +1,4 @@
-/* $Id: plugout_nas.c,v 1.9 2004/10/23 21:19:17 ranmachan Exp $
+/* $Id: plugout_nas.c,v 1.10 2004/10/23 21:41:14 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -24,7 +24,7 @@
 
 #include "plugout.h"
 
-#define NAS_BUFFER_SAMPLES 65536
+#define NAS_BUFFER_SAMPLES 8192
 
 /* global variables */
 static AuServer      *nas_server;
