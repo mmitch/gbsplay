@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.26 2003/12/13 16:05:45 ranma Exp $
+# $Id: configure,v 1.27 2003/12/14 00:12:07 ranma Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -8,6 +8,11 @@
 # Licensed under GNU GPL.
 
 ## initialize variables
+
+## Sane echo is in /usr/ucb on Solaris
+if [ -d /usr/ucb ]; then
+    PATH="/usr/ucb:$PATH"
+fi
 
 VERSION=0.0.3
 if [ -f CVS/Entries ]; then
@@ -106,6 +111,25 @@ have_x() {
     else
 	echo "/* #undef HAVE_$1 */"
     fi
+}
+
+## external which is unreliable
+which()
+{
+    IFS_SAVE="$IFS"
+    IFS=:
+    for ELEMENT in $PATH; do
+	if [ -z "$ELEMENT" ]; then
+	    ELEMENT=.
+	fi
+	if [ -f "$ELEMENT/$PROGRAM" ] && [ -x "$ELEMENT/$PROGRAM" ]; then
+	    IFS="$IFS_SAVE"
+	    echo -n "$ELEMENT/$PROGRAM"
+	    return 0
+	fi
+    done
+    IFS="$IFS_SAVE"
+    return 1
 }
 
 ##### end of subroutines
