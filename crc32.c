@@ -14,7 +14,7 @@ static unsigned long crc_table[256];
 
 /*
  * This routine writes each crc_table entry exactly once,
- * with the ccorrect final value.  Thus, it is safe to call
+ * with the correct final value.  Thus, it is safe to call
  * even on a table that someone else is using concurrently.
  */
 static regparm void make_crc_table(void) {
