@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.4 2003/08/24 10:56:13 ranma Exp $
+/* $Id: gbhw.c,v 1.5 2003/08/24 11:28:19 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -29,10 +29,10 @@ static const char dutylookup[4] = {
 
 struct gbhw_channel gbhw_ch[4];
 
-static int vblanktc = 70256; /* ~59.7 Hz (vblank)*/
-static int vblank = 70256;
-static int timertc = 0;
-static int timer = 0;
+static int vblanktc = 70256; /* ~59.7 Hz (vblankctr)*/
+static int vblankctr = 70256;
+static int timertc = 70256;
+static int timerctr = 70256;
 
 static gbhw_callback_fn callback;
 static void *callbackpriv;
@@ -91,154 +91,149 @@ static void rom_put(unsigned short addr, unsigned char val)
 
 static void io_put(unsigned short addr, unsigned char val)
 {
+	int chn = (addr - 0xff10)/5;
 	if (addr >= 0xff80 && addr <= 0xfffe) {
 		hiram[addr & 0x7f] = val;
 		return;
-	} else if ((addr >= 0xff00 &&
-	            addr <= 0xff7f) ||
-	            addr == 0xffff) {
-		int chn = (addr - 0xff10)/5;
-		ioregs[addr & 0x7f] = val;
-		DPRINTF(" ([0x%04x]=%02x) ", addr, val);
-		switch (addr) {
-			case 0xff06:
-			case 0xff07:
-				timertc = (256-ioregs[0x06]) * (16 << (((ioregs[0x07]+3) & 3) << 1));
-				if ((ioregs[0x07] & 0xf0) == 0x80) timertc /= 2;
-//				printf("Callback rate set to %2.2fHz.\n", 4194304/(float)timertc);
-				break;
-			case 0xff10:
-				gbhw_ch[0].sweep_speed = gbhw_ch[0].sweep_speed_tc = ((val >> 4) & 7)*2;
-				gbhw_ch[0].sweep_dir = (val >> 3) & 1;
-				gbhw_ch[0].sweep_shift = val & 7;
-
-				break;
-			case 0xff11:
-			case 0xff16:
-			case 0xff20:
-				{
-					int duty = val >> 6;
-					int len = val & 0x3f;
-
-					gbhw_ch[chn].duty = dutylookup[duty];
-					gbhw_ch[chn].duty_tc = gbhw_ch[chn].div_tc*gbhw_ch[0].duty/8;
-					gbhw_ch[chn].len = (64 - len)*2;
-
-					break;
-				}
-			case 0xff12:
-			case 0xff17:
-			case 0xff21:
-				{
-					int vol = val >> 4;
-					int envdir = (val >> 3) & 1;
-					int envspd = val & 7;
-
-					gbhw_ch[chn].volume = vol;
-					gbhw_ch[chn].env_dir = envdir;
-					gbhw_ch[chn].env_speed = gbhw_ch[chn].env_speed_tc = envspd*8;
-				}
-				break;
-			case 0xff13:
-			case 0xff14:
-			case 0xff18:
-			case 0xff19:
-			case 0xff1d:
-			case 0xff1e:
-				{
-					int div = ioregs[0x13 + 5*chn];
-
-					div |= ((int)ioregs[0x14 + 5*chn] & 7) << 8;
-					gbhw_ch[chn].div_tc = 2048 - div;
-					gbhw_ch[chn].duty_tc = gbhw_ch[chn].div_tc*gbhw_ch[0].duty/8;
-
-					if (addr == 0xff13 ||
-					    addr == 0xff18 ||
-					    addr == 0xff1e) break;
-				}
-				gbhw_ch[chn].len_enable = (val & 0x40) > 0;
-
-//				printf(" ch1: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d gate=%d%d\n", gbhw_ch[0].volume, gbhw_ch[0].env_dir, gbhw_ch[0].env_speed_tc, gbhw_ch[0].duty, gbhw_ch[0].len, gbhw_ch[0].len_enable, gbhw_ch[0].div_tc, gbhw_ch[0].leftgate, gbhw_ch[0].rightgate);
-				break;
-			case 0xff15:
-				break;
-			case 0xff1a:
-				gbhw_ch[2].master = (ioregs[0x1a] & 0x80) > 0;
-				break;
-			case 0xff1b:
-				gbhw_ch[2].len = (256 - val)*2;
-				break;
-			case 0xff1c:
-				{
-					int vol = (ioregs[0x1c] >> 5) & 3;
-					gbhw_ch[2].volume = vol;
-					break;
-				}
-			case 0xff1f:
-				break;
-			case 0xff22:
-			case 0xff23:
-				{
-					int div = ioregs[0x22];
-					int shift = div >> 5;
-					int rate = div & 7;
-					gbhw_ch[3].div = 0;
-					gbhw_ch[3].div_tc = 1 << shift;
-					if (rate) gbhw_ch[3].div_tc *= rate;
-					else gbhw_ch[3].div_tc /= 2;
-					if (addr == 0xff22) break;
-//					printf(" ch4: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d gate=%d%d\n", gbhw_ch[3].volume, gbhw_ch[3].env_dir, gbhw_ch[3].env_speed, gbhw_ch[3].duty, gbhw_ch[3].len, gbhw_ch[3].len_enable, gbhw_ch[3].div_tc, gbhw_ch[3].leftgate, gbhw_ch[3].rightgate);
-				}
-				break;
-			case 0xff25:
-				gbhw_ch[0].leftgate = (val & 0x10) > 0;
-				gbhw_ch[0].rightgate = (val & 0x01) > 0;
-				gbhw_ch[1].leftgate = (val & 0x20) > 0;
-				gbhw_ch[1].rightgate = (val & 0x02) > 0;
-				gbhw_ch[2].leftgate = (val & 0x40) > 0;
-				gbhw_ch[2].rightgate = (val & 0x04) > 0;
-				gbhw_ch[3].leftgate = (val & 0x80) > 0;
-				gbhw_ch[3].rightgate = (val & 0x08) > 0;
-				break;
-			case 0xff26:
-				ioregs[0x26] = 0x80;
-				break;
-			case 0xff00:
-			case 0xff24:
-			case 0xff27:
-			case 0xff28:
-			case 0xff29:
-			case 0xff2a:
-			case 0xff2b:
-			case 0xff2c:
-			case 0xff2d:
-			case 0xff2e:
-			case 0xff2f:
-			case 0xff30:
-			case 0xff31:
-			case 0xff32:
-			case 0xff33:
-			case 0xff34:
-			case 0xff35:
-			case 0xff36:
-			case 0xff37:
-			case 0xff38:
-			case 0xff39:
-			case 0xff3a:
-			case 0xff3b:
-			case 0xff3c:
-			case 0xff3d:
-			case 0xff3e:
-			case 0xff3f:
-			case 0xffff:
-				break;
-			default:
-				printf("iowrite to 0x%04x unimplemented (val=%02x).\n", addr, val);
-				break;
-		}
-		return;
 	}
-	DPRINTF("io_put(%04x, %02x)\n", addr, val);
+	ioregs[addr & 0x7f] = val;
+	DPRINTF(" ([0x%04x]=%02x) ", addr, val);
+	switch (addr) {
+		case 0xff06:
+		case 0xff07:
+			timertc = (256-ioregs[0x06]) * (16 << (((ioregs[0x07]+3) & 3) << 1));
+			if ((ioregs[0x07] & 0xf0) == 0x80) timertc /= 2;
+//			printf("Callback rate set to %2.2fHz.\n", 4194304/(float)timertc);
+			break;
+		case 0xff10:
+			gbhw_ch[0].sweep_ctr = gbhw_ch[0].sweep_tc = ((val >> 4) & 7)*2;
+			gbhw_ch[0].sweep_dir = (val >> 3) & 1;
+			gbhw_ch[0].sweep_shift = val & 7;
+
+			break;
+		case 0xff11:
+		case 0xff16:
+		case 0xff20:
+			{
+				int duty_ctr = val >> 6;
+				int len = val & 0x3f;
+
+				gbhw_ch[chn].duty_ctr = dutylookup[duty_ctr];
+				gbhw_ch[chn].duty_tc = gbhw_ch[chn].div_tc*gbhw_ch[0].duty_ctr/8;
+				gbhw_ch[chn].len = (64 - len)*2;
+
+				break;
+			}
+		case 0xff12:
+		case 0xff17:
+		case 0xff21:
+			{
+				int vol = val >> 4;
+				int envdir = (val >> 3) & 1;
+				int envspd = val & 7;
+
+				gbhw_ch[chn].volume = vol;
+				gbhw_ch[chn].env_dir = envdir;
+				gbhw_ch[chn].env_ctr = gbhw_ch[chn].env_tc = envspd*8;
+			}
+			break;
+		case 0xff13:
+		case 0xff14:
+		case 0xff18:
+		case 0xff19:
+		case 0xff1d:
+		case 0xff1e:
+			{
+				int div = ioregs[0x13 + 5*chn];
+
+				div |= ((int)ioregs[0x14 + 5*chn] & 7) << 8;
+				gbhw_ch[chn].div_tc = 2048 - div;
+				gbhw_ch[chn].duty_tc = gbhw_ch[chn].div_tc*gbhw_ch[0].duty_ctr/8;
+
+				if (addr == 0xff13 ||
+				    addr == 0xff18 ||
+				    addr == 0xff1e) break;
+			}
+			gbhw_ch[chn].len_enable = (val & 0x40) > 0;
+
+//			printf(" ch1: vol=%02d envd=%d envspd=%d duty_ctr=%d len=%02d len_en=%d key=%04d gate=%d%d\n", gbhw_ch[0].volume, gbhw_ch[0].env_dir, gbhw_ch[0].env_tc, gbhw_ch[0].duty_ctr, gbhw_ch[0].len, gbhw_ch[0].len_enable, gbhw_ch[0].div_tc, gbhw_ch[0].leftgate, gbhw_ch[0].rightgate);
+			break;
+		case 0xff15:
+			break;
+		case 0xff1a:
+			gbhw_ch[2].master = (ioregs[0x1a] & 0x80) > 0;
+			break;
+		case 0xff1b:
+			gbhw_ch[2].len = (256 - val)*2;
+			break;
+		case 0xff1c:
+			{
+				int vol = (ioregs[0x1c] >> 5) & 3;
+				gbhw_ch[2].volume = vol;
+				break;
+			}
+		case 0xff1f:
+			break;
+		case 0xff22:
+		case 0xff23:
+			{
+				int div = ioregs[0x22];
+				int shift = div >> 5;
+				int rate = div & 7;
+				gbhw_ch[3].div_ctr = 0;
+				gbhw_ch[3].div_tc = 1 << shift;
+				if (rate) gbhw_ch[3].div_tc *= rate;
+				else gbhw_ch[3].div_tc /= 2;
+				if (addr == 0xff22) break;
+//				printf(" ch4: vol=%02d envd=%d envspd=%d duty_ctr=%d len=%02d len_en=%d key=%04d gate=%d%d\n", gbhw_ch[3].volume, gbhw_ch[3].env_dir, gbhw_ch[3].env_ctr, gbhw_ch[3].duty_ctr, gbhw_ch[3].len, gbhw_ch[3].len_enable, gbhw_ch[3].div_tc, gbhw_ch[3].leftgate, gbhw_ch[3].rightgate);
+			}
+			break;
+		case 0xff25:
+			gbhw_ch[0].leftgate = (val & 0x10) > 0;
+			gbhw_ch[0].rightgate = (val & 0x01) > 0;
+			gbhw_ch[1].leftgate = (val & 0x20) > 0;
+			gbhw_ch[1].rightgate = (val & 0x02) > 0;
+			gbhw_ch[2].leftgate = (val & 0x40) > 0;
+			gbhw_ch[2].rightgate = (val & 0x04) > 0;
+			gbhw_ch[3].leftgate = (val & 0x80) > 0;
+			gbhw_ch[3].rightgate = (val & 0x08) > 0;
+			break;
+		case 0xff26:
+			ioregs[0x26] = 0x80;
+			break;
+		case 0xff00:
+		case 0xff24:
+		case 0xff27:
+		case 0xff28:
+		case 0xff29:
+		case 0xff2a:
+		case 0xff2b:
+		case 0xff2c:
+		case 0xff2d:
+		case 0xff2e:
+		case 0xff2f:
+		case 0xff30:
+		case 0xff31:
+		case 0xff32:
+		case 0xff33:
+		case 0xff34:
+		case 0xff35:
+		case 0xff36:
+		case 0xff37:
+		case 0xff38:
+		case 0xff39:
+		case 0xff3a:
+		case 0xff3b:
+		case 0xff3c:
+		case 0xff3d:
+		case 0xff3e:
+		case 0xff3f:
+		case 0xffff:
+			break;
+		default:
+			printf("iowrite to 0x%04x unimplemented (val=%02x).\n", addr, val);
+			break;
+	}
 }
 
 static void intram_put(unsigned short addr, unsigned char val)
@@ -267,6 +262,45 @@ int smpldivisor;
 static unsigned int lfsr = 0xffffffff;
 static int ch3pos;
 
+static void gb_sound_sweep(void)
+{
+	int i;
+
+	if (gbhw_ch[0].sweep_tc) {
+		gbhw_ch[0].sweep_ctr--;
+		if (gbhw_ch[0].sweep_ctr < 0) {
+			int val = gbhw_ch[0].div_tc >> gbhw_ch[0].sweep_shift;
+
+			gbhw_ch[0].sweep_ctr = gbhw_ch[0].sweep_tc;
+			if (gbhw_ch[0].sweep_dir) {
+				if (gbhw_ch[0].div_tc < 2048 - val) gbhw_ch[0].div_tc += val;
+			} else {
+				if (gbhw_ch[0].div_tc > val) gbhw_ch[0].div_tc -= val;
+			}
+			gbhw_ch[0].duty_tc = gbhw_ch[0].div_tc*gbhw_ch[0].duty_ctr/8;
+		}
+	}
+	for (i=0; i<4; i++) {
+		if (gbhw_ch[i].len > 0 && gbhw_ch[i].len_enable) {
+			gbhw_ch[i].len--;
+			if (gbhw_ch[i].len == 0) gbhw_ch[i].volume = 0;
+		}
+		if (gbhw_ch[i].env_tc) {
+			gbhw_ch[i].env_ctr--;
+			if (gbhw_ch[i].env_ctr <=0) {
+				gbhw_ch[i].env_ctr = gbhw_ch[i].env_tc;
+				if (!gbhw_ch[i].env_dir) {
+					if (gbhw_ch[i].volume > 0)
+						gbhw_ch[i].volume--;
+				} else {
+					if (gbhw_ch[i].volume < 15)
+					gbhw_ch[i].volume++;
+				}
+			}
+		}
+	}
+}
+
 static void gb_sound(int cycles)
 {
 	int i;
@@ -288,9 +322,9 @@ static void gb_sound(int cycles)
 		}
 	}
 	if (gbhw_ch[2].master) for (i=0; i<cycles; i++) {
-		gbhw_ch[2].div--;
-		if (gbhw_ch[2].div <= 0) {
-			gbhw_ch[2].div = gbhw_ch[2].div_tc;
+		gbhw_ch[2].div_ctr--;
+		if (gbhw_ch[2].div_ctr <= 0) {
+			gbhw_ch[2].div_ctr = gbhw_ch[2].div_tc;
 			ch3pos++;
 		}
 	}
@@ -298,28 +332,16 @@ static void gb_sound(int cycles)
 	while (main_div > main_div_tc) {
 		main_div -= main_div_tc;
 
-		if (gbhw_ch[0].master) {
-			int val = gbhw_ch[0].volume;
-			if (gbhw_ch[0].div > gbhw_ch[0].duty_tc) {
+		for (i=0; i<2; i++) if (gbhw_ch[i].master) {
+			int val = gbhw_ch[i].volume;
+			if (gbhw_ch[i].div_ctr > gbhw_ch[i].duty_tc) {
 				val = -val;
 			}
-			if (gbhw_ch[0].leftgate) l_smpl += val;
-			if (gbhw_ch[0].rightgate) r_smpl += val;
-			gbhw_ch[0].div--;
-			if (gbhw_ch[0].div <= 0) {
-				gbhw_ch[0].div = gbhw_ch[0].div_tc;
-			}
-		}
-		if (gbhw_ch[1].master) {
-			int val = gbhw_ch[1].volume;
-			if (gbhw_ch[1].div > gbhw_ch[1].duty_tc) {
-				val = -val;
-			}
-			if (gbhw_ch[1].leftgate) l_smpl += val;
-			if (gbhw_ch[1].rightgate) r_smpl += val;
-			gbhw_ch[1].div--;
-			if (gbhw_ch[1].div <= 0) {
-				gbhw_ch[1].div = gbhw_ch[1].div_tc;
+			if (gbhw_ch[i].leftgate) l_smpl += val;
+			if (gbhw_ch[i].rightgate) r_smpl += val;
+			gbhw_ch[i].div_ctr--;
+			if (gbhw_ch[i].div_ctr <= 0) {
+				gbhw_ch[i].div_ctr = gbhw_ch[i].div_tc;
 			}
 		}
 		if (gbhw_ch[2].master) {
@@ -337,9 +359,9 @@ static void gb_sound(int cycles)
 			static int val;
 			if (gbhw_ch[3].leftgate) l_smpl += val;
 			if (gbhw_ch[3].rightgate) r_smpl += val;
-			gbhw_ch[3].div--;
-			if (gbhw_ch[3].div <= 0) {
-				gbhw_ch[3].div = gbhw_ch[3].div_tc;
+			gbhw_ch[3].div_ctr--;
+			if (gbhw_ch[3].div_ctr <= 0) {
+				gbhw_ch[3].div_ctr = gbhw_ch[3].div_tc;
 				lfsr = (lfsr << 1) | (((lfsr >> 15) ^ (lfsr >> 14)) & 1);
 				val = gbhw_ch[3].volume * ((random() & 2)-1);
 //				val = gbhw_ch[3].volume * ((lfsr & 2)-1);
@@ -350,88 +372,7 @@ static void gb_sound(int cycles)
 		sweep_div += 1;
 		if (sweep_div >= sweep_div_tc) {
 			sweep_div = 0;
-			if (gbhw_ch[0].sweep_speed_tc) {
-				gbhw_ch[0].sweep_speed--;
-				if (gbhw_ch[0].sweep_speed < 0) {
-					int val = gbhw_ch[0].div_tc >> gbhw_ch[0].sweep_shift;
-
-					gbhw_ch[0].sweep_speed = gbhw_ch[0].sweep_speed_tc;
-					if (gbhw_ch[0].sweep_dir) {
-						if (gbhw_ch[0].div_tc < 2048 - val) gbhw_ch[0].div_tc += val;
-					} else {
-						if (gbhw_ch[0].div_tc > val) gbhw_ch[0].div_tc -= val;
-					}
-					gbhw_ch[0].duty_tc = gbhw_ch[0].div_tc*gbhw_ch[0].duty/8;
-				}
-			}
-			if (gbhw_ch[0].len > 0 && gbhw_ch[0].len_enable) {
-				gbhw_ch[0].len--;
-				if (gbhw_ch[0].len == 0) gbhw_ch[0].volume = 0;
-			}
-			if (gbhw_ch[0].env_speed_tc) {
-				gbhw_ch[0].env_speed--;
-				if (gbhw_ch[0].env_speed <=0) {
-					gbhw_ch[0].env_speed = gbhw_ch[0].env_speed_tc;
-					if (!gbhw_ch[0].env_dir) {
-						if (gbhw_ch[0].volume > 0)
-							gbhw_ch[0].volume--;
-					} else {
-						if (gbhw_ch[0].volume < 15)
-							gbhw_ch[0].volume++;
-					}
-				}
-			}
-			if (gbhw_ch[1].len > 0 && gbhw_ch[1].len_enable) {
-				gbhw_ch[1].len--;
-				if (gbhw_ch[1].len == 0) gbhw_ch[1].volume = 0;
-			}
-			if (gbhw_ch[1].env_speed_tc) {
-				gbhw_ch[1].env_speed--;
-				if (gbhw_ch[1].env_speed <=0) {
-					gbhw_ch[1].env_speed = gbhw_ch[1].env_speed_tc;
-					if (!gbhw_ch[1].env_dir) {
-						if (gbhw_ch[1].volume > 0)
-							gbhw_ch[1].volume--;
-					} else {
-						if (gbhw_ch[1].volume < 15)
-							gbhw_ch[1].volume++;
-					}
-				}
-			}
-			if (gbhw_ch[2].len > 0 && gbhw_ch[2].len_enable) {
-				gbhw_ch[2].len--;
-				if (gbhw_ch[2].len == 0) gbhw_ch[2].volume = 0;
-			}
-			if (gbhw_ch[2].env_speed_tc) {
-				gbhw_ch[2].env_speed--;
-				if (gbhw_ch[2].env_speed <=0) {
-					gbhw_ch[2].env_speed = gbhw_ch[2].env_speed_tc;
-					if (!gbhw_ch[2].env_dir) {
-						if (gbhw_ch[2].volume > 0)
-							gbhw_ch[2].volume--;
-					} else {
-						if (gbhw_ch[2].volume < 15)
-							gbhw_ch[2].volume++;
-					}
-				}
-			}
-			if (gbhw_ch[3].len > 0 && gbhw_ch[3].len_enable) {
-				gbhw_ch[3].len--;
-				if (gbhw_ch[3].len == 0) gbhw_ch[3].volume = 0;
-			}
-			if (gbhw_ch[3].env_speed_tc) {
-				gbhw_ch[3].env_speed--;
-				if (gbhw_ch[3].env_speed <=0) {
-					gbhw_ch[3].env_speed = gbhw_ch[3].env_speed_tc;
-					if (!gbhw_ch[3].env_dir) {
-						if (gbhw_ch[3].volume > 0)
-							gbhw_ch[3].volume--;
-					} else {
-						if (gbhw_ch[3].volume < 15)
-							gbhw_ch[3].volume++;
-					}
-				}
-			}
+			gb_sound_sweep();
 		}
 	}
 }
@@ -467,8 +408,8 @@ void gbhw_init(void)
 {
 	callback = NULL;
 	callbackpriv = NULL;
-	gbhw_ch[0].duty = 4;
-	gbhw_ch[1].duty = 4;
+	gbhw_ch[0].duty_ctr = 4;
+	gbhw_ch[1].duty_ctr = 4;
 	gbhw_ch[0].div_tc = 1;
 	gbhw_ch[1].div_tc = 1;
 	gbhw_ch[2].div_tc = 1;
@@ -494,14 +435,14 @@ int gbhw_step(void)
 	int cycles = gbcpu_step();
 
 	gb_sound(cycles);
-	if (vblank > 0) vblank -= cycles;
-	if (vblank <= 0 && gbcpu_if && (ioregs[0x7f] & 1)) {
-		vblank += vblanktc;
+	if (vblankctr > 0) vblankctr -= cycles;
+	if (vblankctr <= 0 && gbcpu_if && (ioregs[0x7f] & 1)) {
+		vblankctr += vblanktc;
 		gbcpu_intr(0x40);
 	}
-	if (timer > 0) timer -= cycles;
-	if (timer <= 0 && gbcpu_if && (ioregs[0x7f] & 4)) {
-		timer += timertc;
+	if (timerctr > 0) timerctr -= cycles;
+	if (timerctr <= 0 && gbcpu_if && (ioregs[0x7f] & 4)) {
+		timerctr += timertc;
 		gbcpu_intr(0x48);
 	}
 

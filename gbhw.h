@@ -1,4 +1,4 @@
-/* $Id: gbhw.h,v 1.2 2003/08/24 10:56:13 ranma Exp $
+/* $Id: gbhw.h,v 1.3 2003/08/24 11:28:19 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -15,18 +15,18 @@ struct gbhw_channel {
 	int rightgate;
 	int volume;
 	int env_dir;
-	int env_speed_tc;
-	int env_speed;
+	int env_tc;
+	int env_ctr;
 	int sweep_dir;
-	int sweep_speed_tc;
-	int sweep_speed;
+	int sweep_tc;
+	int sweep_ctr;
 	int sweep_shift;
 	int len;
 	int len_enable;
 	int div_tc;
-	int div;
+	int div_ctr;
 	int duty_tc;
-	int duty;
+	int duty_ctr;
 };
 
 extern struct gbhw_channel gbhw_ch[4];
