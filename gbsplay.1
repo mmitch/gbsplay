@@ -5,7 +5,7 @@
 .LP
 \fBgbsplay\fR \- Gameboy sound player
 .SH "SYNOPSIS"
-\fBgbsplay\fR [\fI\-h\fR] [\fI\-r samplerate\fR] [\fI\-s\fR] [\fI\-t subsong\-timeout\fR] [\fI\-T silence\-timeout\fR] [\fI\-V\fR] \fIgbs\-file\fR [\fIsubsong\-number\fR]
+\fBgbsplay\fR [\fI\-h\fR] [\fI\-r samplerate\fR] [\fI\-s\fR] [\fI\-t subsong\-timeout\fR] [\fI\-T silence\-timeout\fR] [\fI\-V\fR] \fIgbs\-file\fR [\fIstart\-subsong\fR [\fIstop\-subsong\fR] ]
 .SH "DESCRIPTION"
 gbsplay emulates the sound hardware of the Nintendo Gameboy.  It
 is able to play the sounds from a Gameboy module dump (.GBS format)
@@ -37,8 +37,11 @@ Display version number and exit.
 \fIgbs\-file\fR
 The sound file to play.  Must be in uncompressed .GBS format.
 .TP
-\fIsubsong\-number\fR
+\fIstart\-subsong\fR
 The subsong from the sound file to play.  If nothing is specified, the default song will be played.  An out\-of\-bounds number will result in an error.
+.TP
+\fIstop\-subsong\fR
+gbsplay stops when this subsong has been played.  If nothing is specified, gbsplay stops after playing the last subsong.
 .SH "KEYBOARD CONTROL"
 \fBgbsplay\fR supports basic keyboard control.  You probably need to hit \fIreturn\fR after every command.  The following commands are recognized:
 .TP
@@ -49,7 +52,7 @@ Skip to the previous subsong.
 Skip to the next subsong.
 .TP
 \fIq\fR
-Quit \fBgbsplay\fR.
+Quit gbsplay.
 .SH "FILES"
 .TP
 \fI/etc/gbsplayrc\fR

@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.42 2003/09/04 13:38:12 ranma Exp $
+/* $Id: gbsplay.c,v 1.43 2003/09/13 15:47:35 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -151,7 +151,7 @@ void usage(int exitcode)
 {
 	FILE *out = exitcode ? stderr : stdout;
 	fprintf(out,
-	        "Usage: %s [option(s)] <gbs-file> [subsong number]\n"
+	        "Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
 	        "\n"
 	        "Available options are:\n"
 	        "  -h	display this help and exit\n"
@@ -215,6 +215,7 @@ static int quit = 0;
 static int silencectr = 0;
 static long long clock = 0;
 static int subsong = -1;
+static int subsong_stop = -1;
 
 static void handletimeouts(struct gbs *gbs)
 {
@@ -233,6 +234,7 @@ static void handletimeouts(struct gbs *gbs)
 
 	if ((subsongtimeout && time >= subsongtimeout) ||
 	    (silencetimeout && silencectr > 50*silencetimeout)) {
+		if (subsong == subsong_stop) quit = 1;
 		subsong++;
 		if (subsong >= gbs->songs) quit = 1;
 		silencectr = 0;
@@ -326,10 +328,16 @@ int main(int argc, char **argv)
 	gbhw_setcallback(callback, NULL);
 	gbhw_setrate(rate);
 
-	if (argc == 2) {
+	if (argc >= 2) {
 		sscanf(argv[1], "%d", &subsong);
 		subsong--;
 	}
+
+	if (argc >= 3) {
+		sscanf(argv[2], "%d", &subsong_stop);
+		subsong_stop--;
+	}
+
 	gbs = gbs_open(argv[0]);
 	if (gbs == NULL) exit(1);
 	if (subsong == -1) subsong = gbs->defaultsong - 1;
