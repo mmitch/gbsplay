@@ -1,4 +1,4 @@
-/* $Id: gbcpu.c,v 1.9 2003/09/18 11:15:08 ikari Exp $
+/* $Id: gbcpu.c,v 1.10 2003/09/18 11:17:48 ikari Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -1821,10 +1821,8 @@ int gbcpu_step(void)
 		op = mem_get(gbcpu_regs.rn.pc++);
 		DPRINTF("%04x: %02x", gbcpu_regs.rn.pc - 1, op);
 		ops[op].fn(op, &ops[op]);
+
 		DEB(show_reg_diffs());
-	        if (gbcpu_halted) {
-			fflush(stdout);
-		}
 		return 1;
 	}
 	if (gbcpu_halted == 1 && gbcpu_if == 0) {
