@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.60 2004/04/14 18:42:00 ranmachan Exp $
+# $Id: configure,v 1.61 2004/04/16 18:26:32 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -557,21 +557,9 @@ int main(int argc, char **argv)
 EOF
     if [ $? -eq 0 -a "$libc_flags" != "" ]; then
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS $libc_flags"
+    else
+	use_i18n=no
     fi
-#    find_lib intl "/usr/local/lib"
-#    flags="-lintl"
-#    test -z "$libintl_path" || flags="-L$libintl_path $flags"
-#    cc_check "do we need -lintl" need_lintl "$flags" yes no <<EOF
-##include <libintl.h>
-#int main(int argc, char **argv)
-#{
-#	bindtextdomain("foo", "bar");
-#	return 0;
-#}
-#EOF
-#    if [ $? -eq 0 ]; then
-#	EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lintl"
-#    fi
 fi
 
 if [ "$build_xmmsplugin" != "no" ]; then
