@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.41 2003/12/12 23:13:05 ranma Exp $>>
+<<$Id: TODO,v 1.42 2003/12/18 17:13:33 ranma Exp $>>
 
 
 TODO list for gbsplay.
@@ -22,6 +22,8 @@ TODO list for gbsplay.
 ( )  gbsplay: toggle display of channel/volume
      (about 1fps on my Win2k/Cygwin --> simply want to deactivate it.
       display of time is enough)
+
+( )  gbsplay: use ncurses for status display and keyboard input
 
 ( )  gbsinfo: add --help option
 
