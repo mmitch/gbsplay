@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.40 2004/03/10 01:48:14 ranmachan Exp $
+# $Id: configure,v 1.41 2004/03/10 12:49:29 ranmachan Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -191,6 +191,8 @@ Installation directories:
                          [PREFIX]
   --bindir=BINDIR        install binaries in BINDIR
                          [EPREFIX/bin]
+  --libdir=BINDIR        install binaries in LIBDIR
+                         [EPREFIX/lib]
   --mandir=MANDIR        install manpages in MANDIR
                          [PREFIX/man]
   --docdir=DOCDIR        install documentation in DOCDIR
@@ -217,6 +219,22 @@ isknown()
 	done
 
 	return 1
+}
+
+printoptional()
+{
+	echo -n "optional $1:"
+	for i in $OPTS; do
+		eval "val=\$$i"
+		if [ "${i#${2}_}" != "$i" ]; then
+			if [ "$val" = "yes" ]; then
+				echo -n " +${i#${2}_}"
+			else
+				echo -n " -${i#${2}_}"
+			fi
+		fi
+	done
+	echo
 }
 
 while [ $1 ]; do
@@ -427,22 +445,20 @@ fi
 
 ## can XMMS be built?
 
-echo -n "xmms support "
 if [ "$build_xmmsplugin" != "no" -a "$GLIB_CFLAGS" -a "$XMMS_CFLAGS" -a "XMMS_INPUT_PLUGIN_DIR" -a "$PTHREAD" ]; then
     EXTRA_CFLAGS="$EXTRA_CFLAGS $GLIB_CFLAGS $XMMS_CFLAGS"
     EXTRA_INSTALL="$EXTRA_INSTALL install-gbsxmms.so"
     EXTRA_UNINSTALL="$EXTRA_UNINSTALL uninstall-gbsxmms.so"
     build_xmmsplugin=yes
-    echo "enabled."
 else
     build_xmmsplugin=no
-    echo "disabled."
 fi
 
 ## set variables we have no test for to default values if not set
 
 setdefault exec_prefix "$prefix"
 setdefault bindir      "$exec_prefix/bin"
+setdefault libdir      "$exec_prefix/lib"
 setdefault mandir      "$prefix/man"
 setdefault man1dir     "$mandir/man1"
 setdefault man5dir     "$mandir/man5"
@@ -451,6 +467,9 @@ setdefault localedir   "$prefix/share/locale"
 
 setdefault use_sharedlibgbs no
 setdefault use_regparm yes
+
+printoptional modules build
+printoptional features use
 
 ## write configuration
 
@@ -467,6 +486,7 @@ setdefault use_regparm yes
     echo prefix := $prefix
     echo exec_prefix := $exec_prefix
     echo bindir := $bindir
+    echo libdir := $libdir
     echo mandir := $mandir
     echo man1dir := $man1dir
     echo man5dir := $man5dir
@@ -496,4 +516,3 @@ setdefault use_regparm yes
 
 rm -rf "$TEMPDIR"
 test -s $ERRORLOG || rm $ERRORLOG
-echo "end."

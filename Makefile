@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.74 2004/03/10 01:48:14 ranmachan Exp $
+# $Id: Makefile,v 1.75 2004/03/10 12:49:29 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -17,7 +17,7 @@ docdir      := $(prefix)/share/doc/gbsplay
 localedir   := $(prefix)/share/locale
 
 CFLAGS  := -Wall -Os -fomit-frame-pointer -march=pentium -mcpu=i586
-LDFLAGS :=
+LDFLAGS := 
 
 ifneq ($(noincludes),yes)
 -include config.mk
@@ -53,7 +53,19 @@ endif
 
 ifeq ($(use_sharedlibgbs),yes)
 LDFLAGS += -L. -lgbs
+EXTRA_INSTALL += install-libgbs.so.1
+EXTRA_UNINSTALL += uninstall-libgbs.so.1
+
 objs += $(objs_libgbspic)
+
+install-libgbs.so.1:
+	install -d $(libdir)
+	install -m 644 libgbs.so.1 $(libdir)/libgbs.so.1
+
+uninstall-libgbs.so.1:
+	rm -f $(libdir)/libgbs.so.1
+	-rmdir -p $(libdir)
+
 
 libgbs.so.1: $(objs_libgbspic)
 	$(CC) -fPIC -shared -Wl,-soname=$@ -o $@ $+
