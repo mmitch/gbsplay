@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.75 2004/03/10 12:49:29 ranmachan Exp $
+# $Id: Makefile,v 1.76 2004/03/17 19:03:27 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -16,8 +16,8 @@ man5dir     := $(mandir)/man5
 docdir      := $(prefix)/share/doc/gbsplay
 localedir   := $(prefix)/share/locale
 
-CFLAGS  := -Wall -Os -fomit-frame-pointer -march=pentium -mcpu=i586
-LDFLAGS := 
+GBSCFLAGS  := -Wall
+GBSLDFLAGS := 
 
 ifneq ($(noincludes),yes)
 -include config.mk
@@ -26,10 +26,10 @@ endif
 DESTDIR :=
 DISTDIR := gbsplay-$(VERSION)
 
-CFLAGS  += $(EXTRA_CFLAGS)
-LDFLAGS += $(EXTRA_LDFLAGS)
+GBSCFLAGS  += $(EXTRA_CFLAGS)
+GBSLDFLAGS += $(EXTRA_LDFLAGS)
 
-export CC CFLAGS LDFLAGS
+export CC GBSCFLAGS GBSLDFLAGS
 
 docs           := README HISTORY gbsplayrc_sample
 
@@ -52,7 +52,7 @@ gbsinfobin     :=$(gbsinfobin).exe
 endif
 
 ifeq ($(use_sharedlibgbs),yes)
-LDFLAGS += -L. -lgbs
+GBSLDFLAGS += -L. -lgbs
 EXTRA_INSTALL += install-libgbs.so.1
 EXTRA_UNINSTALL += uninstall-libgbs.so.1
 
@@ -190,12 +190,12 @@ libgbspic.a: $(objs_libgbspic)
 libgbs.a: $(objs_libgbs)
 	$(AR) r $@ $+
 gbsinfo: $(objs_gbsinfo) libgbs
-	$(CC) -o $(gbsinfobin) $(objs_gbsinfo) $(LDFLAGS)
+	$(CC) -o $(gbsinfobin) $(objs_gbsinfo) $(GBSLDFLAGS)
 gbsplay: $(objs_gbsplay) libgbs
-	$(CC) -o $(gbsplaybin) $(objs_gbsplay) $(LDFLAGS) -lm
+	$(CC) -o $(gbsplaybin) $(objs_gbsplay) $(GBSLDFLAGS) -lm
 
 gbsxmms.so: $(objs_gbsxmms) libgbspic
-	$(CC) -shared -fPIC -o $@ $(objs_gbsxmms) $(LDFLAGS) $(PTHREAD)
+	$(CC) -shared -fPIC -o $@ $(objs_gbsxmms) $(GBSLDFLAGS) $(PTHREAD)
 
 # rules for suffixes
 
@@ -203,14 +203,14 @@ gbsxmms.so: $(objs_gbsxmms) libgbspic
 
 .c.lo:
 	@echo CC $< -o $@
-	@$(CC) $(CFLAGS) -fPIC -c -o $@ $<
+	@$(CC) $(GBSCFLAGS) -fPIC -c -o $@ $<
 .c.o:
 	@echo CC $< -o $@
-	@$(CC) $(CFLAGS) -c -o $@ $<
+	@$(CC) $(GBSCFLAGS) -c -o $@ $<
 .c.i:
-	$(CC) -E $(CFLAGS) -o $@ $<
+	$(CC) -E $(GBSCFLAGS) -o $@ $<
 .c.s:
-	$(CC) -S $(CFLAGS) -fverbose-asm -o $@ $<
+	$(CC) -S $(GBSCFLAGS) -fverbose-asm -o $@ $<
 
 # rules for generated files
 
