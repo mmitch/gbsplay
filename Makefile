@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.78 2004/03/20 19:57:49 mitch Exp $
+# $Id: Makefile,v 1.79 2004/03/21 02:46:14 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -38,7 +38,7 @@ mans_src       := gbsplay.in.1 gbsinfo.in.1 gbsplayrc.in.5
 
 objs_libgbspic := gbcpu.lo gbhw.lo gbs.lo cfgparser.lo crc32.lo
 objs_libgbs    := gbcpu.o  gbhw.o  gbs.o  cfgparser.o  crc32.o
-objs_gbsplay   := gbsplay.o util.o
+objs_gbsplay   := gbsplay.o util.o plugout.o
 objs_gbsinfo   := gbsinfo.o
 objs_gbsxmms   := gbsxmms.lo
 

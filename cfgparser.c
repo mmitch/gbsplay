@@ -1,4 +1,4 @@
-/* $Id: cfgparser.c,v 1.9 2004/03/20 22:02:05 mitch Exp $
+/* $Id: cfgparser.c,v 1.10 2004/03/21 02:46:14 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -81,6 +81,28 @@ regparm void cfg_endian(void *ptr)
 	}
 
 	c = nextchar();
+	state = 0;
+	nextstate = 1;
+}
+
+regparm void cfg_string(void *ptr)
+{
+	char s[200];
+	unsigned int n = 0;
+
+	if (!isalpha(c) && c != '-' && c != '_') {
+		err_expect("[a-zA-Z_-]");
+		return;
+	}
+	do {
+		s[n++] = c;
+		c = nextchar();
+	} while ((isalnum(c) || c == '-' || c == '_') &&
+	         n < (sizeof(s)-1));
+	s[n] = 0;
+
+	*((char**)ptr) = strdup(s);
+
 	state = 0;
 	nextstate = 1;
 }
