@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.33 2004/10/22 22:53:50 ranmachan Exp $
+/* $Id: gbhw.c,v 1.34 2004/10/22 22:57:04 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -353,6 +353,11 @@ regparm void gbhw_master_fade(int speed, int dstvol)
 	else master_fade = -speed;
 }
 
+#define GET_NIBBLE(p, n) ({ \
+	int index = ((n) >> 1) & 0xf; \
+	int shift = (~(n) & 1) << 2; \
+	(((p)[index] >> shift) & 0xf); })
+
 static regparm void gb_sound(int cycles)
 {
 	int i;
@@ -387,7 +392,7 @@ static regparm void gb_sound(int cycles)
 	if (gbhw_ch[2].master) for (i=0; i<cycles; i++) {
 		gbhw_ch[2].div_ctr--;
 		if (gbhw_ch[2].div_ctr <= 0) {
-			gbhw_ch[2].div_ctr = gbhw_ch[2].div_tc;
+			gbhw_ch[2].div_ctr = gbhw_ch[2].div_tc*2;
 			ch3pos++;
 		}
 	}
@@ -410,8 +415,17 @@ static regparm void gb_sound(int cycles)
 			}
 		}
 		if (gbhw_ch[2].master) {
-			int val = ((ioregs[0x30 + ((ch3pos >> 2) & 0xf)] >> ((~ch3pos & 2)*2)) & 0xf)*2;
+			int pos = ch3pos;
+			int val = GET_NIBBLE(&ioregs[0x30], pos);
+#if 0 /* Channel 3 looses the edge when interpolated */
+			int nextval = GET_NIBBLE(&ioregs[0x30], pos+1);
+			int ctr = gbhw_ch[2].div_ctr;
+			int tc = gbhw_ch[2].div_tc*2;
+			val = (val * ctr + nextval * (tc - ctr))*2 / tc;
 			val -= 15;
+#else
+			val = val*2 - 15;
+#endif
 			if (gbhw_ch[2].volume) {
 				val = val >> (gbhw_ch[2].volume-1);
 			} else val = 0;
