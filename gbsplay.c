@@ -1,9 +1,9 @@
-/* $Id: gbsplay.c,v 1.78 2004/03/10 01:48:15 ranmachan Exp $
+/* $Id: gbsplay.c,v 1.79 2004/03/17 14:17:43 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
- * 2003 (C) by Tobias Diedrich <ranma@gmx.at>
- *             Christian Garbs <mitch@cgarbs.de>
+ * 2003-2004 (C) by Tobias Diedrich <ranma@gmx.at>
+ *                  Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL.
  */
 
@@ -177,6 +177,7 @@ static regparm void callback(struct gbhw_buffer *buf, void *priv)
 
 static struct cfg_option options[] = {
 	{ "rate", &rate, cfg_int },
+	{ "refresh_delay", &refresh_delay, cfg_int },
 	{ "quiet", &quiet, cfg_int },
 	{ "endian", &endian, cfg_endian },
 	{ "subsong_timeout", &subsong_timeout, cfg_int },
@@ -377,6 +378,7 @@ static regparm void usage(int exitcode)
 	        "  -h  display this help and exit\n"
 	        "  -q  quiet\n"
 	        "  -r  set samplerate (%dHz)\n"
+	        "  -R  set refresh delay (%d milliseconds)\n"
 	        "  -s  write to stdout\n"
 	        "  -t  set subsong timeout (%d seconds)\n"
 	        "  -T  set silence timeout (%d seconds)\n"
@@ -388,6 +390,7 @@ static regparm void usage(int exitcode)
 		fadeout,
 		subsong_gap,
 	        rate,
+		refresh_delay,
 		subsong_timeout,
 	        silence_timeout);
 	exit(exitcode);
@@ -403,7 +406,7 @@ static regparm void parseopts(int *argc, char ***argv)
 {
 	int res;
 	myname = *argv[0];
-	while ((res = getopt(*argc, *argv, "E:f:g:hqr:st:T:VzZ")) != -1) {
+	while ((res = getopt(*argc, *argv, "E:f:g:hqr:R:st:T:VzZ")) != -1) {
 		switch (res) {
 		default:
 			usage(1);
@@ -434,6 +437,9 @@ static regparm void parseopts(int *argc, char ***argv)
 			break;
 		case 'r':
 			sscanf(optarg, "%d", &rate);
+			break;
+		case 'R':
+			sscanf(optarg, "%d", &refresh_delay);
 			break;
 		case 's':
 			usestdout = 1;

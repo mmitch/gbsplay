@@ -1,5 +1,5 @@
-.\" $Id: gbsplay.in.1,v 1.9 2004/02/16 20:50:04 mitch Exp $
-.\" This manpage 2003 (C) by Christian Garbs <mitch@cgarbs.de>
+.\" $Id: gbsplay.in.1,v 1.10 2004/03/17 14:17:43 mitch Exp $
+.\" This manpage 2003-2004 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
 .TH "gbsplay" "1" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
 .SH "NAME"
@@ -30,6 +30,9 @@ Be quiet, show only error messages.
 .TP
 \fI\-r samplerate\fR
 Set the samplerate to \fIsamplerate\fR Hz.  Default value is 44100Hz.
+.TP
+\fI\-R refresh\-delay\fR
+Set the refresh delay to \fIrefresh\-delay\fR milliseconds.  Default value is 33 milliseconds.  Larger values will lower CPU usage, but things as subsong changes, fadeouts, reactions to keypresses and the on\-screen display will be delayed.
 .TP
 \fI\-s\fR
 Write to stdout instead of /dev/dsp.
