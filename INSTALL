@@ -1,4 +1,4 @@
-<<$Id: INSTALL,v 1.1 2003/09/12 17:56:20 mitch Exp $>>
+<<$Id: INSTALL,v 1.2 2003/12/25 10:17:45 mitch Exp $>>
 
 
 gbsplay INSTALL instructions
@@ -12,6 +12,9 @@ also be built.
 
 Run "make install" (as root) to install everything to your system.
 Run "make uninstall" (as root) to remove it afterwards.
+
+Be aware that you need a GNU make!
+So on FreeBSD, you need to run "gmake" instead of "make".
 
 
 
