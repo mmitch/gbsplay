@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.5 2003/09/12 18:00:24 mitch Exp $
+# $Id: configure,v 1.6 2003/09/12 18:02:44 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 
@@ -80,7 +80,7 @@ fi
     if [ -f CVS/Entries ]; then
 	echo "#define GBS_VERSION \"CVS `date -r CVS/Entries`\""
     else
-	echo "#define GBS_VERSION \"0.0.1\""
+	echo "#define GBS_VERSION \"0.0.2-dev\""
     fi
 ) > config.h
 
