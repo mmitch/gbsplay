@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.63 2004/04/20 17:24:42 mitch Exp $
+# $Id: configure,v 1.64 2004/04/20 22:31:32 ranmachan Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -22,6 +22,9 @@ package=gbsplay
 prefix=/usr/local
 
 ## define sane environment
+unset LC_ALL LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY \
+      LC_MESSAGES LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE      \
+      LC_MEASUREMENT LC_IDENTIFICATION
 LANG=C
 export LANG
 
