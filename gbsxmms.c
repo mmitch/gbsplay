@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.18 2003/10/24 08:56:53 ranma Exp $
+/* $Id: gbsxmms.c,v 1.19 2003/11/29 23:07:46 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -206,7 +206,7 @@ static void callback(void *buf, int len, void *priv)
 	int gbslen = gbs->subsong_info[gbs_subsong].len;
 
 	gbs_ip.add_vis_pcm(gbs_ip.output->written_time(),
-	                   FMT_S16_LE, 2, len, buf);
+	                   FMT_S16_NE, 2, len, buf);
 	while (gbs_ip.output->buffer_free() < len && !stopthread) usleep(10000);
 	gbs_ip.output->write_audio(buf, len);
 
@@ -540,7 +540,7 @@ static int workunit = 50; /* in msec */
 
 void *playloop(void *priv)
 {
-	if (!gbs_ip.output->open_audio(FMT_S16_LE, rate, 2)) {
+	if (!gbs_ip.output->open_audio(FMT_S16_NE, rate, 2)) {
 		puts("Error opening output plugin.");
 		return 0;
 	}
