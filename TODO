@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.27 2003/10/11 17:47:08 mitch Exp $>>
+<<$Id: TODO,v 1.28 2003/10/11 19:49:33 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -40,3 +40,5 @@ TODO list for gbsplay.
 (X)  gbsplay: mention Esc to quit gbsplay
 
 (X)  gbsplay: allow play/pause with Space bar
+
+(X)  gbsplay: add fadeout and subsong gap
