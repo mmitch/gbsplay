@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.13 2003/09/13 16:03:00 mitch Exp $>>
+<<$Id: TODO,v 1.14 2003/09/14 15:38:47 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -49,3 +49,7 @@ TODO list for gbsplay.
 
 (X)  gbsplay: stop at a given subsong
      ("gbsplay $file 3 3" will play only song 3 and then stop)
+
+(X)  gbsplay: honor SIGSTOP+SIGCONT
+
+(X)  gbsplay: no need for return after keyboard command any more
