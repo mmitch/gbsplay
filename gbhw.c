@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.7 2003/08/24 12:11:36 ranma Exp $
+/* $Id: gbhw.c,v 1.8 2003/08/24 17:15:22 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -106,7 +106,7 @@ static void io_put(unsigned short addr, unsigned char val)
 //			printf("Callback rate set to %2.2fHz.\n", 4194304/(float)timertc);
 			break;
 		case 0xff10:
-			gbhw_ch[0].sweep_ctr = gbhw_ch[0].sweep_tc = ((val >> 4) & 7)*2;
+			gbhw_ch[0].sweep_ctr = gbhw_ch[0].sweep_tc = ((val >> 4) & 7);
 			gbhw_ch[0].sweep_dir = (val >> 3) & 1;
 			gbhw_ch[0].sweep_shift = val & 7;
 
@@ -120,7 +120,7 @@ static void io_put(unsigned short addr, unsigned char val)
 
 				gbhw_ch[chn].duty_ctr = dutylookup[duty_ctr];
 				gbhw_ch[chn].duty_tc = gbhw_ch[chn].div_tc*gbhw_ch[chn].duty_ctr/8;
-				gbhw_ch[chn].len = (64 - len)*2;
+				gbhw_ch[chn].len = 64 - len;
 
 				break;
 			}
@@ -134,7 +134,7 @@ static void io_put(unsigned short addr, unsigned char val)
 
 				gbhw_ch[chn].volume = vol;
 				gbhw_ch[chn].env_dir = envdir;
-				gbhw_ch[chn].env_ctr = gbhw_ch[chn].env_tc = envspd*8;
+				gbhw_ch[chn].env_ctr = gbhw_ch[chn].env_tc = envspd*4;
 			}
 			break;
 		case 0xff13:
@@ -156,7 +156,7 @@ static void io_put(unsigned short addr, unsigned char val)
 			}
 			gbhw_ch[chn].len_enable = (val & 0x40) > 0;
 
-//			printf(" ch1: vol=%02d envd=%d envspd=%d duty_ctr=%d len=%02d len_en=%d key=%04d gate=%d%d\n", gbhw_ch[0].volume, gbhw_ch[0].env_dir, gbhw_ch[0].env_tc, gbhw_ch[0].duty_ctr, gbhw_ch[0].len, gbhw_ch[0].len_enable, gbhw_ch[0].div_tc, gbhw_ch[0].leftgate, gbhw_ch[0].rightgate);
+//			printf(" ch%d: vol=%02d envd=%d envspd=%d duty_ctr=%d len=%03d len_en=%d key=%04d gate=%d%d\n", chn, gbhw_ch[chn].volume, gbhw_ch[chn].env_dir, gbhw_ch[chn].env_tc, gbhw_ch[chn].duty_ctr, gbhw_ch[chn].len, gbhw_ch[chn].len_enable, gbhw_ch[chn].div_tc, gbhw_ch[chn].leftgate, gbhw_ch[chn].rightgate);
 			break;
 		case 0xff15:
 			break;
@@ -184,9 +184,11 @@ static void io_put(unsigned short addr, unsigned char val)
 				gbhw_ch[3].div_tc = 1 << shift;
 				if (rate) gbhw_ch[3].div_tc *= rate;
 				else gbhw_ch[3].div_tc /= 2;
+				gbhw_ch[3].div_tc *= 2;
 				if (addr == 0xff22) break;
-//				printf(" ch4: vol=%02d envd=%d envspd=%d duty_ctr=%d len=%02d len_en=%d key=%04d gate=%d%d\n", gbhw_ch[3].volume, gbhw_ch[3].env_dir, gbhw_ch[3].env_ctr, gbhw_ch[3].duty_ctr, gbhw_ch[3].len, gbhw_ch[3].len_enable, gbhw_ch[3].div_tc, gbhw_ch[3].leftgate, gbhw_ch[3].rightgate);
+//				printf(" ch4: vol=%02d envd=%d envspd=%d duty_ctr=%d len=%03d len_en=%d key=%04d gate=%d%d\n", gbhw_ch[3].volume, gbhw_ch[3].env_dir, gbhw_ch[3].env_ctr, gbhw_ch[3].duty_ctr, gbhw_ch[3].len, gbhw_ch[3].len_enable, gbhw_ch[3].div_tc, gbhw_ch[3].leftgate, gbhw_ch[3].rightgate);
 			}
+			gbhw_ch[chn].len_enable = (val & 0x40) > 0;
 			break;
 		case 0xff25:
 			gbhw_ch[0].leftgate = (val & 0x10) > 0;
@@ -250,9 +252,9 @@ static short soundbuf[4096];
 static int soundbufpos;
 static int sound_div_tc;
 static int sound_div;
-static int main_div_tc = 32;
+static const int main_div_tc = 32;
 static int main_div;
-static int sweep_div_tc = 256;
+static const int sweep_div_tc = 512;
 static int sweep_div;
 
 int r_smpl;
@@ -283,7 +285,10 @@ static void gb_sound_sweep(void)
 	for (i=0; i<4; i++) {
 		if (gbhw_ch[i].len > 0 && gbhw_ch[i].len_enable) {
 			gbhw_ch[i].len--;
-			if (gbhw_ch[i].len == 0) gbhw_ch[i].volume = 0;
+			if (gbhw_ch[i].len == 0) {
+				gbhw_ch[i].volume = 0;
+				gbhw_ch[i].env_tc = 0;
+			}
 		}
 		if (gbhw_ch[i].env_tc) {
 			gbhw_ch[i].env_ctr--;

@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.31 2003/08/24 16:00:59 ikari Exp $
+/* $Id: gbsplay.c,v 1.32 2003/08/24 17:15:22 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -187,9 +187,9 @@ static void open_gbs(char *name)
 }
 
 #define LN2 .69314718055994530941
-#define MAGIC 6.02980484763069750723
+#define MAGIC 5.78135971352465960412
 #define FREQ(x) (262144 / x)
-// #define NOTE(x) ((log(FREQ(x))/LN2 - log(65.33593)/LN2)*12 + .2)
+// #define NOTE(x) ((log(FREQ(x))/LN2 - log(55)/LN2)*12 + .2)
 #define NOTE(x) ((int)((log(FREQ(x))/LN2 - MAGIC)*12 + .2))
 
 #define MAXOCTAVE 9
@@ -206,7 +206,6 @@ static int getnote(int div)
 	return n;
 }
 
-static const char notes[7] = "CDEFGAB";
 static char notelookup[4*MAXOCTAVE*12];
 static void precalc_notes(void)
 {
@@ -216,8 +215,8 @@ static void precalc_notes(void)
 		int n = i % 12;
 
 		s[2] = '0' + i / 12;
-		n += n > 4;
-		s[0] = notes[n >> 1];
+		n += (n > 2) + (n > 7);
+		s[0] = 'A' + (n >> 1);
 		if (n & 1) s[1] = '#';
 		else s[1] = '-';
 	}
