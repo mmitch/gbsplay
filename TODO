@@ -1,11 +1,11 @@
-$Id: TODO,v 1.5 2003/09/11 18:36:20 mitch Exp $
+$Id: TODO,v 1.6 2003/09/12 13:38:39 ranma Exp $
 
 TODO list for gbsplay.
 
 ### version 0.0.1:
 
 ( )  set up feature list for 0.0.1 release
-( )  add manpage for gbsplayrc(5)
+(X)  add manpage for gbsplayrc(5)
 (X)  add "--next_song_after_pause" switch to gbsplay
 (X)  add "--next_song_after_playtime" switch to gbsplay
 

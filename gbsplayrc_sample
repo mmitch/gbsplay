@@ -4,8 +4,6 @@
 rate = 48000           # this is a comment
 quiet=0                # should work without whitespace too
 
-# this should fail:
-
 # '\' can be used as escape and tabs are whitespace
 
 subsong_timeout \
