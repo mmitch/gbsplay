@@ -1,0 +1,80 @@
+#!/bin/sh
+# $Id: configure,v 1.1 2003/08/25 22:59:16 mitch Exp $
+#
+# generate config.mk for gbsplay Makefile
+
+EXTRA_ALL=
+EXTRA_CFLAGS=
+EXTRA_INSTALL=
+EXTRA_SRCS=
+EXTRA_UNINSTALL=
+XMMS_INPUT_PLUGIN_DIR=
+
+## enable logging of errors
+
+ERRORLOG=config.err
+exec 2> $ERRORLOG
+
+## check for glib development files
+
+echo -n "checking for glib-dev:  "
+CONFIG=`which glib-config`
+if [ $? == 0 ]; then
+    GLIB_CFLAGS=`glib-config --cflags`
+    if [ $? == 0 ]; then
+	echo "ok"
+    else
+	echo "error running glib-config --cflags!"
+    fi
+else
+    echo "glib-config not found!"
+fi
+
+## check for xmms development files
+
+echo -n "checking for xmms-dev:  "
+CONFIG=`which xmms-config`
+if [ $? == 0 ]; then
+    XMMS_CFLAGS=`xmms-config --cflags` 
+    if [ $? == 0 ]; then
+	XMMS_INPUT_PLUGIN_DIR=`xmms-config --input-plugin-dir`
+	if [ $? == 0 ]; then
+	    echo "ok"
+	else
+	    echo "error running xmms-config --input-plugin-dir!"
+	fi
+    else
+	echo "error running xmms-config --cflags!"
+    fi
+else
+    echo "xmms-config not found!"
+fi
+
+## everything ok?
+
+if [ "$GLIB_CFLAGS" -a "$XMMS_CFLAGS" -a "XMMS_INPUT_PLUGIN_DIR" ]; then
+    EXTRA_ALL="$EXTRA_ALL gbsxmms.so"
+    EXTRA_CFLAGS="$EXTRA_CFLAGS $GLIB_CFLAGS $XMMS_CFLAGS"
+    EXTRA_INSTALL="$EXTRA_INSTALL install-gbsxmms.so"
+    EXTRA_SRCS="$EXTRA_SRCS gbsxmms.c"
+    EXTRA_UNINSTALL="$EXTRA_UNINSTALL uninstall-gbsxmms.so"
+    echo "xmms support enabled."
+else
+    echo "no xmms support."
+fi
+
+## write configuration
+
+(
+    echo EXTRA_ALL := $EXTRA_ALL
+    echo EXTRA_CFLAGS := $EXTRA_CFLAGS 
+    echo EXTRA_INSTALL := $EXTRA_INSTALL
+    echo EXTRA_SRCS := $EXTRA_SRCS
+    echo EXTRA_UNINSTALL := $EXTRA_UNINSTALL
+    echo XMMS_INPUT_PLUGIN_DIR := $XMMS_INPUT_PLUGIN_DIR
+) > config.mk
+
+## end
+
+test -s $ERRORLOG || rm $ERRORLOG
+echo "end."
