@@ -1,3 +1,11 @@
+/* $Id: gbsplay.c,v 1.11 2003/08/23 08:31:38 mitch Exp $
+ *
+ * gbsplay is a Gameboy sound player
+ *
+ * 2003 (C) by Tobias Diedrich <ranma@gmx.at>
+ * Licensed under GNU GPL.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
