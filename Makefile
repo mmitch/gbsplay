@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.77 2004/03/20 18:50:02 mitch Exp $
+# $Id: Makefile,v 1.78 2004/03/20 19:57:49 mitch Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -43,9 +43,11 @@ objs_gbsinfo   := gbsinfo.o
 objs_gbsxmms   := gbsxmms.lo
 
 # gbsplay output plugins
-objs_gbsplay +=  plugout_stdout.o
-ifeq ($(dsp_plugin),yes)
+ifeq ($(plugout_devdsp),yes)
 objs_gbsplay += plugout_devdsp.o
+endif
+ifeq ($(plugout_stdout),yes)
+objs_gbsplay +=  plugout_stdout.o
 endif
 
 # Cygwin automatically adds .exe to binaries.

@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.44 2004/03/20 18:50:02 mitch Exp $
+# $Id: configure,v 1.45 2004/03/20 19:57:49 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -101,6 +101,16 @@ have_x() {
 	echo "#define HAVE_$1 1"
     else
 	echo "/* #undef HAVE_$1 */"
+    fi
+}
+
+plugout_x() {
+    localvar="use_`echo $1 | tr A-Z a-z`"
+    eval "result=\$$localvar"
+    if [ "$result" = "yes" ]; then
+	echo "#define PLUGOUT_$1 1"
+    else
+	echo "/* #undef PLUGOUT_$1 */"
     fi
 }
 
@@ -298,11 +308,15 @@ Optional Features:
 
 Optional Packages:
   --without-xmmsplugin   do not build xmms input plugin
+
+Output Plugins:
+  --disable-devdsp       omit /dev/dsp sound output plugin
+  --disable-stdout       omit stdout file writer plugin
 EOF
 	exit $1
 }
 
-OPTS="build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_debug"
+OPTS="build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_debug use_stdout use_devdsp"
 
 ## load user config
 if [ -f config.conf ]; then
@@ -365,7 +379,13 @@ fi
 ## check for various headers
 
 need_include inttypes.h
-check_include sys/soundcard.h
+
+if [ "$use_devdsp" != no ]; then
+    check_include sys/soundcard.h
+    if [ "$have_sys_soundcard_h" = "no" ]; then
+	use_devdsp=no
+    fi
+fi
 
 if [ "$use_i18n" != no ]; then
     check_include locale.h
@@ -508,6 +528,9 @@ setdefault localedir   "$prefix/share/locale"
 setdefault use_sharedlibgbs no
 setdefault use_debug no
 
+setdefault use_devdsp yes
+setdefault use_stdout yes
+
 printoptional modules build
 printoptional features use
 
@@ -555,7 +578,8 @@ echo "EXTRA_CFLAGS=$EXTRA_CFLAGS"
     echo CC := $CC
     echo build_xmmsplugin := $build_xmmsplugin
     echo have_xgettext := $have_xgettext
-    echo dsp_plugin := $have_sys_soundcard_h
+    echo plugout_devdsp := $use_devdsp
+    echo plugout_stdout := $use_stdout
     echo use_i18n := $use_i18n
     echo use_sharedlibgbs := $use_sharedlibgbs
     echo cygwin_build := $cygwin_build
@@ -564,7 +588,8 @@ echo "EXTRA_CFLAGS=$EXTRA_CFLAGS"
 (
     echo "#define GBS_VERSION \"$VERSION\""
     echo "#define LOCALE_PREFIX \"$localedir\""
-    have_x SYS_SOUNDCARD_H
+    plugout_x DEVDSP
+    plugout_x STDOUT
     use_x I18N
     use_x REGPARM
 ) > config.h

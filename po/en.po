@@ -1,4 +1,4 @@
-# $Id: en.po,v 1.9 2004/03/20 19:25:14 mitch Exp $
+# $Id: en.po,v 1.10 2004/03/20 19:57:49 mitch Exp $
 # English translations for gbsplay.
 # Copyright (C) 2003 Tobias Diedrich <ranma@gmx.at>
 # This file is distributed under GNU GPL.
@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-03-20 20:15+0100\n"
+"POT-Creation-Date: 2004-03-20 20:53+0100\n"
 "PO-Revision-Date: 2004-03-20 20:19+0100\n"
 "Last-Translator: Tobias Diedrich <ranma@gmx.at>\n"
 "Language-Team: none\n"
@@ -137,6 +137,14 @@ msgstr "Length    "
 
 msgid "Next"
 msgstr "Next"
+
+#, c-format
+msgid ""
+"No output plugins available.\n"
+"\n"
+msgstr ""
+"No output plugins available.\n"
+"\n"
 
 #, c-format
 msgid "Not a GBS-File: %s\n"

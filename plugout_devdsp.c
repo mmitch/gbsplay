@@ -17,15 +17,12 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
-#ifdef HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>
-#endif
 
 #include "plugins.h"
 
 int regparm devdsp_open(int endian, int rate)
 {
-#ifdef HAVE_SYS_SOUNDCARD_H
 	int fd;
 	int c;
 	int flags;
@@ -67,10 +64,6 @@ int regparm devdsp_open(int endian, int rate)
 	if ((ioctl(fd, SNDCTL_DSP_SETFRAGMENT, &c)) == -1)
 		fprintf(stderr, _("ioctl(fd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n"), c, strerror(errno));
 	return fd;
-
-#else
-	return -1;
-#endif
 }
 
 ssize_t regparm devdsp_write(int fd, const void *buf, size_t count)
@@ -82,4 +75,3 @@ int regparm devdsp_close(int fd)
 {
 	return close(fd);
 }
-

@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.81 2004/03/20 19:25:14 mitch Exp $
+/* $Id: gbsplay.c,v 1.82 2004/03/20 19:57:49 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -27,9 +27,12 @@
 #include "cfgparser.h"
 #include "plugins.h"
 #include "util.h"
-#include "plugout_stdout.h"
-#ifdef HAVE_SYS_SOUNDCARD_H
+
+#ifdef PLUGOUT_DEVDSP
 #include "plugout_devdsp.h"
+#endif
+#ifdef PLUGOUT_STDOUT
+#include "plugout_stdout.h"
 #endif
 
 #define LN2 .69314718055994530941
@@ -101,18 +104,27 @@ static struct cfg_option options[] = {
 };
 
 /* sound output plugins */
+int regparm no_output_plugin(int endian, int rate);
 static struct output_plugin plugouts[] = {
-#ifdef HAVE_SYS_SOUNDCARD_H
+#ifdef PLUGOUT_DEVDSP
 	{ "dsp", "/dev/dsp sound driver", &devdsp_open, &devdsp_write, &devdsp_close },
 #endif
+#ifdef PLUGOUT_STDOUT
 	{ "stdout", "STDOUT file writer", &stdout_open, &stdout_write, &stdout_close },
-	{ NULL, NULL, NULL, NULL, NULL }
+#endif
+	{ "", "", &no_output_plugin, NULL, NULL }
 };
 static char* sound_id;
 static char* sound_name;
 static plugout_open_fn  sound_open;
 static plugout_write_fn sound_write;
 static plugout_close_fn sound_close;
+
+int regparm no_output_plugin(int endian, int rate)
+{
+	printf(_("No output plugins available.\n\n"));
+	exit(1);
+}
 
 static regparm int getnote(int div)
 {
@@ -326,7 +338,6 @@ static regparm void select_plugin_by_index(int idx)
 {
 	sound_id    = plugouts[idx].id;
 	sound_name  = plugouts[idx].name;
-	sound_close = plugouts[idx].close_fn;
 	sound_open  = plugouts[idx].open_fn;
 	sound_write = plugouts[idx].write_fn;
 	sound_close = plugouts[idx].close_fn;
@@ -344,13 +355,13 @@ static regparm void select_plugin_by_id(char *id)
 
 	if (strcmp(id, "list") == 0) {
 		printf(_("available output plugins:\n"));
-		for (idx = 0; plugouts[idx].id != NULL; idx++) {
+		for (idx = 0; plugouts[idx].write_fn != NULL; idx++) {
 			printf("%s\t- %s\n", plugouts[idx].id, plugouts[idx].name);
 		}
 		exit(0);
 	}
 
-	for (idx = 0; plugouts[idx].id != NULL; idx++) {
+	for (idx = 0; plugouts[idx].write_fn != NULL; idx++) {
 		if ( strcmp(plugouts[idx].id, id) == 0 ) {
 			select_plugin_by_index(idx);
 			return;
