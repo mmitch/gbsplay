@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.28 2003/12/15 18:35:42 ranma Exp $
+/* $Id: gbsxmms.c,v 1.29 2003/12/18 17:11:23 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -590,12 +590,16 @@ static void set_song_info(struct gbs *gbs, char **title, int *length)
 	         gbs->title, gbs->author, gbs->copyright);
 }
 
+static int old_length;
+
 static int get_time(void)
 {
 	char *title;
 	int length;
 	set_song_info(gbs, &title, &length);
-	gbs_ip.set_info(title, length, 0, 44100, 2);
+	if (length != old_length)
+		gbs_ip.set_info(title, length, 0, 44100, 2);
+	old_length = length;
 	if (stopthread) return -1;
 	return gbs_ip.output->output_time();
 }
