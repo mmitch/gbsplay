@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.18 2003/11/30 13:57:32 ranma Exp $
+/* $Id: gbhw.c,v 1.19 2003/11/30 14:25:24 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -15,14 +15,14 @@
 #include "gbcpu.h"
 #include "gbhw.h"
 
-static unsigned char *rom;
-static unsigned char intram[0x2000];
-static unsigned char extram[0x2000];
-static unsigned char ioregs[0x80];
-static unsigned char hiram[0x80];
-static unsigned int rombank = 1;
-static unsigned int romsize;
-static unsigned int lastbank;
+static uint8_t *rom;
+static uint8_t intram[0x2000];
+static uint8_t extram[0x2000];
+static uint8_t ioregs[0x80];
+static uint8_t hiram[0x80];
+static int rombank = 1;
+static int romsize;
+static int lastbank;
 
 static const char dutylookup[4] = {
 	1, 2, 4, 6
@@ -51,19 +51,19 @@ static int pause_output = 0;
 static gbhw_callback_fn callback;
 static void *callbackpriv;
 
-static unsigned char rom_get(unsigned int addr)
+static uint8_t rom_get(uint32_t addr)
 {
 //	DPRINTF("rom_get(%04x)\n", addr);
 	return rom[addr & 0x3fff];
 }
 
-static unsigned char rombank_get(unsigned int addr)
+static uint8_t rombank_get(uint32_t addr)
 {
 //	DPRINTF("rombank_get(%04x)\n", addr);
 	return rom[(addr & 0x3fff) + 0x4000*rombank];
 }
 
-static unsigned char io_get(unsigned int addr)
+static uint8_t io_get(uint32_t addr)
 {
 	if (addr >= 0xff80 && addr <= 0xfffe) {
 		return hiram[addr & 0x7f];
@@ -79,19 +79,19 @@ static unsigned char io_get(unsigned int addr)
 	return 0xff;
 }
 
-static unsigned char intram_get(unsigned int addr)
+static uint8_t intram_get(uint32_t addr)
 {
 //	DPRINTF("intram_get(%04x)\n", addr);
 	return intram[addr & 0x1fff];
 }
 
-static unsigned char extram_get(unsigned int addr)
+static uint8_t extram_get(uint32_t addr)
 {
 //	DPRINTF("extram_get(%04x)\n", addr);
 	return extram[addr & 0x1fff];
 }
 
-static void rom_put(unsigned int addr, unsigned char val)
+static void rom_put(uint32_t addr, uint8_t val)
 {
 	if (addr >= 0x2000 && addr <= 0x3fff) {
 		val &= 0x1f;
@@ -103,7 +103,7 @@ static void rom_put(unsigned int addr, unsigned char val)
 	}
 }
 
-static void io_put(unsigned int addr, unsigned char val)
+static void io_put(uint32_t addr, uint8_t val)
 {
 	int chn = (addr - 0xff10)/5;
 	if (addr >= 0xff80 && addr <= 0xfffe) {
@@ -252,12 +252,12 @@ static void io_put(unsigned int addr, unsigned char val)
 	}
 }
 
-static void intram_put(unsigned int addr, unsigned char val)
+static void intram_put(uint32_t addr, uint8_t val)
 {
 	intram[addr & 0x1fff] = val;
 }
 
-static void extram_put(unsigned int addr, unsigned char val)
+static void extram_put(uint32_t addr, uint8_t val)
 {
 	extram[addr & 0x1fff] = val;
 }
@@ -275,7 +275,7 @@ int r_smpl;
 int l_smpl;
 int smpldivisor;
 
-static unsigned int lfsr = 0xffffffff;
+static uint32_t lfsr = 0xffffffff;
 static int ch3pos;
 
 static void gb_sound_sweep(void)
@@ -451,7 +451,7 @@ void gbhw_getminmax(int *lmin, int *lmax, int *rmin, int *rmax)
 	lmaxval = rmaxval = INT_MIN;
 }
 
-void gbhw_init(unsigned char *rombuf, unsigned int size)
+void gbhw_init(uint8_t *rombuf, uint32_t size)
 {
 	int i;
 
