@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.69 2003/12/12 23:05:51 ranma Exp $
+/* $Id: gbsplay.c,v 1.70 2003/12/13 15:43:12 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -483,7 +483,7 @@ static void printstatus(struct gbs *gbs)
 
 void exit_handler(int signum)
 {
-	printf(_("\nCatched signal %d, exiting...\n"), signum);
+	printf(_("\nCaught signal %d, exiting...\n"), signum);
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
 	exit(1);
 }
