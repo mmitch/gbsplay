@@ -1,5 +1,5 @@
-.\" $Id: gbsplayrc.in.5,v 1.4 2004/02/16 20:50:04 mitch Exp $
-.\" This manpage 2003 (C) by Christian Garbs <mitch@cgarbs.de>
+.\" $Id: gbsplayrc.in.5,v 1.5 2004/03/17 14:18:29 mitch Exp $
+.\" This manpage 2003-2004 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
 .TH "gbsplayrc" "5" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
 .SH "NAME"
@@ -8,10 +8,7 @@
 .SH "DESCRIPTION"
 \fI/etc/gbsplayrc\fR and \fI~/\.gbsplayrc\fR are used by gbsplay(1).
 .SH "SYNTAX"
-Comments are introduced by hash marks.  A comment continues to the end
-of the line.  Whitespace, including empty lines, is ignored.  Option
-values follow the option name and an equal sign.  Valid Option value
-types are:
+Comments are introduced by hash marks.  A comment continues to the end of the line.  Whitespace, including empty lines, is ignored.  Option values follow the option name and an equal sign.  Valid option value types are:
 .IP Integer
 An integer number in decimal.
 .IP Boolean
@@ -19,23 +16,24 @@ An integer number in decimal. 0 is considered \fIfalse\fR, everything else is \f
 .IP Endian
 A single character denoting the endianness. n == native endian, l == little endian and b == big endian.
 .SH "OPTIONS"
+.IP "endian = \fIEndian\fR"
+The output endianness.
+.IP "fadeout = \fIInteger\fR"
+The fadeout time in seconds.  Instead of cutting of the subsong hard, do a soft fadeout.
+.IP "quiet = \fIBoolean\fR"
+In quiet mode, the player will only show error messages.
 .IP "rate = \fIInteger\fR"
 The samplerate to be used.
-.IP "subsong_timeout = \fIInteger\fR"
-The subsong timeout in seconds.  When a subsong has been played for the given
-time, the player will skip to the next subsong.
+.IP "refresh_delay = \fIInteger\fR"
+Set the refresh delay in milliseconds.  Larger values will lower CPU usage, but things as subsong changes, fadeouts, reactions to keypresses and the on\-screen display will be delayed.
 .IP "silence_timeout = \fIInteger\fR"
 The silence timeout in seconds.  When a subsong contains silence for the given
 time, the player will skip to the next subsong.
 .IP "subsong_gap = \fIInteger\fR"
 The subsong gap in seconds.  Before playing the next subsong after the subsong timeout, play \fIsubsong_gap\fR seconds of silence.
-.IP "fadeout = \fIInteger\fR"
-The fadeout time in seconds.  Instead of cutting of the subso
-ng hard, do a soft fadeout.
-.IP "quiet = \fIBoolean\fR"
-In quiet mode, the player will only show error messages.
-.IP "endian = \fIEndian\fR"
-The output endianness.
+.IP "subsong_timeout = \fIInteger\fR"
+The subsong timeout in seconds.  When a subsong has been played for the given
+time, the player will skip to the next subsong.
 .SH "FILES"
 .TP
 \fI/etc/gbsplayrc\fR
