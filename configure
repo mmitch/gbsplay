@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.25 2003/12/12 23:05:51 ranma Exp $
+# $Id: configure,v 1.26 2003/12/13 16:05:45 ranma Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -58,6 +58,33 @@ EOF
     else
 	echo "not found"
 	eval "have_$varname=no"
+	return 1
+    fi
+}
+
+## generalized 'does it compile' check
+cc_check()
+{
+    INFILE="$TEMPDIR/cc.c"
+    OUTFILE="$TEMPDIR/cc"
+    name="$1"
+    varname="$2"
+    flags="$3"
+    okmsg="${4-ok}"
+    errmsg="${5-not found}"
+
+    echo -n "$name:  "
+
+    cat > "$INFILE"
+    $CC -o "$OUTFILE" "$INFILE" $flags
+    RESULT=$?
+    if [ $RESULT -eq 0 ]; then
+	echo "$okmsg"
+	eval "$varname=yes"
+	return 0
+    else
+	echo "$errmsg"
+	eval "$varname=no"
 	return 1
     fi
 }
@@ -157,10 +184,25 @@ else
     die
 fi
 
+need_include inttypes.h
 check_include sys/soundcard.h
 check_include locale.h
 check_include libintl.h
-need_include inttypes.h
+if [ "$have_locale_h" = "yes" -a "$have_libintl_h" = "yes" ]; then
+    cc_check "Do we need -lintl" need_lintl "-lintl" yes no <<EOF
+#include <locale.h>
+#include <libintl.h>
+int main(int argc, char **argv)
+{
+	setlocale(LC_ALL, "");
+	bindtextdomain("foo", "bar");
+	return 0;
+}
+EOF
+    if [ $? -eq 0 ]; then
+	EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lintl"
+    fi
+fi
 
 ## check for glib development files
 
