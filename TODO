@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.46 2003/12/26 22:17:05 mitch Exp $>>
+<<$Id: TODO,v 1.47 2003/12/28 16:09:12 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -30,27 +30,7 @@ TODO list for gbsplay.
 
 ( )  gbsinfo: add --help option
 
-### version 0.0.4:
+### version 0.0.5:
 
-( )  set up feature list for 0.0.4 release
+( )  set up feature list for 0.0.5 release
 
-(X)  make gbsinfo output *really* script friendly
-
-(X)  configure: support for stripped-down versions of mktemp
-
-(X)  gbsplay/gbshw: improved buffer handling
-
-(X)  gbsplay: allow -1 as subsong (default)
-
-(X)  clean up build process (rebuild only changed files)
-
-(X)  gettext support
-
-(X)  gbs2ogg.sh: fix script (wrong path to gbsinfo)
-
-(X)  build process: fixes for non-GNU find
-
-(X)  gbsxmms: now works on FreeBSD
-
-(X)  gbsplay: changed -z and -Z description.  shuffled lists are
-     reproducible over playlist boundaries.
