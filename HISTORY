@@ -1,4 +1,4 @@
-<<$Id: HISTORY,v 1.2 2003/09/21 16:04:35 mitch Exp $>>
+<<$Id: HISTORY,v 1.3 2003/09/21 16:07:39 mitch Exp $>>
 
 
 gbsplay HISTORY
@@ -21,6 +21,10 @@ gbsplay HISTORY
   - no need to press return for keyboard commands to take effect
   - stop after playing a given subsong
   - honor SIGSTOP and SIGCONT signals
+
+- build process new features:
+  - detect working C compiler
+  - detect zlib existance
 
 
 2003/09/12  -  0.0.1
