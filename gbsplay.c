@@ -11,7 +11,7 @@
 #include <math.h>
 
 #define ZF	0x80
-#define SF	0x40
+#define NF	0x40
 #define HF	0x20
 #define CF	0x10
 
@@ -432,7 +432,7 @@ static get_fn getlookup[256] = {
 static unsigned char mem_get(unsigned short addr)
 {
 	unsigned char res = getlookup[addr >> 8](addr);
-	cycles++;
+	cycles+=4;
 	return res;
 }
 
@@ -443,7 +443,7 @@ static void vidram_put(unsigned short addr, unsigned char val)
 static void rom_put(unsigned short addr, unsigned char val)
 {
 	if (addr >= 0x2000 && addr <= 0x3fff)
-		rombank = val;
+		rombank = val + (val == 0);
 }
 
 static void io_put(unsigned short addr, unsigned char val)
@@ -1077,6 +1077,8 @@ static void op_bit(unsigned char op)
 	print_reg(reg);
 	res = get_reg(reg) & (1 << bit);
 	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
+	regs.rn.f &= ~NF;
+	regs.rn.f |= HF;
 }
 
 static void op_rlc(unsigned char op, struct opinfo *oi)
@@ -1093,6 +1095,7 @@ static void op_rlc(unsigned char op, struct opinfo *oi)
 	regs.rn.f &= ~CF;
 	regs.rn.f |= (val >> 7) << 4;
 	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
+	regs.rn.f &= ~(NF | HF);
 	put_reg(reg, res);
 }
 
@@ -1107,6 +1110,7 @@ static void op_rlca(unsigned char op, struct opinfo *oi)
 	regs.rn.f &= ~CF;
 	regs.rn.f |= (regs.rn.a >> 7) << 4;
 	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
+	regs.rn.f &= ~(NF | HF);
 	regs.rn.a = res;
 }
 
@@ -1124,6 +1128,7 @@ static void op_rl(unsigned char op, struct opinfo *oi)
 	regs.rn.f &= ~CF;
 	regs.rn.f |= (val >> 7) << 4;
 	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
+	regs.rn.f &= ~(NF | HF);
 	put_reg(reg, res);
 }
 
@@ -1138,6 +1143,7 @@ static void op_rla(unsigned char op, struct opinfo *oi)
 	regs.rn.f &= ~CF;
 	regs.rn.f |= (regs.rn.a >> 7) << 4;
 	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
+	regs.rn.f &= ~(NF | HF);
 	regs.rn.a = res;
 }
 
@@ -1154,6 +1160,7 @@ static void op_sla(unsigned char op, struct opinfo *oi)
 	regs.rn.f &= ~CF;
 	regs.rn.f |= ((val >> 7) << 4);
 	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
+	regs.rn.f &= ~(NF | HF);
 	put_reg(reg, res);
 }
 
@@ -1171,6 +1178,7 @@ static void op_rrc(unsigned char op, struct opinfo *oi)
 	regs.rn.f &= ~CF;
 	regs.rn.f |= (val & 1) << 4;
 	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
+	regs.rn.f &= ~(NF | HF);
 	put_reg(reg, res);
 }
 
@@ -1185,6 +1193,7 @@ static void op_rrca(unsigned char op, struct opinfo *oi)
 	regs.rn.f &= ~CF;
 	regs.rn.f |= (regs.rn.a & 1) << 4;
 	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
+	regs.rn.f &= ~(NF | HF);
 	regs.rn.a = res;
 }
 
@@ -1202,6 +1211,7 @@ static void op_rr(unsigned char op, struct opinfo *oi)
 	regs.rn.f &= ~CF;
 	regs.rn.f |= (val & 1) << 4;
 	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
+	regs.rn.f &= ~(NF | HF);
 	put_reg(reg, res);
 }
 
@@ -1216,6 +1226,7 @@ static void op_rra(unsigned char op, struct opinfo *oi)
 	regs.rn.f &= ~CF;
 	regs.rn.f |= (regs.rn.a & 1) << 4;
 	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
+	regs.rn.f &= ~(NF | HF);
 	regs.rn.a = res;
 }
 
@@ -1233,6 +1244,7 @@ static void op_sra(unsigned char op, struct opinfo *oi)
 	regs.rn.f &= ~CF;
 	regs.rn.f |= ((val & 1) << 4);
 	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
+	regs.rn.f &= ~(NF | HF);
 	put_reg(reg, res);
 }
 
@@ -1249,6 +1261,7 @@ static void op_srl(unsigned char op, struct opinfo *oi)
 	regs.rn.f &= ~CF;
 	regs.rn.f |= ((val & 1) << 4);
 	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
+	regs.rn.f &= ~(NF | HF);
 	put_reg(reg, res);
 }
 
@@ -1264,6 +1277,7 @@ static void op_swap(unsigned char op, struct opinfo *oi)
 	res = (val >> 4) |
 	      (val << 4);
 	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
+	regs.rn.f &= ~(CF | HF | NF);
 	put_reg(reg, res);
 }
 
@@ -1406,18 +1420,24 @@ static void op_inc(unsigned char op, struct opinfo *oi)
 {
 	int reg = (op >> 3) & 7;
 	unsigned char res;
+	unsigned char old;
 
 	if (reg != 6) {
 		DPRINTF(" %s %c", oi->name, regnames[reg]);
-		res = ++regs.ri[reg];
+		res = old = regs.ri[reg];
+		res++;
+		regs.ri[reg] = res;
 	} else {
 		unsigned short hl = REGS16_R(regs, HL);
 
-		res = mem_get(hl) + 1;
 		DPRINTF(" %s [HL]", oi->name);
+		res = old = mem_get(hl);
+		res++;
 		mem_put(hl, res);
 	}
 	if (res == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	if ((old & 7) > (res & 7)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
+	regs.rn.f &= ~ NF;
 }
 
 static void op_inc16(unsigned char op, struct opinfo *oi)
@@ -1428,25 +1448,30 @@ static void op_inc16(unsigned char op, struct opinfo *oi)
 	DPRINTF(" %s %s", oi->name, regnamech16[reg]);
 	res++;
 	REGS16_W(regs, reg, res);
-//	if (res == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
 }
 
 static void op_dec(unsigned char op, struct opinfo *oi)
 {
 	int reg = (op >> 3) & 7;
 	unsigned char res;
+	unsigned char old;
 
 	if (reg != 6) {
 		DPRINTF(" %s %c", oi->name, regnames[reg]);
-		res = --regs.ri[reg];
+		old = res = regs.ri[reg];
+		res--;
+		regs.ri[reg] = res;
 	} else {
 		unsigned short hl = REGS16_R(regs, HL);
 
-		res = mem_get(hl) - 1;
 		DPRINTF(" %s [HL]", oi->name);
+		res = old = mem_get(hl);
+		res--;
 		mem_put(hl, res);
 	}
 	if (res == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	if ((old & 7) > (res & 7)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
+	regs.rn.f |= NF;
 }
 
 static void op_dec16(unsigned char op, struct opinfo *oi)
@@ -1457,12 +1482,11 @@ static void op_dec16(unsigned char op, struct opinfo *oi)
 	DPRINTF(" %s %s", oi->name, regnamech16[reg]);
 	res--;
 	REGS16_W(regs, reg, res);
-//	if (res == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
 }
 
 static void op_add_sp_imm(unsigned char op, struct opinfo *oi)
 {
-	unsigned char imm = get_imm8();
+	char imm = get_imm8();
 	unsigned short old = REGS16_R(regs, SP);
 	unsigned short new = old;
 
@@ -1471,7 +1495,7 @@ static void op_add_sp_imm(unsigned char op, struct opinfo *oi)
 	REGS16_W(regs, SP, new);
 	if (old > new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
 	if ((old & 0xfff) > (new & 0xfff)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
-	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	regs.rn.f &= ~(ZF | NF);
 }
 
 static void op_add(unsigned char op, struct opinfo *oi)
@@ -1482,7 +1506,7 @@ static void op_add(unsigned char op, struct opinfo *oi)
 	DPRINTF(" %s A,", oi->name);
 	print_reg(op & 7);
 	regs.rn.a += get_reg(op & 7);
-	regs.rn.f &= ~SF;
+	regs.rn.f &= ~NF;
 	new = regs.rn.a;
 	if (old > new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
 	if ((old & 15) > (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
@@ -1497,7 +1521,7 @@ static void op_add_imm(unsigned char op, struct opinfo *oi)
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new += imm;
-	regs.rn.f &= ~SF;
+	regs.rn.f &= ~NF;
 	regs.rn.a = new;
 	if (old > new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
 	if ((old & 15) > (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
@@ -1516,7 +1540,7 @@ static void op_add_hl(unsigned char op, struct opinfo *oi)
 	new += REGS16_R(regs, reg);
 	REGS16_W(regs, HL, new);
 
-	regs.rn.f &= ~SF;
+	regs.rn.f &= ~NF;
 	if (old > new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
 	if ((old & 0xfff) > (new & 0xfff)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
 }
@@ -1530,7 +1554,7 @@ static void op_adc(unsigned char op, struct opinfo *oi)
 	print_reg(op & 7);
 	regs.rn.a += get_reg(op & 7);
 	regs.rn.a += (regs.rn.f & CF) > 0;
-	regs.rn.f &= ~SF;
+	regs.rn.f &= ~NF;
 	new = regs.rn.a;
 	if (old > new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
 	if ((old & 15) > (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
@@ -1546,7 +1570,7 @@ static void op_adc_imm(unsigned char op, struct opinfo *oi)
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new += imm;
 	new += (regs.rn.f & CF) > 0;
-	regs.rn.f &= ~SF;
+	regs.rn.f &= ~NF;
 	regs.rn.a = new;
 	if (old > new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
 	if ((old & 15) > (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
@@ -1564,6 +1588,7 @@ static void op_cp(unsigned char op, struct opinfo *oi)
 	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
 	if ((old & 15) < (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
 	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	regs.rn.f |= NF;
 }
 
 static void op_cp_imm(unsigned char op, struct opinfo *oi)
@@ -1577,6 +1602,7 @@ static void op_cp_imm(unsigned char op, struct opinfo *oi)
 	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
 	if ((old & 15) < (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
 	if (new == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	regs.rn.f |= NF;
 }
 
 static void op_sub(unsigned char op, struct opinfo *oi)
@@ -1587,7 +1613,7 @@ static void op_sub(unsigned char op, struct opinfo *oi)
 	DPRINTF(" %s A,", oi->name);
 	print_reg(op & 7);
 	regs.rn.a -= get_reg(op & 7);
-	regs.rn.f |= SF;
+	regs.rn.f |= NF;
 	new = regs.rn.a;
 	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
 	if ((old & 15) < (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
@@ -1602,7 +1628,7 @@ static void op_sub_imm(unsigned char op, struct opinfo *oi)
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new -= imm;
-	regs.rn.f |= SF;
+	regs.rn.f |= NF;
 	regs.rn.a = new;
 	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
 	if ((old & 15) < (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
@@ -1618,7 +1644,7 @@ static void op_sbc(unsigned char op, struct opinfo *oi)
 	print_reg(op & 7);
 	regs.rn.a -= get_reg(op & 7);
 	regs.rn.a -= (regs.rn.f & CF) > 0;
-	regs.rn.f |= SF;
+	regs.rn.f |= NF;
 	new = regs.rn.a;
 	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
 	if ((old & 15) < (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
@@ -1634,7 +1660,7 @@ static void op_sbc_imm(unsigned char op, struct opinfo *oi)
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new -= imm;
 	new -= (regs.rn.f & CF) > 0;
-	regs.rn.f |= SF;
+	regs.rn.f |= NF;
 	regs.rn.a = new;
 	if (old < new) regs.rn.f |= CF; else regs.rn.f &= ~CF;
 	if ((old & 15) < (new & 15)) regs.rn.f |= HF; else regs.rn.f &= ~HF;
@@ -1647,6 +1673,8 @@ static void op_and(unsigned char op, struct opinfo *oi)
 	print_reg(op & 7);
 	regs.rn.a &= get_reg(op & 7);
 	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	regs.rn.f &= ~(NF | CF);
+	regs.rn.f |= HF;
 }
 
 static void op_and_imm(unsigned char op, struct opinfo *oi)
@@ -1656,6 +1684,8 @@ static void op_and_imm(unsigned char op, struct opinfo *oi)
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	regs.rn.a &= imm;
 	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	regs.rn.f &= ~(NF | CF);
+	regs.rn.f |= HF;
 }
 
 static void op_or(unsigned char op, struct opinfo *oi)
@@ -1664,6 +1694,7 @@ static void op_or(unsigned char op, struct opinfo *oi)
 	print_reg(op & 7);
 	regs.rn.a |= get_reg(op & 7);
 	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	regs.rn.f &= ~(NF | CF | HF);
 }
 
 static void op_or_imm(unsigned char op, struct opinfo *oi)
@@ -1673,6 +1704,7 @@ static void op_or_imm(unsigned char op, struct opinfo *oi)
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	regs.rn.a |= imm;
 	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	regs.rn.f &= ~(NF | CF | HF);
 }
 
 static void op_xor(unsigned char op, struct opinfo *oi)
@@ -1681,6 +1713,7 @@ static void op_xor(unsigned char op, struct opinfo *oi)
 	print_reg(op & 7);
 	regs.rn.a ^= get_reg(op & 7);
 	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	regs.rn.f &= ~(NF | CF | HF);
 }
 
 static void op_xor_imm(unsigned char op, struct opinfo *oi)
@@ -1690,6 +1723,7 @@ static void op_xor_imm(unsigned char op, struct opinfo *oi)
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	regs.rn.a ^= imm;
 	if (regs.rn.a == 0) regs.rn.f |= ZF; else regs.rn.f &= ~ZF;
+	regs.rn.f &= ~(NF | CF | HF);
 }
 
 static void op_push(unsigned char op, struct opinfo *oi)
@@ -1712,18 +1746,21 @@ static void op_cpl(unsigned char op, struct opinfo *oi)
 {
 	DPRINTF(" %s", oi->name);
 	regs.rn.a = ~regs.rn.a;
+	regs.rn.f &= ~(NF | HF);
 }
 
 static void op_ccf(unsigned char op, struct opinfo *oi)
 {
 	DPRINTF(" %s", oi->name);
 	regs.rn.f ^= CF;
+	regs.rn.f &= ~(NF | HF);
 }
 
 static void op_scf(unsigned char op, struct opinfo *oi)
 {
 	DPRINTF(" %s", oi->name);
 	regs.rn.f |= CF;
+	regs.rn.f &= ~(NF | HF);
 }
 
 #if DEBUG == 1
@@ -2162,14 +2199,15 @@ static void show_reg_diffs(void)
 	for (i=6; i<8; i++) {
 		if (regs.ri[i] != oldregs.ri[i]) {
 			if (i == 6) { /* Flags */
-				if (regs.rn.f & ZF) DPRINTF("ZF ");
-				else DPRINTF("zf ");
-				if (regs.rn.f & SF) DPRINTF("SF ");
-				else DPRINTF("sf ");
-				if (regs.rn.f & HF) DPRINTF("HF ");
-				else DPRINTF("hf ");
-				if (regs.rn.f & CF) DPRINTF("CF ");
-				else DPRINTF("cf ");
+				if (regs.rn.f & ZF) DPRINTF("Z");
+				else DPRINTF("z");
+				if (regs.rn.f & NF) DPRINTF("N");
+				else DPRINTF("n");
+				if (regs.rn.f & HF) DPRINTF("H");
+				else DPRINTF("h");
+				if (regs.rn.f & CF) DPRINTF("C");
+				else DPRINTF("c");
+				DPRINTF(" ");
 			} else {
 				DPRINTF("%c=%02x ", regnames[i], regs.ri[i]);
 			}
