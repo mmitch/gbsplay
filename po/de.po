@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-12-12 23:57+0100\n"
+"POT-Creation-Date: 2003-12-13 05:06+0100\n"
 "PO-Revision-Date: 2003-12-12 21:16+0100\n"
 "Last-Translator: Tobias Diedrich <ranma@gmx.at>\n"
 "Language-Team: none\n"
@@ -30,7 +30,7 @@ msgstr "Titel"
 
 #: gbsxmms.c:168
 msgid "Length    "
-msgstr "Laenge    "
+msgstr "Länge    "
 
 #: gbsxmms.c:304
 msgid "File Info"
@@ -62,7 +62,7 @@ msgstr "Erweiterte Informationen"
 
 #: gbsxmms.c:453
 msgid "Next"
-msgstr "Naechter"
+msgstr "Nächster"
 
 #: gbsxmms.c:459
 msgid "Prev"
@@ -78,12 +78,12 @@ msgstr "Abbrechen"
 
 #: gbsxmms.c:526
 msgid "Error opening output plugin."
-msgstr "Konnte Ausgabeplugin nicht oeffnen."
+msgstr "Konnte Ausgabeplugin nicht öffnen."
 
 #: gbsplay.c:266
 #, c-format
 msgid "Could not open /dev/dsp: %s\n"
-msgstr "Konnte /dev/dsp nicht oeffnen: %s\n"
+msgstr "Konnte /dev/dsp nicht öffnen: %s\n"
 
 #: gbsplay.c:270
 #, c-format
@@ -108,7 +108,7 @@ msgstr "ioctl(dspfd, SNDCTL_DSP_SPEED, %d) fehlgeschlagen: %s\n"
 #: gbsplay.c:286
 #, c-format
 msgid "Requested rate %dHz, got %dHz.\n"
-msgstr "Angeforderte Samplingrate ist %dHz, tatsaechliche ist %dHz.\n"
+msgstr "Angeforderte Samplingrate ist %dHz, tatsächliche ist %dHz.\n"
 
 #: gbsplay.c:291
 #, c-format
@@ -125,7 +125,7 @@ msgid ""
 "No sound support on this platform.\n"
 "Use 'gbsplay -s' for stdout output."
 msgstr ""
-"Tonausgabe wird auf dieser Platform nicht unterstuetzt.\n"
+"Tonausgabe wird auf dieser Platform nicht unterstützt.\n"
 "Benutze 'gbsplay -s' um die Daten auf die Standardausgabe zu lenken."
 
 #: gbsplay.c:307
@@ -146,20 +146,20 @@ msgid ""
 "  -z  play subsongs in random mode\n"
 "  -Z  play subsongs in shuffle mode (repetitions possible)\n"
 msgstr ""
-"Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
+"Benutzung: %s [Option(en)] <GBS-Datei> [Starte_bei_Subsong [Stoppe_bei_Subsong] ]\n"
 "\n"
-"Available options are:\n"
-"  -f  set fadeout (%d seconds)\n"
-"  -g  set subsong gap (%d seconds)\n"
-"  -h  display this help and exit\n"
-"  -q  quiet\n"
-"  -r  set samplerate (%dHz)\n"
-"  -s  write to stdout\n"
-"  -t  set subsong timeout (%d seconds)\n"
-"  -T  set silence timeout (%d seconds)\n"
-"  -V  print version and exit\n"
-"  -z  play subsongs in random mode\n"
-"  -Z  play subsongs in shuffle mode (repetitions possible)\n"
+"Verfügbare Optionen sind:\n"
+"  -f  Ausblendzeit (%d Sekunden)\n"
+"  -g  Lücke (%d Sekunden)\n"
+"  -h  Diese Hilfe anzeigen und Programm beenden\n"
+"  -q  Leise\n"
+"  -r  Abspielrate (%dHz)\n"
+"  -s  Auf die Standardausgabe schreiben\n"
+"  -t  Zeitlimit (%d Sekunden)\n"
+"  -T  Zeitlimit für Stille (%d Sekunden)\n"
+"  -V  Version anzeigen und Programm beenden\n"
+"  -z  Subsongs im Zufallsmodus abspielen\n"
+"  -Z  Subsongs gemischt abspielen (Wiederholungen möglich)\n"
 
 #: gbsplay.c:468
 msgid "Untitled"
@@ -169,10 +169,10 @@ msgstr "Unbenannt"
 #, c-format
 msgid ""
 "\n"
-"Catched signal %d, exiting...\n"
+"Caught signal %d, exiting...\n"
 msgstr ""
 "\n"
-"Signal %d abgefangen, beende Ausfuehrung...\n"
+"Signal %d abgefangen, beende Ausführung...\n"
 
 #: gbsplay.c:577
 msgid ""
@@ -181,8 +181,8 @@ msgid ""
 "           [ ] pause/resume   [1-4] mute channel"
 msgstr ""
 "\n"
-"commands:  [p]revious subsong   [n]ext subsong   [q]uit player\n"
-"           [ ] pause/resume   [1-4] mute channel"
+"Kommandos: [p] vorheriger Subsong  [n]ächster Subsong  [q] Player beenden\n"
+"           [ ] Pause/Wiederaufnahme   [1-4] Kanal unterdrücken"
 
 #: gbs.c:102
 #, c-format
@@ -212,8 +212,8 @@ msgstr ""
 "Initadresse:    0x%04x\n"
 "Abspieladresse: 0x%04x\n"
 "Stack pointer:  0x%04x\n"
-"Dateigroesse:   0x%08x\n"
-"ROM-Groesse:    0x%08x (%d banks)\n"
+"Dateigrösse:    0x%08x\n"
+"ROM-Grösse:     0x%08x (%d Bänke)\n"
 "Subsongs:       %d\n"
 
 #: gbs.c:207
@@ -251,7 +251,7 @@ msgstr "Kein Zeitlimit"
 #: gbs.c:273 gbs.c:356
 #, fuzzy, c-format
 msgid "Could not open %s: %s\n"
-msgstr "Konnte /dev/dsp nicht oeffnen: %s\n"
+msgstr "Konnte /dev/dsp nicht öffnen: %s\n"
 
 #: gbs.c:363
 #, c-format
@@ -261,20 +261,20 @@ msgstr "Keine GBS-Datei: %s\n"
 #: gbs.c:368
 #, c-format
 msgid "GBS Version %d unsupported.\n"
-msgstr "GBS Version %d wird nicht unterstuetzt.\n"
+msgstr "GBS Version %d wird nicht unterstützt.\n"
 
 #: gbs.c:405
 #, c-format
 msgid ""
 "Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n"
 msgstr ""
-"Warnung: Extended header gefunden, aber die Pruefsumme stimmt nicht (0x%08x !"
+"Warnung: Extended header gefunden, aber die Prüfsumme stimmt nicht (0x%08x !"
 "= 0x%08x).\n"
 
 #: gbs.c:448
 #, c-format
 msgid "Warning: File CRC does not match (0x%08x != 0x%08x).\n"
-msgstr "Warnung: Dateipruefsumme stimmt nicht ueberein (0x%08x != 0x%08x).\n"
+msgstr "Warnung: Dateiprüfsumme stimmt nicht überein (0x%08x != 0x%08x).\n"
 
 #: gbsinfo.c:25
 #, c-format
