@@ -1,7 +1,34 @@
-<<$Id: HISTORY,v 1.6 2003/12/07 09:49:14 mitch Exp $>>
+<<$Id: HISTORY,v 1.7 2003/12/28 16:10:12 mitch Exp $>>
 
 
 gbsplay HISTORY
+
+
+2003/12/28  -  0.0.4-pre1
+~~~~~~~~~~~~~~~~~~~~~~~~~
+- gbsplay:
+  - allow -1 as subsong (plays default subsong)
+  - improved buffer handling
+  - changed -z and -Z description
+  - shuffled playlists are reproducible over playlist boundaries
+
+- gbsxmms:
+  - builds on FreeBSD
+
+- gbsinfo:
+  - change output to an even more script friendly format
+
+- gbs2ogg.sh:
+  - fix path to gbsinfo
+
+- internationalization:
+  - gettext support for gbsplay and gbsinfo
+  - German translation
+
+- build process:
+  - fixes for non-GNU find(1)
+  - fixes for non-Debian mktemp(1)
+  - rebuild only changed files
 
 
 2003/12/07  -  0.0.3
