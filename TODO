@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.38 2003/12/09 21:24:45 mitch Exp $>>
+<<$Id: TODO,v 1.39 2003/12/09 21:44:48 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -32,3 +32,7 @@ TODO list for gbsplay.
 (X)  make gbsinfo output *really* script friendly
 
 (X)  configure: support for stripped-down versions of mktemp
+
+(X)  gbsplay/gbshw: improved buffer handling
+
+(X)  gbsplay: allow -1 as subsong (default)
