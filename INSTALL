@@ -1,4 +1,4 @@
-<<$Id: INSTALL,v 1.4 2004/04/14 18:47:38 ranmachan Exp $>>
+<<$Id: INSTALL,v 1.5 2004/09/05 23:51:36 mitch Exp $>>
 
 
 gbsplay INSTALL instructions
@@ -15,6 +15,12 @@ Run "make uninstall" (as root) to remove it afterwards.
 
 Be aware that you need a GNU make!
 So on FreeBSD, you need to run "gmake" instead of "make".
+
+If you want to build the XMMS plugin, you must have the XMMS
+development files installed (header files etc.).  If you have
+installed XMMS but the configure script does not detect it, you
+probably need to install an extra package named something like
+"xmms-dev".
 
 Note to Solaris users:
 Solaris /bin/sh is not POSIX compatible (${foo#bar} and ${foo%bar} are
