@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <math.h>
 
 #define ZF	0x80
 #define SF	0x40
@@ -465,7 +466,7 @@ static void io_put(unsigned short addr, unsigned char val)
 					ch1.duty_tc = ch1.div_tc*ch1.duty/8;
 					ch1.len = 64 - len;
 					ch1.len_enable = (val & 0x40) > 0;
-					printf(" ch1: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch1.volume, ch1.env_dir, ch1.env_speed_tc, ch1.duty, ch1.len, ch1.len_enable, ch1.div_tc);
+//					printf(" ch1: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch1.volume, ch1.env_dir, ch1.env_speed_tc, ch1.duty, ch1.len, ch1.len_enable, ch1.div_tc);
 					ch1.len *=2;
 					ch1.env_speed *= 8;
 					ch1.env_speed_tc *= 8;
@@ -489,32 +490,41 @@ static void io_put(unsigned short addr, unsigned char val)
 					ch2.duty_tc = ch2.div_tc*ch2.duty/8;
 					ch2.len = 64 - len;
 					ch2.len_enable = (val & 0x40) > 0;
-					printf(" ch2: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch2.volume, ch2.env_dir, ch2.env_speed, ch2.duty, ch2.len, ch2.len_enable, ch2.div_tc);
+//					printf(" ch2: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch2.volume, ch2.env_dir, ch2.env_speed, ch2.duty, ch2.len, ch2.len_enable, ch2.div_tc);
 					ch2.len *=2;
 					ch2.env_speed *= 8;
 					ch2.env_speed_tc *= 8;
 				}
 				break;
+			case 0xff1c:
+				{
+					int vol = (ioregs[0x1c] >> 5) & 3;
+					if (vol == 0) {
+						ch3.master = 0;
+						ch3.volume = 0;
+					} else {
+						ch3.volume = vol - 1;
+					}
+					break;
+				}
 			case 0xff1e:
 				if (val & 0x80) {
 					int vol = (ioregs[0x1c] >> 5) & 3;
-					int envdir = (ioregs[0x1c] >> 3) & 1;
-					int envspd = ioregs[0x1c] & 7;
 					int len = ioregs[0x1b] & 0x3f;
 					int div = ioregs[0x1d];
 					div |= ((int)val & 7) << 8;
 					ch3.master = (ioregs[0x1a] & 0x80) > 0; 
-					if (vol == 0) ch3.master = 0;
-					ch3.volume = vol - 1;
-					ch3.env_dir = envdir;
-					ch3.env_speed = ch3.env_speed_tc = envspd;
+					if (vol == 0) {
+						ch3.master = 0;
+						ch3.volume = 0;
+					} else {
+						ch3.volume = vol - 1;
+					}
 					ch3.div_tc = 2048 - div;
 					ch3.len = 64 - len;
 					ch3.len_enable = (val & 0x40) > 0;
-					printf(" ch3: sft=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch3.volume, ch3.env_dir, ch3.env_speed, ch3.duty, ch3.len, ch3.len_enable, ch3.div_tc);
+//					printf(" ch3: sft=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch3.volume, ch3.env_dir, ch3.env_speed, ch3.duty, ch3.len, ch3.len_enable, ch3.div_tc);
 					ch3.len *=2;
-					ch3.env_speed *= 8;
-					ch3.env_speed_tc *= 8;
 				}
 				break;
 			case 0xff23:
@@ -535,7 +545,7 @@ static void io_put(unsigned short addr, unsigned char val)
 					else ch4.div_tc /= 2;
 					ch4.len = 64 - len;
 					ch4.len_enable = (val & 0x40) > 0;
-					printf(" ch4: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch4.volume, ch4.env_dir, ch4.env_speed, ch4.duty, ch4.len, ch4.len_enable, ch4.div_tc);
+//					printf(" ch4: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch4.volume, ch4.env_dir, ch4.env_speed, ch4.duty, ch4.len, ch4.len_enable, ch4.div_tc);
 					ch4.len *=2;
 					ch4.env_speed *= 8;
 					ch4.env_speed_tc *= 8;
@@ -2167,10 +2177,10 @@ static void do_sound(int cycles)
 					ch3.env_speed = ch3.env_speed_tc;
 					if (!ch3.env_dir) {
 						if (ch3.volume > 0)
-							ch2.volume--;
+							ch3.volume--;
 					} else {
 						if (ch3.volume < 15)
-							ch2.volume++;
+							ch3.volume++;
 					}
 				}
 			}
@@ -2255,6 +2265,40 @@ static void open_gbs(char *name, int i)
 	close(fd);
 }
 
+static char *notes[] = {
+ "C-0","C#0","D-0","D#0","E-0","F-0","F#0","G-0","G#0","A-0","A#0","H-0",
+ "C-1","C#1","D-1","D#1","E-1","F-1","F#1","G-1","G#1","A-1","A#1","H-1",
+ "C-2","C#2","D-2","D#2","E-2","F-2","F#2","G-2","G#2","A-2","A#2","H-2",
+ "C-3","C#3","D-3","D#3","E-3","F-3","F#3","G-3","G#3","A-3","A#3","H-3",
+ "C-4","C#4","D-4","D#4","E-4","F-4","F#4","G-4","G#4","A-4","A#4","H-4",
+ "C-5","C#5","D-5","D#5","E-5","F-5","F#5","G-5","G#5","A-5","A#5","H-5"
+};
+
+#define FREQ(x) (262144 / x)
+#define NOTE(x) ((log(FREQ(x))/log(2)-log(130.67187)/log(2))*12 + .2)
+
+char *vols[] = {
+	"%%%#",
+	"%%%=",
+	"%%%-",
+	"%%% ",
+	"%%# ",
+	"%%= ",
+	"%%- ",
+	"%%  ",
+	"%#  ",
+	"%=  ",
+	"%-  ",
+	"%   ",
+	"#   ",
+	"=   ",
+	"-   ",
+	"    ",
+};
+
+static int statustc = 83886;
+static int statuscnt;
+
 int main(int argc, char **argv)
 {
 	dspfd = open("/dev/dsp", O_WRONLY);
@@ -2266,9 +2310,12 @@ int main(int argc, char **argv)
 	ioctl(dspfd, SNDCTL_DSP_STEREO, &c);
 	c=44100;
 	ioctl(dspfd, SNDCTL_DSP_SPEED, &c);
+	c=(4 << 16) + 11;
+	ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, &c);
 	sound_div_tc = (long long)4194304*65536/sound_rate;
 	ch1.duty = 4;
 	ch2.duty = 4;
+	ch1.div_tc = ch2.div_tc = ch3.div_tc = 1;
 	if (argc != 3) {
 		printf("Usage: %s <gbs-file> <subsong>\n", argv[0]);
 		exit(1);
@@ -2283,11 +2330,30 @@ int main(int argc, char **argv)
 		} else cycles = 16;
 		clock += cycles;
 		timer -= cycles;
+		statuscnt -= cycles;
 		if (timer < 0) {
 			timer += timertc;
 			halted = 0;
 			push(REGS16_R(regs, PC));
 			REGS16_W(regs, PC, gbs_play);
+		}
+		if (statuscnt < 0) {
+			char *n1 = notes[(int)NOTE(ch1.div_tc)];
+			char *n2 = notes[(int)NOTE(ch2.div_tc)];
+			char *n3 = notes[(int)NOTE(ch3.div_tc)];
+			statuscnt += statustc;
+			if (!ch1.master) n1 = "---";
+			if (!ch2.master) n2 = "---";
+			if (!ch3.master) n3 = "---";
+			printf("ch1:%s %s ch2:%s %s  ch3:%s %s ch4:%s\r",
+				n1,
+				vols[15-ch1.volume],
+				n2,
+				vols[15-ch2.volume],
+				n3,
+				vols[ch3.volume << 2],
+				vols[15-ch4.volume]);
+			fflush(stdout);
 		}
 		do_sound(cycles);
 		cycles = 0;

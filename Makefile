@@ -1,5 +1,5 @@
 CFLAGS := -Wall -Wstrict-prototypes -Os -g
-LDFLAGS :=
+LDFLAGS := -lm
 
 SRCS := gbsplay.c
 
@@ -24,7 +24,7 @@ clean:
 	find -regex ".*\.\([aos]\|so\)" -exec rm -f "{}" \;
 
 gbsplay: gbsplay.o 
-	$(CC) -o $@ $<
+	$(CC) $(LDFLAGS) -o $@ $<
 
 .SUFFIXES: .i .s
 
