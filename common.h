@@ -16,7 +16,7 @@
 #  include <locale.h>
 #  include <libintl.h>
 
-#  if NO_GLOBAL_TEXTDOMAIN == 1
+#  if GBS_PRESERVE_TEXTDOMAIN == 1
 
 static inline char* _(const char *msgid)
 {

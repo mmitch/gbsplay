@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.31 2004/01/07 22:42:26 ranma Exp $
+/* $Id: gbsxmms.c,v 1.32 2004/01/07 22:45:43 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -20,7 +20,7 @@
 #include <xmms/plugin.h>
 #include <gtk/gtk.h>
 
-#define NO_GLOBAL_TEXTDOMAIN 1
+#define GBS_PRESERVE_TEXTDOMAIN 1
 
 #include "common.h"
 #include "gbhw.h"
