@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.51.2.3 2004/04/09 17:27:56 mitch Exp $
+# $Id: configure,v 1.51.2.4 2004/04/13 13:07:22 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -27,7 +27,7 @@ if [ -d /usr/ucb ]; then
 fi
 
 ## set version number
-VERSION=0.0.6-rc1
+VERSION=0.0.6-rc2
 
 ##### begin of subroutines
 
@@ -408,7 +408,7 @@ if [ "$use_devdsp" != no ]; then
     use_devdsp=$have_sys_soundcard_h
 fi
 
-if [ "$use_nas" != no ]; then
+if [ "$use_nas" = yes ]; then
     check_include audio/audiolib.h
     use_nas=$have_audio_audiolib_h
 fi
