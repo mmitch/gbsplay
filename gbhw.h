@@ -1,4 +1,4 @@
-/* $Id: gbhw.h,v 1.12 2004/03/10 01:48:15 ranmachan Exp $
+/* $Id: gbhw.h,v 1.13 2004/10/23 21:12:49 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -10,6 +10,7 @@
 #define _GBHW_H_
 
 #include <inttypes.h>
+#include "common.h"
 
 #define GBHW_CLOCK 4194304
 
