@@ -1,4 +1,4 @@
-.\" $Id: gbsplay.in.1,v 1.14 2004/04/13 14:14:43 mitch Exp $
+.\" $Id: gbsplay.in.1,v 1.15 2004/06/03 18:37:41 mitch Exp $
 .\" This manpage 2003-2004 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
 .TH "gbsplay" "1" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
@@ -32,7 +32,7 @@ Enable loop mode.  When the last subsong is played, playback starts again with t
 Select sound output plugin \fIplugin\fR.  Default depends on compilation options.  Select \fIlist\fR to view a list of all available output plugins.
 .TP
 \fI\-q\fR
-Be quiet, show only error messages.
+Be quieter, reduce verbosity.  Can be applied multiple times.  Default verbosity is 3.
 .TP
 \fI\-r samplerate\fR
 Set the samplerate to \fIsamplerate\fR Hz.  Default value is 44100Hz.
@@ -45,6 +45,9 @@ Set subsong timeout to \fIsubsong\-timeout\fR seconds.  When a subsong has been 
 .TP
 \fI\-T silence\-timeout\fR
 Set silence timeout to \fIsilence\-timeout\fR seconds.  When a subsong contains silence for the given time, the player will skip to the next subsong.  Default value is 2 seconds.
+.TP
+\fI\-v\fR
+Increase verbosity, print more information.  Can be applied multiple times.  Default verbosity is 3.
 .TP
 \fI\-V\fR
 Display version number and exit.
