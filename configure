@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.37 2004/01/19 20:20:20 mitch Exp $
+# $Id: configure,v 1.38 2004/01/20 21:05:41 ranma Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -201,9 +201,22 @@ Optional Features:
   --enable-sharedlibgbs  build libgbs as a shared library
 
 Optional Packages:
-  --with-xmmsplugin      build xmms input plugin
+  --without-xmmsplugin   do not build xmms input plugin
 EOF
 	exit $1
+}
+
+OPTS="build_xmmsplugin use_i18n use_sharedlibgbs"
+
+isknown()
+{
+	for i in $OPTS; do
+		if [ "$i" = "$1" ]; then
+			return 0
+		fi
+	done
+
+	return 1
 }
 
 while [ $1 ]; do
@@ -228,21 +241,27 @@ while [ $1 ]; do
 		;;
 		--have-*)
 		eval "have_${1#--have-}=yes"
+		isknown have_${1#--have-} || usage 1
 		;;
 		--donthave-*)
 		eval "have_${1#--donthave-}=no"
+		isknown have_${1#--donthave-} || usage 1
 		;;
 		--enable-*)
 		eval "use_${1#--enable-}=yes"
+		isknown use_${1#--enable-} || usage 1
 		;;
 		--disable-*)
 		eval "use_${1#--disable-}=no"
+		isknown use_${1#--disable-} || usage 1
 		;;
 		--with-*)
 		eval "build_${1#--with-}=yes"
+		isknown build_${1#--with-} || usage 1
 		;;
 		--without-*)
 		eval "build_${1#--without-}=no"
+		isknown build_${1#--without-} || usage 1
 		;;
 		--help)
 		usage 0
