@@ -1,4 +1,6 @@
-# $Id: subdir.mk,v 1.1 2003/12/12 23:05:52 ranma Exp $
+# $Id: subdir.mk,v 1.2 2003/12/14 00:31:48 ranma Exp $
+
+ifeq ($(have_xgettext),yes)
 
 pos  := $(wildcard po/*.po)
 mos  := $(patsubst %.po,%.mo,$(pos))
@@ -17,3 +19,5 @@ po/po.d: po/subdir.mk
 
 %.mo: %.po
 	msgfmt -o $@ $<
+
+endif
