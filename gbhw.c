@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.6 2003/08/24 11:59:58 ranma Exp $
+/* $Id: gbhw.c,v 1.7 2003/08/24 12:11:36 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -119,7 +119,7 @@ static void io_put(unsigned short addr, unsigned char val)
 				int len = val & 0x3f;
 
 				gbhw_ch[chn].duty_ctr = dutylookup[duty_ctr];
-				gbhw_ch[chn].duty_tc = gbhw_ch[chn].div_tc*gbhw_ch[0].duty_ctr/8;
+				gbhw_ch[chn].duty_tc = gbhw_ch[chn].div_tc*gbhw_ch[chn].duty_ctr/8;
 				gbhw_ch[chn].len = (64 - len)*2;
 
 				break;
@@ -148,7 +148,7 @@ static void io_put(unsigned short addr, unsigned char val)
 
 				div |= ((int)ioregs[0x14 + 5*chn] & 7) << 8;
 				gbhw_ch[chn].div_tc = 2048 - div;
-				gbhw_ch[chn].duty_tc = gbhw_ch[chn].div_tc*gbhw_ch[0].duty_ctr/8;
+				gbhw_ch[chn].duty_tc = gbhw_ch[chn].div_tc*gbhw_ch[chn].duty_ctr/8;
 
 				if (addr == 0xff13 ||
 				    addr == 0xff18 ||
