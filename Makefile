@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.85 2004/07/05 19:49:30 mitch Exp $
+# $Id: Makefile,v 1.86 2004/07/08 13:51:40 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -249,7 +249,7 @@ config.mk: configure
 
 %.d: %.c config.mk
 	@echo DEP $< -o $@
-	@./depend.sh $< config.mk > $@
+	@./depend.sh $< config.mk > $@ || rm -f $@
 
 %.1: %.in.1
 	sed -f config.sed $< > $@
