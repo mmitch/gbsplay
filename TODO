@@ -1,11 +1,10 @@
-<<$Id: TODO,v 1.17 2003/09/20 10:55:56 mitch Exp $>>
+<<$Id: TODO,v 1.18 2003/09/20 18:31:01 mitch Exp $>>
 
 
 TODO list for gbsplay.
 
 
 ### bugs
-
 
 
 ### unspecified: (bits'n'ideas)
@@ -35,6 +34,9 @@ TODO list for gbsplay.
 
 (X)  BUGFIX configure:
      Not all temporary files were deleted.
+
+(X)  BUGFIX gbsplay:
+     subsong_stop default was set to 0.
 
 ( )  make gbsinfo output more script friendly
      (perhaps via with commandline switch)
