@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.14 2003/08/24 13:30:10 mitch Exp $
+# $Id: Makefile,v 1.15 2003/08/24 13:41:08 mitch Exp $
 
 prefix = /usr/local
 exec_prefix = ${prefix}
@@ -22,7 +22,7 @@ OBJS := $(patsubst %.c,%.o,$(filter %.c,$(SRCS)))
 # include the dependency files
 
 %.d: %.c
-	./depend.sh $< $(CFLAGS) > $@
+	CC=$(CC) ./depend.sh $< $(CFLAGS) > $@
 
 include $(OBJS:.o=.d)
 
