@@ -1,4 +1,4 @@
-/* $Id: gbsinfo.c,v 1.5 2004/03/12 19:02:15 mitch Exp $
+/* $Id: gbsinfo.c,v 1.6 2004/04/08 16:54:36 yuuhi Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
                 usage(1);
         }
 
-	if ((gbs = gbs_open(argv[1])) == NULL) exit(1);
+	if ((gbs = gbs_open(argv[0])) == NULL) exit(1);
 	gbs_printinfo(gbs, 1);
 	gbs_close(gbs);
 
