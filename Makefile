@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.27 2003/08/30 19:36:10 mitch Exp $
+# $Id: Makefile,v 1.28 2003/08/31 08:30:08 mitch Exp $
 
 include config.mk
 
@@ -82,7 +82,7 @@ dist:	distclean
 	install -m 644 *.c ./gbsplay/
 	install -m 644 *.h ./gbsplay/
 	install -m 644 gbsplay.1 gbsinfo.1 ./gbsplay/
-	install -m 644 README ./gbsplay/
+	install -m 644 README TODO ./gbsplay/
 	tar -c gbsplay/ -vzf ../gbsplay.tar.gz
 	rm -rf ./gbsplay
 
