@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.27 2003/08/24 11:59:58 ranma Exp $
+/* $Id: gbsplay.c,v 1.28 2003/08/24 12:19:41 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -60,7 +60,7 @@ static const char playercode[] = {
 	0x7a,              /* 0086:  ld   a, d       */
 	0x01, 0x8c, 0x00,  /* 0087:  ld   bc, 0x008c */
 	0xc5,              /* 008a:  push bc         */
-	0xe9,              /* 008b:  jp   [hl]       */
+	0xe9,              /* 008b:  jp   hl         */
 	0xfb,              /* 008c:  ei              */
 	0x76,              /* 008d:  halt            */
 	0xe1,              /* 008e:  pop  hl         */
@@ -73,7 +73,7 @@ static const char playercode[] = {
 	0x7a,              /* 0097:  ld   a, d       */
 	0x01, 0x9d, 0x00,  /* 0098:  ld   bc, 0x009d */
 	0xc5,              /* 009b:  push bc         */
-	0xe9,              /* 009c:  jp   [hl]       */
+	0xe9,              /* 009c:  jp   hl         */
 	0x18, 0xee,        /* 009d:  jr $-6          */
 
 	0x80, 0xbf, 0x00, 0x00, 0xbf, /* 009f: initdata */
@@ -322,7 +322,7 @@ int main(int argc, char **argv)
 			    gbhw_ch[2].volume == 0 &&
 			    gbhw_ch[3].volume == 0) {
 				silencectr++;
-			}
+			} else silencectr = 0;
 
 			if (time > 3*60 || silencectr > 100) {
 				subsong++;
