@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.12 2003/08/23 14:16:40 ranma Exp $
+/* $Id: gbsplay.c,v 1.13 2003/08/23 14:37:56 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -18,6 +18,10 @@
 #include <string.h>
 #include <math.h>
 
+#if !BYTE_ORDER || !BIG_ENDIAN || !LITTLE_ENDIAN
+#error endian defines missing
+#endif
+
 #define ZF	0x80
 #define NF	0x40
 #define HF	0x20
@@ -29,13 +33,6 @@
 #define FA 3
 #define SP 4
 #define PC 5
-
-#define REGS16_R(r, i) ((r.ri[(i)*2]<<8) + r.ri[(i)*2+1])
-#define REGS16_W(r, i, x) do { \
-	unsigned short v = x; \
-	r.ri[(i)*2] = v >> 8; \
-	r.ri[(i)*2+1] = v & 0xff; \
-} while (0)
 
 #define DEBUG 0
 
@@ -52,6 +49,38 @@ static inline void foo(void)
 #define DEB(x) foo()
 #endif
 
+#if BYTE_ORDER == LITTLE_ENDIAN
+
+#define REGS16_R(r, i) (*((unsigned short*)&r.ri[i*2]))
+#define REGS16_W(r, i, x) (*((unsigned short*)&r.ri[i*2])) = x
+#define REGS8_R(r, i) (r.ri[i^1])
+#define REGS8_W(r, i, x) (r.ri[i^1]) = x
+
+static struct regs {
+	union {
+		unsigned char ri[12];
+		struct {
+			unsigned char c;
+			unsigned char b;
+			unsigned char e;
+			unsigned char d;
+			unsigned char l;
+			unsigned char h;
+			unsigned char a;
+			unsigned char f;
+			unsigned short sp;
+			unsigned short pc;
+		} rn;
+	};
+} regs;
+
+#else
+
+#define REGS16_R(r, i) (*((unsigned short*)&r.ri[i*2]))
+#define REGS16_W(r, i, x) (*((unsigned short*)&r.ri[i*2])) = x
+#define REGS8_R(r, i) (*((unsigned short*)&r.ri[i*2]))
+#define REGS8_W(r, i, x) (*((unsigned short*)&r.ri[i*2])) = x
+
 static struct regs {
 	union {
 		unsigned char ri[12];
@@ -64,11 +93,13 @@ static struct regs {
 			unsigned char l;
 			unsigned char f;
 			unsigned char a;
-			unsigned short sp_dontuse;
-			unsigned short pc_dontuse;
+			unsigned short sp;
+			unsigned short pc;
 		} rn;
 	};
 } regs;
+
+#endif
 
 static struct regs oldregs;
 
@@ -1049,14 +1080,14 @@ static unsigned char get_reg(int i)
 {
 	if (i == 6) /* indirect memory access by [HL] */
 		return mem_get(REGS16_R(regs, HL));
-	return regs.ri[i];
+	return REGS8_R(regs, i);
 }
 
 static void put_reg(int i, unsigned char val)
 {
 	if (i == 6) /* indirect memory access by [HL] */
 		mem_put(REGS16_R(regs, HL), val);
-	else regs.ri[i] = val;
+	else REGS8_W(regs, i, val);
 }
 
 static void op_unknown(unsigned char op, struct opinfo *oi)
@@ -1339,7 +1370,7 @@ static void op_ld(unsigned char op, struct opinfo *oi)
 	} else {
 		DPRINTF(" %s %c,", oi->name, regnames[dst]);
 		print_reg(src);
-		regs.ri[dst] = get_reg(src);
+		REGS8_W(regs, dst, get_reg(src));
 	}
 }
 
@@ -1442,9 +1473,9 @@ static void op_inc(unsigned char op, struct opinfo *oi)
 
 	if (reg != 6) {
 		DPRINTF(" %s %c", oi->name, regnames[reg]);
-		res = old = regs.ri[reg];
+		res = old = REGS8_R(regs, reg);
 		res++;
-		regs.ri[reg] = res;
+		REGS8_W(regs, reg, res);
 	} else {
 		unsigned short hl = REGS16_R(regs, HL);
 
@@ -1476,9 +1507,9 @@ static void op_dec(unsigned char op, struct opinfo *oi)
 
 	if (reg != 6) {
 		DPRINTF(" %s %c", oi->name, regnames[reg]);
-		old = res = regs.ri[reg];
+		old = res = REGS8_R(regs, reg);
 		res--;
-		regs.ri[reg] = res;
+		REGS8_W(regs, reg, res);
 	} else {
 		unsigned short hl = REGS16_R(regs, HL);
 
@@ -2194,7 +2225,7 @@ static void dump_regs(void)
 
 	DPRINTF("; ");
 	for (i=0; i<8; i++) {
-		DPRINTF("%c=%02x ", regnames[i], regs.ri[i]);
+		DPRINTF("%c=%02x ", regnames[i], REGS8_R(regs, i));
 	}
 	for (i=5; i<6; i++) {
 		DPRINTF("%s=%04x ", regnamech16[i], REGS16_R(regs, i));
@@ -2215,7 +2246,7 @@ static void show_reg_diffs(void)
 		}
 	}
 	for (i=6; i<8; i++) {
-		if (regs.ri[i] != oldregs.ri[i]) {
+		if (REGS8_R(regs, i) != REGS8_R(oldregs, i)) {
 			if (i == 6) { /* Flags */
 				if (regs.rn.f & ZF) DPRINTF("Z");
 				else DPRINTF("z");
@@ -2227,9 +2258,9 @@ static void show_reg_diffs(void)
 				else DPRINTF("c");
 				DPRINTF(" ");
 			} else {
-				DPRINTF("%c=%02x ", regnames[i], regs.ri[i]);
+				DPRINTF("%c=%02x ", regnames[i], REGS8_R(regs,i));
 			}
-			oldregs.ri[i] = regs.ri[i];
+			REGS8_W(oldregs, i, REGS8_R(regs, i));
 		}
 	}
 	for (i=4; i<5; i++) {
