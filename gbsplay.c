@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.65 2003/12/06 02:42:36 ranma Exp $
+/* $Id: gbsplay.c,v 1.66 2003/12/06 23:31:43 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -79,6 +79,12 @@ static int usestdout = 0;
 
 static char *cfgfile = ".gbsplayrc";
 
+static int16_t samples[4096];
+static struct gbhw_buffer buf = {
+.data = samples,
+.pos  = 0,
+.len  = sizeof(samples)/sizeof(int16_t),
+};
 
 static int getnote(int div)
 {
@@ -147,10 +153,11 @@ static void precalc_vols(void)
 	}
 }
 
-void callback(void *buf, int len, void *priv)
+void callback(struct gbhw_buffer *buf, void *priv)
 {
 	if (dspfd != -1)
-		write(dspfd, buf, len);
+		write(dspfd, buf->data, buf->pos*sizeof(int16_t));
+	buf->pos = 0;
 }
 
 static struct cfg_option options[] = {
@@ -583,6 +590,7 @@ int main(int argc, char **argv)
 	}
 	
 	setup_playmode(gbs);
+	gbhw_setbuffer(&buf);
 	gbs_playsong(gbs, subsong);
 	if (!quiet) {
 		gbs_printinfo(gbs, 0);

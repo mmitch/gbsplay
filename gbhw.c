@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.22 2003/12/06 02:41:37 ranma Exp $
+/* $Id: gbhw.c,v 1.23 2003/12/06 23:31:43 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -262,8 +262,7 @@ static void extram_put(uint32_t addr, uint8_t val)
 	extram[addr & 0x1fff] = val;
 }
 
-static short soundbuf[4096];
-static int soundbufpos;
+static struct gbhw_buffer *soundbuf = NULL;
 static int sound_div_tc;
 static int sound_div;
 static const int main_div_tc = 32;
@@ -355,8 +354,10 @@ static void gb_sound(int cycles)
 		l_smpl *= master_volume/256;
 		r_smpl /= 256;
 		l_smpl /= 256;
-		soundbuf[soundbufpos++] = l_smpl;
-		soundbuf[soundbufpos++] = r_smpl;
+		if (soundbuf != NULL && soundbuf->pos < soundbuf->len) {
+			soundbuf->data[soundbuf->pos++] = l_smpl;
+			soundbuf->data[soundbuf->pos++] = r_smpl;
+		}
 		if (l_smpl > lmaxval) lmaxval = l_smpl;
 		if (l_smpl < lminval) lminval = l_smpl;
 		if (r_smpl > rmaxval) rmaxval = r_smpl;
@@ -364,9 +365,10 @@ static void gb_sound(int cycles)
 		smpldivisor = 0;
 		l_smpl = 0;
 		r_smpl = 0;
-		if (soundbufpos >= 4096) {
-			soundbufpos = 0;
-			callback(soundbuf, sizeof(soundbuf), callbackpriv);
+		if (soundbuf != NULL &&
+		    callback != NULL &&
+		    soundbuf->pos >= soundbuf->len) {
+			callback(soundbuf, callbackpriv);
 		}
 	}
 	if (gbhw_ch[2].master) for (i=0; i<cycles; i++) {
@@ -436,6 +438,11 @@ void gbhw_setcallback(gbhw_callback_fn fn, void *priv)
 	callbackpriv = priv;
 }
 
+void gbhw_setbuffer(struct gbhw_buffer *buffer)
+{
+	soundbuf = buffer;
+}
+
 void gbhw_setrate(int rate)
 {
 	sound_div_tc = (long long)HW_CLOCK*65536/rate;
@@ -461,7 +468,8 @@ void gbhw_init(uint8_t *rombuf, uint32_t size)
 	memset(gbhw_ch, 0, sizeof(gbhw_ch));
 	master_volume = MASTER_VOL_MAX;
 	master_fade = 0;
-	soundbufpos = 0;
+	if (soundbuf)
+		soundbuf->pos = 0;
 	lminval = rminval = INT_MAX;
 	lmaxval = rmaxval = INT_MIN;
 	for (i=0; i<4; i++) {

@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.20 2003/12/06 18:07:01 ranma Exp $
+/* $Id: gbsxmms.c,v 1.21 2003/12/06 23:31:43 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -48,6 +48,13 @@ static int subsongtimeout = 2*60;
 static int rate = 44100;
 
 static int stopthread = 1;
+
+static int16_t samples[4096];
+static struct gbhw_buffer buffer = {
+.data = samples,
+.len  = sizeof(samples)/sizeof(int16_t),
+.pos  = 0,
+};
 
 static struct cfg_option options[] = {
 	{ "rate", &rate, cfg_int },
@@ -199,21 +206,17 @@ static void file_info_box(char *filename)
 	gtk_widget_show(dialog_fileinfo);
 }
 
-static void callback(void *buf, int len, void *priv)
+static void writebuffer(void)
 {
 	int time = gbclock / 4194304;
 	int time1024 = (gbclock * 1024) / 4194304;
 	int gbslen = gbs->subsong_info[gbs_subsong].len;
 
 	gbs_ip.add_vis_pcm(gbs_ip.output->written_time(),
-	                   FMT_S16_NE, 2, len, buf);
-	while (gbs_ip.output->buffer_free() < len && !stopthread) {
-		pthread_mutex_unlock(&gbs_mutex);
-		usleep(10000);
-		pthread_mutex_lock(&gbs_mutex);
-	}
-	gbs_ip.output->write_audio(buf, len);
-
+	                   FMT_S16_NE, 2,
+	                   buffer.pos*sizeof(int16_t), buffer.data);
+	gbs_ip.output->write_audio(buffer.data, buffer.pos*sizeof(int16_t));
+	buffer.pos = 0;
 
 	if ((gbhw_ch[0].volume == 0 ||
 	     gbhw_ch[0].master == 0) &&
@@ -550,22 +553,21 @@ void *playloop(void *priv)
 	}
 	while (!stopthread) {
 		int cycles;
+
+		if (gbs_ip.output->buffer_free() < buffer.len*sizeof(int16_t)) {
+			usleep(workunit*1000);
+			continue;
+		}
+
 		pthread_mutex_lock(&gbs_mutex);
 		cycles = gbhw_step(workunit);
 		pthread_mutex_unlock(&gbs_mutex);
+
 		if (cycles<0) {
 			stopthread = 1;
 		} else {
 			gbclock += cycles;
-			if (!((gbhw_ch[0].volume == 0 ||
-			       gbhw_ch[0].master == 0) &&
-			      (gbhw_ch[1].volume == 0 ||
-			       gbhw_ch[1].master == 0) &&
-			      (gbhw_ch[2].volume == 0 ||
-			       gbhw_ch[2].master == 0) &&
-			      (gbhw_ch[3].volume == 0 ||
-			       gbhw_ch[3].master == 0)))
-				silencectr = 0;
+			writebuffer();
 		}
 	}
 	gbs_ip.output->close_audio();
@@ -587,8 +589,9 @@ static void play_file(char *filename)
 		gbs_ip.set_info(title, length, 0, rate, 2);
 
 		gbhw_init(gbs->rom, gbs->romsize);
-		gbhw_setcallback(callback, NULL);
+		gbhw_setbuffer(&buffer);
 		gbhw_setrate(rate);
+		workunit = 1000*(buffer.len/2)/rate;
 		gbs_subsong = gbs->defaultsong - 1;
 		gbs_playsong(gbs, gbs_subsong);
 		gbclock = 0;
