@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.7 2003/08/23 16:12:24 ranma Exp $
+# $Id: Makefile,v 1.8 2003/08/23 16:24:17 ranma Exp $
 
 prefix = /usr/local
 exec_prefix = ${prefix}
@@ -52,4 +52,4 @@ gbsplay: gbsplay.o
 .c.i:
 	$(CC) -E $(CFLAGS) -o $@ $<
 .c.s:
-	$(CC) -S $(CFLAGS) -o $@ $<
+	$(CC) -S $(CFLAGS) -fverbose-asm -o $@ $<
