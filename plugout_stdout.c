@@ -1,4 +1,4 @@
-/* $Id: plugout_stdout.c,v 1.2 2004/03/20 20:08:47 mitch Exp $
+/* $Id: plugout_stdout.c,v 1.3 2004/03/20 20:32:04 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -10,17 +10,15 @@
 
 #include "plugins.h"
 
-int regparm stdout_open(int endian, int rate)
+void regparm stdout_open(int endian, int rate)
 {
-	return STDOUT_FILENO;
 }
 
-ssize_t regparm stdout_write(int fd, const void *buf, size_t count)
+ssize_t regparm stdout_write(const void *buf, size_t count)
 {
-	return write(fd, buf, count);
+	return write(STDOUT_FILENO, buf, count);
 }
 
-int regparm stdout_close(int fd)
+void regparm stdout_close()
 {
-	return close(fd);
 }

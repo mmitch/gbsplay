@@ -1,4 +1,4 @@
-/* $Id: plugout_devdsp.c,v 1.3 2004/03/20 20:08:47 mitch Exp $
+/* $Id: plugout_devdsp.c,v 1.4 2004/03/20 20:32:04 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -21,9 +21,10 @@
 
 #include "plugins.h"
 
-int regparm devdsp_open(int endian, int rate)
+static int fd;
+
+void regparm devdsp_open(int endian, int rate)
 {
-	int fd;
 	int c;
 	int flags;
 	
@@ -63,15 +64,14 @@ int regparm devdsp_open(int endian, int rate)
 	c=(4 << 16) + 11;
 	if ((ioctl(fd, SNDCTL_DSP_SETFRAGMENT, &c)) == -1)
 		fprintf(stderr, _("ioctl(fd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n"), c, strerror(errno));
-	return fd;
 }
 
-ssize_t regparm devdsp_write(int fd, const void *buf, size_t count)
+ssize_t regparm devdsp_write(const void *buf, size_t count)
 {
 	return write(fd, buf, count);
 }
 
-int regparm devdsp_close(int fd)
+void regparm devdsp_close()
 {
-	return close(fd);
+	close(fd);
 }

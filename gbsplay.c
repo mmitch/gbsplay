@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.82 2004/03/20 19:57:49 mitch Exp $
+/* $Id: gbsplay.c,v 1.83 2004/03/20 20:32:04 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -31,6 +31,9 @@
 #ifdef PLUGOUT_DEVDSP
 #include "plugout_devdsp.h"
 #endif
+#ifdef PLUGOUT_NAS
+#include "plugout_nas.h"
+#endif
 #ifdef PLUGOUT_STDOUT
 #include "plugout_stdout.h"
 #endif
@@ -55,7 +58,6 @@ static const char vols[5] = " -=#%";
 
 /* global variables */
 static char *myname;
-static int dspfd = -1;
 static int quit = 0;
 static struct termios ots;
 static int *subsong_playlist;
@@ -106,6 +108,9 @@ static struct cfg_option options[] = {
 /* sound output plugins */
 int regparm no_output_plugin(int endian, int rate);
 static struct output_plugin plugouts[] = {
+#ifdef PLUGOUT_NAS
+	{ "nas", "NAS sound driver", &nas_open, &nas_write, &nas_close },
+#endif
 #ifdef PLUGOUT_DEVDSP
 	{ "dsp", "/dev/dsp sound driver", &devdsp_open, &devdsp_write, &devdsp_close },
 #endif
@@ -205,13 +210,11 @@ static regparm void swap_endian(struct gbhw_buffer *buf)
 
 static regparm void callback(struct gbhw_buffer *buf, void *priv)
 {
-	if (dspfd != -1) {
-		if ((is_le_machine() && endian == CFG_ENDIAN_BE) ||
-		    (is_be_machine() && endian == CFG_ENDIAN_LE)) {
-			swap_endian(buf);
-		}
-		sound_write(dspfd, buf->data, buf->pos*sizeof(int16_t));
+	if ((is_le_machine() && endian == CFG_ENDIAN_BE) ||
+	    (is_be_machine() && endian == CFG_ENDIAN_LE)) {
+		swap_endian(buf);
 	}
+	sound_write(buf->data, buf->pos*sizeof(int16_t));
 	buf->pos = 0;
 }
 
@@ -658,7 +661,7 @@ int main(int argc, char **argv)
 	precalc_notes();
 	precalc_vols();
 
-	dspfd = sound_open(endian, rate);
+	sound_open(endian, rate);
 
 	gbhw_setcallback(callback, NULL);
 	gbhw_setrate(rate);
@@ -727,6 +730,8 @@ int main(int argc, char **argv)
 		handleuserinput(gbs);
 	}
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
-	sound_close(dspfd);
+
+	sound_close();
+
 	return 0;
 }
