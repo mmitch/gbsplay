@@ -1,4 +1,4 @@
-.\" $Id: gbsplayrc.in.5,v 1.10 2004/04/13 14:14:43 mitch Exp $
+.\" $Id: gbsplayrc.in.5,v 1.11 2004/06/03 16:19:38 ranmachan Exp $
 .\" This manpage 2003-2004 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
 .TH "gbsplayrc" "5" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
@@ -26,8 +26,6 @@ The fadeout time in seconds.  Instead of cutting of the subsong hard, do a soft 
 In loop mode the playback will restart from the beginning after the last subsong.
 .IP "output_plugin = \fIPlugin\fR"
 The sound output plugin to be used.
-.IP "quiet = \fIBoolean\fR"
-In quiet mode the player will only show error messages.
 .IP "rate = \fIInteger\fR"
 The samplerate to be used.
 .IP "refresh_delay = \fIInteger\fR"
@@ -40,6 +38,8 @@ The subsong gap in seconds.  Before playing the next subsong after the subsong t
 .IP "subsong_timeout = \fIInteger\fR"
 The subsong timeout in seconds.  When a subsong has been played for the given
 time, the player will skip to the next subsong.  A timeout of 0 seconds disables automatic subsong changes.
+.IP "verbosity = \fIInteger\fR"
+Sets the verbosity level (default: 3). A value of 0 means no messages on stdout.
 .SH "FILES"
 .TP
 \fI/etc/gbsplayrc\fR

@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.88 2004/04/05 12:08:36 mitch Exp $
+/* $Id: gbsplay.c,v 1.89 2004/06/03 16:19:38 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -64,7 +64,7 @@ static int refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
 static int playmode = PLAYMODE_LINEAR;
 static int loopmode = 0;
 static int endian = CFG_ENDIAN_NE;
-static int quiet = 0;
+static int verbosity = 3;
 static int rate = 44100;
 static int silence_timeout = 2;
 static int fadeout = 3;
@@ -93,7 +93,7 @@ static struct gbhw_buffer buf = {
 static struct cfg_option options[] = {
 	{ "rate", &rate, cfg_int },
 	{ "refresh_delay", &refresh_delay, cfg_int },
-	{ "quiet", &quiet, cfg_int },
+	{ "verbosity", &verbosity, cfg_int },
 	{ "endian", &endian, cfg_endian },
 	{ "subsong_timeout", &subsong_timeout, cfg_int },
 	{ "subsong_gap", &subsong_gap, cfg_int },
@@ -341,11 +341,12 @@ static regparm void usage(int exitcode)
 		  "  -l  loop mode\n"
 		  "  -o  select output plugin (%s)\n"
 		  "      'list' shows available plugins\n"
-		  "  -q  quiet\n"
+		  "  -q  reduce verboseness\n"
 		  "  -r  set samplerate (%dHz)\n"
 		  "  -R  set refresh delay (%d milliseconds)\n"
 		  "  -t  set subsong timeout (%d seconds)\n"
 		  "  -T  set silence timeout (%d seconds)\n"
+		  "  -v  increase verboseness\n"
 		  "  -V  print version and exit\n"
 		  "  -z  play subsongs in shuffle mode\n"
 		  "  -Z  play subsongs in random mode (repetitions possible)\n"),
@@ -371,7 +372,7 @@ static regparm void parseopts(int *argc, char ***argv)
 {
 	int res;
 	myname = *argv[0];
-	while ((res = getopt(*argc, *argv, "E:f:g:hlo:qr:R:t:T:VzZ")) != -1) {
+	while ((res = getopt(*argc, *argv, "E:f:g:hlo:qr:R:t:T:vVzZ")) != -1) {
 		switch (res) {
 		default:
 			usage(1);
@@ -404,7 +405,7 @@ static regparm void parseopts(int *argc, char ***argv)
 			sound_name = optarg;
 			break;
 		case 'q':
-			quiet = 1;
+			verbosity -= 1;
 			break;
 		case 'r':
 			sscanf(optarg, "%d", &rate);
@@ -417,6 +418,9 @@ static regparm void parseopts(int *argc, char ***argv)
 			break;
 		case 'T':
 			sscanf(optarg, "%d", &silence_timeout);
+			break;
+		case 'v':
+			verbosity += 1;
 			break;
 		case 'V':
 			version();
@@ -526,15 +530,20 @@ static regparm void printstatus(struct gbs *gbs)
 	}
 	printf("\r\033[A\033[A"
 	       "Song %3d/%3d (%s)\033[K\n"
-	       "%02d:%02d/%02d:%02d  %s %s  %s %s  %s %s  %s %s  [%s|%s]\n",
+	       "%02d:%02d/%02d:%02d",
 	       gbs->subsong+1, gbs->songs, songtitle,
-	       timem, times, lenm, lens,
-	       notestring(0), volstring(chvol(0)),
-	       notestring(1), volstring(chvol(1)),
-	       notestring(2), volstring(chvol(2)),
-	       notestring(3), volstring(chvol(3)),
-	       reverse_vol(volstring(gbs->lvol/1024)),
-	       volstring(gbs->rvol/1024));
+	       timem, times, lenm, lens);
+	if (verbosity>2) {
+		printf("  %s %s  %s %s  %s %s  %s %s  [%s|%s]\n",
+		       notestring(0), volstring(chvol(0)),
+		       notestring(1), volstring(chvol(1)),
+		       notestring(2), volstring(chvol(2)),
+		       notestring(3), volstring(chvol(3)),
+		       reverse_vol(volstring(gbs->lvol/1024)),
+		       volstring(gbs->rvol/1024));
+	} else {
+		puts("");
+	}
 	fflush(stdout);
 }
 
@@ -569,10 +578,12 @@ void cont_handler(int signum)
 
 static regparm void printinfo(struct gbs *gbs)
 {
-	if (!quiet) {
+	if (verbosity>0) {
 		gbs_printinfo(gbs, 0);
 		puts(_("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player\n" \
 		         "           [ ] pause/resume   [1-4] mute channel"));
+	}
+	if (verbosity>1) {
 		puts("\n\n"); /* additional newlines for the status display */
 	}
 	redraw = false;
@@ -600,7 +611,7 @@ static regparm void select_plugin(void)
 	sound_description = plugout->description;
 
 	if (plugout->flags & PLUGOUT_USES_STDOUT) {
-		quiet = 1;
+		verbosity = 0;
 	}
 }
 
@@ -700,7 +711,7 @@ int main(int argc, char **argv)
 		}
 
 		if (redraw) printinfo(gbs);
-		if (!quiet) printstatus(gbs);
+		if (verbosity>1) printstatus(gbs);
 		handleuserinput(gbs);
 	}
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
