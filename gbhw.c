@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.30 2004/06/05 21:08:47 ranmachan Exp $
+/* $Id: gbhw.c,v 1.31 2004/06/06 00:03:09 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -56,6 +56,7 @@ static void *callbackpriv;
 
 static uint32_t tap1 = TAP1_15;
 static uint32_t tap2 = TAP2_15;
+static uint32_t lfsr = 0xffffffff;
 
 static regparm uint32_t rom_get(uint32_t addr)
 {
@@ -209,6 +210,7 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 					tap1 = TAP1_15;
 					tap2 = TAP2_15;
 				}
+				lfsr |= 1; /* Make sure lfsr is not 0 */
 				if (rate) gbhw_ch[3].div_tc *= rate;
 				else gbhw_ch[3].div_tc /= 2;
 				if (addr == 0xff22) break;
@@ -286,7 +288,6 @@ static int r_smpl;
 static int l_smpl;
 static int smpldivisor;
 
-static uint32_t lfsr = 0xffffffff;
 static int ch3pos;
 
 static regparm void gb_sound_sweep(void)
