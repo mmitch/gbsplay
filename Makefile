@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.61 2003/12/26 15:00:07 mitch Exp $
+# $Id: Makefile,v 1.62 2003/12/26 15:07:42 mitch Exp $
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
@@ -66,7 +66,7 @@ distclean: clean
 	rm -f ./config.mk ./config.h ./config.err ./config.sed
 
 clean:
-	find . -regex ".*\.\([aos]\|lo\|mo\|so\(\.[0-9]\)?\)" -exec rm -f "{}" \;
+	find . -regex ".*\.\([aos]\|lo\|mo\|pot\|so\(\.[0-9]\)?\)" -exec rm -f "{}" \;
 	find . -name "*~" -exec rm -f "{}" \;
 	rm -f libgbs
 	rm -f $(mans)
