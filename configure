@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.59 2004/04/14 17:35:02 ranmachan Exp $
+# $Id: configure,v 1.60 2004/04/14 18:42:00 ranmachan Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -45,7 +45,7 @@ check_include()
     includedirs="$2 /usr/local/include"
     includename="`echo $include | sed -e 's@[/\.]@_@g'`"
     eval "value=\$have_$includename"
-    test -z $value || return
+    test -z "$value" || return
 
     flags=""
     for dir in "" $includedirs; do
@@ -241,7 +241,7 @@ which()
 setdefault()
 {
 	eval "value=\$$1"
-	if [ -z $value ]; then
+	if [ -z "$value" ]; then
 		eval "$1=$2"
 	fi
 }
