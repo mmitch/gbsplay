@@ -1,6 +1,4 @@
-# $Id: Makefile,v 1.46 2003/10/27 21:52:29 ranma Exp $
-
-include config.mk
+# $Id: Makefile,v 1.47 2003/11/17 01:47:52 ranma Exp $
 
 prefix      := /usr/local
 exec_prefix := $(prefix)
@@ -48,7 +46,10 @@ all: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL)
 
 # include the dependency files
 
-include $(patsubst %.o,%.d,$(filter %.o,$(objs)))
+ifneq ($(patsubst clean,nodep,$(patsubst distclean,nodep,$(MAKECMDGOALS))), nodep)
+include config.mk
+-include $(patsubst %.o,%.d,$(filter %.o,$(objs)))
+endif
 
 distclean: clean
 	find -regex ".*\.d" -exec rm -f "{}" \;
