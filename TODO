@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.39 2003/12/09 21:44:48 mitch Exp $>>
+<<$Id: TODO,v 1.40 2003/12/10 21:33:54 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -36,3 +36,5 @@ TODO list for gbsplay.
 (X)  gbsplay/gbshw: improved buffer handling
 
 (X)  gbsplay: allow -1 as subsong (default)
+
+(X)  clean up bild process (rebuild only changed files)
