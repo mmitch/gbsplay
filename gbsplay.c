@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.33 2003/08/24 21:40:44 ranma Exp $
+/* $Id: gbsplay.c,v 1.34 2003/08/25 09:05:27 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -253,32 +253,55 @@ void callback(void *buf, int len, void *priv)
 	write(dspfd, buf, len);
 }
 
-int main(int argc, char **argv)
+void open_dsp(void)
 {
-	precalc_notes();
-	precalc_vols();
-
-	dspfd = open("/dev/dsp", O_WRONLY);
 	int c;
-	int subsong = -1;
+
+	if ((dspfd = open("/dev/dsp", O_WRONLY)) == -1) {
+		printf("Could not open /dev/dsp: %s\n", strerror(errno));
+		exit(1);
+	}
 
 	c=AFMT_S16_LE;
-	ioctl(dspfd, SNDCTL_DSP_SETFMT, &c);
+	if ((ioctl(dspfd, SNDCTL_DSP_SETFMT, &c)) == -1) {
+		printf("ioctl(dspfd, SNDCTL_DSP_SETFMT, %d) failed: %s\n", c, strerror(errno));
+		exit(1);
+	}
 	c=1;
-	ioctl(dspfd, SNDCTL_DSP_STEREO, &c);
+	if ((ioctl(dspfd, SNDCTL_DSP_STEREO, &c)) == -1) {
+		printf("ioctl(dspfd, SNDCTL_DSP_STEREO, %d) failed: %s\n", c, strerror(errno));
+		exit(1);
+	}
 	c=44100;
-	ioctl(dspfd, SNDCTL_DSP_SPEED, &c);
+	if ((ioctl(dspfd, SNDCTL_DSP_SPEED, &c)) == -1) {
+		printf("ioctl(dspfd, SNDCTL_DSP_SPEED, %d) failed: %s\n", c, strerror(errno));
+		exit(1);
+	}
 	c=(4 << 16) + 11;
-	ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, &c);
+	if ((ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, &c)) == -1) {
+		printf("ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %d) failed: %s\n", c, strerror(errno));
+		exit(1);
+	}
 	
-	gbhw_init();
-	gbhw_setcallback(callback, NULL);
-	gbhw_setrate(44100);
-	
+}
+
+int main(int argc, char **argv)
+{
+	int subsong = -1;
+
 	if (argc < 2) {
 		printf("Usage: %s <gbs-file> [<subsong>]\n", argv[0]);
 		exit(1);
 	}
+
+	precalc_notes();
+	precalc_vols();
+
+	open_dsp();
+	gbhw_init();
+	gbhw_setcallback(callback, NULL);
+	gbhw_setrate(44100);
+
 	if (argc == 3) sscanf(argv[2], "%d", &subsong);
 	open_gbs(argv[1]);
 	if (subsong == -1) subsong = gbs_songdefault;
