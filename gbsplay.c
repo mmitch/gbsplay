@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.75 2003/12/28 18:37:45 ranma Exp $
+/* $Id: gbsplay.c,v 1.76 2003/12/28 19:24:51 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -370,6 +370,7 @@ void usage(int exitcode)
 	        _("Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
 	        "\n"
 	        "Available options are:\n"
+	        "  -E  endian, b == big, l == little, n == native (%s)\n"
 	        "  -f  set fadeout (%d seconds)\n"
 	        "  -g  set subsong gap (%d seconds)\n"
 	        "  -h  display this help and exit\n"
@@ -377,17 +378,16 @@ void usage(int exitcode)
 	        "  -r  set samplerate (%dHz)\n"
 	        "  -s  write to stdout\n"
 	        "  -t  set subsong timeout (%d seconds)\n"
-	        "  -E  endian, b == big, l == little, n == native (%s)\n"
 	        "  -T  set silence timeout (%d seconds)\n"
 	        "  -V  print version and exit\n"
 		"  -z  play subsongs in shuffle mode\n"
 		"  -Z  play subsongs in random mode (repetitions possible)\n"),
 	        myname,
+	        endian_str(endian),
 		fadeout,
 		subsong_gap,
 	        rate,
 		subsong_timeout,
-	        endian_str(endian),
 	        silence_timeout);
 	exit(exitcode);
 }
@@ -402,10 +402,28 @@ void parseopts(int *argc, char ***argv)
 {
 	int res;
 	myname = *argv[0];
-	while ((res = getopt(*argc, *argv, "hqr:st:T:f:g:VzZE:")) != -1) {
+	while ((res = getopt(*argc, *argv, "E:f:g:hqr:st:T:VzZ")) != -1) {
 		switch (res) {
 		default:
 			usage(1);
+			break;
+		case 'E':
+			if (strcasecmp(optarg, "b") == 0) {
+				endian = CFG_ENDIAN_BE;
+			} else if (strcasecmp(optarg, "l") == 0) {
+				endian = CFG_ENDIAN_LE;
+			} else if (strcasecmp(optarg, "n") == 0) {
+				endian = CFG_ENDIAN_NE;
+			} else {
+				printf(_("\"%s\" is not a valid endian.\n\n"), optarg);
+				usage(1);
+			}
+			break;
+		case 'f':
+			sscanf(optarg, "%d", &fadeout);
+			break;
+		case 'g':
+			sscanf(optarg, "%d", &subsong_gap);
 			break;
 		case 'h':
 			usage(0);
@@ -426,12 +444,6 @@ void parseopts(int *argc, char ***argv)
 		case 'T':
 			sscanf(optarg, "%d", &silence_timeout);
 			break;
-		case 'f':
-			sscanf(optarg, "%d", &fadeout);
-			break;
-		case 'g':
-			sscanf(optarg, "%d", &subsong_gap);
-			break;
 		case 'V':
 			version();
 			break;
@@ -440,17 +452,6 @@ void parseopts(int *argc, char ***argv)
 			break;
 		case 'Z':
 			playmode = PLAYMODE_RANDOM;
-			break;
-		case 'E':
-			if (strcasecmp(optarg, "b") == 0) {
-				endian = CFG_ENDIAN_BE;
-			} else if (strcasecmp(optarg, "l") == 0) {
-				endian = CFG_ENDIAN_LE;
-			} else if (strcasecmp(optarg, "n") == 0) {
-				endian = CFG_ENDIAN_NE;
-			} else {
-				usage(1);
-			}
 			break;
 		}
 	}
