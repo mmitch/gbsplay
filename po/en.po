@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-12-14 15:15+0100\n"
+"POT-Creation-Date: 2003-12-28 20:25+0100\n"
 "PO-Revision-Date: 2003-12-12 21:16+0100\n"
 "Last-Translator: Tobias Diedrich <ranma@gmx.at>\n"
 "Language-Team: none\n"
@@ -15,20 +15,74 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "File Info: "
-msgstr "File Info: "
+#, c-format
+msgid ""
+"\n"
+"Caught signal %d, exiting...\n"
+msgstr ""
+"\n"
+"Caught signal %d, exiting...\n"
 
-msgid "Subsong"
-msgstr "Subsong"
+msgid ""
+"\n"
+"commands:  [p]revious subsong   [n]ext subsong   [q]uit player\n"
+"           [ ] pause/resume   [1-4] mute channel"
+msgstr ""
+"\n"
+"commands:  [p]revious subsong   [n]ext subsong   [q]uit player\n"
+"           [ ] pause/resume   [1-4] mute channel"
 
-msgid "Title"
-msgstr "Title"
+#, c-format
+msgid ""
+"\"%s\" is not a valid endian.\n"
+"\n"
+msgstr ""
+"\"%s\" is not a valid endian.\n"
+"\n"
 
-msgid "Length    "
-msgstr "Length    "
+#, c-format
+msgid "'%s' expected at %s line %d char %d.\n"
+msgstr "'%s' expected at %s line %d char %d.\n"
+
+#, c-format
+msgid "(%d seconds)\n"
+msgstr "(%d seconds)\n"
+
+msgid "Artist:"
+msgstr "Artist:"
+
+#, c-format
+msgid "CRC32:\t\t0x%08x/0x%08x (%s)\n"
+msgstr "CRC32:\t\t0x%08x/0x%08x (%s)\n"
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Copyright:"
+msgstr "Copyright:"
+
+#, c-format
+msgid "Could not open %s: %s\n"
+msgstr "Could not open %s: %s\n"
+
+#, c-format
+msgid "Could not open /dev/dsp: %s\n"
+msgstr "Could not open /dev/dsp: %s\n"
+
+msgid "Error opening output plugin."
+msgstr "Error opening output plugin."
+
+msgid "Extended Info"
+msgstr "Extended Info"
+
+msgid "Failed"
+msgstr "Failed"
 
 msgid "File Info"
 msgstr "File Info"
+
+msgid "File Info: "
+msgstr "File Info: "
 
 msgid "Filename:"
 msgstr "Filename:"
@@ -36,36 +90,135 @@ msgstr "Filename:"
 msgid "GBS Info"
 msgstr "GBS Info"
 
+#, c-format
+msgid "GBS Version %d unsupported.\n"
+msgstr "GBS Version %d unsupported.\n"
+
+#, c-format
+msgid ""
+"GBSVersion:     %d\n"
+"Title:          \"%s\"\n"
+"Author:         \"%s\"\n"
+"Copyright:      \"%s\"\n"
+"Load address:   0x%04x\n"
+"Init address:   0x%04x\n"
+"Play address:   0x%04x\n"
+"Stack pointer:  0x%04x\n"
+"File size:      0x%08x\n"
+"ROM size:       0x%08x (%d banks)\n"
+"Subsongs:       %d\n"
+msgstr ""
+"GBSVersion:     %d\n"
+"Title:          \"%s\"\n"
+"Author:         \"%s\"\n"
+"Copyright:      \"%s\"\n"
+"Load address:   0x%04x\n"
+"Init address:   0x%04x\n"
+"Play address:   0x%04x\n"
+"Stack pointer:  0x%04x\n"
+"File size:      0x%08x\n"
+"ROM size:       0x%08x (%d banks)\n"
+"Subsongs:       %d\n"
+
 msgid "Game:"
 msgstr "Game:"
 
-msgid "Artist:"
-msgstr "Artist:"
-
-msgid "Copyright:"
-msgstr "Copyright:"
-
-msgid "Extended Info"
-msgstr "Extended Info"
+msgid "Length    "
+msgstr "Length    "
 
 msgid "Next"
 msgstr "Next"
 
+msgid ""
+"No sound support on this platform.\n"
+"Use 'gbsplay -s' for stdout output."
+msgstr ""
+"No sound support on this platform.\n"
+"Use 'gbsplay -s' for stdout output."
+
+#, c-format
+msgid "Not a GBS-File: %s\n"
+msgstr "Not a GBS-File: %s\n"
+
+msgid "OK"
+msgstr "OK"
+
 msgid "Prev"
 msgstr "Prev"
+
+#, c-format
+msgid "Requested rate %dHz, got %dHz.\n"
+msgstr "Requested rate %dHz, got %dHz.\n"
 
 msgid "Save"
 msgstr "Save"
 
-msgid "Cancel"
-msgstr "Cancel"
-
-msgid "Error opening output plugin."
-msgstr "Error opening output plugin."
+msgid "Subsong"
+msgstr "Subsong"
 
 #, c-format
-msgid "Could not open /dev/dsp: %s\n"
-msgstr "Could not open /dev/dsp: %s\n"
+msgid "Subsong %03d:\t"
+msgstr "Subsong %03d:\t"
+
+#, c-format
+msgid "Subsong number out of range (min=0, max=%d).\n"
+msgstr "Subsong number out of range (min=0, max=%d).\n"
+
+msgid "Title"
+msgstr "Title"
+
+#, c-format
+msgid "Unknown option %s at %s line %d.\n"
+msgstr "Unknown option %s at %s line %d.\n"
+
+msgid "Untitled"
+msgstr "Untitled"
+
+#, c-format
+msgid "Usage: %s <gbs-file>\n"
+msgstr "Usage: %s <gbs-file>\n"
+
+#, c-format
+msgid ""
+"Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
+"\n"
+"Available options are:\n"
+"  -E  endian, b == big, l == little, n == native (%s)\n"
+"  -f  set fadeout (%d seconds)\n"
+"  -g  set subsong gap (%d seconds)\n"
+"  -h  display this help and exit\n"
+"  -q  quiet\n"
+"  -r  set samplerate (%dHz)\n"
+"  -s  write to stdout\n"
+"  -t  set subsong timeout (%d seconds)\n"
+"  -T  set silence timeout (%d seconds)\n"
+"  -V  print version and exit\n"
+"  -z  play subsongs in shuffle mode\n"
+"  -Z  play subsongs in random mode (repetitions possible)\n"
+msgstr ""
+"Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
+"\n"
+"Available options are:\n"
+"  -E  endian, b == big, l == little, n == native (%s)\n"
+"  -f  set fadeout (%d seconds)\n"
+"  -g  set subsong gap (%d seconds)\n"
+"  -h  display this help and exit\n"
+"  -q  quiet\n"
+"  -r  set samplerate (%dHz)\n"
+"  -s  write to stdout\n"
+"  -t  set subsong timeout (%d seconds)\n"
+"  -T  set silence timeout (%d seconds)\n"
+"  -V  print version and exit\n"
+"  -z  play subsongs in shuffle mode\n"
+"  -Z  play subsongs in random mode (repetitions possible)\n"
+
+#, c-format
+msgid "Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n"
+msgstr "Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n"
+
+#, c-format
+msgid "Warning: File CRC does not match (0x%08x != 0x%08x).\n"
+msgstr "Warning: File CRC does not match (0x%08x != 0x%08x).\n"
 
 #, c-format
 msgid "fcntl(F_GETFL) failed: %s\n"
@@ -80,162 +233,19 @@ msgid "ioctl(dspfd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"
 msgstr "ioctl(dspfd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"
 
 #, c-format
-msgid "ioctl(dspfd, SNDCTL_DSP_SPEED, %d) failed: %s\n"
-msgstr "ioctl(dspfd, SNDCTL_DSP_SPEED, %d) failed: %s\n"
+msgid "ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n"
+msgstr "ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n"
 
 #, c-format
-msgid "Requested rate %dHz, got %dHz.\n"
-msgstr "Requested rate %dHz, got %dHz.\n"
+msgid "ioctl(dspfd, SNDCTL_DSP_SPEED, %d) failed: %s\n"
+msgstr "ioctl(dspfd, SNDCTL_DSP_SPEED, %d) failed: %s\n"
 
 #, c-format
 msgid "ioctl(dspfd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
 msgstr "ioctl(dspfd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
 
-#, c-format
-msgid "ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n"
-msgstr "ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n"
-
-msgid ""
-"No sound support on this platform.\n"
-"Use 'gbsplay -s' for stdout output."
-msgstr ""
-"No sound support on this platform.\n"
-"Use 'gbsplay -s' for stdout output."
-
-#, c-format
-msgid ""
-"Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
-"\n"
-"Available options are:\n"
-"  -f  set fadeout (%d seconds)\n"
-"  -g  set subsong gap (%d seconds)\n"
-"  -h  display this help and exit\n"
-"  -q  quiet\n"
-"  -r  set samplerate (%dHz)\n"
-"  -s  write to stdout\n"
-"  -t  set subsong timeout (%d seconds)\n"
-"  -T  set silence timeout (%d seconds)\n"
-"  -V  print version and exit\n"
-"  -z  play subsongs in random mode\n"
-"  -Z  play subsongs in shuffle mode (repetitions possible)\n"
-msgstr ""
-"Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
-"\n"
-"Available options are:\n"
-"  -f  set fadeout (%d seconds)\n"
-"  -g  set subsong gap (%d seconds)\n"
-"  -h  display this help and exit\n"
-"  -q  quiet\n"
-"  -r  set samplerate (%dHz)\n"
-"  -s  write to stdout\n"
-"  -t  set subsong timeout (%d seconds)\n"
-"  -T  set silence timeout (%d seconds)\n"
-"  -V  print version and exit\n"
-"  -z  play subsongs in random mode\n"
-"  -Z  play subsongs in shuffle mode (repetitions possible)\n"
-
-msgid "Untitled"
-msgstr "Untitled"
-
-#, c-format
-msgid ""
-"\n"
-"Caught signal %d, exiting...\n"
-msgstr ""
-"\n"
-"Caught signal %d, exiting...\n"
-
-msgid ""
-"\n"
-"commands:  [p]revious subsong   [n]ext subsong   [q]uit player\n"
-"           [ ] pause/resume   [1-4] mute channel"
-msgstr ""
-"\n"
-"commands:  [p]revious subsong   [n]ext subsong   [q]uit player\n"
-"           [ ] pause/resume   [1-4] mute channel"
-
-#, c-format
-msgid "Subsong number out of range (min=0, max=%d).\n"
-msgstr "Subsong number out of range (min=0, max=%d).\n"
-
-#, c-format
-msgid ""
-"GBSVersion:     %d\n"
-"Title:          \"%s\"\n"
-"Author:         \"%s\"\n"
-"Copyright:      \"%s\"\n"
-"Load address:   0x%04x\n"
-"Init address:   0x%04x\n"
-"Play address:   0x%04x\n"
-"Stack pointer:  0x%04x\n"
-"File size:      0x%08x\n"
-"ROM size:       0x%08x (%d banks)\n"
-"Subsongs:       %d\n"
-msgstr ""
-"GBSVersion:     %d\n"
-"Title:          \"%s\"\n"
-"Author:         \"%s\"\n"
-"Copyright:      \"%s\"\n"
-"Load address:   0x%04x\n"
-"Init address:   0x%04x\n"
-"Play address:   0x%04x\n"
-"Stack pointer:  0x%04x\n"
-"File size:      0x%08x\n"
-"ROM size:       0x%08x (%d banks)\n"
-"Subsongs:       %d\n"
-
-#, c-format
-msgid "CRC32:\t\t0x%08x/0x%08x (%s)\n"
-msgstr "CRC32:\t\t0x%08x/0x%08x (%s)\n"
-
-msgid "OK"
-msgstr "OK"
-
-msgid "Failed"
-msgstr "Failed"
-
-#, c-format
-msgid "Subsong %03d:\t"
-msgstr "Subsong %03d:\t"
-
-msgid "untitled"
-msgstr "untitled"
-
-#, c-format
-msgid "(%d seconds)\n"
-msgstr "(%d seconds)\n"
-
 msgid "no timelimit"
 msgstr "no timelimit"
 
-#, c-format
-msgid "Could not open %s: %s\n"
-msgstr "Could not open %s: %s\n"
-
-#, c-format
-msgid "Not a GBS-File: %s\n"
-msgstr "Not a GBS-File: %s\n"
-
-#, c-format
-msgid "GBS Version %d unsupported.\n"
-msgstr "GBS Version %d unsupported.\n"
-
-#, c-format
-msgid "Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n"
-msgstr "Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n"
-
-#, c-format
-msgid "Warning: File CRC does not match (0x%08x != 0x%08x).\n"
-msgstr "Warning: File CRC does not match (0x%08x != 0x%08x).\n"
-
-#, c-format
-msgid "Usage: %s <gbs-file>\n"
-msgstr "Usage: %s <gbs-file>\n"
-
-#, c-format
-msgid "'%s' expected at %s line %d char %d.\n"
-msgstr "'%s' expected at %s line %d char %d.\n"
-
-#, c-format
-msgid "Unknown option %s at %s line %d.\n"
-msgstr "Unknown option %s at %s line %d.\n"
+msgid "untitled"
+msgstr "untitled"

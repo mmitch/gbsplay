@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-12-14 15:15+0100\n"
+"POT-Creation-Date: 2003-12-28 20:25+0100\n"
 "PO-Revision-Date: 2003-12-12 21:16+0100\n"
 "Last-Translator: Tobias Diedrich <ranma@gmx.at>\n"
 "Language-Team: none\n"
@@ -14,128 +14,6 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-msgid "File Info: "
-msgstr "Dateiinformationen: "
-
-msgid "Subsong"
-msgstr "Subsong"
-
-msgid "Title"
-msgstr "Titel"
-
-msgid "Length    "
-msgstr "Länge    "
-
-msgid "File Info"
-msgstr "Dateiinformationen"
-
-msgid "Filename:"
-msgstr "Dateiname:"
-
-msgid "GBS Info"
-msgstr "GBS Info"
-
-msgid "Game:"
-msgstr "Spiel:"
-
-msgid "Artist:"
-msgstr "Komponist:"
-
-msgid "Copyright:"
-msgstr "Copyright:"
-
-msgid "Extended Info"
-msgstr "Erweiterte Informationen"
-
-msgid "Next"
-msgstr "Nächster"
-
-msgid "Prev"
-msgstr "Vorheriger"
-
-msgid "Save"
-msgstr "Speichern"
-
-msgid "Cancel"
-msgstr "Abbrechen"
-
-msgid "Error opening output plugin."
-msgstr "Konnte Ausgabeplugin nicht öffnen."
-
-#, c-format
-msgid "Could not open /dev/dsp: %s\n"
-msgstr "Konnte /dev/dsp nicht öffnen: %s\n"
-
-#, c-format
-msgid "fcntl(F_GETFL) failed: %s\n"
-msgstr "fcntl(F_GETFL) fehlgeschlagen: %s\n"
-
-#, c-format
-msgid "fcntl(F_SETFL, flags&~O_NONBLOCK) failed: %s\n"
-msgstr "fcntl(F_SETFL, flags&~O_NONBLOCK) fehlgeschlagen: %s\n"
-
-#, c-format
-msgid "ioctl(dspfd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"
-msgstr "ioctl(dspfd, SNDCTL_DSP_SETFMT, %d) fehlgeschlagen: %s\n"
-
-#, c-format
-msgid "ioctl(dspfd, SNDCTL_DSP_SPEED, %d) failed: %s\n"
-msgstr "ioctl(dspfd, SNDCTL_DSP_SPEED, %d) fehlgeschlagen: %s\n"
-
-#, c-format
-msgid "Requested rate %dHz, got %dHz.\n"
-msgstr "Angeforderte Samplingrate ist %dHz, tatsächliche ist %dHz.\n"
-
-#, c-format
-msgid "ioctl(dspfd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
-msgstr "ioctl(dspfd, SNDCTL_DSP_STEREO, %d) fehlgeschlagen: %s\n"
-
-#, c-format
-msgid "ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n"
-msgstr "ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %08x) fehlgeschlagen: %s\n"
-
-msgid ""
-"No sound support on this platform.\n"
-"Use 'gbsplay -s' for stdout output."
-msgstr ""
-"Tonausgabe wird auf dieser Platform nicht unterstützt.\n"
-"Benutze 'gbsplay -s' um die Daten auf die Standardausgabe zu lenken."
-
-#, c-format
-msgid ""
-"Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
-"\n"
-"Available options are:\n"
-"  -f  set fadeout (%d seconds)\n"
-"  -g  set subsong gap (%d seconds)\n"
-"  -h  display this help and exit\n"
-"  -q  quiet\n"
-"  -r  set samplerate (%dHz)\n"
-"  -s  write to stdout\n"
-"  -t  set subsong timeout (%d seconds)\n"
-"  -T  set silence timeout (%d seconds)\n"
-"  -V  print version and exit\n"
-"  -z  play subsongs in random mode\n"
-"  -Z  play subsongs in shuffle mode (repetitions possible)\n"
-msgstr ""
-"Benutzung: %s [Option(en)] <GBS-Datei> [Starte_bei_Subsong [Stoppe_bei_Subsong] ]\n"
-"\n"
-"Verfügbare Optionen sind:\n"
-"  -f  Ausblendzeit (%d Sekunden)\n"
-"  -g  Lücke (%d Sekunden)\n"
-"  -h  Diese Hilfe anzeigen und Programm beenden\n"
-"  -q  Leise\n"
-"  -r  Abspielrate (%dHz)\n"
-"  -s  Auf die Standardausgabe schreiben\n"
-"  -t  Zeitlimit (%d Sekunden)\n"
-"  -T  Zeitlimit für Stille (%d Sekunden)\n"
-"  -V  Version anzeigen und Programm beenden\n"
-"  -z  Subsongs durcheinandergewürfelt abspielen\n"
-"  -Z  Subsongs zufällig abspielen (Wiederholungen möglich)\n"
-
-msgid "Untitled"
-msgstr "Unbenannt"
 
 #, c-format
 msgid ""
@@ -155,8 +33,66 @@ msgstr ""
 "           [ ] Pause/Wiederaufnahme   [1-4] Kanal unterdrücken"
 
 #, c-format
-msgid "Subsong number out of range (min=0, max=%d).\n"
-msgstr "Subsong-Nummer ausserhalb des Wertebereichs (min=0, max=%d).\n"
+msgid ""
+"\"%s\" is not a valid endian.\n"
+"\n"
+msgstr ""
+"\"%s\" is not a valid endian.\n"
+"\n"
+
+#, c-format
+msgid "'%s' expected at %s line %d char %d.\n"
+msgstr "'%s' erwartet in %s Zeile %d Spalte %d.\n"
+
+#, c-format
+msgid "(%d seconds)\n"
+msgstr "(%d Sekunden)\n"
+
+msgid "Artist:"
+msgstr "Komponist:"
+
+#, c-format
+msgid "CRC32:\t\t0x%08x/0x%08x (%s)\n"
+msgstr "CRC32:\t\t0x%08x/0x%08x (%s)\n"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Copyright:"
+msgstr "Copyright:"
+
+#, c-format
+msgid "Could not open %s: %s\n"
+msgstr "Konnte %s nicht öffnen: %s\n"
+
+#, c-format
+msgid "Could not open /dev/dsp: %s\n"
+msgstr "Konnte /dev/dsp nicht öffnen: %s\n"
+
+msgid "Error opening output plugin."
+msgstr "Konnte Ausgabeplugin nicht öffnen."
+
+msgid "Extended Info"
+msgstr "Erweiterte Informationen"
+
+msgid "Failed"
+msgstr "Fehlerhaft"
+
+msgid "File Info"
+msgstr "Dateiinformationen"
+
+msgid "File Info: "
+msgstr "Dateiinformationen: "
+
+msgid "Filename:"
+msgstr "Dateiname:"
+
+msgid "GBS Info"
+msgstr "GBS Info"
+
+#, c-format
+msgid "GBS Version %d unsupported.\n"
+msgstr "GBS Version %d wird nicht unterstützt.\n"
 
 #, c-format
 msgid ""
@@ -184,41 +120,97 @@ msgstr ""
 "ROM-Grösse:     0x%08x (%d Bänke)\n"
 "Subsongs:       %d\n"
 
-#, c-format
-msgid "CRC32:\t\t0x%08x/0x%08x (%s)\n"
-msgstr "CRC32:\t\t0x%08x/0x%08x (%s)\n"
+msgid "Game:"
+msgstr "Spiel:"
 
-msgid "OK"
-msgstr "Korrekt"
+msgid "Length    "
+msgstr "Länge    "
 
-msgid "Failed"
-msgstr "Fehlerhaft"
+msgid "Next"
+msgstr "Nächster"
 
-#, c-format
-msgid "Subsong %03d:\t"
-msgstr "Subsong %03d:\t"
-
-msgid "untitled"
-msgstr "Unbenannt"
-
-#, c-format
-msgid "(%d seconds)\n"
-msgstr "(%d Sekunden)\n"
-
-msgid "no timelimit"
-msgstr "Kein Zeitlimit"
-
-#, c-format
-msgid "Could not open %s: %s\n"
-msgstr "Konnte %s nicht öffnen: %s\n"
+msgid ""
+"No sound support on this platform.\n"
+"Use 'gbsplay -s' for stdout output."
+msgstr ""
+"Tonausgabe wird auf dieser Platform nicht unterstützt.\n"
+"Benutze 'gbsplay -s' um die Daten auf die Standardausgabe zu lenken."
 
 #, c-format
 msgid "Not a GBS-File: %s\n"
 msgstr "Keine GBS-Datei: %s\n"
 
+msgid "OK"
+msgstr "Korrekt"
+
+msgid "Prev"
+msgstr "Vorheriger"
+
 #, c-format
-msgid "GBS Version %d unsupported.\n"
-msgstr "GBS Version %d wird nicht unterstützt.\n"
+msgid "Requested rate %dHz, got %dHz.\n"
+msgstr "Angeforderte Samplingrate ist %dHz, tatsächliche ist %dHz.\n"
+
+msgid "Save"
+msgstr "Speichern"
+
+msgid "Subsong"
+msgstr "Subsong"
+
+#, c-format
+msgid "Subsong %03d:\t"
+msgstr "Subsong %03d:\t"
+
+#, c-format
+msgid "Subsong number out of range (min=0, max=%d).\n"
+msgstr "Subsong-Nummer ausserhalb des Wertebereichs (min=0, max=%d).\n"
+
+msgid "Title"
+msgstr "Titel"
+
+#, c-format
+msgid "Unknown option %s at %s line %d.\n"
+msgstr "Unbekannte Option %s in %s Zeile %d.\n"
+
+msgid "Untitled"
+msgstr "Unbenannt"
+
+#, c-format
+msgid "Usage: %s <gbs-file>\n"
+msgstr "Benutzung: %s <GBS-Datei>\n"
+
+#, c-format
+msgid ""
+"Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
+"\n"
+"Available options are:\n"
+"  -E  endian, b == big, l == little, n == native (%s)\n"
+"  -f  set fadeout (%d seconds)\n"
+"  -g  set subsong gap (%d seconds)\n"
+"  -h  display this help and exit\n"
+"  -q  quiet\n"
+"  -r  set samplerate (%dHz)\n"
+"  -s  write to stdout\n"
+"  -t  set subsong timeout (%d seconds)\n"
+"  -T  set silence timeout (%d seconds)\n"
+"  -V  print version and exit\n"
+"  -z  play subsongs in shuffle mode\n"
+"  -Z  play subsongs in random mode (repetitions possible)\n"
+msgstr ""
+"Benutzung: %s [Option(en)] <GBS-Datei> [Starte_bei_Subsong [Stoppe_bei_Subsong] ]\n"
+"\n"
+"Verfügbare Optionen sind:\n"
+"  -E  endian, b == big, l == little, n == native (%s)\n"
+"  -f  Ausblendzeit (%d Sekunden)\n"
+"  -g  Lücke (%d Sekunden)\n"
+"  -h  Diese Hilfe anzeigen und Programm beenden\n"
+"  -q  Leise\n"
+"  -r  Abspielrate (%dHz)\n"
+"  -s  Auf die Standardausgabe schreiben\n"
+"  -t  Zeitlimit (%d Sekunden)\n"
+"  -T  Zeitlimit für Stille (%d Sekunden)\n"
+"  -V  Version anzeigen und Programm beenden\n"
+"  -z  Subsongs durcheinandergewürfelt abspielen\n"
+"  -Z  Subsongs zufällig abspielen (Wiederholungen möglich)\n"
 
 #, c-format
 msgid "Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n"
@@ -229,13 +221,31 @@ msgid "Warning: File CRC does not match (0x%08x != 0x%08x).\n"
 msgstr "Warnung: Dateiprüfsumme stimmt nicht überein (0x%08x != 0x%08x).\n"
 
 #, c-format
-msgid "Usage: %s <gbs-file>\n"
-msgstr "Benutzung: %s <GBS-Datei>\n"
+msgid "fcntl(F_GETFL) failed: %s\n"
+msgstr "fcntl(F_GETFL) fehlgeschlagen: %s\n"
 
 #, c-format
-msgid "'%s' expected at %s line %d char %d.\n"
-msgstr "'%s' erwartet in %s Zeile %d Spalte %d.\n"
+msgid "fcntl(F_SETFL, flags&~O_NONBLOCK) failed: %s\n"
+msgstr "fcntl(F_SETFL, flags&~O_NONBLOCK) fehlgeschlagen: %s\n"
 
 #, c-format
-msgid "Unknown option %s at %s line %d.\n"
-msgstr "Unbekannte Option %s in %s Zeile %d.\n"
+msgid "ioctl(dspfd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"
+msgstr "ioctl(dspfd, SNDCTL_DSP_SETFMT, %d) fehlgeschlagen: %s\n"
+
+#, c-format
+msgid "ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n"
+msgstr "ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %08x) fehlgeschlagen: %s\n"
+
+#, c-format
+msgid "ioctl(dspfd, SNDCTL_DSP_SPEED, %d) failed: %s\n"
+msgstr "ioctl(dspfd, SNDCTL_DSP_SPEED, %d) fehlgeschlagen: %s\n"
+
+#, c-format
+msgid "ioctl(dspfd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
+msgstr "ioctl(dspfd, SNDCTL_DSP_STEREO, %d) fehlgeschlagen: %s\n"
+
+msgid "no timelimit"
+msgstr "Kein Zeitlimit"
+
+msgid "untitled"
+msgstr "Unbenannt"
