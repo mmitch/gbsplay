@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.80 2004/04/02 10:40:44 mitch Exp $
+# $Id: Makefile,v 1.81 2004/04/07 17:28:51 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -188,7 +188,7 @@ dist:	distclean
 	install -m 644 *.c ./$(DISTDIR)/
 	install -m 644 *.h ./$(DISTDIR)/
 	install -m 644 $(mans_src) ./$(DISTDIR)/
-	install -m 644 $(docs) INSTALL ./$(DISTDIR)/
+	install -m 644 $(docs) INSTALL CODINGSTYLE ./$(DISTDIR)/
 	install -d ./$(DISTDIR)/contrib
 	install -m 755 contrib/gbs2ogg.sh ./$(DISTDIR)/contrib
 	install -d ./$(DISTDIR)/po
