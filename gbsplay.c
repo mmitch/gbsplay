@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.14 2003/08/23 16:11:50 ranma Exp $
+/* $Id: gbsplay.c,v 1.15 2003/08/23 16:42:33 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -1122,14 +1122,12 @@ static void op_bit(unsigned char op)
 {
 	int reg = op & 7;
 	int bit = (op >> 3) & 7;
-	unsigned char res;
 
 	DPRINTF(" BIT %d,", bit);
 	print_reg(reg);
-	res = get_reg(reg) & (1 << bit);
-	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
 	regs.rn.f &= ~NF;
-	regs.rn.f |= HF;
+	regs.rn.f |= HF | ZF;
+	regs.rn.f ^= (get_reg(reg) >> (bit-4)) & ZF;
 }
 
 static void op_rlc(unsigned char op, struct opinfo *oi)
@@ -1143,10 +1141,8 @@ static void op_rlc(unsigned char op, struct opinfo *oi)
 	res  = val = get_reg(reg);
 	res  = res << 1;
 	res |= (((unsigned short)regs.rn.f & CF) >> 4);
-	regs.rn.f &= ~CF;
-	regs.rn.f |= (val >> 7) << 4;
-	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
-	regs.rn.f &= ~(NF | HF);
+	regs.rn.f = (val >> 7) << 4;
+	if (res == 0) regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
 
@@ -1158,10 +1154,8 @@ static void op_rlca(unsigned char op, struct opinfo *oi)
 	res  = regs.rn.a;
 	res  = res << 1;
 	res |= (((unsigned short)regs.rn.f & CF) >> 4);
-	regs.rn.f &= ~CF;
-	regs.rn.f |= (regs.rn.a >> 7) << 4;
-	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
-	regs.rn.f &= ~(NF | HF);
+	regs.rn.f = (regs.rn.a >> 7) << 4;
+	if (res == 0) regs.rn.f |= ZF;
 	regs.rn.a = res;
 }
 
@@ -1176,10 +1170,8 @@ static void op_rl(unsigned char op, struct opinfo *oi)
 	res  = val = get_reg(reg);
 	res  = res << 1;
 	res |= (val >> 7);
-	regs.rn.f &= ~CF;
-	regs.rn.f |= (val >> 7) << 4;
-	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
-	regs.rn.f &= ~(NF | HF);
+	regs.rn.f = (val >> 7) << 4;
+	if (res == 0) regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
 
@@ -1191,10 +1183,8 @@ static void op_rla(unsigned char op, struct opinfo *oi)
 	res  = regs.rn.a;
 	res  = res << 1;
 	res |= (regs.rn.a >> 7);
-	regs.rn.f &= ~CF;
-	regs.rn.f |= (regs.rn.a >> 7) << 4;
-	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
-	regs.rn.f &= ~(NF | HF);
+	regs.rn.f = (regs.rn.a >> 7) << 4;
+	if (res == 0) regs.rn.f |= ZF;
 	regs.rn.a = res;
 }
 
@@ -1208,10 +1198,8 @@ static void op_sla(unsigned char op, struct opinfo *oi)
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res << 1;
-	regs.rn.f &= ~CF;
-	regs.rn.f |= ((val >> 7) << 4);
-	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
-	regs.rn.f &= ~(NF | HF);
+	regs.rn.f = ((val >> 7) << 4);
+	if (res == 0) regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
 
@@ -1226,10 +1214,8 @@ static void op_rrc(unsigned char op, struct opinfo *oi)
 	res  = val = get_reg(reg);
 	res  = res >> 1;
 	res |= (((unsigned short)regs.rn.f & CF) << 3);
-	regs.rn.f &= ~CF;
-	regs.rn.f |= (val & 1) << 4;
-	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
-	regs.rn.f &= ~(NF | HF);
+	regs.rn.f = (val & 1) << 4;
+	if (res == 0) regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
 
@@ -1241,10 +1227,8 @@ static void op_rrca(unsigned char op, struct opinfo *oi)
 	res  = regs.rn.a;
 	res  = res >> 1;
 	res |= (((unsigned short)regs.rn.f & CF) << 3);
-	regs.rn.f &= ~CF;
-	regs.rn.f |= (regs.rn.a & 1) << 4;
-	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
-	regs.rn.f &= ~(NF | HF);
+	regs.rn.f = (regs.rn.a & 1) << 4;
+	if (res == 0) regs.rn.f |= ZF;
 	regs.rn.a = res;
 }
 
@@ -1259,10 +1243,8 @@ static void op_rr(unsigned char op, struct opinfo *oi)
 	res  = val = get_reg(reg);
 	res  = res >> 1;
 	res |= (val << 7);
-	regs.rn.f &= ~CF;
-	regs.rn.f |= (val & 1) << 4;
-	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
-	regs.rn.f &= ~(NF | HF);
+	regs.rn.f = (val & 1) << 4;
+	if (res == 0) regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
 
@@ -1274,10 +1256,8 @@ static void op_rra(unsigned char op, struct opinfo *oi)
 	res  = regs.rn.a;
 	res  = res >> 1;
 	res |= (regs.rn.a << 7);
-	regs.rn.f &= ~CF;
-	regs.rn.f |= (regs.rn.a & 1) << 4;
-	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
-	regs.rn.f &= ~(NF | HF);
+	regs.rn.f = (regs.rn.a & 1) << 4;
+	if (res == 0) regs.rn.f |= ZF;
 	regs.rn.a = res;
 }
 
@@ -1292,10 +1272,8 @@ static void op_sra(unsigned char op, struct opinfo *oi)
 	res  = val = get_reg(reg);
 	res  = res >> 1;
 	res |= (val & 0x80);
-	regs.rn.f &= ~CF;
-	regs.rn.f |= ((val & 1) << 4);
-	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
-	regs.rn.f &= ~(NF | HF);
+	regs.rn.f = ((val & 1) << 4);
+	if (res == 0) regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
 
@@ -1309,10 +1287,8 @@ static void op_srl(unsigned char op, struct opinfo *oi)
 	print_reg(reg);
 	res  = val = get_reg(reg);
 	res  = res >> 1;
-	regs.rn.f &= ~CF;
-	regs.rn.f |= ((val & 1) << 4);
-	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
-	regs.rn.f &= ~(NF | HF);
+	regs.rn.f = ((val & 1) << 4);
+	if (res == 0) regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
 
@@ -1327,8 +1303,8 @@ static void op_swap(unsigned char op, struct opinfo *oi)
 	val = get_reg(reg);
 	res = (val >> 4) |
 	      (val << 4);
-	if (res) regs.rn.f &= ~ZF; else regs.rn.f |= ZF;
-	regs.rn.f &= ~(CF | HF | NF);
+	regs.rn.f = 0;
+	if (res == 0) regs.rn.f |= ZF;
 	put_reg(reg, res);
 }
 
