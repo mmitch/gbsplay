@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.34 2003/09/12 13:38:39 ranma Exp $
+# $Id: Makefile,v 1.35 2003/09/12 17:41:49 mitch Exp $
 
 include config.mk
 
@@ -20,6 +20,8 @@ CFLAGS  += $(EXTRA_CFLAGS)
 LDFLAGS += $(EXTRA_LDFLAGS)
 
 export CC CFLAGS LDFLAGS
+
+docs           := README TODO HISTORY gbsplayrc_sample
 
 objs_gbslibpic := gbcpu.po gbhw.po gbs.po cfgparser.po
 objs_gbslib    := gbcpu.o gbhw.o gbs.o cfgparser.o
@@ -62,7 +64,7 @@ install-default:
 	install -m 755 gbsplay   gbsinfo   $(bindir)
 	install -m 644 gbsplay.1 gbsinfo.1 $(man1dir)
 	install -m 644 gbsplayrc.5 $(man5dir)
-	install -m 644 README TODO gbsplayrc_sample $(docdir)
+	install -m 644 $(docs) $(docdir)
 
 install-gbsxmms.so:
 	install -d $(DESTDIR)$(XMMS_INPUT_PLUGIN_DIR)
@@ -74,7 +76,7 @@ uninstall-default:
 	rm -f $(bindir)/gbsplay    $(bindir)/gbsinfo
 	rm -f $(man1dir)/gbsplay.1 $(man1dir)/gbsinfo.1
 	rm -f $(man5dir)/gbsplayrc.5 $(man5dir)/gbsplayrc.5
-	rm -f $(docdir)/README $(docdir)/TODO $(docdir)/gbsplayrc_sample
+	rm -rf $(docdir)
 	-rmdir -p $(bindir)
 	-rmdir -p $(man1dir)
 	-rmdir -p $(man5dir)
@@ -92,7 +94,7 @@ dist:	distclean
 	install -m 644 *.c ./gbsplay/
 	install -m 644 *.h ./gbsplay/
 	install -m 644 gbsplay.1 gbsinfo.1 gbsplayrc.5 ./gbsplay/
-	install -m 644 README TODO gbsplayrc_sample ./gbsplay/
+	install -m 644 $(docs) ./gbsplay/
 	tar -c gbsplay/ -vzf ../gbsplay.tar.gz
 	rm -rf ./gbsplay
 
