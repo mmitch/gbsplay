@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.12 2003/08/24 10:08:19 ranma Exp $
+# $Id: Makefile,v 1.13 2003/08/24 12:36:24 mitch Exp $
 
 prefix = /usr/local
 exec_prefix = ${prefix}
@@ -35,6 +35,10 @@ clean:
 install: all
 	install -d $(bindir)
 	install -m 755 gbsplay $(bindir)/gbsplay
+
+uninstall:
+	rm -f $(bindir)/gbsplay
+	-rmdir $(bindir)
 
 dist:	distclean
 	install -d ./gbsplay
