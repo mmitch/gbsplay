@@ -1,8 +1,9 @@
-/* $Id: cfgparser.c,v 1.8 2004/03/10 01:48:14 ranmachan Exp $
+/* $Id: cfgparser.c,v 1.9 2004/03/20 22:02:05 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
- * 2003 (C) by Tobias Diedrich <ranma@gmx.at>
+ * 2003-2004 (C) by Tobias Diedrich <ranma@gmx.at>
+ *                  Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL.
  */
 
@@ -173,3 +174,18 @@ regparm void cfg_parse(char *fname, struct cfg_option *options)
 
 	fclose(cfg_file);
 }
+
+regparm char* get_userconfig(const char* cfgfile)
+{
+	char *homedir, *usercfg;
+	int length;
+
+	homedir = getenv("HOME");
+	length  = strlen(homedir) + strlen(cfgfile) + 2;
+	usercfg = malloc(length);
+	snprintf(usercfg, length, "%s/%s", homedir, cfgfile);
+
+	free(homedir);
+	return usercfg;
+}
+

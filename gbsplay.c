@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.84 2004/03/20 20:41:26 mitch Exp $
+/* $Id: gbsplay.c,v 1.85 2004/03/20 22:02:05 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -644,8 +644,7 @@ static regparm void printinfo(struct gbs *gbs)
 int main(int argc, char **argv)
 {
 	struct gbs *gbs;
-	char *homedir = getenv("HOME");
-	char *usercfg = malloc(strlen(homedir) + strlen(cfgfile) + 2);
+	char *usercfg;
 	struct termios ts;
 	struct sigaction sa;
 	int subsong = -1;
@@ -658,9 +657,10 @@ int main(int argc, char **argv)
 
 	select_plugin();
 
-	sprintf(usercfg, "%s/%s", homedir, cfgfile);
+	usercfg = get_userconfig(cfgfile);
 	cfg_parse("/etc/gbsplayrc", options);
 	cfg_parse(usercfg, options);
+	free(usercfg);
 	parseopts(&argc, &argv);
 
 	if (argc < 1) {

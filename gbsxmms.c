@@ -1,8 +1,9 @@
-/* $Id: gbsxmms.c,v 1.34 2004/03/10 01:48:15 ranmachan Exp $
+/* $Id: gbsxmms.c,v 1.35 2004/03/20 22:02:05 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
- * 2003,2004 (C) by Tobias Diedrich <ranma@gmx.at>
+ * 2003-2004 (C) by Tobias Diedrich <ranma@gmx.at>
+ *                  Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL.
  */
 
@@ -500,11 +501,9 @@ static void create_dialogs(void)
 
 static void init(void)
 {
-	char *homedir = getenv("HOME");
-	char *usercfg = malloc(strlen(homedir) + strlen(cfgfile) + 2);
-
-	sprintf(usercfg, "%s/%s", homedir, cfgfile);
+	char *usercfg = get_userconfig(cfgfile);
 	cfg_parse(usercfg, options);
+	free(usercfg);
 
 	create_dialogs();
 }
