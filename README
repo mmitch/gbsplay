@@ -1,0 +1,14 @@
+<<$Id: README,v 1.1 2003/08/24 13:44:53 mitch Exp $>>
+
+gbsplay - A Gameboy sound player
+
+(C) 2003 by Tobias Diedrich <ranma@gmx.at>
+            Christian Garbs <mitch@cgarbs.de>
+            Maximilian Rehkopf <otakon@gmx.net>
+
+Licensed under GNU GPL.
+
+
+This program emulates the sound hardware of the Nintendo Gameboy.  It
+is able to play the sounds from a Gameboy module dump (.GBS format)
+over /dev/dsp.
