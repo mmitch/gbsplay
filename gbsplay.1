@@ -44,10 +44,10 @@ Play subsongs in shuffle mode.  Like random mode, but a subsong can be played mu
 The sound file to play.  Must be in uncompressed .GBS format.
 .TP
 \fIstart\-subsong\fR
-The subsong from the sound file to play.  If nothing is specified, the default song will be played.  An out\-of\-bounds number will result in an error.
+The subsong from the sound file to play.  If not specified, the default song will be played (unless in shuffle or random mode).  An out\-of\-bounds number will be clipped to the possible range of subsongs.
 .TP
 \fIstop\-subsong\fR
-gbsplay stops when this subsong has been played.  If nothing is specified, gbsplay stops after playing the last subsong.
+gbsplay stops when this subsong has been played.  If not specified, gbsplay stops after playing the last subsong.  An out\-of\-bounds number will be clipped to the possible range of subsongs.
 .SH "KEYBOARD CONTROL"
 \fBgbsplay\fR supports basic keyboard control.  The following commands are recognized:
 .TP

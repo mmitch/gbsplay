@@ -1,13 +1,10 @@
-<<$Id: TODO,v 1.15 2003/09/19 19:35:17 mitch Exp $>>
+<<$Id: TODO,v 1.16 2003/09/19 22:11:46 mitch Exp $>>
 
 
 TODO list for gbsplay.
 
 
 ### bugs
-
-( )  gbsplay:
-     segmentation fault on startup when $start_subsong is out-of-bounds
 
 
 
@@ -32,6 +29,9 @@ TODO list for gbsplay.
 
 (X)  BUGFIX gbsplay:
      don't display "out of bounds error" after playing last subsong
+
+(X)  BUGFIX gbsplay:
+     segmentation fault on startup when $start_subsong is out-of-bounds
 
 ( )  make gbsinfo output more script friendly
      (perhaps via with commandline switch)

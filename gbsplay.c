@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.52 2003/09/19 19:35:17 mitch Exp $
+/* $Id: gbsplay.c,v 1.53 2003/09/19 22:11:46 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -495,6 +495,19 @@ int main(int argc, char **argv)
 	if (gbs == NULL) {
 		exit(1);
 	}
+
+	/* sanitize commandline values */
+	if (subsong <  0) {
+		subsong = 0;
+	} else if (subsong >= gbs->songs) {
+		subsong = gbs->songs-1;
+	}
+	if (subsong_stop <  0) {
+		subsong_stop = 0;
+	} else if (subsong_stop >= gbs->songs) {
+		subsong_stop = gbs->songs-1;
+	}
+	
 	setup_playmode(gbs);
 	gbs_playsong(gbs, subsong);
 	if (!quiet) {
