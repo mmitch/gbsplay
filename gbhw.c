@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.25 2003/12/12 18:37:10 ranma Exp $
+/* $Id: gbhw.c,v 1.26 2003/12/13 15:42:57 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -343,7 +343,7 @@ static void gb_sound(int cycles)
 {
 	int i;
 	sound_div += (cycles * 65536);
-	while (sound_div > sound_div_tc) {
+	while (sound_div_tc && sound_div > sound_div_tc) {
 		sound_div -= sound_div_tc;
 		r_smpl *= 256;
 		l_smpl *= 256;
