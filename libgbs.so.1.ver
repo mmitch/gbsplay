@@ -1,0 +1,24 @@
+{
+  global:
+    gbs_init;
+    gbs_set_nextsubsong_cb;
+    gbs_step;
+    gbs_printinfo;
+    gbs_close;
+    gbs_open;
+    gbs_write;
+
+    gbhw_ch;
+    gbhw_setcallback;
+    gbhw_setbuffer;
+    gbhw_setrate;
+    gbhw_pause;
+
+    cfg_endian;
+    cfg_string;
+    cfg_int;
+    cfg_parse;
+    get_userconfig;
+  local:
+    *;
+};

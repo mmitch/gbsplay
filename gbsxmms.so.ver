@@ -1,0 +1,6 @@
+{
+  global:
+    get_iplugin_info;
+  local:
+    *;
+};
