@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.38 2004/01/20 21:05:41 ranma Exp $
+# $Id: configure,v 1.39 2004/03/07 14:11:54 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -224,19 +224,19 @@ while [ $1 ]; do
 		--prefix=*)
 		prefix="${1#--prefix=}"
 		;;
-		--exec-prefix*)
+		--exec-prefix=*)
 		exec_prefix="${1#--exec-prefix=}"
 		;;
-		--bindir)
+		--bindir=*)
 		bindir="${1#--bindir=}"
 		;;
-		--mandir)
+		--mandir=*)
 		mandir="${1#--mandir=}"
 		;;
-		--docdir)
+		--docdir=*)
 		docdir="${1#--docdir=}"
 		;;
-		--localedir)
+		--localedir=*)
 		localedir="${1#--localedir=}"
 		;;
 		--have-*)
