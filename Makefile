@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.35 2003/09/12 17:41:49 mitch Exp $
+# $Id: Makefile,v 1.36 2003/09/12 17:56:20 mitch Exp $
 
 include config.mk
 
@@ -21,7 +21,7 @@ LDFLAGS += $(EXTRA_LDFLAGS)
 
 export CC CFLAGS LDFLAGS
 
-docs           := README TODO HISTORY gbsplayrc_sample
+docs           := README TODO HISTORY INSTALL gbsplayrc_sample
 
 objs_gbslibpic := gbcpu.po gbhw.po gbs.po cfgparser.po
 objs_gbslib    := gbcpu.o gbhw.o gbs.o cfgparser.o

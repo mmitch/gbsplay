@@ -1,0 +1,43 @@
+<<$Id: INSTALL,v 1.1 2003/09/12 17:56:20 mitch Exp $>>
+
+
+gbsplay INSTALL instructions
+
+
+### BASIC INSTRUCTIONS
+
+Run "make".  This should autoconfigure and build all files.  If you
+have GTK2 and XMMS development files installed, the XMMS library will
+also be built.
+
+Run "make install" (as root) to install everything to your system.
+Run "make uninstall" (as root) to remove it afterwards.
+
+
+
+### CUSTOMIZING THE INSTALLATION TARGET
+
+To change the installation target, set a prefix:
+
+$ make install prefix=/tmp/GBSPLAY
+
+Remember to use the same prefix on uninstall!
+
+
+
+### CUSTOMIZING THE XMMS PLUGIN PATH
+
+Installing the XMMS plugin to another directory is a bit tricky :-)
+Upon configure, the XMMS plugin target path is detected by running
+`xmms-config --input-plugin-dir`.  You can not change this path!
+But you can prepend it with another path.  Use DESTDIR= for this.
+
+Example:
+
+$ make install prefix=/tmp/GBSPLAY/usr DESTDIR=/tmp/GBSPLAY
+
+This will install to /tmp/GBSPLAY/usr/(bin|man|share/doc) and put the
+XMMS plugin to /tmp/GBSPLAY/$(xmms-config --input-plugin-dir).
+
+This is probably what you want to do if you plan to
+"install everything under /tmp/GBSPLAY".
