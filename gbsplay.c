@@ -1,8 +1,9 @@
-/* $Id: gbsplay.c,v 1.51 2003/09/18 18:43:37 mitch Exp $
+/* $Id: gbsplay.c,v 1.52 2003/09/19 19:35:17 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
  * 2003 (C) by Tobias Diedrich <ranma@gmx.at>
+ *             Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL.
  */
 
@@ -18,11 +19,13 @@
 #include <math.h>
 #include <term.h>
 #include <signal.h>
+#include <time.h>
 
 #include "gbhw.h"
 #include "gbcpu.h"
 #include "gbs.h"
 #include "cfgparser.h"
+#include "util.h"
 
 #include "config.h"
 
@@ -52,6 +55,8 @@ static int silencectr = 0;
 static int statuscnt;
 static long long ticks = 0;
 static struct termios ots;
+static int *subsong_playlist;
+static int subsong_playlist_idx = 0;
 
 
 /* default values */
@@ -136,23 +141,81 @@ static struct cfg_option options[] = {
 	{ NULL, NULL, NULL }
 };
 
-static int get_next_subsong(void)
-/* Return the number of the subsong that is to be played next */
+static int *setup_playlist(int songs)
+/* setup a playlist in shuffle mode */
+{
+	int i;
+	int *playlist;
+	
+	playlist = (int*) calloc( songs, sizeof(int) );
+	for (i=0; i<songs; i++) {
+		playlist[i] = i;
+	}
+
+	shuffle_int(playlist, songs);
+
+	return playlist;
+}
+
+static int get_next_subsong(struct gbs *gbs)
+/* returns the number of the subsong that is to be played next */
 {
 	int next = -1;
 	switch (playmode) {
 
 	case PLAYMODE_SHUFFLE:
-		/* not implemented yet, use fallthrough */
+		next = rand_int(gbs->songs);
+		break;
 
 	case PLAYMODE_RANDOM:
-		/* not implemented yet, use fallthrough */
+		subsong_playlist_idx++;
+		if (subsong_playlist_idx == gbs->songs) {
+			free(subsong_playlist);
+			subsong_playlist = setup_playlist(gbs->songs);
+			subsong_playlist_idx = 0;
+		}
+		next = subsong_playlist[subsong_playlist_idx];
+		break;
 
 	case PLAYMODE_LINEAR:
 		next = subsong + 1;
 		break;
 	}
 	return next;
+}
+
+static void setup_playmode(struct gbs *gbs)
+/* initializes the chosen playmode (set start subsong etc.) */
+{
+	int temp;
+
+	switch (playmode) {
+
+	case PLAYMODE_SHUFFLE:
+		if (subsong == -1) {
+			subsong = get_next_subsong(gbs);
+		}
+
+	case PLAYMODE_RANDOM:
+		subsong_playlist = setup_playlist(gbs->songs);
+		subsong_playlist_idx = 0;
+		if (subsong == -1) {
+			subsong = subsong_playlist[0];
+		} else {
+			/* rotate playlist until desired start song is first */
+			while (subsong_playlist[0] != subsong) {
+				temp = subsong_playlist[gbs->songs-1];
+				memmove(subsong_playlist+1, subsong_playlist, (gbs->songs - 1) * sizeof(int));
+				subsong_playlist[0] = temp;
+			}
+		}
+
+	case PLAYMODE_LINEAR:
+		if (subsong == -1) {
+			subsong = gbs->defaultsong - 1;
+		}
+		break;
+	}
 }
 
 void open_dsp(void)
@@ -231,7 +294,7 @@ void parseopts(int *argc, char ***argv)
 {
 	int res;
 	myname = *argv[0];
-	while ((res = getopt(*argc, *argv, "hqr:st:T:V")) != -1) {
+	while ((res = getopt(*argc, *argv, "hqr:st:T:VzZ")) != -1) {
 		switch (res) {
 		default:
 			usage(1);
@@ -291,7 +354,7 @@ static void handletimeouts(struct gbs *gbs)
 		if (subsong == subsong_stop) {
 			quit = 1;
 		}
-		next_subsong = get_next_subsong();
+		next_subsong = get_next_subsong(gbs);
 		if (next_subsong >= gbs->songs) {
 			quit = 1;
 		} else {
@@ -400,6 +463,8 @@ int main(int argc, char **argv)
 	struct termios ts;
 	struct sigaction sa;
 
+	srand(time(0)+getpid());  /* initialize RNG */
+
 	sprintf(usercfg, "%s/%s", homedir, cfgfile);
 	cfg_parse("/etc/gbsplayrc", options);
 	cfg_parse(usercfg, options);
@@ -430,9 +495,7 @@ int main(int argc, char **argv)
 	if (gbs == NULL) {
 		exit(1);
 	}
-	if (subsong == -1) {
-		subsong = gbs->defaultsong - 1;
-	}
+	setup_playmode(gbs);
 	gbs_playsong(gbs, subsong);
 	if (!quiet) {
 		gbs_printinfo(gbs, 0);

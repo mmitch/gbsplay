@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.37 2003/09/18 18:52:12 mitch Exp $
+# $Id: Makefile,v 1.38 2003/09/19 19:35:17 mitch Exp $
 
 include config.mk
 
@@ -25,7 +25,7 @@ docs           := README TODO HISTORY INSTALL gbsplayrc_sample
 
 objs_gbslibpic := gbcpu.po gbhw.po gbs.po cfgparser.po
 objs_gbslib    := gbcpu.o gbhw.o gbs.o cfgparser.o
-objs_gbsplay   := gbsplay.o
+objs_gbsplay   := gbsplay.o util.o
 objs_gbsinfo   := gbsinfo.o
 objs_gbsxmms   := gbsxmms.o
 

@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.14 2003/09/14 15:38:47 mitch Exp $>>
+<<$Id: TODO,v 1.15 2003/09/19 19:35:17 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -38,10 +38,10 @@ TODO list for gbsplay.
 
 ( )  gbsplay: add fadeout option to automatic songchange
 
-( )  gbsplay: add shuffle mode for subsongs
+(X)  gbsplay: add shuffle mode for subsongs
      (play every subsong once)
 
-( )  gbsplay: add random mode for subsongs
+(X)  gbsplay: add random mode for subsongs
      (single subsongs can be played more than once)
 
 ( )  gbsplay: add repeat mode for module
