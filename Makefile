@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.51 2003/11/29 21:57:16 ranma Exp $
+# $Id: Makefile,v 1.52 2003/11/30 15:03:49 ranma Exp $
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
@@ -31,21 +31,21 @@ docs           := README TODO HISTORY gbsplayrc_sample
 mans           := gbsplay.1    gbsinfo.1    gbsplayrc.5
 mans_src       := gbsplay.in.1 gbsinfo.in.1 gbsplayrc.in.5
 
-objs_gbslibpic := gbcpu.po gbhw.po gbs.po cfgparser.po crc32.po
-objs_gbslib    := gbcpu.o  gbhw.o  gbs.o  cfgparser.o  crc32.o
+objs_libgbspic := gbcpu.po gbhw.po gbs.po cfgparser.po crc32.po
+objs_libgbs    := gbcpu.o  gbhw.o  gbs.o  cfgparser.o  crc32.o
 objs_gbsplay   := gbsplay.o util.o
 objs_gbsinfo   := gbsinfo.o
 objs_gbsxmms   := gbsxmms.o
 
-objs := $(objs_gbslib) $(objs_gbsplay) $(objs_gbsinfo)
-dsts := gbslib.a gbslibpic.a gbsplay gbsinfo
+objs := $(objs_libgbs) $(objs_gbsplay) $(objs_gbsinfo)
+dsts := libgbs.a libgbspic.a gbsplay gbsinfo
 
 ifeq ($(build_xmmsplugin),y)
 objs += $(objs_gbsxmms)
 dsts += gbsxmms.so
 endif
 
-.PHONY: all distclean clean install dist
+.PHONY: all distclean clean install dist libgbs
 
 all: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL)
 
@@ -60,7 +60,7 @@ distclean: clean
 	rm -f ./config.mk ./config.h ./config.err ./config.sed
 
 clean:
-	find -regex ".*\.\([aos]\|[sp]o\)" -exec rm -f "{}" \;
+	find -regex ".*\.\([aos]\|po\|so\(\.[0-9]\)?\)" -exec rm -f "{}" \;
 	find -name "*~" -exec rm -f "{}" \;
 	rm -f $(mans)
 	rm -f ./gbsplay ./gbsinfo
@@ -115,28 +115,29 @@ dist:	distclean
 ifeq ($(build_sharedlib),y)
 LDFLAGS += -L. -lgbs
 
-libgbs.so.1: $(objs_gbslibpic)
+libgbs.so.1: $(objs_libgbspic)
 	$(CC) -fPIC -shared -Wl,-soname=$@ -o $@ $+
 	ln -s $@ libgbs.so
-else
-objs_gbsinfo    += gbslib.a
-objs_gbsplay    += gbslib.a
-objs_gbsxmms    += gbslibpic.a
 
-.PHONY: libgbs.so.1
-libgbs.so.1:
+libgbs: libgbs.so.1
+else
+objs_gbsinfo    += libgbs.a
+objs_gbsplay    += libgbs.a
+objs_gbsxmms    += libgbspic.a
+
+libgbs: libgbs.a libgbspic.a
 endif
 
-gbslibpic.a: $(objs_gbslibpic)
+libgbspic.a: $(objs_libgbspic)
 	$(AR) r $@ $+
-gbslib.a: $(objs_gbslib)
+libgbs.a: $(objs_libgbs)
 	$(AR) r $@ $+
-gbsinfo: $(objs_gbsinfo) libgbs.so.1
+gbsinfo: $(objs_gbsinfo) libgbs
 	$(CC) $(LDFLAGS) -o $@ $(objs_gbsinfo)
-gbsplay: $(objs_gbsplay) libgbs.so.1
+gbsplay: $(objs_gbsplay) libgbs
 	$(CC) $(LDFLAGS) -o $@ $(objs_gbsplay) -lm
 
-gbsxmms.so: $(objs_gbsxmms) libgbs.so.1
+gbsxmms.so: $(objs_gbsxmms) libgbs
 	$(CC) $(LDFLAGS) -shared -o $@ $(objs_gbsxmms) -lpthread
 
 # rules for suffixes
