@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.67 2004/01/07 22:41:45 ranma Exp $
+# $Id: Makefile,v 1.68 2004/01/11 20:15:33 mitch Exp $
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
@@ -12,15 +12,15 @@ man5dir     := $(mandir)/man5
 docdir      := $(prefix)/share/doc/gbsplay
 localedir   := $(prefix)/share/locale
 
-DESTDIR :=
-DISTDIR := gbsplay-$(VERSION)
-
 CFLAGS  := -Wall -g -Os
 LDFLAGS :=
 
 ifneq ($(noincludes),yes)
 -include config.mk
 endif
+
+DESTDIR :=
+DISTDIR := gbsplay-$(VERSION)
 
 CFLAGS  += $(EXTRA_CFLAGS)
 LDFLAGS += $(EXTRA_LDFLAGS)
