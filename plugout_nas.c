@@ -1,4 +1,4 @@
-/* $Id: plugout_nas.c,v 1.5 2004/04/04 19:26:42 ranmachan Exp $
+/* $Id: plugout_nas.c,v 1.6 2004/04/04 19:30:30 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -6,6 +6,10 @@
  * Licensed under GNU GPL.
  *
  * NAS sound output plugin
+ *
+ * Based on the libaudiooss nas backend, which was largely rewritten
+ * by me (Tobias Diedrich), I'd dare to say the only function left from
+ * the xmms code is nas_find_device, but I did not check that. :-)
  */
 
 #include "common.h"
