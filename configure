@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.39 2004/03/07 14:11:54 mitch Exp $
+# $Id: configure,v 1.40 2004/03/10 01:48:14 ranmachan Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -206,7 +206,7 @@ EOF
 	exit $1
 }
 
-OPTS="build_xmmsplugin use_i18n use_sharedlibgbs"
+OPTS="build_xmmsplugin use_i18n use_sharedlibgbs use_regparm"
 
 isknown()
 {
@@ -450,6 +450,7 @@ setdefault docdir      "$prefix/share/doc/$package"
 setdefault localedir   "$prefix/share/locale"
 
 setdefault use_sharedlibgbs no
+setdefault use_regparm yes
 
 ## write configuration
 
@@ -484,6 +485,7 @@ setdefault use_sharedlibgbs no
     echo "#define LOCALE_PREFIX \"$localedir\""
     have_x SYS_SOUNDCARD_H
     use_x I18N
+    use_x REGPARM
 ) > config.h
 
 (

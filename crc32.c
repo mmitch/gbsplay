@@ -7,6 +7,7 @@
  **/
 
 #include <unistd.h>
+#include "common.h"
 
 #define POLYNOMIAL (unsigned long)0xedb88320
 static unsigned long crc_table[256];
@@ -16,7 +17,7 @@ static unsigned long crc_table[256];
  * with the ccorrect final value.  Thus, it is safe to call
  * even on a table that someone else is using concurrently.
  */
-static void make_crc_table(void) {
+static regparm void make_crc_table(void) {
   unsigned int i, j;
   unsigned long h = 1;
   crc_table[0] = 0;
@@ -38,7 +39,7 @@ static void make_crc_table(void) {
  * to data in little-endian byte and bit order to preserve the
  * property of detecting all burst errors of length 32 bits or less.
  */
-unsigned long gbs_crc32(unsigned long crc, const unsigned char *buf, size_t len) {
+regparm unsigned long gbs_crc32(unsigned long crc, const unsigned char *buf, size_t len) {
   if (crc_table[255] == 0)
     make_crc_table();
   crc ^= 0xffffffff;

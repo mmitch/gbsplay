@@ -1,4 +1,4 @@
-/* $Id: common.h,v 1.6 2004/01/11 20:58:44 mitch Exp $
+/* $Id: common.h,v 1.7 2004/03/10 01:48:14 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -18,6 +18,12 @@
 
 #define TEXTDOMAIN "gbsplay"
 #define N_(x) x
+
+#if USE_REGPARM == 1
+#  define regparm __attribute__((regparm(3)))
+#else
+#  define regparm
+#endif
 
 #if USE_I18N == 1
 

@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.28 2003/12/14 16:24:05 ranma Exp $
+/* $Id: gbhw.c,v 1.29 2004/03/10 01:48:15 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -49,19 +49,19 @@ static int pause_output = 0;
 static gbhw_callback_fn callback;
 static void *callbackpriv;
 
-static uint8_t rom_get(uint32_t addr)
+static regparm uint32_t rom_get(uint32_t addr)
 {
 //	DPRINTF("rom_get(%04x)\n", addr);
 	return rom[addr & 0x3fff];
 }
 
-static uint8_t rombank_get(uint32_t addr)
+static regparm uint32_t rombank_get(uint32_t addr)
 {
 //	DPRINTF("rombank_get(%04x)\n", addr);
 	return rom[(addr & 0x3fff) + 0x4000*rombank];
 }
 
-static uint8_t io_get(uint32_t addr)
+static regparm uint32_t io_get(uint32_t addr)
 {
 	if (addr >= 0xff80 && addr <= 0xfffe) {
 		return hiram[addr & 0x7f];
@@ -77,19 +77,19 @@ static uint8_t io_get(uint32_t addr)
 	return 0xff;
 }
 
-static uint8_t intram_get(uint32_t addr)
+static regparm uint32_t intram_get(uint32_t addr)
 {
 //	DPRINTF("intram_get(%04x)\n", addr);
 	return intram[addr & 0x1fff];
 }
 
-static uint8_t extram_get(uint32_t addr)
+static regparm uint32_t extram_get(uint32_t addr)
 {
 //	DPRINTF("extram_get(%04x)\n", addr);
 	return extram[addr & 0x1fff];
 }
 
-static void rom_put(uint32_t addr, uint8_t val)
+static regparm void rom_put(uint32_t addr, uint8_t val)
 {
 	if (addr >= 0x2000 && addr <= 0x3fff) {
 		val &= 0x1f;
@@ -101,7 +101,7 @@ static void rom_put(uint32_t addr, uint8_t val)
 	}
 }
 
-static void io_put(uint32_t addr, uint8_t val)
+static regparm void io_put(uint32_t addr, uint8_t val)
 {
 	int chn = (addr - 0xff10)/5;
 	if (addr >= 0xff80 && addr <= 0xfffe) {
@@ -250,12 +250,12 @@ static void io_put(uint32_t addr, uint8_t val)
 	}
 }
 
-static void intram_put(uint32_t addr, uint8_t val)
+static regparm void intram_put(uint32_t addr, uint8_t val)
 {
 	intram[addr & 0x1fff] = val;
 }
 
-static void extram_put(uint32_t addr, uint8_t val)
+static regparm void extram_put(uint32_t addr, uint8_t val)
 {
 	extram[addr & 0x1fff] = val;
 }
@@ -275,7 +275,7 @@ static int smpldivisor;
 static uint32_t lfsr = 0xffffffff;
 static int ch3pos;
 
-static void gb_sound_sweep(void)
+static regparm void gb_sound_sweep(void)
 {
 	int i;
 
@@ -328,7 +328,7 @@ static void gb_sound_sweep(void)
 
 }
 
-void gbhw_master_fade(int speed, int dstvol)
+regparm void gbhw_master_fade(int speed, int dstvol)
 {
 	if (dstvol < MASTER_VOL_MIN) dstvol = MASTER_VOL_MIN;
 	if (dstvol > MASTER_VOL_MAX) dstvol = MASTER_VOL_MAX;
@@ -338,7 +338,7 @@ void gbhw_master_fade(int speed, int dstvol)
 	else master_fade = -speed;
 }
 
-static void gb_sound(int cycles)
+static regparm void gb_sound(int cycles)
 {
 	int i;
 	sound_div += (cycles * 65536);
@@ -430,23 +430,23 @@ static void gb_sound(int cycles)
 	}
 }
 
-void gbhw_setcallback(gbhw_callback_fn fn, void *priv)
+regparm void gbhw_setcallback(gbhw_callback_fn fn, void *priv)
 {
 	callback = fn;
 	callbackpriv = priv;
 }
 
-void gbhw_setbuffer(struct gbhw_buffer *buffer)
+regparm void gbhw_setbuffer(struct gbhw_buffer *buffer)
 {
 	soundbuf = buffer;
 }
 
-void gbhw_setrate(int rate)
+regparm void gbhw_setrate(int rate)
 {
 	sound_div_tc = (long long)GBHW_CLOCK*65536/rate;
 }
 
-void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax)
+regparm void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax)
 {
 	*lmin = lminval;
 	*lmax = lmaxval;
@@ -462,7 +462,7 @@ void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax)
  * so we don't need range checking in rom_get and
  * rombank_get.
  */
-void gbhw_init(uint8_t *rombuf, uint32_t size)
+regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 {
 	int i;
 
@@ -494,7 +494,7 @@ void gbhw_init(uint8_t *rombuf, uint32_t size)
 	gbcpu_addmem(0xff, 0xff, io_put, io_get);
 }
 
-int gbhw_step(int time_to_work)
+regparm int gbhw_step(int time_to_work)
 /*
  * Rückgabewert: Anzahl gelaufener CPU-Cycles
  */
@@ -530,7 +530,7 @@ int gbhw_step(int time_to_work)
 	return cycles_total;
 }
 
-void gbhw_pause(int new_pause)
+regparm void gbhw_pause(int new_pause)
 {
 	pause_output = new_pause != 0;
 }

@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.33 2004/01/11 20:59:45 mitch Exp $
+/* $Id: gbsxmms.c,v 1.34 2004/03/10 01:48:15 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -73,7 +73,7 @@ static struct cfg_option options[] = {
 	{ NULL, NULL, NULL }
 };
 
-static int gbs_time(struct gbs *gbs, int subsong) {
+static regparm int gbs_time(struct gbs *gbs, int subsong) {
 	int res = 0;
 	int i;
 

@@ -1,4 +1,4 @@
-/* $Id: gbcpu.h,v 1.8 2003/12/28 18:37:45 ranma Exp $
+/* $Id: gbcpu.h,v 1.9 2004/03/10 01:48:14 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -34,6 +34,7 @@
 
 #else
 
+/*
 static inline void foo(void)
 {
 }
@@ -41,6 +42,9 @@ static inline void foo(void)
 
 #define DPRINTF(...) foo()
 #define DEB(x) foo()
+*/
+#define DPRINTF(...)
+#define DEB(x)
 #define OPINFO(name, fn) {fn}
 
 #endif
@@ -93,16 +97,16 @@ typedef union {
 
 #endif
 
-typedef void (*gbcpu_put_fn)(uint32_t addr, uint8_t val);
-typedef uint8_t (*gbcpu_get_fn)(uint32_t addr);
+typedef regparm void (*gbcpu_put_fn)(uint32_t addr, uint8_t val);
+typedef regparm uint32_t (*gbcpu_get_fn)(uint32_t addr);
 
 extern gbcpu_regs_u gbcpu_regs;
 extern int gbcpu_halted;
 extern int gbcpu_if;
 
-void gbcpu_addmem(uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn);
-void gbcpu_init(void);
-int gbcpu_step(void);
-void gbcpu_intr(int vec);
+regparm void gbcpu_addmem(uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn);
+regparm void gbcpu_init(void);
+regparm int gbcpu_step(void);
+regparm void gbcpu_intr(int vec);
 
 #endif

@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.77 2003/12/28 19:52:21 ranma Exp $
+/* $Id: gbsplay.c,v 1.78 2004/03/10 01:48:15 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -86,7 +86,7 @@ static struct gbhw_buffer buf = {
 .len  = sizeof(samples)/sizeof(int16_t),
 };
 
-static int getnote(int div)
+static regparm int getnote(int div)
 {
 	int n = 0;
 
@@ -103,7 +103,7 @@ static int getnote(int div)
 	return n;
 }
 
-static void precalc_notes(void)
+static regparm void precalc_notes(void)
 {
 	int i;
 	for (i=0; i<MAXOCTAVE*12; i++) {
@@ -121,7 +121,7 @@ static void precalc_notes(void)
 	}
 }
 
-static char *reverse_vol(char *s)
+static regparm char *reverse_vol(char *s)
 {
 	static char buf[5];
 	int i;
@@ -134,7 +134,7 @@ static char *reverse_vol(char *s)
 	return buf;
 }
 
-static void precalc_vols(void)
+static regparm void precalc_vols(void)
 {
 	int i, k;
 	for (k=0; k<16; k++) {
@@ -153,7 +153,7 @@ static void precalc_vols(void)
 	}
 }
 
-static void swap_endian(struct gbhw_buffer *buf)
+static regparm void swap_endian(struct gbhw_buffer *buf)
 {
 	int i;
 
@@ -163,7 +163,7 @@ static void swap_endian(struct gbhw_buffer *buf)
 	}
 }
 
-static void callback(struct gbhw_buffer *buf, void *priv)
+static regparm void callback(struct gbhw_buffer *buf, void *priv)
 {
 	if (dspfd != -1) {
 		if ((is_le_machine() && endian == CFG_ENDIAN_BE) ||
@@ -187,7 +187,7 @@ static struct cfg_option options[] = {
 	{ NULL, NULL, NULL }
 };
 
-static int *setup_playlist(int songs)
+static regparm int *setup_playlist(int songs)
 /* setup a playlist in shuffle mode */
 {
 	int i;
@@ -205,7 +205,7 @@ static int *setup_playlist(int songs)
 	return playlist;
 }
 
-static int get_next_subsong(struct gbs *gbs)
+static regparm int get_next_subsong(struct gbs *gbs)
 /* returns the number of the subsong that is to be played next */
 {
 	int next = -1;
@@ -233,7 +233,7 @@ static int get_next_subsong(struct gbs *gbs)
 	return next;
 }
 
-static int get_prev_subsong(struct gbs *gbs)
+static regparm int get_prev_subsong(struct gbs *gbs)
 /* returns the number of the subsong that has been played previously */
 {
 	int prev = -1;
@@ -261,7 +261,7 @@ static int get_prev_subsong(struct gbs *gbs)
 	return prev;
 }
 
-static void setup_playmode(struct gbs *gbs)
+static regparm void setup_playmode(struct gbs *gbs)
 /* initializes the chosen playmode (set start subsong etc.) */
 {
 	switch (playmode) {
@@ -294,7 +294,7 @@ static void setup_playmode(struct gbs *gbs)
 	}
 }
 
-static int nextsubsong_cb(struct gbs *gbs, void *priv)
+static regparm int nextsubsong_cb(struct gbs *gbs, void *priv)
 {
 	int subsong = get_next_subsong(gbs);
 
@@ -306,7 +306,7 @@ static int nextsubsong_cb(struct gbs *gbs, void *priv)
 	return true;
 }
 
-void open_dsp(void)
+static regparm void open_dsp(void)
 {
 #ifdef HAVE_SYS_SOUNDCARD_H
 	int c;
@@ -364,7 +364,7 @@ char *endian_str(int endian)
 	}
 }
 
-void usage(int exitcode)
+static regparm void usage(int exitcode)
 {
 	FILE *out = exitcode ? stderr : stdout;
 	fprintf(out,
@@ -393,13 +393,13 @@ void usage(int exitcode)
 	exit(exitcode);
 }
 
-void version(void)
+static regparm void version(void)
 {
 	puts("gbsplay " GBS_VERSION);
 	exit(0);
 }
 
-void parseopts(int *argc, char ***argv)
+static regparm void parseopts(int *argc, char ***argv)
 {
 	int res;
 	myname = *argv[0];
@@ -460,7 +460,7 @@ void parseopts(int *argc, char ***argv)
 	*argv += optind;
 }
 
-static void handleuserinput(struct gbs *gbs)
+static regparm void handleuserinput(struct gbs *gbs)
 {
 	char c;
 
@@ -496,7 +496,7 @@ static void handleuserinput(struct gbs *gbs)
 	}
 }
 
-static char *notestring(int ch)
+static regparm char *notestring(int ch)
 {
 	int n;
 
@@ -510,7 +510,7 @@ static char *notestring(int ch)
 	else return "nse";
 }
 
-static int chvol(int ch)
+static regparm int chvol(int ch)
 {
 	int v;
 
@@ -524,7 +524,7 @@ static int chvol(int ch)
 	return v;
 }
 
-static char *volstring(int v)
+static regparm char *volstring(int v)
 {
 	if (v < 0) v = 0;
 	if (v > 15) v = 15;
@@ -532,7 +532,7 @@ static char *volstring(int v)
 	return &vollookup[5*v];
 }
 
-static void printstatus(struct gbs *gbs)
+static regparm void printstatus(struct gbs *gbs)
 {
 	int time = gbs->ticks / GBHW_CLOCK;
 	int timem = time / 60;
@@ -565,6 +565,10 @@ static void printstatus(struct gbs *gbs)
 	fflush(stdout);
 }
 
+/*
+ * signal handlers and main may not use regparm
+ * unless libc is using regparm too...
+ */
 void exit_handler(int signum)
 {
 	printf(_("\nCaught signal %d, exiting...\n"), signum);
@@ -575,17 +579,6 @@ void exit_handler(int signum)
 void stop_handler(int signum)
 {
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
-}
-
-static void printinfo(struct gbs *gbs)
-{
-	if (!quiet) {
-		gbs_printinfo(gbs, 0);
-		puts(_("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player\n" \
-		         "           [ ] pause/resume   [1-4] mute channel"));
-		puts("\n\n"); /* additional newlines for the status display */
-	}
-	redraw = false;
 }
 
 void cont_handler(int signum)
@@ -599,6 +592,17 @@ void cont_handler(int signum)
 	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
 
 	redraw = true;
+}
+
+static regparm void printinfo(struct gbs *gbs)
+{
+	if (!quiet) {
+		gbs_printinfo(gbs, 0);
+		puts(_("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player\n" \
+		         "           [ ] pause/resume   [1-4] mute channel"));
+		puts("\n\n"); /* additional newlines for the status display */
+	}
+	redraw = false;
 }
 
 int main(int argc, char **argv)

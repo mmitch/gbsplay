@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.73 2004/01/24 12:26:57 mitch Exp $
+# $Id: Makefile,v 1.74 2004/03/10 01:48:14 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -16,7 +16,7 @@ man5dir     := $(mandir)/man5
 docdir      := $(prefix)/share/doc/gbsplay
 localedir   := $(prefix)/share/locale
 
-CFLAGS  := -Wall -g -Os
+CFLAGS  := -Wall -Os -fomit-frame-pointer -march=pentium -mcpu=i586
 LDFLAGS :=
 
 ifneq ($(noincludes),yes)

@@ -1,4 +1,4 @@
-/* $Id: gbhw.h,v 1.11 2003/12/07 01:39:04 ranma Exp $
+/* $Id: gbhw.h,v 1.12 2004/03/10 01:48:15 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -42,15 +42,15 @@ struct gbhw_channel {
 
 extern struct gbhw_channel gbhw_ch[4];
 
-typedef void (*gbhw_callback_fn)(struct gbhw_buffer *buf, void *priv);
+typedef regparm void (*gbhw_callback_fn)(struct gbhw_buffer *buf, void *priv);
 
-void gbhw_setcallback(gbhw_callback_fn fn, void *priv);
-void gbhw_setrate(int rate);
-void gbhw_setbuffer(struct gbhw_buffer *buffer);
-void gbhw_init(uint8_t *rombuf, uint32_t size);
-void gbhw_pause(int new_pause);
-void gbhw_master_fade(int speed, int dstvol);
-void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax);
-int gbhw_step(int time_to_work);
+regparm void gbhw_setcallback(gbhw_callback_fn fn, void *priv);
+regparm void gbhw_setrate(int rate);
+regparm void gbhw_setbuffer(struct gbhw_buffer *buffer);
+regparm void gbhw_init(uint8_t *rombuf, uint32_t size);
+regparm void gbhw_pause(int new_pause);
+regparm void gbhw_master_fade(int speed, int dstvol);
+regparm void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax);
+regparm int gbhw_step(int time_to_work);
 
 #endif

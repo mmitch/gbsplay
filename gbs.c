@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.17 2003/12/14 16:24:06 ranma Exp $
+/* $Id: gbs.c,v 1.18 2004/03/10 01:48:15 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -93,7 +93,7 @@ static const uint8_t playercode[] = {
 	0xac, 0xdd, 0xda, 0x48
 };
 
-int gbs_init(struct gbs *gbs, int subsong)
+regparm int gbs_init(struct gbs *gbs, int subsong)
 {
 	gbhw_init(gbs->rom, gbs->romsize);
 
@@ -114,13 +114,13 @@ int gbs_init(struct gbs *gbs, int subsong)
 	return 1;
 }
 
-void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv)
+regparm void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv)
 {
 	gbs->nextsubsong_cb = cb;
 	gbs->nextsubsong_cb_priv = priv;
 }
 
-static int gbs_nextsubsong(struct gbs *gbs)
+static regparm int gbs_nextsubsong(struct gbs *gbs)
 {
 	if (gbs->nextsubsong_cb != NULL) {
 		return gbs->nextsubsong_cb(gbs, gbs->nextsubsong_cb_priv);
@@ -133,7 +133,7 @@ static int gbs_nextsubsong(struct gbs *gbs)
 	return true;
 }
 
-int gbs_step(struct gbs *gbs, int time_to_work)
+regparm int gbs_step(struct gbs *gbs, int time_to_work)
 {
 	int cycles = gbhw_step(time_to_work);
 	int time;
@@ -176,7 +176,7 @@ int gbs_step(struct gbs *gbs, int time_to_work)
 	return true;
 }
 
-void gbs_printinfo(struct gbs *gbs, int verbose)
+regparm void gbs_printinfo(struct gbs *gbs, int verbose)
 {
 	printf(_("GBSVersion:     %d\n"
 	         "Title:          \"%s\"\n"
@@ -225,13 +225,13 @@ void gbs_printinfo(struct gbs *gbs, int verbose)
 	}
 }
 
-void gbs_close(struct gbs *gbs)
+regparm void gbs_close(struct gbs *gbs)
 {
 	free(gbs->subsong_info);
 	free(gbs);
 }
 
-void writeint(uint8_t *buf, uint32_t val, int bytes)
+regparm void writeint(uint8_t *buf, uint32_t val, int bytes)
 {
 	int shift = 0;
 	int i;
@@ -242,7 +242,7 @@ void writeint(uint8_t *buf, uint32_t val, int bytes)
 	}
 }
 
-uint32_t readint(uint8_t *buf, int bytes)
+regparm uint32_t readint(uint8_t *buf, int bytes)
 {
 	int i;
 	int shift = 0;
@@ -256,7 +256,7 @@ uint32_t readint(uint8_t *buf, int bytes)
 	return res;
 }
 
-int gbs_write(struct gbs *gbs, char *name, int version)
+regparm int gbs_write(struct gbs *gbs, char *name, int version)
 {
 	int fd;
 	int codelen = (gbs->codelen + 15) >> 4;
@@ -336,7 +336,7 @@ int gbs_write(struct gbs *gbs, char *name, int version)
 	return 1;
 }
 
-struct gbs *gbs_open(char *name)
+regparm struct gbs *gbs_open(char *name)
 {
 	int fd, i;
 	struct stat st;

@@ -1,4 +1,4 @@
-/* $Id: cfgparser.c,v 1.7 2004/01/11 21:03:15 mitch Exp $
+/* $Id: cfgparser.c,v 1.8 2004/03/10 01:48:14 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -21,7 +21,7 @@ static FILE *cfg_file;
 
 static int nextchar_state;
 
-static char nextchar(void)
+static regparm char nextchar(void)
 {
 	int c;
 
@@ -56,7 +56,7 @@ static int nextstate;
 static int c;
 static char *filename;
 
-static void err_expect(char *s)
+static regparm void err_expect(char *s)
 {
 	fprintf(stderr, _("'%s' expected at %s line %d char %d.\n"),
 	        s, filename, cfg_line, cfg_char);
@@ -65,7 +65,7 @@ static void err_expect(char *s)
 	nextstate = 1;
 }
 
-void cfg_endian(void *ptr)
+regparm void cfg_endian(void *ptr)
 {
 	c = tolower(c);
 	if (c != 'b' && c != 'l' && c!= 'n') {
@@ -84,7 +84,7 @@ void cfg_endian(void *ptr)
 	nextstate = 1;
 }
 
-void cfg_int(void *ptr)
+regparm void cfg_int(void *ptr)
 {
 	char num[20];
 	unsigned int n = 0;
@@ -106,7 +106,7 @@ void cfg_int(void *ptr)
 	nextstate = 1;
 }
 
-void cfg_parse(char *fname, struct cfg_option *options)
+regparm void cfg_parse(char *fname, struct cfg_option *options)
 {
 	filename = fname;
 	cfg_file = fopen(fname, "r");
