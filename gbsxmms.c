@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.24 2003/12/07 09:49:14 mitch Exp $
+/* $Id: gbsxmms.c,v 1.25 2003/12/12 18:37:11 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -25,17 +25,9 @@
 #include "gbs.h"
 #include "cfgparser.h"
 
-InputPlugin gbs_ip;
+static InputPlugin gbs_ip;
 
-GtkWidget *dialog_fileinfo;
-GtkWidget *entry_filename;
-GtkWidget *entry_game;
-GtkWidget *entry_artist;
-GtkWidget *entry_copyright;
-GtkWidget *table2;
-GtkWidget *viewport1;
-
-char *fileinfo_filename;
+static char *cfgfile = ".xmms/gbsxmmsrc";
 
 static struct gbs *gbs;
 static pthread_mutex_t gbs_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -46,7 +38,9 @@ static int silence_timeout = 2;
 static int subsong_timeout = 2*60;
 static int rate = 44100;
 
+static pthread_t playthread;
 static int stopthread = 1;
+static int workunit;
 
 static int16_t samples[4096];
 static struct gbhw_buffer buffer = {
@@ -54,6 +48,18 @@ static struct gbhw_buffer buffer = {
 .len  = sizeof(samples)/sizeof(int16_t),
 .pos  = 0,
 };
+
+static GtkWidget *dialog_fileinfo;
+static GtkWidget *entry_filename;
+static GtkWidget *entry_game;
+static GtkWidget *entry_artist;
+static GtkWidget *entry_copyright;
+static GtkWidget *table2;
+static GtkWidget *viewport1;
+
+static char *file_info_title;
+static char *file_info_filename;
+static struct gbs *file_info_gbs;
 
 static struct cfg_option options[] = {
 	{ "rate", &rate, cfg_int },
@@ -111,15 +117,12 @@ static void about(void)
 	next_subsong(1);
 }
 
-char *file_info_title;
-struct gbs *file_info_gbs;
-
 static void file_info_box(char *filename)
 {
 	int titlelen = strlen(filename) + 12;
 
-	if (fileinfo_filename) free(fileinfo_filename);
-	fileinfo_filename = strdup(filename);
+	if (file_info_filename) free(file_info_filename);
+	file_info_filename = strdup(filename);
 	if (file_info_title) free(file_info_title);
 	file_info_title = malloc(titlelen);
 	strcpy(file_info_title, "File Info: ");
@@ -214,7 +217,7 @@ static void writebuffer(void)
 	buffer.pos = 0;
 }
 
-void tableenum(gpointer data, gpointer user_data)
+static void tableenum(gpointer data, gpointer user_data)
 {
 	int i;
 	GtkTableChild *child = (GtkTableChild*) data;
@@ -235,21 +238,21 @@ void tableenum(gpointer data, gpointer user_data)
 	}
 }
 
-void on_button_next_clicked(GtkButton *button, gpointer user_data)
+static void on_button_next_clicked(GtkButton *button, gpointer user_data)
 {
 	pthread_mutex_lock(&gbs_mutex);
 	next_subsong(1);
 	pthread_mutex_unlock(&gbs_mutex);
 }
 
-void on_button_prev_clicked(GtkButton *button, gpointer user_data)
+static void on_button_prev_clicked(GtkButton *button, gpointer user_data)
 {
 	pthread_mutex_lock(&gbs_mutex);
 	prev_subsong();
 	pthread_mutex_unlock(&gbs_mutex);
 }
 
-void on_button_save_clicked(GtkButton *button, gpointer user_data)
+static void on_button_save_clicked(GtkButton *button, gpointer user_data)
 {
 	file_info_gbs->title = strdup(gtk_entry_get_text(GTK_ENTRY(entry_game)));
 	file_info_gbs->author = strdup(gtk_entry_get_text(GTK_ENTRY(entry_artist)));
@@ -257,10 +260,10 @@ void on_button_save_clicked(GtkButton *button, gpointer user_data)
 
 	g_list_foreach(GTK_TABLE(table2)->children, tableenum, NULL);
 
-	gbs_write(file_info_gbs, fileinfo_filename, 2);
+	gbs_write(file_info_gbs, file_info_filename, 2);
 }
 
-void on_button_cancel_clicked(GtkButton *button, gpointer user_data)
+static void on_button_cancel_clicked(GtkButton *button, gpointer user_data)
 {
 	if (file_info_gbs) {
 		gbs_close(file_info_gbs);
@@ -274,8 +277,6 @@ void on_button_cancel_clicked(GtkButton *button, gpointer user_data)
 	}
 	gtk_widget_hide(dialog_fileinfo);
 }
-
-static char *cfgfile = ".xmms/gbsxmmsrc";
 
 static void create_dialogs(void)
 {
@@ -507,23 +508,18 @@ static void init(void)
 static int is_our_file(char *filename)
 {
 	int fd = open(filename, O_RDONLY);
-	int res = 0;
+	int res = false;
 	char id[4];
 
 	read(fd, id, sizeof(id));
 	close(fd);
 
-	if (strncmp(id, "GBS\1", sizeof(id)) == 0 ||
-	    strncmp(id, "GBS\2", sizeof(id)) == 0) res = 1;
+	if (strncmp(id, "GBS\1", sizeof(id)) == 0) res = true;
 
 	return res;
 }
 
-static pthread_t playthread;
-
-static int workunit = 50; /* in msec */
-
-void *playloop(void *priv)
+static void *playloop(void *priv)
 {
 	if (!gbs_ip.output->open_audio(FMT_S16_NE, rate, 2)) {
 		puts("Error opening output plugin.");
@@ -568,14 +564,14 @@ static void play_file(char *filename)
 		gbs->gap = subsong_gap;
 		gbs->silence_timeout = silence_timeout;
 		gbs->fadeout = fadeout;
-		stopthread = 0;
+		stopthread = false;
 		pthread_create(&playthread, 0, playloop, 0);
 	}
 }
 
 static void stop(void)
 {
-	stopthread = 1;
+	stopthread = true;
 	pthread_join(playthread, 0);
 	if (gbs) {
 		gbs_close(gbs);
@@ -618,10 +614,10 @@ static void seek(int time)
 
 static void pause_file(short paused)
 {
-       gbs_ip.output->pause(paused);
+	gbs_ip.output->pause(paused);
 }
 
-InputPlugin gbs_ip = {
+static InputPlugin gbs_ip = {
 description:	"GBS Player",
 init:		init,
 is_our_file:	is_our_file,

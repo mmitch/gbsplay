@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.24 2003/12/07 01:39:04 ranma Exp $
+/* $Id: gbhw.c,v 1.25 2003/12/12 18:37:10 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -269,9 +269,9 @@ static int main_div;
 static const int sweep_div_tc = 256;
 static int sweep_div;
 
-int r_smpl;
-int l_smpl;
-int smpldivisor;
+static int r_smpl;
+static int l_smpl;
+static int smpldivisor;
 
 static uint32_t lfsr = 0xffffffff;
 static int ch3pos;
