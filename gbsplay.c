@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.43 2003/09/13 15:47:35 mitch Exp $
+/* $Id: gbsplay.c,v 1.44 2003/09/13 16:00:30 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -234,9 +234,14 @@ static void handletimeouts(struct gbs *gbs)
 
 	if ((subsongtimeout && time >= subsongtimeout) ||
 	    (silencetimeout && silencectr > 50*silencetimeout)) {
-		if (subsong == subsong_stop) quit = 1;
+		if (subsong == subsong_stop) {
+			quit = 1;
+		}
 		subsong++;
-		if (subsong >= gbs->songs) quit = 1;
+		if (subsong >= gbs->songs) {
+			quit = 1;
+			subsong--;
+		}
 		silencectr = 0;
 		clock = 0;
 		gbs_playsong(gbs, subsong);
