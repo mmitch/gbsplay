@@ -1,4 +1,4 @@
-/* $Id: gbcpu.c,v 1.13 2003/12/13 23:47:01 ranma Exp $
+/* $Id: gbcpu.c,v 1.14 2003/12/14 16:25:52 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -1792,7 +1792,7 @@ static void show_reg_diffs(void)
 
 void gbcpu_addmem(uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn)
 {
-	int i;
+	uint32_t i;
 
 	for (i=start; i<=end; i++) {
 		putlookup[i] = putfn;

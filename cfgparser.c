@@ -60,7 +60,7 @@ static void err_expect(char *s)
 void cfg_int(void *ptr)
 {
 	char num[20];
-	int n = 0;
+	unsigned int n = 0;
 
 	if (!isdigit(c)) {
 		err_expect("[0-9]");
@@ -94,7 +94,7 @@ void cfg_parse(char *fname, struct cfg_option *options)
 
 	do {
 		char option[200];
-		int n;
+		unsigned int n;
 		switch (state) {
 		case 0:
 			if (isspace(c))

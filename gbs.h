@@ -1,4 +1,4 @@
-/* $Id: gbs.h,v 1.6 2003/12/07 01:39:04 ranma Exp $
+/* $Id: gbs.h,v 1.7 2003/12/14 16:25:52 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -40,7 +40,7 @@ struct gbs {
 	char *title;
 	char *author;
 	char *copyright;
-	int codelen;
+	unsigned int codelen;
 	uint8_t *code;
 	uint8_t *exthdr;
 	size_t filesize;
@@ -50,7 +50,7 @@ struct gbs {
 	char *strings;
 	char v1strings[33*3];
 	uint8_t *rom;
-	int romsize;
+	unsigned int romsize;
 
 	long long ticks;
 	int16_t lmin, lmax, lvol, rmin, rmax, rvol;
