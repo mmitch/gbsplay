@@ -19,20 +19,28 @@ Offset Size Description
   70     n  Code and Data (see RST VECTORS)
 n+70     x  Extended Header (see EXTENDED HEADER)
 
+If the word at offset 0x6e is not zero, the extended header is considered
+valid if both the magic is present and the extended header crc is ok.
+If the extended header is not valid, the copyright string is assumed to be
+32 characters.
+
 
 EXTENDED HEADER
 
 Offset Size Description
 ====== ==== ==========================
-  00     4  File Size (SIZE)
-  08     2  Offset to Extended Title string
-  0a     2  Offset to Extended Author string
-  0c     2  Offset to Extended Copyright string
-  0e     6  Unused/Reserved (0)
-  14     4  Extended Header CRC (Bytes 00-13)
-  18     a  Subsong Info Table (see SUBSONG INFO TABLE)
-a+18     b  String area
-SIZE-4   4  File CRC
+  00     4  Magic 'GBSX'
+  04     4  Size of Extended Header - 8
+  08     4  Extended Header CRC
+  0c     4  File Size
+  10     4  File CRC
+  14     2  Offset to Extended Title string
+  16     2  Offset to Extended Author string
+  18     2  Offset to Extended Copyright string
+  1a     1  Number of Entries in Subsong Info Table
+  1b     5  Reserved (0)
+  20     a  Subsong Info Table (see SUBSONG INFO TABLE)
+a+20     b  String area
 
 Reserved bits shall be zero.
 The Offsets refer to the beginning of the String area.
@@ -40,6 +48,8 @@ If the Offset is -1 (FFFF) the String is not set.
 The Extended String Offsets shall be -1 except when the String
 does not fit into the main header. Strings in the String area
 are zero terminated.
+The file CRC is calculated with both CRCs set to zero.
+The extended header CRC is calculated after the file CRC has been set.
 
 
 SUBSONG INFO TABLE
@@ -47,4 +57,5 @@ SUBSONG INFO TABLE
 Offset Size Description
 ====== ==== ==========================
   00     4  Length of Subsong (1024 == 1 second, 0 == unlimited)
-  02     4  Offset to Subsong Title
+  04     2  Offset to Subsong Title
+  06     2  Reserved (0)

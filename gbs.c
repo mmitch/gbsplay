@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.6 2003/10/21 22:34:29 ranma Exp $
+/* $Id: gbs.c,v 1.7 2003/10/24 00:25:55 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -20,6 +20,9 @@
 #include "gbcpu.h"
 #include "gbs.h"
 #include "crc32.h"
+
+#define GBS_MAGIC		"GBS"
+#define GBS_EXTHDR_MAGIC	"GBSX"
 
 static const char playercode[] = {
 	0xf5,              /* 0050:  push af         */
@@ -175,6 +178,20 @@ void writeint(unsigned char *buf, unsigned int val, int bytes)
 	}
 }
 
+unsigned int readint(unsigned char *buf, int bytes)
+{
+	int i;
+	int shift = 0;
+	unsigned int res = 0;
+
+	for (i=0; i<bytes; i++) {
+		res |= buf[i] << shift;
+		shift += 8;
+	}
+
+	return res;
+}
+
 int gbs_write(struct gbs *gbs, char *name, int version)
 {
 	int fd;
@@ -192,53 +209,58 @@ int gbs_write(struct gbs *gbs, char *name, int version)
 
 	if (version == 2) {
 		int len,i;
-		int newlen = 0x70 + codelen*16 + 16 + 4*gbs->songs;
+		int ehdrlen = 32 + 8*gbs->songs;
+		int newlen = 0x70 + codelen*16 + ehdrlen;
+		unsigned int hdrcrc;
 
+		gbs->buf[3] = 1;
 		gbs->buf = realloc(gbs->buf, newlen + 65536);
 		gbs->code = gbs->buf + 0x70;
-		writeint(gbs->buf + 0x6e, codelen, 2);
-		gbs->filesize = 0x70 + codelen*16 + 16 + 4*gbs->songs;
-		memset(&gbs->code[gbs->codelen], 0xff, codelen*16 - gbs->codelen);
-		memset(&gbs->code[16*codelen], 0x00, newlen - 0x70 - 16*codelen);
 		gbs->exthdr = gbs->code + codelen*16;
-
+		writeint(gbs->buf + 0x6e, codelen, 2);
+		gbs->filesize = newlen;
+		memset(&gbs->code[gbs->codelen], 0x00, codelen*16 - gbs->codelen);
+		memset(gbs->exthdr, 0x00, ehdrlen + 65536);
+		strncpy(gbs->exthdr, GBS_EXTHDR_MAGIC, 4);
+		gbs->exthdr[0x1a] = gbs->songs;
 		if ((len = strlen(gbs->title)) > 32) {
 			memcpy(strings+stringofs, gbs->title, len+1);
-			writeint(&gbs->exthdr[0x08], stringofs, 2);
+			writeint(&gbs->exthdr[0x14], stringofs, 2);
 			stringofs += len+1;
-		} else writeint(&gbs->exthdr[0x08], 0xffff, 2);
+		} else writeint(&gbs->exthdr[0x14], 0xffff, 2);
 		if ((len = strlen(gbs->author)) > 32) {
 			memcpy(strings+stringofs, gbs->author, len+1);
-			writeint(&gbs->exthdr[0x0a], stringofs, 2);
+			writeint(&gbs->exthdr[0x16], stringofs, 2);
 			stringofs += len+1;
-		} else writeint(&gbs->exthdr[0x0a], 0xffff, 2);
+		} else writeint(&gbs->exthdr[0x16], 0xffff, 2);
 		if ((len = strlen(gbs->copyright)) > 30) {
 			memcpy(strings+stringofs, gbs->copyright, len+1);
-			writeint(&gbs->exthdr[0x0c], stringofs, 2);
+			writeint(&gbs->exthdr[0x18], stringofs, 2);
 			stringofs += len+1;
-		} else writeint(&gbs->exthdr[0x0c], 0xffff, 2);
-			writeint(&gbs->exthdr[0x0e], 0, 2);
+		} else writeint(&gbs->exthdr[0x18], 0xffff, 2);
 
 		for (i=0; i<gbs->songs; i++) {
-			writeint(&gbs->exthdr[0x10+4*i],
-			         gbs->subsong_info[i].len, 2);
+			writeint(&gbs->exthdr[0x20+8*i],
+			         gbs->subsong_info[i].len, 4);
 			if (gbs->subsong_info[i].title &&
 			    strcmp(gbs->subsong_info[i].title, "") != 0) {
 				len = strlen(gbs->subsong_info[i].title)+1;
 				memcpy(strings+stringofs, gbs->subsong_info[i].title, len);
-				writeint(&gbs->exthdr[0x10+4*i+2],
+				writeint(&gbs->exthdr[0x20+8*i+4],
 				         stringofs, 2);
 				stringofs += len;
-			} else writeint(&gbs->exthdr[0x10+4*i+2], 0xffff, 2);
+			} else writeint(&gbs->exthdr[0x20+8*i+4], 0xffff, 2);
 		}
 		memcpy(gbs->buf + gbs->filesize, strings, stringofs);
 		gbs->filesize += stringofs;
 
-		writeint(&gbs->exthdr[0x00], gbs->filesize, 4);
-		gbs->buf[3] = 2;
-
+		writeint(&gbs->exthdr[0x04], ehdrlen+stringofs-8, 4);
+		writeint(&gbs->exthdr[0x0c], gbs->filesize, 4);
 		gbs->crc = gbs_crc32(0, gbs->buf, gbs->filesize);
-		writeint(&gbs->exthdr[0x04], gbs->crc, 4);
+		writeint(&gbs->exthdr[0x10], gbs->crc, 4);
+		hdrcrc = gbs_crc32(0, gbs->exthdr, ehdrlen+stringofs);
+		writeint(&gbs->exthdr[0x08], hdrcrc, 4);
+
 	} else {
 		if (gbs->version == 2) {
 			gbs->buf[3] = 1;
@@ -257,6 +279,8 @@ struct gbs *gbs_open(char *name)
 	struct stat st;
 	struct gbs *gbs = malloc(sizeof(struct gbs));
 	unsigned char *buf;
+	unsigned char *buf2 = NULL;
+	int have_ehdr = 0;
 
 	memset(gbs, 0, sizeof(struct gbs));
 	if ((fd = open(name, O_RDONLY)) == -1) {
@@ -266,64 +290,73 @@ struct gbs *gbs_open(char *name)
 	fstat(fd, &st);
 	gbs->buf = buf = malloc(st.st_size);
 	read(fd, buf, st.st_size);
-	if (buf[0] != 'G' ||
-	    buf[1] != 'B' ||
-	    buf[2] != 'S') {
+	if (strncmp(buf, GBS_MAGIC, 3) != 0) {
 		fprintf(stderr, "Not a GBS-File: %s\n", name);
 		return NULL;
 	}
 	gbs->version = buf[3];
-	if (gbs->version > 2) {
+	if (gbs->version != 1) {
 		fprintf(stderr, "GBS Version %d unsupported.\n", buf[3]);
 		return NULL;
 	}
 
 	gbs->songs = buf[0x04];
 	gbs->defaultsong = buf[0x05];
-	gbs->load  = buf[0x06] + (buf[0x07] << 8);
-	gbs->init  = buf[0x08] + (buf[0x09] << 8);
-	gbs->play  = buf[0x0a] + (buf[0x0b] << 8);
-	gbs->stack = buf[0x0c] + (buf[0x0d] << 8);
+	gbs->load  = readint(&buf[0x06], 2);
+	gbs->init  = readint(&buf[0x08], 2);
+	gbs->play  = readint(&buf[0x0a], 2);
+	gbs->stack = readint(&buf[0x0c], 2);
 	gbs->tma = buf[0x0e];
 	gbs->tmc = buf[0x0f];
 
 	memcpy(gbs->v1strings, &buf[0x10], 32);
 	memcpy(gbs->v1strings+33, &buf[0x30], 32);
-	memcpy(gbs->v1strings+66, &buf[0x50], 32);
+	memcpy(gbs->v1strings+66, &buf[0x50], 30);
 	gbs->title = gbs->v1strings;
 	gbs->author = gbs->v1strings+33;
 	gbs->copyright = gbs->v1strings+66;
 	gbs->code = &buf[0x70];
-	gbs->codelen = st.st_size - 0x70;
 	gbs->filesize = st.st_size;
 
 	gbs->subsong_info = malloc(gbs->songs * sizeof(struct gbs_subsong_info));
 	memset(gbs->subsong_info, 0, gbs->songs * sizeof(struct gbs_subsong_info));
-	if (gbs->version == 2) {
-		unsigned char *buf2;
+	gbs->codelen = (buf[0x6e] + (buf[0x6f] << 8)) << 4;
+	if ((0x70 + gbs->codelen) < (gbs->filesize - 8) &&
+	    strncmp(&buf[0x70 + gbs->codelen], GBS_EXTHDR_MAGIC, 4) == 0) {
+		unsigned int crc, realcrc, ehdrlen;
+
+		gbs->exthdr = gbs->code + gbs->codelen;
+		ehdrlen = readint(&gbs->exthdr[0x04], 4) + 8;
+		crc = readint(&gbs->exthdr[0x08], 4);
+		writeint(&gbs->exthdr[0x08], 0, 4);
+
+		if ((realcrc=gbs_crc32(0, gbs->exthdr, ehdrlen)) == crc) {
+			have_ehdr = 1;
+		} else {
+			fprintf(stderr, "Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n", crc, realcrc);
+		}
+	}
+	if (have_ehdr) {
+		buf2 = gbs->exthdr;
+		gbs->filesize = readint(&buf2[0x0c], 4);
+		gbs->crc = readint(&buf2[0x10], 4);
+		writeint(&buf2[0x10], 0, 4);
+	} else {
+		memcpy(gbs->v1strings+66, &buf[0x50], 32);
+		gbs->codelen = st.st_size - 0x70;
+	}
+	gbs->crcnow = gbs_crc32(0, buf, gbs->filesize);
+	if (have_ehdr) {
 		int gbs_titleex;
 		int gbs_authorex;
 		int gbs_copyex;
 
-		gbs->codelen = (buf[0x6e] + (buf[0x6f] << 8)) << 4;
-		buf2 = gbs->exthdr = gbs->code + gbs->codelen;
-		gbs->strings = gbs->exthdr + 16 + 4*gbs->songs;
+		gbs->version = 2;
+		gbs->strings = gbs->exthdr + 32 + 8*gbs->songs;
 
-		gbs->filesize = buf2[0] +
-		               (buf2[1] << 8) +
-		               (buf2[2] << 16) +
-		               (buf2[3] << 24);
-		gbs->crc = buf2[4] +
-		          (buf2[5] << 8) +
-		          (buf2[6] << 16) +
-		          (buf2[7] << 24);
-		buf2[4] = 0;
-		buf2[5] = 0;
-		buf2[6] = 0;
-		buf2[7] = 0;
-		gbs_titleex = buf2[8] + (buf2[9] << 8);
-		gbs_authorex = buf2[10] + (buf2[11] << 8);
-		gbs_copyex = buf2[12] + (buf2[13] << 8);
+		gbs_titleex = readint(&buf2[0x14], 2);
+		gbs_authorex = readint(&buf2[0x16], 2);
+		gbs_copyex = readint(&buf2[0x18], 2);
 		if (gbs->filesize != st.st_size)
 			fprintf(stderr, "Warning: file size does not match: %d != %ld\n", gbs->filesize, st.st_size);
 		if (gbs_titleex != 0xffff)
@@ -334,17 +367,17 @@ struct gbs *gbs_open(char *name)
 			gbs->copyright = gbs->strings + gbs_copyex;
 
 		for (i=0; i<gbs->songs; i++) {
-			int ofs = buf2[16 + 4*i + 2] +
-			         (buf2[16 + 4*i + 3] << 8);
-			gbs->subsong_info[i].len = buf2[16 + 4*i] +
-			                          (buf2[16 + 4*i + 1] << 8);
+			int ofs = readint(&buf2[32 + 8*i + 4], 2);
+			gbs->subsong_info[i].len = readint(&buf2[32 + 8*i], 4);
 			if (ofs == 0xffff)
 				gbs->subsong_info[i].title = NULL;
 			else gbs->subsong_info[i].title = gbs->strings + ofs;
 		}
-	}
 
-	gbs->crcnow = gbs_crc32(0, buf, gbs->filesize);
+		if (gbs->crc != gbs->crcnow) {
+			fprintf(stderr, "File CRC does not match: 0x%08x != 0x%08x\n", gbs->crc, gbs->crcnow);
+		}
+	}
 
 	gbs->romsize = (gbs->codelen + gbs->load + 0x3fff) & ~0x3fff;
 

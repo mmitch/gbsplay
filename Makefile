@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.44 2003/10/21 22:34:29 ranma Exp $
+# $Id: Makefile,v 1.45 2003/10/24 00:25:55 ranma Exp $
 
 include config.mk
 
@@ -107,17 +107,32 @@ dist:	distclean
 	tar -c $(DISTDIR)/ -vzf ../$(DISTDIR).tar.gz
 	rm -rf ./$(DISTDIR)
 
+ifeq ($(build_sharedlib),y)
+LDFLAGS += -L. -lgbs
+
+libgbs.so.1: $(objs_gbslibpic)
+	$(CC) -fPIC -shared -Wl,-soname=$@ -o $@ $+
+	ln -s $@ libgbs.so
+else
+objs_gbsinfo    += gbslib.a
+objs_gbsplay    += gbslibpic.a
+objs_gbsxmms    += gbslibpic.a
+
+.PHONY: libgbs.so.1
+libgbs.so.1:
+endif
+
 gbslibpic.a: $(objs_gbslibpic)
 	$(AR) r $@ $+
 gbslib.a: $(objs_gbslib)
 	$(AR) r $@ $+
-gbsinfo: $(objs_gbsinfo) gbslib.a
-	$(CC) $(LDFLAGS) -o $@ $+
-gbsplay: $(objs_gbsplay) gbslib.a
-	$(CC) $(LDFLAGS) -o $@ $+ -lm
+gbsinfo: $(objs_gbsinfo) libgbs.so.1
+	$(CC) $(LDFLAGS) -o $@ $(objs_gbsinfo)
+gbsplay: $(objs_gbsplay) libgbs.so.1
+	$(CC) $(LDFLAGS) -o $@ $(objs_gbsplay) -lm
 
-gbsxmms.so: $(objs_gbsxmms) gbslibpic.a
-	$(CC) $(LDFLAGS) -shared -o $@ $+ -lpthread
+gbsxmms.so: $(objs_gbsxmms) libgbs.so.1
+	$(CC) $(LDFLAGS) -shared -o $@ $(objs_gbsxmms) -lpthread
 
 # rules for suffixes
 

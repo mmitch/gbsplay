@@ -1,4 +1,4 @@
-/* $Id: gbsinfo.c,v 1.1 2003/08/27 15:07:03 ranma Exp $
+/* $Id: gbsinfo.c,v 1.2 2003/10/24 00:25:55 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -20,7 +20,7 @@
 #include "gbhw.h"
 #include "gbcpu.h"
 #include "gbs.h"
-\
+
 int main(int argc, char **argv)
 {
 	struct gbs *gbs;

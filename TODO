@@ -1,12 +1,10 @@
-<<$Id: TODO,v 1.32 2003/10/21 23:39:59 ranma Exp $>>
+<<$Id: TODO,v 1.33 2003/10/24 00:25:55 ranma Exp $>>
 
 
 TODO list for gbsplay.
 
 
 ### bugs
-
-( )  change gbs_(open|write) to conform to new gbsformat.txt
 
 ### unspecified: (bits'n'ideas)
 
@@ -22,12 +20,13 @@ TODO list for gbsplay.
 
 ( )  gbsplay: make refresh_delay a commandline argument
 
-
 ### version 0.0.3:
 
 ( )  set up feature list for 0.0.3 release
 
-(X)  add info about GBS format (GBSv2 is history)
+(X)  change gbs_(open|write) to conform to new gbsformat.txt
+
+(X)  add info about GBS format
 
 (X)  gbsplay:
      fix help text spacing

@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.16 2003/10/21 22:34:29 ranma Exp $
+# $Id: configure,v 1.17 2003/10/24 00:25:55 ranma Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -56,7 +56,7 @@ else
     echo "nok"
     cat <<EOF
 Environment variable CC is not set.
-Pleasy point it to a working C compiler.
+Please point it to a working C compiler.
 You probably want to run 'make' instead of './configure'.
 EOF
     die
