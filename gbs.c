@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.7 2003/10/24 00:25:55 ranma Exp $
+/* $Id: gbs.c,v 1.8 2003/10/27 16:06:58 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -114,17 +114,17 @@ int gbs_playsong(struct gbs *gbs, int i)
 
 void gbs_printinfo(struct gbs *gbs, int verbose)
 {
-	printf("GBSVersion:	%d.\n"
-	       "Title:		\"%s\".\n"
-	       "Author:		\"%s\".\n"
-	       "Copyright:	\"%s\".\n"
-	       "Load address:	0x%04x.\n"
-	       "Init address:	0x%04x.\n"
-	       "Play address:	0x%04x.\n"
-	       "Stack pointer:	0x%04x.\n"
-	       "File size:	0x%08x.\n"
-	       "ROM size:	0x%08x (%d banks).\n"
-	       "Subsongs:	%d.\n",
+	printf("GBSVersion:	%d\n"
+	       "Title:		\"%s\"\n"
+	       "Author:		\"%s\"\n"
+	       "Copyright:	\"%s\"\n"
+	       "Load address:	0x%04x\n"
+	       "Init address:	0x%04x\n"
+	       "Play address:	0x%04x\n"
+	       "Stack pointer:	0x%04x\n"
+	       "File size:	0x%08x\n"
+	       "ROM size:	0x%08x (%d banks)\n"
+	       "Subsongs:	%d\n",
 	       gbs->version,
 	       gbs->title,
 	       gbs->author,
@@ -138,7 +138,7 @@ void gbs_printinfo(struct gbs *gbs, int verbose)
 	       gbs->romsize/0x4000,
 	       gbs->songs);
 	if (gbs->version == 2) {
-		printf("CRC32:		0x%08x/0x%08x (%s).\n",
+		printf("CRC32:		0x%08x/0x%08x (%s)\n",
 		       gbs->crc, gbs->crcnow,
 		       gbs->crc == gbs->crcnow ? "OK" : "Failed");
 	}
@@ -152,10 +152,10 @@ void gbs_printinfo(struct gbs *gbs, int verbose)
 				printf("untitled ");
 			}
 			if (gbs->subsong_info[i].len) {
-				printf("(%d seconds).\n",
+				printf("(%d seconds)\n",
 				       gbs->subsong_info[i].len);
 			} else {
-				printf("(no timelimit).\n");
+				printf("(no timelimit)\n");
 			}
 		}
 	}
