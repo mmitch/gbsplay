@@ -1,4 +1,4 @@
-<<$Id: TODO,v 1.37 2003/12/05 22:03:44 mitch Exp $>>
+<<$Id: TODO,v 1.38 2003/12/09 21:24:45 mitch Exp $>>
 
 
 TODO list for gbsplay.
@@ -19,6 +19,10 @@ TODO list for gbsplay.
 
 ( )  gbsplay: make refresh_delay a commandline argument
 
+( )  gbsplay: toggle display of channel/volume
+     (about 1fps on my Win2k/Cygwin --> simply want to deactivate it.
+      display of time is enough)
+
 ( )  gbsinfo: add --help option
 
 ### version 0.0.4:
@@ -26,3 +30,5 @@ TODO list for gbsplay.
 ( )  set up feature list for 0.0.4 release
 
 (X)  make gbsinfo output *really* script friendly
+
+(X)  configure: support for stripped-down versions of mktemp
