@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.3 2003/08/31 17:46:34 ranma Exp $
+# $Id: configure,v 1.4 2003/09/01 09:48:52 ranma Exp $
 #
 # generate config.mk for gbsplay Makefile
 
@@ -21,9 +21,9 @@ exec 2> $ERRORLOG
 
 echo -n "checking for glib-dev:  "
 CONFIG=`which glib-config`
-if [ $? == 0 ]; then
+if [ $? -eq 0 ]; then
     GLIB_CFLAGS=`glib-config --cflags`
-    if [ $? == 0 ]; then
+    if [ $? -eq 0 ]; then
 	echo "ok"
     else
 	echo "error running glib-config --cflags!"
@@ -36,11 +36,11 @@ fi
 
 echo -n "checking for xmms-dev:  "
 CONFIG=`which xmms-config`
-if [ $? == 0 ]; then
+if [ $? -eq 0 ]; then
     XMMS_CFLAGS=`xmms-config --cflags` 
-    if [ $? == 0 ]; then
+    if [ $? -eq 0 ]; then
 	XMMS_INPUT_PLUGIN_DIR=`xmms-config --input-plugin-dir`
-	if [ $? == 0 ]; then
+	if [ $? -eq 0 ]; then
 	    echo "ok"
 	else
 	    echo "error running xmms-config --input-plugin-dir!"
