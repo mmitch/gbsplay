@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.81.2.2 2004/04/09 17:29:38 mitch Exp $
+# $Id: Makefile,v 1.81.2.3 2004/04/13 18:03:46 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -17,6 +17,7 @@ localedir   := $(prefix)/share/locale
 
 GBSCFLAGS  := -Wall
 GBSLDFLAGS := 
+GBSPLAYLDFLAGS :=
 
 ifneq ($(noincludes),yes)
 -include config.mk
@@ -54,7 +55,7 @@ objs_gbsplay += plugout_devdsp.o
 endif
 ifeq ($(plugout_nas),yes)
 objs_gbsplay += plugout_nas.o
-GBSLDFLAGS += -laudio
+GBSPLAYLDFLAGS += -laudio $(libaudio_flags)
 endif
 ifeq ($(plugout_stdout),yes)
 objs_gbsplay += plugout_stdout.o
@@ -220,7 +221,7 @@ libgbs.a: $(objs_libgbs)
 gbsinfo: $(objs_gbsinfo) libgbs
 	$(CC) -o $(gbsinfobin) $(objs_gbsinfo) $(GBSLDFLAGS)
 gbsplay: $(objs_gbsplay) libgbs
-	$(CC) -o $(gbsplaybin) $(objs_gbsplay) $(GBSLDFLAGS) -lm
+	$(CC) -o $(gbsplaybin) $(objs_gbsplay) $(GBSLDFLAGS) $(GBSPLAYLDFLAGS) -lm
 
 gbsxmms.so: $(objs_gbsxmms) libgbspic
 	$(CC) -shared -fPIC -o $@ $(objs_gbsxmms) $(GBSLDFLAGS) $(PTHREAD)
