@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.23 2003/08/24 03:26:10 ranma Exp $
+/* $Id: gbsplay.c,v 1.24 2003/08/24 07:54:00 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -276,10 +276,10 @@ int main(int argc, char **argv)
 			char *n1 = &notelookup[4*ni1];
 			char *n2 = &notelookup[4*ni2];
 			char *n3 = &notelookup[4*ni3];
-			char *v1 = &vollookup[5*gbhw_ch[1].volume];
-			char *v2 = &vollookup[5*gbhw_ch[2].volume];
-			char *v3 = &vollookup[5*((3-((gbhw_ch[3].volume+3)&3)) << 2)];
-			char *v4 = &vollookup[5*gbhw_ch[4].volume];
+			char *v1 = &vollookup[5* (gbhw_ch[1].volume & 15)];
+			char *v2 = &vollookup[5* (gbhw_ch[2].volume & 15)];
+			char *v3 = &vollookup[5* (((3-((gbhw_ch[3].volume+3)&3)) << 2) & 15)];
+			char *v4 = &vollookup[5* (gbhw_ch[4].volume & 15)];
 
 			statuscnt += statustc;
 
