@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.29 2003/08/24 12:26:47 ranma Exp $
+/* $Id: gbsplay.c,v 1.30 2003/08/24 15:43:08 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -112,8 +112,6 @@ static void gbs_playsong(int i)
 	REGS16_W(gbcpu_regs, SP, gbs_stack);
 	REGS16_W(gbcpu_regs, HL, gbs_base - 0x70);
 	gbcpu_regs.rn.a = i - 1;
-
-	printf("Playing song %d/%d.\n", i, gbs_songcnt);
 }
 
 static void open_gbs(char *name)
@@ -313,8 +311,8 @@ int main(int argc, char **argv)
 			if (!gbhw_ch[1].volume) n2 = "---";
 			if (!gbhw_ch[2].volume) n3 = "---";
 
-			printf("%02d:%02d ch1: %s %s  ch2: %s %s  ch3: %s %s  ch4: %s\r",
-				timem, times, n1, v1, n2, v2, n3, v3, v4);
+			printf("song %d/%d %02d:%02d ch1: %s %s  ch2: %s %s  ch3: %s %s  ch4: %s\r",
+			       	subsong, gbs_songcnt, timem, times, n1, v1, n2, v2, n3, v3, v4);
 			fflush(stdout);
 
 			if ((gbhw_ch[0].volume == 0 ||
