@@ -1,8 +1,9 @@
-/* $Id: plugout_nas.c,v 1.6 2004/04/04 19:30:30 ranmachan Exp $
+/* $Id: plugout_nas.c,v 1.7 2004/04/05 10:34:17 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
  * 2004 (C) by Christian Garbs <mitch@cgarbs.de>
+ *             Tobias Diedrich <ranma@gmx.at>
  * Licensed under GNU GPL.
  *
  * NAS sound output plugin
