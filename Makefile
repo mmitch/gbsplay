@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.5 2003/08/23 14:20:17 mitch Exp $
+# $Id: Makefile,v 1.6 2003/08/23 15:02:16 mitch Exp $
 
 prefix = /usr/local
 exec_prefix = ${prefix}
@@ -39,7 +39,8 @@ install: all
 dist:	distclean
 	install -d ./gbsplay
 	install -m 644 *.c ./gbsplay/
-	install -m 644 Makefile depend.sh ./gbsplay/
+	install -m 644 Makefile ./gbsplay/
+	install -m 755 depend.sh ./gbsplay/
 	tar -c gbsplay/ -vzf ../gbsplay.tar.gz
 	rm -rf ./gbsplay
 
