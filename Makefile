@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.49 2003/11/28 21:05:28 ranma Exp $
+# $Id: Makefile,v 1.50 2003/11/29 18:54:58 ranma Exp $
 
 prefix      := /usr/local
 exec_prefix := $(prefix)
@@ -45,7 +45,7 @@ all: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL)
 # include the dependency files
 
 ifneq ($(patsubst clean,nodep,$(patsubst distclean,nodep,$(MAKECMDGOALS))), nodep)
-include config.mk
+-include config.mk
 -include $(patsubst %.o,%.d,$(filter %.o,$(objs)))
 endif
 
