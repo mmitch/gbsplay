@@ -1,17 +1,8 @@
-<<$Id: TODO,v 1.55 2004/01/19 20:20:20 mitch Exp $>>
+<<$Id: TODO,v 1.56 2004/01/24 12:08:13 mitch Exp $>>
 
 
 TODO list for gbsplay.
 
-
-### bugs
-
-( )  `./configure --enable-something` prints no error like
-     "'something' does not exist".
-
-( )  configure script does not print "shared lib enabled"
-
-( )  make install/uninstall miss shared library
 
 ### unspecified: (bits'n'ideas)
 
