@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.19 2004/03/12 19:14:48 mitch Exp $
+/* $Id: gbs.c,v 1.20 2004/04/20 21:46:14 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -231,7 +231,7 @@ regparm void gbs_close(struct gbs *gbs)
 	free(gbs);
 }
 
-regparm void writeint(uint8_t *buf, uint32_t val, int bytes)
+static regparm void writeint(uint8_t *buf, uint32_t val, int bytes)
 {
 	int shift = 0;
 	int i;
@@ -242,7 +242,7 @@ regparm void writeint(uint8_t *buf, uint32_t val, int bytes)
 	}
 }
 
-regparm uint32_t readint(uint8_t *buf, int bytes)
+static regparm uint32_t readint(uint8_t *buf, int bytes)
 {
 	int i;
 	int shift = 0;
