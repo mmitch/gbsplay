@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.53 2004/04/13 14:14:43 mitch Exp $
+# $Id: configure,v 1.54 2004/04/14 16:29:09 ranmachan Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -42,16 +42,114 @@ die ()
 check_include()
 {
     include="$1"
+    includedirs="$2 /usr/local/include"
     name="`echo $include | sed -e 's@[/\.]@_@g'`"
     eval "value=\$have_$name"
     test -z $value || return
 
-    cc_check "checking for $include" have_$name <<EOF
+    flags=""
+    for dir in "" $includedirs; do
+        msg="checking for $include"
+        test -z "$dir" || msg="$msg in $dir"
+        test -z "$dir" || flags="-I$dir"
+        cc_check "$msg" have_$name "$flags" ok <<EOF
 #include <$include>
 int main(char argc, char **argv) {
     return 0;
 }
 EOF
+        if [ $? -eq 0 ]; then
+            eval "include${name}_path=\"$dir \""
+            return 0
+        fi
+    done
+    return 1
+}
+
+## find library path needed for lib
+find_lib()
+{
+    lib="$1"
+    libdirs="$2"
+
+    eval "val=\"\$lib${lib}_path\""
+    if [ ! -z "$val" ]; then
+        return 0
+    else 
+        for dir in "" $libdirs; do
+            msg="looking for -l$lib"
+            flags="-l$lib"
+            test -z "$dir" || msg="$msg in $dir"
+            test -z "$dir" || flags="$flags -L$dir"
+            cc_check "$msg" "" "$flags" ok <<EOF
+int main(char argc, char **argv) { return 0; }
+EOF
+            if [ $? -eq 0 ]; then
+                eval "lib${lib}_path=\"$dir \""
+                return 0
+            fi
+        done
+    fi
+    return 1
+}
+
+## remove duplicate flags
+remove_dupes()
+{
+    flags="$1"
+    newflags=""
+    for i in $flags; do
+        dupe=0
+        for j in $newflags; do
+            test "$i" = "$j" && dupe=1
+        done
+        if [ $dupe -eq 0 ]; then
+            newflags="`test -z "$newflags" || echo -n "$newflags "`$i"
+        fi
+    done
+    echo "$newflags"
+}
+
+## check for needed extra libraries and library paths for a lib
+check_libs()
+{
+    INFILE="$TEMPDIR/cc.c"
+    OUTFILE="$TEMPDIR/cc"
+    checklib="$1"
+    extralibs="$2"
+    extralibdirs="$3"
+    name="$4"
+    extraflags="$5"
+
+    for extralib in $extralibs; do
+        find_lib $extralib "$extralibdirs"
+        test $? -ne 0 && return 1
+        eval "val=\"\$lib${extralib}_path\""
+        if [ "$val" != " " ]; then
+             extraflags="$extraflags -L$val"
+        fi
+    done
+    extraflags=`remove_dupes "$extraflags"`
+
+    minerrs=`$CC -o "$OUTFILE" "$INFILE" -l$checklib $extraflags 2>&1 | wc -l`
+    for extralib in $extralibs; do
+        cat > "$INFILE" <<EOF
+int main(char argc, char **argv) { return 0; }
+EOF
+        errs=`$CC -o "$OUTFILE" "$INFILE" -l$checklib -l$extralib $extraflags 2>&1 | wc -l`
+        if [ $errs -lt $minerrs ]; then
+            minerrs=$errs
+            extraflags="$extraflags -l$extralib"
+        fi
+    done
+    extraflags=`remove_dupes "$extraflags"`
+
+    if [ $minerrs -ne 0 ]; then
+        return 1
+    fi
+
+    eval "lib${checklib}_flags=\"$extraflags\""
+    return 0
 }
 
 ## generalized 'does it compile' check
@@ -409,9 +507,20 @@ if [ "$use_devdsp" != no ]; then
     use_devdsp=$have_sys_soundcard_h
 fi
 
-if [ "$use_nas" = yes ]; then
-    check_include audio/audiolib.h
-    use_nas=$have_audio_audiolib_h
+if [ "$use_nas" != no ]; then
+    check_include audio/audiolib.h "/usr/X11R6/include"
+    retval1=$?
+    retval2=1
+    if [ $retval1 -eq 0 ]; then
+        check_libs audio "X11 Xt m" "/usr/X11R6/lib /usr/X11/lib /usr/lib/X11"
+        retval2=$?
+    fi
+    if [ $retval1 -eq 0 -a $retval2 -eq 0 ]; then
+        if [ "$includeaudiolib_path" != " " ]; then
+            EXTRA_CFLAGS="$EXTRA_CFLAGS -I$includeaudiolib_path"
+        fi
+        use_nas=yes
+    fi
 fi
 
 if [ "$use_i18n" != no ]; then
@@ -606,6 +715,7 @@ echo "EXTRA_CFLAGS=$EXTRA_CFLAGS"
     echo use_i18n := $use_i18n
     echo use_sharedlibgbs := $use_sharedlibgbs
     echo cygwin_build := $cygwin_build
+    echo libaudio_flags := $libaudio_flags
 ) > config.mk
 
 (
