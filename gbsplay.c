@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.63 2003/11/28 20:52:05 ranma Exp $
+/* $Id: gbsplay.c,v 1.64 2003/11/29 22:04:09 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -257,7 +257,7 @@ void open_dsp(void)
 		fprintf(stderr, "fcntl(F_SETFL, flags&~O_NONBLOCK) failed: %s\n", strerror(errno));
 	}
 
-	c=AFMT_S16_LE;
+	c=AFMT_S16_NE; /* Native endian */
 	if ((ioctl(dspfd, SNDCTL_DSP_SETFMT, &c)) == -1) {
 		fprintf(stderr, "ioctl(dspfd, SNDCTL_DSP_SETFMT, %d) failed: %s\n", c, strerror(errno));
 		exit(1);
