@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.21 2003/11/30 14:40:06 ranma Exp $
+/* $Id: gbhw.c,v 1.22 2003/12/06 02:41:37 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -166,7 +166,7 @@ static void io_put(uint32_t addr, uint8_t val)
 
 				if (addr == 0xff13 ||
 				    addr == 0xff18 ||
-				    addr == 0xff1e) break;
+				    addr == 0xff1d) break;
 			}
 			gbhw_ch[chn].len_enable = (ioregs[0x14 + 5*chn] & 0x40) > 0;
 
