@@ -457,6 +457,11 @@ static void io_put(unsigned short addr, unsigned char val)
 		ioregs[addr & 0x7f] = val;
 		DPRINTF(" ([0x%04x]=%02x) ", addr, val);
 		switch (addr) {
+			case 0xff06:
+			case 0xff07:
+				timertc = (256-ioregs[0x06]) * (16 << (((ioregs[0x07]+3) & 3) << 1));
+				printf("Callback rate set to %2.2fHz (Custom).\n", 4194304/(float)timertc);
+				break;
 			case 0xff10:
 				ch1.sweep_speed = ch1.sweep_speed_tc = ((val >> 4) & 7)*2;
 				ch1.sweep_dir = (val >> 3) & 1;
@@ -510,7 +515,6 @@ static void io_put(unsigned short addr, unsigned char val)
 					ch1.env_dir = envdir;
 					ch1.env_speed = ch1.env_speed_tc = envspd*8;
 
-					ch1.div = 0;
 					ch1.div_tc = 2048 - div;
 					ch1.duty = dutylookup[duty];
 					ch1.duty_tc = ch1.div_tc*ch1.duty/8;
@@ -569,7 +573,6 @@ static void io_put(unsigned short addr, unsigned char val)
 					ch2.master = 1;
 					ch2.env_dir = envdir;
 					ch2.env_speed = ch2.env_speed_tc = envspd*8;
-					ch1.div = 0;
 					ch2.div_tc = 2048 - div;
 					ch2.duty = dutylookup[duty];
 					ch2.duty_tc = ch2.div_tc*ch2.duty/8;
@@ -614,7 +617,6 @@ static void io_put(unsigned short addr, unsigned char val)
 					div |= ((int)val & 7) << 8;
 					ch3.master = (ioregs[0x1a] & 0x80) > 0;
 					ch3.volume = vol;
-					ch1.div = 0;
 					ch3.div_tc = 2048 - div;
 					ch3.len = (64 - len)*2;
 					ch3.len_enable = (val & 0x40) > 0;
@@ -2456,6 +2458,12 @@ static void open_gbs(char *name, int i)
 
 	romsize = (st.st_size + gbs_base + 0x3fff) & ~0x3fff;
 
+	if (i == -1) i = buf[0x5];
+	if (i > buf[0x04]) {
+		printf("Subsong number out of range (min=1, max=%d).\n", buf[0x4]);
+		exit(1);
+	}
+
 	printf("Playing song %d/%d.\n"
 	       "Title:     \"%.32s\"\n"
 	       "Author:    \"%.32s\"\n"
@@ -2466,7 +2474,7 @@ static void open_gbs(char *name, int i)
 	       "Stack pointer %04x.\n"
 	       "File size %08lx.\n"
 	       "ROM size %08x (%d banks).\n",
-	       buf[0x05], buf[0x04],
+	       i, buf[0x04],
 	       &buf[0x10],
 	       &buf[0x30],
 	       &buf[0x50],
@@ -2478,7 +2486,10 @@ static void open_gbs(char *name, int i)
 	       romsize,
 	       romsize/0x4000);
 
+
 	if (buf[0x0f] & 4) {
+		ioregs[0x06] = buf[0x0e];
+		ioregs[0x07] = buf[0x0f];
 		timertc = (256-buf[0x0e]) * (16 << (((buf[0x0f]+3) & 3) << 1));
 		printf("Callback rate %2.2fHz (Custom).\n", 4194304/(float)timertc);
 	} else {
@@ -2544,6 +2555,7 @@ int main(int argc, char **argv)
 {
 	dspfd = open("/dev/dsp", O_WRONLY);
 	int c;
+	int subsong = -1;
 
 	c=AFMT_S16_LE;
 	ioctl(dspfd, SNDCTL_DSP_SETFMT, &c);
@@ -2563,11 +2575,12 @@ int main(int argc, char **argv)
 
 	memcpy(&ioregs[0x30], dmgwave, sizeof(dmgwave));
 
-	if (argc != 3) {
-		printf("Usage: %s <gbs-file> <subsong>\n", argv[0]);
+	if (argc < 2) {
+		printf("Usage: %s <gbs-file> [<subsong>]\n", argv[0]);
 		exit(1);
 	}
-	open_gbs(argv[1], argv[2][0]-'0');
+	if (argc == 3) sscanf(argv[2], "%d", &subsong);
+	open_gbs(argv[1], subsong);
 	dump_regs();
 	oldregs = regs;
 	while (1) {
