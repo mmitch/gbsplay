@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.14 2003/09/13 16:03:23 ranma Exp $
+/* $Id: gbsxmms.c,v 1.15 2003/09/20 14:58:14 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -635,6 +635,11 @@ static void seek(int time)
 	pthread_mutex_unlock(&gbs_mutex);
 }
 
+static void pause_file(short paused)
+{
+       /* will hopefully be implemented in the future */
+}
+
 InputPlugin gbs_ip = {
 description:	"GBS Player",
 init:		init,
@@ -642,6 +647,7 @@ is_our_file:	is_our_file,
 configure:	configure,
 about:		about,
 play_file:	play_file,
+pause:		pause_file,
 stop:		stop,
 get_time:	get_time,
 cleanup:	cleanup,
