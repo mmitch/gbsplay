@@ -503,7 +503,7 @@ static void io_put(unsigned short addr, unsigned char val)
 					ch3.div_tc = 2048 - div;
 					ch3.len = 64 - len;
 					ch3.len_enable = (val & 0x40) > 0;
-					printf(" ch3: vol=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch3.volume, ch3.env_dir, ch3.env_speed, ch3.duty, ch3.len, ch3.len_enable, ch3.div_tc);
+					printf(" ch3: sft=%02d envd=%d envspd=%d duty=%d len=%02d len_en=%d key=%04d \n", ch3.volume, ch3.env_dir, ch3.env_speed, ch3.duty, ch3.len, ch3.len_enable, ch3.div_tc);
 					ch3.len *=2;
 					ch3.env_speed *= 8;
 					ch3.env_speed_tc *= 8;
