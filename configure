@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.42 2004/03/17 14:10:05 mitch Exp $
+# $Id: configure,v 1.43 2004/03/17 19:04:52 ranmachan Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -144,6 +144,100 @@ setdefault()
 	fi
 }
 
+# check if $1 is a known feature
+isknown()
+{
+	for i in $OPTS; do
+		if [ "$i" = "$1" ]; then
+			return 0
+		fi
+	done
+
+	if [ "${1#use_}" != "$1" ]; then
+		echo "unknown feature '${1#use_}'"
+	elif [ "${1#build_}" != "$1" ]; then
+		echo "unknown module '${1#build_}'"
+	else
+		echo "unknown option '$2'"
+	fi
+	echo
+	return 1
+}
+
+# list enabled $1 (modules, features)
+# of type $2 (build, use)
+printoptional()
+{
+	echo -n "${3-optional} $1:"
+	for i in $OPTS; do
+		eval "val=\$$i"
+		if [ "${i#${2}_}" != "$i" ]; then
+			if [ "$val" = "yes" ]; then
+				echo -n " +${i#${2}_}"
+			elif [ "$val" = "no" ]; then
+				echo -n " -${i#${2}_}"
+			fi
+		fi
+	done
+	echo
+}
+
+# parse option $1
+parseoption()
+{
+	case $1 in
+		--prefix=*)
+		prefix="${1#--prefix=}"
+		;;
+		--exec-prefix=*)
+		exec_prefix="${1#--exec-prefix=}"
+		;;
+		--bindir=*)
+		bindir="${1#--bindir=}"
+		;;
+		--mandir=*)
+		mandir="${1#--mandir=}"
+		;;
+		--docdir=*)
+		docdir="${1#--docdir=}"
+		;;
+		--localedir=*)
+		localedir="${1#--localedir=}"
+		;;
+		--have-*)
+		eval "have_${1#--have-}=yes"
+		isknown have_${1#--have-} $1 || usage 1
+		;;
+		--donthave-*)
+		eval "have_${1#--donthave-}=no"
+		isknown have_${1#--donthave-} $1 || usage 1
+		;;
+		--enable-*)
+		eval "use_${1#--enable-}=yes"
+		isknown use_${1#--enable-} || usage 1
+		;;
+		--disable-*)
+		eval "use_${1#--disable-}=no"
+		isknown use_${1#--disable-} || usage 1
+		;;
+		--with-*)
+		eval "build_${1#--with-}=yes"
+		isknown build_${1#--with-} || usage 1
+		;;
+		--without-*)
+		eval "build_${1#--without-}=no"
+		isknown build_${1#--without-} || usage 1
+		;;
+		--help)
+		usage 0
+		;;
+		*)
+		echo "unknown option '$1'"
+		echo
+		usage 1
+		;;
+	esac
+}
 ##### end of subroutines
 
 ## enable logging of errors
@@ -208,90 +302,19 @@ EOF
 	exit $1
 }
 
-OPTS="build_xmmsplugin use_i18n use_sharedlibgbs use_regparm"
+OPTS="build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_debug"
 
-isknown()
-{
-	for i in $OPTS; do
-		if [ "$i" = "$1" ]; then
-			return 0
-		fi
-	done
-
-	echo "unknown feature '${1#use_}'"
-	echo
-	return 1
-}
-
-printoptional()
-{
-	echo -n "optional $1:"
-	for i in $OPTS; do
-		eval "val=\$$i"
-		if [ "${i#${2}_}" != "$i" ]; then
-			if [ "$val" = "yes" ]; then
-				echo -n " +${i#${2}_}"
-			else
-				echo -n " -${i#${2}_}"
-			fi
-		fi
-	done
-	echo
-}
+## load user config
+if [ -f config.conf ]; then
+	echo -n "loading config.conf... "
+	while read line; do
+		parseoption $line
+	done < config.conf
+	echo ok
+fi
 
 while [ $1 ]; do
-	case $1 in
-		--prefix=*)
-		prefix="${1#--prefix=}"
-		;;
-		--exec-prefix=*)
-		exec_prefix="${1#--exec-prefix=}"
-		;;
-		--bindir=*)
-		bindir="${1#--bindir=}"
-		;;
-		--mandir=*)
-		mandir="${1#--mandir=}"
-		;;
-		--docdir=*)
-		docdir="${1#--docdir=}"
-		;;
-		--localedir=*)
-		localedir="${1#--localedir=}"
-		;;
-		--have-*)
-		eval "have_${1#--have-}=yes"
-		isknown have_${1#--have-} || usage 1
-		;;
-		--donthave-*)
-		eval "have_${1#--donthave-}=no"
-		isknown have_${1#--donthave-} || usage 1
-		;;
-		--enable-*)
-		eval "use_${1#--enable-}=yes"
-		isknown use_${1#--enable-} || usage 1
-		;;
-		--disable-*)
-		eval "use_${1#--disable-}=no"
-		isknown use_${1#--disable-} || usage 1
-		;;
-		--with-*)
-		eval "build_${1#--with-}=yes"
-		isknown build_${1#--with-} || usage 1
-		;;
-		--without-*)
-		eval "build_${1#--without-}=no"
-		isknown build_${1#--without-} || usage 1
-		;;
-		--help)
-		usage 0
-		;;
-		*)
-		echo "unknown option '$1'"
-		echo
-		usage 1
-		;;
-	esac
+	parseoption $1
 	shift
 done
 
@@ -324,6 +347,19 @@ if [ $RESULT -eq 0 ]; then
 else
     echo "error executing $CC"
     die
+fi
+
+if [ "$use_regparm" != "no" ]; then
+    cc_check "checking for regparm support" use_regparm <<EOF
+void __attribute__((regparm(3))) foo(void)
+{
+}
+int main(int argc, char **argv)
+{
+	foo();
+	return 0;
+}
+EOF
 fi
 
 ## check for various headers
@@ -470,10 +506,30 @@ setdefault docdir      "$prefix/share/doc/$package"
 setdefault localedir   "$prefix/share/locale"
 
 setdefault use_sharedlibgbs no
-setdefault use_regparm yes
+setdefault use_debug no
 
 printoptional modules build
 printoptional features use
+
+## architecture dependent CFLAGS
+
+ARCH=`uname -m`
+case $ARCH in
+	i?86)
+	EXTRA_CFLAGS="$EXTRA_CFLAGS -Os -pipe -march=$ARCH"
+	;;
+	*)
+	EXTRA_CFLAGS="$EXTRA_CFLAGS -Os -pipe"
+	;;
+esac
+
+if [ "$use_debug" = "yes" ]; then
+	EXTRA_CFLAGS="$EXTRA_CFLAGS -g3"
+else
+	EXTRA_CFLAGS="$EXTRA_CFLAGS -fomit-frame-pointer"
+fi
+
+echo "EXTRA_CFLAGS=$EXTRA_CFLAGS"
 
 ## write configuration
 
