@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.58 2004/04/14 17:30:20 ranmachan Exp $
+# $Id: configure,v 1.59 2004/04/14 17:35:02 ranmachan Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -510,7 +510,7 @@ if [ "$use_nas" != no ]; then
     retval1=$?
     retval2=1
     if [ $retval1 -eq 0 ]; then
-        check_libs audio "X11 Xt m" "/usr/X11R6/lib /usr/X11/lib /usr/lib/X11" <<EOF
+        check_libs audio "X11 Xt" "/usr/X11R6/lib /usr/X11/lib /usr/lib/X11" <<EOF
 int main(char argc, char **argv) { return 0; }
 EOF
         retval2=$?
@@ -558,6 +558,20 @@ EOF
     if [ $? -eq 0 -a "$libc_flags" != "" ]; then
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS $libc_flags"
     fi
+#    find_lib intl "/usr/local/lib"
+#    flags="-lintl"
+#    test -z "$libintl_path" || flags="-L$libintl_path $flags"
+#    cc_check "do we need -lintl" need_lintl "$flags" yes no <<EOF
+##include <libintl.h>
+#int main(int argc, char **argv)
+#{
+#	bindtextdomain("foo", "bar");
+#	return 0;
+#}
+#EOF
+#    if [ $? -eq 0 ]; then
+#	EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lintl"
+#    fi
 fi
 
 if [ "$build_xmmsplugin" != "no" ]; then
