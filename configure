@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.51.2.14 2004/04/20 17:24:52 mitch Exp $
+# $Id: configure,v 1.51.2.15 2004/04/26 19:01:23 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -513,7 +513,7 @@ if [ "$use_nas" != no ]; then
     retval1=$?
     retval2=1
     if [ $retval1 -eq 0 ]; then
-        check_libs audio "X11 Xt" "/usr/X11R6/lib /usr/X11/lib /usr/lib/X11" <<EOF
+        check_libs audio "X11 Xt m" "/usr/X11R6/lib /usr/X11/lib /usr/lib/X11" <<EOF
 int main(char argc, char **argv) { return 0; }
 EOF
         retval2=$?
