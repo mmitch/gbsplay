@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.36 2003/09/12 17:56:20 mitch Exp $
+# $Id: Makefile,v 1.37 2003/09/18 18:52:12 mitch Exp $
 
 include config.mk
 
@@ -52,7 +52,7 @@ distclean: clean
 clean:
 	find -regex ".*\.\([aos]\|[sp]o\)" -exec rm -f "{}" \;
 	find -name "*~" -exec rm -f "{}" \;
-	rm -rf ./gbsplay ./gbsinfo
+	rm -f ./gbsplay ./gbsinfo
 
 install: all install-default $(EXTRA_INSTALL)
 
@@ -103,12 +103,12 @@ gbslibpic.a: $(objs_gbslibpic)
 gbslib.a: $(objs_gbslib)
 	$(AR) r $@ $+
 gbsinfo: $(objs_gbsinfo) gbslib.a
-	$(CC) $(LDFLAGS) -o $@ $+ -lz
+	$(CC) $(LDFLAGS) -o $@ $+
 gbsplay: $(objs_gbsplay) gbslib.a
-	$(CC) $(LDFLAGS) -o $@ $+ -lz -lm
+	$(CC) $(LDFLAGS) -o $@ $+ -lm
 
 gbsxmms.so: $(objs_gbsxmms) gbslibpic.a
-	$(CC) $(LDFLAGS) -shared -o $@ $+ -lpthread -lz
+	$(CC) $(LDFLAGS) -shared -o $@ $+ -lpthread
 
 # rules for suffixes
 

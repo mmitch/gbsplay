@@ -1,8 +1,9 @@
-/* $Id: gbs.c,v 1.3 2003/08/31 23:52:08 ranma Exp $
+/* $Id: gbs.c,v 1.4 2003/09/18 18:52:12 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
  * 2003 (C) by Tobias Diedrich <ranma@gmx.at>
+ *             Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL.
  */
 
@@ -14,7 +15,15 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+
+#ifdef HAVE_ZLIB
 #include <zlib.h>
+#else
+/* fake CRC32 routine when zlib is not present */
+unsigned int crc32(unsigned char a, unsigned char* b, unsigned int c) {
+  return 0;
+}
+#endif
 
 #include "gbhw.h"
 #include "gbcpu.h"

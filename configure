@@ -1,14 +1,16 @@
 #!/bin/sh
-# $Id: configure,v 1.6 2003/09/12 18:02:44 mitch Exp $
+# $Id: configure,v 1.7 2003/09/18 18:52:12 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 
 EXTRA_ALL=
 EXTRA_CFLAGS=
 EXTRA_INSTALL=
+EXTRA_LDFLAGS=
 EXTRA_SRCS=
 EXTRA_UNINSTALL=
 XMMS_INPUT_PLUGIN_DIR=
+ZLIB_FOUND=
 
 build_xmmsplugin=n
 
@@ -52,6 +54,27 @@ else
     echo "xmms-config not found!"
 fi
 
+## check for zlib development files
+
+echo -n "checking for zlib-dev:  "
+
+INFILE=$(mktemp).c
+OUTFILE=$(mktemp)
+
+cat > "$INFILE" <<EOF
+#include <zlib.h>
+int main(char argc, char **argv) {
+    return 0;
+}
+EOF
+$CC -o "$OUTFILE" "$INFILE"
+if [ $? -eq 0 ]; then
+    echo "ok"
+else
+    echo "not found"
+fi
+rm -f "$INFILE" "$OUTFILE"
+
 ## everything ok?
 
 if [ "$GLIB_CFLAGS" -a "$XMMS_CFLAGS" -a "XMMS_INPUT_PLUGIN_DIR" ]; then
@@ -64,12 +87,21 @@ else
     echo "no xmms support."
 fi
 
+if [ "$ZLIB_FOUND" = "yes" ]; then
+    EXTRA_CFLAGS="$EXTRA_CFLAGS -DHAVE_ZLIB"
+    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lz"
+    echo "crc32 support enabled."
+else
+    echo "no crc32 support."
+fi
+
 ## write configuration
 
 (
     echo EXTRA_ALL := $EXTRA_ALL
     echo EXTRA_CFLAGS := $EXTRA_CFLAGS 
     echo EXTRA_INSTALL := $EXTRA_INSTALL
+    echo EXTRA_LDFLAGS := $EXTRA_LDFLAGS
     echo EXTRA_SRCS := $EXTRA_SRCS
     echo EXTRA_UNINSTALL := $EXTRA_UNINSTALL
     echo XMMS_INPUT_PLUGIN_DIR := $XMMS_INPUT_PLUGIN_DIR
