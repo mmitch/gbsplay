@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.18 2004/03/10 01:48:15 ranmachan Exp $
+/* $Id: gbs.c,v 1.19 2004/03/12 19:14:48 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -219,7 +219,7 @@ regparm void gbs_printinfo(struct gbs *gbs, int verbose)
 				printf(_("(%d seconds)\n"),
 				       (int)(gbs->subsong_info[i].len >> GBS_LEN_SHIFT));
 			} else {
-				printf("%s\n", _("no timelimit"));
+				printf("%s\n", _("no time limit"));
 			}
 		}
 	}
