@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.70 2004/01/20 20:49:16 ranma Exp $
+# $Id: Makefile,v 1.71 2004/01/20 20:51:26 ranma Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -110,8 +110,7 @@ clean:
 	find . -name "*~" -exec rm -f "{}" \;
 	rm -f libgbs
 	rm -f $(mans)
-	rm -f ./gbsplay     ./gbsinfo
-	rm -f ./gbsplay.exe ./gbsinfo.exe
+	rm -f $(gbsplaybin) $(gbsinfobin)
 
 install: all install-default $(EXTRA_INSTALL)
 
