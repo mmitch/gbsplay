@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.23 2003/08/28 16:49:33 ranma Exp $
+# $Id: Makefile,v 1.24 2003/08/29 02:16:54 ranma Exp $
 
 include config.mk
 
@@ -11,7 +11,7 @@ man1dir     := $(mandir)/man1
 
 DESTDIR :=
 
-CFLAGS  := -Wall -Wstrict-prototypes -Os -fomit-frame-pointer -fPIC
+CFLAGS  := -Wall -Wstrict-prototypes -Os -fomit-frame-pointer
 LDFLAGS :=
 
 CFLAGS  += $(EXTRA_CFLAGS)
@@ -19,13 +19,14 @@ LDFLAGS += $(EXTRA_LDFLAGS)
 
 export CC CFLAGS LDFLAGS
 
-objs_gbslib  := gbcpu.o gbhw.o gbs.o
-objs_gbsplay := gbsplay.o
-objs_gbsinfo := gbsinfo.o
-objs_gbsxmms := gbsxmms.o
+objs_gbslibpic := gbcpu.po gbhw.po gbs.po
+objs_gbslib    := gbcpu.o gbhw.o gbs.o
+objs_gbsplay   := gbsplay.o
+objs_gbsinfo   := gbsinfo.o
+objs_gbsxmms   := gbsxmms.o
 
 objs := $(objs_gbslib) $(objs_gbsplay) $(objs_gbsinfo)
-dsts := gbslib.a gbsplay gbsinfo
+dsts := gbslib.a gbslibpic.a gbsplay gbsinfo
 
 ifeq ($(build_xmmsplugin),y)
 objs += $(objs_gbsxmms)
@@ -45,7 +46,7 @@ distclean: clean
 	rm -f ./config.mk ./config.err
 
 clean:
-	find -regex ".*\.\([aos]\|so\)" -exec rm -f "{}" \;
+	find -regex ".*\.\([aos]\|[sp]o\)" -exec rm -f "{}" \;
 	find -name "*~" -exec rm -f "{}" \;
 	rm -rf ./gbsplay
 
@@ -85,6 +86,8 @@ dist:	distclean
 	tar -c gbsplay/ -vzf ../gbsplay.tar.gz
 	rm -rf ./gbsplay
 
+gbslibpic.a: $(objs_gbslibpic)
+	$(AR) r $@ $+
 gbslib.a: $(objs_gbslib)
 	$(AR) r $@ $+
 gbsinfo: $(objs_gbsinfo) gbslib.a
@@ -92,15 +95,18 @@ gbsinfo: $(objs_gbsinfo) gbslib.a
 gbsplay: $(objs_gbsplay) gbslib.a
 	$(CC) $(LDFLAGS) -o $@ $+ -lz -lm
 
-gbsxmms.so: $(objs_gbsxmms) gbslib.a
-	$(CC) -shared $(LDFLAGS) -o $@ $+ -lpthread -lz
+gbsxmms.so: $(objs_gbsxmms) gbslibpic.a
+	$(CC) $(LDFLAGS) -shared -o $@ $+ -lpthread -lz
 
 # rules for suffixes
 
-.SUFFIXES: .i .s
+.SUFFIXES: .i .s .po
 
+.c.po:
+	@echo CC $< -o $@
+	@$(CC) $(CFLAGS) -fPIC -c -o $@ $<
 .c.o:
-	@echo CC $<
+	@echo CC $< -o $@
 	@$(CC) $(CFLAGS) -c -o $@ $<
 .c.i:
 	$(CC) -E $(CFLAGS) -o $@ $<
@@ -112,5 +118,5 @@ gbsxmms.so: $(objs_gbsxmms) gbslib.a
 config.mk: configure
 	./configure
 %.d: %.c config.mk
-	@echo DEP $<
+	@echo DEP $< -o $@
 	@./depend.sh $< $(CFLAGS) > $@
