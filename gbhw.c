@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.20 2003/11/30 14:35:59 ranma Exp $
+/* $Id: gbhw.c,v 1.21 2003/11/30 14:40:06 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -202,7 +202,7 @@ static void io_put(uint32_t addr, uint8_t val)
 				if (addr == 0xff22) break;
 //				printf(" ch4: vol=%02d envd=%d envspd=%d duty_ctr=%d len=%03d len_en=%d key=%04d gate=%d%d\n", gbhw_ch[3].volume, gbhw_ch[3].env_dir, gbhw_ch[3].env_ctr, gbhw_ch[3].duty_ctr, gbhw_ch[3].len, gbhw_ch[3].len_enable, gbhw_ch[3].div_tc, gbhw_ch[3].leftgate, gbhw_ch[3].rightgate);
 			}
-			gbhw_ch[chn].len_enable = (val & 0x40) > 0;
+			gbhw_ch[chn].len_enable = (ioregs[0x23] & 0x40) > 0;
 			break;
 		case 0xff25:
 			gbhw_ch[0].leftgate = (val & 0x10) > 0;
