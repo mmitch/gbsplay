@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "common.h"
 #include "cfgparser.h"
 
 static int cfg_line, cfg_char;
@@ -49,7 +50,7 @@ static char *filename;
 
 static void err_expect(char *s)
 {
-	fprintf(stderr, "'%s' expected at %s line %d char %d.\n",
+	fprintf(stderr, _("'%s' expected at %s line %d char %d.\n"),
 	        s, filename, cfg_line, cfg_char);
 	c = nextchar();
 	state = 0;
@@ -133,7 +134,7 @@ void cfg_parse(char *fname, struct cfg_option *options)
 			if (options[n].parse_fn)
 				options[n].parse_fn(options[n].ptr);
 			else {
-				fprintf(stderr, "Unknown option %s at %s line %d.\n", option, fname, cfg_line);
+				fprintf(stderr, _("Unknown option %s at %s line %d.\n"), option, fname, cfg_line);
 				while ((c = nextchar()) != '\n' && c != 0);
 				state = 0;
 				nextstate = 1;

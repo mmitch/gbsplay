@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.68 2003/12/07 09:49:14 mitch Exp $
+/* $Id: gbsplay.c,v 1.69 2003/12/12 23:05:51 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -7,7 +7,7 @@
  * Licensed under GNU GPL.
  */
 
-#include "config.h"
+#include "common.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -263,40 +263,40 @@ void open_dsp(void)
 	int flags;
 
 	if ((dspfd = open("/dev/dsp", O_WRONLY|O_NONBLOCK)) == -1) {
-		fprintf(stderr, "Could not open /dev/dsp: %s\n", strerror(errno));
+		fprintf(stderr, _("Could not open /dev/dsp: %s\n"), strerror(errno));
 		exit(1);
 	}
 	if ((flags = fcntl(dspfd, F_GETFL)) == -1) {
-		fprintf(stderr, "fcntl(F_GETFL) failed: %s\n", strerror(errno));
+		fprintf(stderr, _("fcntl(F_GETFL) failed: %s\n"), strerror(errno));
 	} else if (fcntl(dspfd, F_SETFL, flags & ~O_NONBLOCK) == -1) {
-		fprintf(stderr, "fcntl(F_SETFL, flags&~O_NONBLOCK) failed: %s\n", strerror(errno));
+		fprintf(stderr, _("fcntl(F_SETFL, flags&~O_NONBLOCK) failed: %s\n"), strerror(errno));
 	}
 
 	c=AFMT_S16_NE; /* Native endian */
 	if ((ioctl(dspfd, SNDCTL_DSP_SETFMT, &c)) == -1) {
-		fprintf(stderr, "ioctl(dspfd, SNDCTL_DSP_SETFMT, %d) failed: %s\n", c, strerror(errno));
+		fprintf(stderr, _("ioctl(dspfd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"), c, strerror(errno));
 		exit(1);
 	}
 	c = rate;
 	if ((ioctl(dspfd, SNDCTL_DSP_SPEED, &c)) == -1) {
-		fprintf(stderr, "ioctl(dspfd, SNDCTL_DSP_SPEED, %d) failed: %s\n", rate, strerror(errno));
+		fprintf(stderr, _("ioctl(dspfd, SNDCTL_DSP_SPEED, %d) failed: %s\n"), rate, strerror(errno));
 		exit(1);
 	}
 	if (c != rate) {
-		fprintf(stderr, "Requested rate %dHz, got %dHz.\n", rate, c);
+		fprintf(stderr, _("Requested rate %dHz, got %dHz.\n"), rate, c);
 		rate = c;
 	}
 	c=1;
 	if ((ioctl(dspfd, SNDCTL_DSP_STEREO, &c)) == -1) {
-		fprintf(stderr, "ioctl(dspfd, SNDCTL_DSP_STEREO, %d) failed: %s\n", c, strerror(errno));
+		fprintf(stderr, _("ioctl(dspfd, SNDCTL_DSP_STEREO, %d) failed: %s\n"), c, strerror(errno));
 		exit(1);
 	}
 	c=(4 << 16) + 11;
 	if ((ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, &c)) == -1)
-		fprintf(stderr, "ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n", c, strerror(errno));
+		fprintf(stderr, _("ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n"), c, strerror(errno));
 #else
-	puts("No sound support on this platform.");
-	puts("Use 'gbsplay -s' for stdout output.");
+	puts(_("No sound support on this platform.\n" \
+	       "Use 'gbsplay -s' for stdout output."));
 #endif
 }
 
@@ -304,12 +304,11 @@ void usage(int exitcode)
 {
 	FILE *out = exitcode ? stderr : stdout;
 	fprintf(out,
-	        "Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
+	        _("Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
 	        "\n"
 	        "Available options are:\n"
 	        "  -f  set fadeout (%d seconds)\n"
 	        "  -g  set subsong gap (%d seconds)\n"
-	        "  -h  display this help and exit\n"
 	        "  -h  display this help and exit\n"
 	        "  -q  quiet\n"
 	        "  -r  set samplerate (%dHz)\n"
@@ -318,7 +317,7 @@ void usage(int exitcode)
 	        "  -T  set silence timeout (%d seconds)\n"
 	        "  -V  print version and exit\n"
 		"  -z  play subsongs in random mode\n"
-		"  -Z  play subsongs in shuffle mode (repetitions possible)\n",
+		"  -Z  play subsongs in shuffle mode (repetitions possible)\n"),
 	        myname,
 		fadeout,
 		subsong_gap,
@@ -466,7 +465,7 @@ static void printstatus(struct gbs *gbs)
 
 	songtitle = gbs->subsong_info[gbs->subsong].title;
 	if (!songtitle) {
-		songtitle="Untitled";
+		songtitle=_("Untitled");
 	}
 	printf("\r\033[A\033[A"
 	       "Song %3d/%3d (%s)\033[K\n"
@@ -484,7 +483,7 @@ static void printstatus(struct gbs *gbs)
 
 void exit_handler(int signum)
 {
-	printf("\nCatched signal %d, exiting...\n", signum);
+	printf(_("\nCatched signal %d, exiting...\n"), signum);
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
 	exit(1);
 }
@@ -514,6 +513,7 @@ int main(int argc, char **argv)
 	struct sigaction sa;
 	int subsong = -1;
 
+	i18n_init();
 	srand(time(0)+getpid());  /* initialize RNG */
 
 	sprintf(usercfg, "%s/%s", homedir, cfgfile);
@@ -574,8 +574,8 @@ int main(int argc, char **argv)
 	gbs_init(gbs, gbs->subsong);
 	if (!quiet) {
 		gbs_printinfo(gbs, 0);
-		puts("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player");
-		puts(  "           [ ] pause/resume   [1-4] mute channel");
+		puts(_("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player\n" \
+		         "           [ ] pause/resume   [1-4] mute channel"));
 		puts("\n\n"); /* additional newlines for the status display */
 	}
 	tcgetattr(STDIN_FILENO, &ts);

@@ -1,0 +1,293 @@
+# English translations for PACKAGE package.
+# Copyright (C) 2003 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Tobias Diedrich <ranma@gmx.at>, 2003.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2003-12-12 23:57+0100\n"
+"PO-Revision-Date: 2003-12-12 21:16+0100\n"
+"Last-Translator: Tobias Diedrich <ranma@gmx.at>\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: gbsxmms.c:129
+msgid "File Info: "
+msgstr "File Info: "
+
+#: gbsxmms.c:156
+#, fuzzy
+msgid "Subsong"
+msgstr "Subsong %03d:\t"
+
+#: gbsxmms.c:162
+#, fuzzy
+msgid "Title"
+msgstr "Untitled"
+
+#: gbsxmms.c:168
+msgid "Length    "
+msgstr "Length    "
+
+#: gbsxmms.c:304
+msgid "File Info"
+msgstr "File Info"
+
+#: gbsxmms.c:326
+msgid "Filename:"
+msgstr "Filename:"
+
+#: gbsxmms.c:341
+msgid "GBS Info"
+msgstr "GBS Info"
+
+#: gbsxmms.c:359
+msgid "Game:"
+msgstr "Game:"
+
+#: gbsxmms.c:369
+msgid "Artist:"
+msgstr "Artist:"
+
+#: gbsxmms.c:379
+msgid "Copyright:"
+msgstr "Copyright:"
+
+#: gbsxmms.c:416
+msgid "Extended Info"
+msgstr "Extended Info"
+
+#: gbsxmms.c:453
+msgid "Next"
+msgstr "Next"
+
+#: gbsxmms.c:459
+msgid "Prev"
+msgstr "Prev"
+
+#: gbsxmms.c:465
+msgid "Save"
+msgstr "Save"
+
+#: gbsxmms.c:473
+msgid "Cancel"
+msgstr "Cancel"
+
+#: gbsxmms.c:526
+msgid "Error opening output plugin."
+msgstr "Error opening output plugin."
+
+#: gbsplay.c:266
+#, c-format
+msgid "Could not open /dev/dsp: %s\n"
+msgstr "Could not open /dev/dsp: %s\n"
+
+#: gbsplay.c:270
+#, c-format
+msgid "fcntl(F_GETFL) failed: %s\n"
+msgstr "fcntl(F_GETFL) failed: %s\n"
+
+#: gbsplay.c:272
+#, c-format
+msgid "fcntl(F_SETFL, flags&~O_NONBLOCK) failed: %s\n"
+msgstr "fcntl(F_SETFL, flags&~O_NONBLOCK) failed: %s\n"
+
+#: gbsplay.c:277
+#, c-format
+msgid "ioctl(dspfd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"
+msgstr "ioctl(dspfd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"
+
+#: gbsplay.c:282
+#, c-format
+msgid "ioctl(dspfd, SNDCTL_DSP_SPEED, %d) failed: %s\n"
+msgstr "ioctl(dspfd, SNDCTL_DSP_SPEED, %d) failed: %s\n"
+
+#: gbsplay.c:286
+#, c-format
+msgid "Requested rate %dHz, got %dHz.\n"
+msgstr "Requested rate %dHz, got %dHz.\n"
+
+#: gbsplay.c:291
+#, c-format
+msgid "ioctl(dspfd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
+msgstr "ioctl(dspfd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
+
+#: gbsplay.c:296
+#, c-format
+msgid "ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n"
+msgstr "ioctl(dspfd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n"
+
+#: gbsplay.c:298
+msgid ""
+"No sound support on this platform.\n"
+"Use 'gbsplay -s' for stdout output."
+msgstr ""
+"No sound support on this platform.\n"
+"Use 'gbsplay -s' for stdout output."
+
+#: gbsplay.c:307
+#, c-format
+msgid ""
+"Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
+"\n"
+"Available options are:\n"
+"  -f  set fadeout (%d seconds)\n"
+"  -g  set subsong gap (%d seconds)\n"
+"  -h  display this help and exit\n"
+"  -q  quiet\n"
+"  -r  set samplerate (%dHz)\n"
+"  -s  write to stdout\n"
+"  -t  set subsong timeout (%d seconds)\n"
+"  -T  set silence timeout (%d seconds)\n"
+"  -V  print version and exit\n"
+"  -z  play subsongs in random mode\n"
+"  -Z  play subsongs in shuffle mode (repetitions possible)\n"
+msgstr ""
+"Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
+"\n"
+"Available options are:\n"
+"  -f  set fadeout (%d seconds)\n"
+"  -g  set subsong gap (%d seconds)\n"
+"  -h  display this help and exit\n"
+"  -q  quiet\n"
+"  -r  set samplerate (%dHz)\n"
+"  -s  write to stdout\n"
+"  -t  set subsong timeout (%d seconds)\n"
+"  -T  set silence timeout (%d seconds)\n"
+"  -V  print version and exit\n"
+"  -z  play subsongs in random mode\n"
+"  -Z  play subsongs in shuffle mode (repetitions possible)\n"
+
+#: gbsplay.c:468
+msgid "Untitled"
+msgstr "Untitled"
+
+#: gbsplay.c:486
+#, c-format
+msgid ""
+"\n"
+"Catched signal %d, exiting...\n"
+msgstr ""
+"\n"
+"Catched signal %d, exiting...\n"
+
+#: gbsplay.c:577
+msgid ""
+"\n"
+"commands:  [p]revious subsong   [n]ext subsong   [q]uit player\n"
+"           [ ] pause/resume   [1-4] mute channel"
+msgstr ""
+"\n"
+"commands:  [p]revious subsong   [n]ext subsong   [q]uit player\n"
+"           [ ] pause/resume   [1-4] mute channel"
+
+#: gbs.c:102
+#, c-format
+msgid "Subsong number out of range (min=0, max=%d).\n"
+msgstr "Subsong number out of range (min=0, max=%d).\n"
+
+#: gbs.c:183
+#, c-format
+msgid ""
+"GBSVersion:     %d\n"
+"Title:          \"%s\"\n"
+"Author:         \"%s\"\n"
+"Copyright:      \"%s\"\n"
+"Load address:   0x%04x\n"
+"Init address:   0x%04x\n"
+"Play address:   0x%04x\n"
+"Stack pointer:  0x%04x\n"
+"File size:      0x%08x\n"
+"ROM size:       0x%08x (%d banks)\n"
+"Subsongs:       %d\n"
+msgstr ""
+"GBSVersion:     %d\n"
+"Title:          \"%s\"\n"
+"Author:         \"%s\"\n"
+"Copyright:      \"%s\"\n"
+"Load address:   0x%04x\n"
+"Init address:   0x%04x\n"
+"Play address:   0x%04x\n"
+"Stack pointer:  0x%04x\n"
+"File size:      0x%08x\n"
+"ROM size:       0x%08x (%d banks)\n"
+"Subsongs:       %d\n"
+
+#: gbs.c:207
+#, c-format
+msgid "CRC32:\t\t0x%08x/0x%08x (%s)\n"
+msgstr "CRC32:\t\t0x%08x/0x%08x (%s)\n"
+
+#: gbs.c:209
+msgid "OK"
+msgstr "OK"
+
+#: gbs.c:209
+msgid "Failed"
+msgstr "Failed"
+
+#: gbs.c:214
+#, c-format
+msgid "Subsong %03d:\t"
+msgstr "Subsong %03d:\t"
+
+#: gbs.c:218
+#, fuzzy
+msgid "untitled"
+msgstr "Untitled"
+
+#: gbs.c:221
+#, c-format
+msgid "(%d seconds)\n"
+msgstr "(%d seconds)\n"
+
+#: gbs.c:224
+msgid "no timelimit"
+msgstr "no timelimit"
+
+#: gbs.c:273 gbs.c:356
+#, fuzzy, c-format
+msgid "Could not open %s: %s\n"
+msgstr "Could not open /dev/dsp: %s\n"
+
+#: gbs.c:363
+#, c-format
+msgid "Not a GBS-File: %s\n"
+msgstr "Not a GBS-File: %s\n"
+
+#: gbs.c:368
+#, c-format
+msgid "GBS Version %d unsupported.\n"
+msgstr "GBS Version %d unsupported.\n"
+
+#: gbs.c:405
+#, c-format
+msgid ""
+"Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n"
+msgstr ""
+"Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n"
+
+#: gbs.c:448
+#, c-format
+msgid "Warning: File CRC does not match (0x%08x != 0x%08x).\n"
+msgstr "Warning: File CRC does not match (0x%08x != 0x%08x).\n"
+
+#: gbsinfo.c:25
+#, c-format
+msgid "Usage: %s <gbs-file>\n"
+msgstr "Usage: %s <gbs-file>\n"
+
+#: cfgparser.c:53
+#, c-format
+msgid "'%s' expected at %s line %d char %d.\n"
+msgstr "'%s' expected at %s line %d char %d.\n"
+
+#: cfgparser.c:137
+#, c-format
+msgid "Unknown option %s at %s line %d.\n"
+msgstr "Unknown option %s at %s line %d.\n"

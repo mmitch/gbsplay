@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.14 2003/12/07 01:39:04 ranma Exp $
+/* $Id: gbs.c,v 1.15 2003/12/12 23:05:51 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -16,6 +16,7 @@
 #include <errno.h>
 #include <string.h>
 
+#include "common.h"
 #include "gbhw.h"
 #include "gbcpu.h"
 #include "gbs.h"
@@ -98,7 +99,7 @@ int gbs_init(struct gbs *gbs, int subsong)
 
 	if (subsong == -1) subsong = gbs->defaultsong - 1;
 	if (subsong >= gbs->songs) {
-		fprintf(stderr, "Subsong number out of range (min=0, max=%d).\n", gbs->songs - 1);
+		fprintf(stderr, _("Subsong number out of range (min=0, max=%d).\n"), gbs->songs - 1);
 		return 0;
 	}
 
@@ -179,17 +180,17 @@ int gbs_step(struct gbs *gbs, int time_to_work)
 
 void gbs_printinfo(struct gbs *gbs, int verbose)
 {
-	printf("GBSVersion:     %d\n"
-	       "Title:          \"%s\"\n"
-	       "Author:         \"%s\"\n"
-	       "Copyright:      \"%s\"\n"
-	       "Load address:   0x%04x\n"
-	       "Init address:   0x%04x\n"
-	       "Play address:   0x%04x\n"
-	       "Stack pointer:  0x%04x\n"
-	       "File size:      0x%08x\n"
-	       "ROM size:       0x%08x (%d banks)\n"
-	       "Subsongs:       %d\n",
+	printf(_("GBSVersion:     %d\n"
+	         "Title:          \"%s\"\n"
+	         "Author:         \"%s\"\n"
+	         "Copyright:      \"%s\"\n"
+	         "Load address:   0x%04x\n"
+	         "Init address:   0x%04x\n"
+	         "Play address:   0x%04x\n"
+	         "Stack pointer:  0x%04x\n"
+	         "File size:      0x%08x\n"
+	         "ROM size:       0x%08x (%d banks)\n"
+	         "Subsongs:       %d\n"),
 	       gbs->version,
 	       gbs->title,
 	       gbs->author,
@@ -203,24 +204,24 @@ void gbs_printinfo(struct gbs *gbs, int verbose)
 	       gbs->romsize/0x4000,
 	       gbs->songs);
 	if (gbs->version == 2) {
-		printf("CRC32:		0x%08x/0x%08x (%s)\n",
+		printf(_("CRC32:		0x%08x/0x%08x (%s)\n"),
 		       (unsigned int)gbs->crc, (unsigned int)gbs->crcnow,
-		       gbs->crc == gbs->crcnow ? "OK" : "Failed");
+		       gbs->crc == gbs->crcnow ? _("OK") : _("Failed"));
 	}
 	if (verbose && gbs->version == 2) {
 		int i;
 		for (i=0; i<gbs->songs; i++) {
-			printf("Subsong %03d:	", i);
+			printf(_("Subsong %03d:	"), i);
 			if (gbs->subsong_info[i].title) {
 				printf("\"%s\" ", gbs->subsong_info[i].title);
 			} else {
-				printf("untitled ");
+				printf("%s ", _("untitled"));
 			}
 			if (gbs->subsong_info[i].len) {
-				printf("(%d seconds)\n",
+				printf(_("(%d seconds)\n"),
 				       (int)(gbs->subsong_info[i].len >> GBS_LEN_SHIFT));
 			} else {
-				printf("(no timelimit)\n");
+				printf("%s\n", _("no timelimit"));
 			}
 		}
 	}
@@ -269,7 +270,7 @@ int gbs_write(struct gbs *gbs, char *name, int version)
 	memset(pad, 0xff, sizeof(pad));
 
 	if ((fd = open(name, O_WRONLY|O_CREAT|O_TRUNC, 0644)) == -1) {
-		fprintf(stderr, "Could not open %s: %s\n", name, strerror(errno));
+		fprintf(stderr, _("Could not open %s: %s\n"), name, strerror(errno));
 		return 0;
 	}
 
@@ -352,19 +353,19 @@ struct gbs *gbs_open(char *name)
 	gbs->gap = 2;
 	gbs->fadeout = 3;
 	if ((fd = open(name, O_RDONLY)) == -1) {
-		fprintf(stderr, "Could not open %s: %s\n", name, strerror(errno));
+		fprintf(stderr, _("Could not open %s: %s\n"), name, strerror(errno));
 		return NULL;
 	}
 	fstat(fd, &st);
 	gbs->buf = buf = malloc(st.st_size);
 	read(fd, buf, st.st_size);
 	if (strncmp(buf, GBS_MAGIC, 3) != 0) {
-		fprintf(stderr, "Not a GBS-File: %s\n", name);
+		fprintf(stderr, _("Not a GBS-File: %s\n"), name);
 		return NULL;
 	}
 	gbs->version = buf[3];
 	if (gbs->version != 1) {
-		fprintf(stderr, "GBS Version %d unsupported.\n", buf[3]);
+		fprintf(stderr, _("GBS Version %d unsupported.\n"), buf[3]);
 		return NULL;
 	}
 
@@ -401,7 +402,7 @@ struct gbs *gbs_open(char *name)
 		if ((realcrc=gbs_crc32(0, gbs->exthdr, ehdrlen)) == crc) {
 			have_ehdr = 1;
 		} else {
-			fprintf(stderr, "Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n",
+			fprintf(stderr, _("Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n"),
 			        (unsigned int)crc, (unsigned int)realcrc);
 		}
 	}
@@ -444,7 +445,7 @@ struct gbs *gbs_open(char *name)
 		}
 
 		if (gbs->crc != gbs->crcnow) {
-			fprintf(stderr, "Warning: File CRC does not match (0x%08x != 0x%08x).\n",
+			fprintf(stderr, _("Warning: File CRC does not match (0x%08x != 0x%08x).\n"),
 			        (unsigned int)gbs->crc, (unsigned int)gbs->crcnow);
 		}
 	}

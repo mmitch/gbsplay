@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.24 2003/12/09 21:21:36 mitch Exp $
+# $Id: configure,v 1.25 2003/12/12 23:05:51 ranma Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -158,6 +158,8 @@ else
 fi
 
 check_include sys/soundcard.h
+check_include locale.h
+check_include libintl.h
 need_include inttypes.h
 
 ## check for glib development files
@@ -223,7 +225,10 @@ fi
 
 (
     echo "#define GBS_VERSION \"$VERSION\""
+    echo "#define LOCALE_PREFIX \"/usr/local/share/locale\""
     have_x SYS_SOUNDCARD_H
+    have_x LOCALE_H
+    have_x LIBINTL_H
 ) > config.h
 
 (

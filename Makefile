@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.55 2003/12/09 22:19:26 benni Exp $
+# $Id: Makefile,v 1.56 2003/12/12 23:05:51 ranma Exp $
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
@@ -14,6 +14,7 @@ mandir      := $(prefix)/man
 man1dir     := $(mandir)/man1
 man5dir     := $(mandir)/man5
 docdir      := $(prefix)/share/doc/gbsplay
+localedir   := $(prefix)/share/locale
 
 DESTDIR :=
 DISTDIR := gbsplay-$(VERSION)
@@ -31,11 +32,11 @@ docs           := README TODO HISTORY gbsplayrc_sample
 mans           := gbsplay.1    gbsinfo.1    gbsplayrc.5
 mans_src       := gbsplay.in.1 gbsinfo.in.1 gbsplayrc.in.5
 
-objs_libgbspic := gbcpu.po gbhw.po gbs.po cfgparser.po crc32.po
+objs_libgbspic := gbcpu.lo gbhw.lo gbs.lo cfgparser.lo crc32.lo
 objs_libgbs    := gbcpu.o  gbhw.o  gbs.o  cfgparser.o  crc32.o
 objs_gbsplay   := gbsplay.o util.o
 objs_gbsinfo   := gbsinfo.o
-objs_gbsxmms   := gbsxmms.po
+objs_gbsxmms   := gbsxmms.lo
 
 objs := $(objs_libgbs) $(objs_gbsplay) $(objs_gbsinfo)
 dsts := gbsplay gbsinfo
@@ -45,9 +46,14 @@ objs += $(objs_gbsxmms)
 dsts += gbsxmms.so
 endif
 
-.PHONY: all distclean clean install dist libgbs
+.PHONY: all default distclean clean install dist libgbs
 
-all: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL)
+all: default
+
+# include the rules for each subdir
+include $(shell find -type f -name "subdir.mk")
+
+default: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL)
 
 # include the dependency files
 
@@ -60,7 +66,7 @@ distclean: clean
 	rm -f ./config.mk ./config.h ./config.err ./config.sed
 
 clean:
-	find -regex ".*\.\([aos]\|po\|so\(\.[0-9]\)?\)" -exec rm -f "{}" \;
+	find -regex ".*\.\([aos]\|lo\|mo\|so\(\.[0-9]\)?\)" -exec rm -f "{}" \;
 	find -name "*~" -exec rm -f "{}" \;
 	rm -f $(mans)
 	rm -f ./gbsplay ./gbsinfo
@@ -76,6 +82,11 @@ install-default:
 	install -m 644 gbsplay.1 gbsinfo.1 $(man1dir)
 	install -m 644 gbsplayrc.5 $(man5dir)
 	install -m 644 $(docs) $(docdir)
+	for i in $(mos); do \
+	base=`basename $$i`; \
+	install -d $(localedir)/$${base%.mo}/LC_MESSAGES; \
+	install -m 644 $$i $(localedir)/$${base%.mo}/LC_MESSAGES/gbsplay.mo; \
+	done
 
 install-gbsxmms.so:
 	install -d $(DESTDIR)$(XMMS_INPUT_PLUGIN_DIR)
@@ -142,9 +153,9 @@ gbsxmms.so: $(objs_gbsxmms) | libgbs
 
 # rules for suffixes
 
-.SUFFIXES: .i .s .po
+.SUFFIXES: .i .s .lo
 
-.c.po:
+.c.lo:
 	@echo CC $< -o $@
 	@$(CC) $(CFLAGS) -fPIC -c -o $@ $<
 .c.o:

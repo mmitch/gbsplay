@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.25 2003/12/12 18:37:11 ranma Exp $
+/* $Id: gbsxmms.c,v 1.26 2003/12/12 23:05:51 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -20,6 +20,7 @@
 #include <xmms/plugin.h>
 #include <gtk/gtk.h>
 
+#include "common.h"
 #include "gbhw.h"
 #include "gbcpu.h"
 #include "gbs.h"
@@ -125,7 +126,7 @@ static void file_info_box(char *filename)
 	file_info_filename = strdup(filename);
 	if (file_info_title) free(file_info_title);
 	file_info_title = malloc(titlelen);
-	strcpy(file_info_title, "File Info: ");
+	strcpy(file_info_title, _("File Info: "));
 	strcat(file_info_title, filename);
 	gtk_window_set_title (GTK_WINDOW (dialog_fileinfo), file_info_title);
 	gtk_entry_set_text(GTK_ENTRY(entry_filename), filename);
@@ -152,19 +153,19 @@ static void file_info_box(char *filename)
 		gtk_table_set_row_spacings (GTK_TABLE (table2), 5);
 		gtk_table_set_col_spacings (GTK_TABLE (table2), 5);
 
-		label = gtk_label_new("Subsong");
+		label = gtk_label_new(_("Subsong"));
 		gtk_widget_show(label);
 		gtk_table_attach(GTK_TABLE(table2), label,
 		                 0, 1, 0, 1,
 		                 (GtkAttachOptions) (GTK_FILL),
 		                 (GtkAttachOptions) (0), 0, 0);
-		label = gtk_label_new("Title");
+		label = gtk_label_new(_("Title"));
 		gtk_widget_show(label);
 		gtk_table_attach(GTK_TABLE(table2), label,
 		                 1, 2, 0, 1,
 		                 (GtkAttachOptions) (GTK_FILL),
 		                 (GtkAttachOptions) (0), 0, 0);
-		label = gtk_label_new("Length    ");
+		label = gtk_label_new(_("Length    "));
 		gtk_widget_show(label);
 		gtk_table_attach(GTK_TABLE(table2), label,
 		                 2, 3, 0, 1,
@@ -300,7 +301,7 @@ static void create_dialogs(void)
 
   dialog_fileinfo = gtk_dialog_new ();
   gtk_object_set_data (GTK_OBJECT (dialog_fileinfo), "dialog_fileinfo", dialog_fileinfo);
-  gtk_window_set_title (GTK_WINDOW (dialog_fileinfo), "File Info");
+  gtk_window_set_title (GTK_WINDOW (dialog_fileinfo), _("File Info"));
   gtk_window_set_policy (GTK_WINDOW (dialog_fileinfo), TRUE, TRUE, FALSE);
 
   dialog_vbox1 = GTK_DIALOG (dialog_fileinfo)->vbox;
@@ -322,7 +323,7 @@ static void create_dialogs(void)
   gtk_box_pack_start (GTK_BOX (vbox1), hbox1, FALSE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (hbox1), 5);
 
-  label1 = gtk_label_new ("Filename:");
+  label1 = gtk_label_new (_("Filename:"));
   gtk_widget_ref (label1);
   gtk_object_set_data_full (GTK_OBJECT (dialog_fileinfo), "label1", label1,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -337,7 +338,7 @@ static void create_dialogs(void)
   gtk_box_pack_start (GTK_BOX (hbox1), entry_filename, TRUE, TRUE, 0);
   gtk_entry_set_editable (GTK_ENTRY (entry_filename), FALSE);
 
-  frame1 = gtk_frame_new ("GBS Info");
+  frame1 = gtk_frame_new (_("GBS Info"));
   gtk_widget_ref (frame1);
   gtk_object_set_data_full (GTK_OBJECT (dialog_fileinfo), "frame1", frame1,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -355,7 +356,7 @@ static void create_dialogs(void)
   gtk_table_set_row_spacings (GTK_TABLE (table1), 5);
   gtk_table_set_col_spacings (GTK_TABLE (table1), 5);
 
-  label2 = gtk_label_new ("Game:");
+  label2 = gtk_label_new (_("Game:"));
   gtk_widget_ref (label2);
   gtk_object_set_data_full (GTK_OBJECT (dialog_fileinfo), "label2", label2,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -365,7 +366,7 @@ static void create_dialogs(void)
                     (GtkAttachOptions) (0), 0, 0);
   gtk_misc_set_alignment (GTK_MISC (label2), 0, 0.5);
 
-  label3 = gtk_label_new ("Artist:");
+  label3 = gtk_label_new (_("Artist:"));
   gtk_widget_ref (label3);
   gtk_object_set_data_full (GTK_OBJECT (dialog_fileinfo), "label3", label3,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -375,7 +376,7 @@ static void create_dialogs(void)
                     (GtkAttachOptions) (0), 0, 0);
   gtk_misc_set_alignment (GTK_MISC (label3), 0, 0.5);
 
-  label4 = gtk_label_new ("Copyright:");
+  label4 = gtk_label_new (_("Copyright:"));
   gtk_widget_ref (label4);
   gtk_object_set_data_full (GTK_OBJECT (dialog_fileinfo), "label4", label4,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -412,7 +413,7 @@ static void create_dialogs(void)
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  frame2 = gtk_frame_new ("Extended Info");
+  frame2 = gtk_frame_new (_("Extended Info"));
   gtk_widget_ref (frame2);
   gtk_object_set_data_full (GTK_OBJECT (dialog_fileinfo), "frame2", frame2,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -449,19 +450,19 @@ static void create_dialogs(void)
   gtk_box_pack_start (GTK_BOX (dialog_action_area1), hbuttonbox1, TRUE, TRUE, 0);
   gtk_button_box_set_layout (GTK_BUTTON_BOX (hbuttonbox1), GTK_BUTTONBOX_END);
 
-  button_next = gtk_button_new_with_label ("Next");
+  button_next = gtk_button_new_with_label (_("Next"));
   gtk_widget_ref (button_next);
   gtk_widget_show (button_next);
   gtk_container_add (GTK_CONTAINER (hbuttonbox1), button_next);
   GTK_WIDGET_SET_FLAGS (button_next, GTK_CAN_DEFAULT);
 
-  button_prev = gtk_button_new_with_label ("Prev");
+  button_prev = gtk_button_new_with_label (_("Prev"));
   gtk_widget_ref (button_prev);
   gtk_widget_show (button_prev);
   gtk_container_add (GTK_CONTAINER (hbuttonbox1), button_prev);
   GTK_WIDGET_SET_FLAGS (button_prev, GTK_CAN_DEFAULT);
 
-  button_save = gtk_button_new_with_label ("Save");
+  button_save = gtk_button_new_with_label (_("Save"));
   gtk_widget_ref (button_save);
   gtk_object_set_data_full (GTK_OBJECT (dialog_fileinfo), "button_save", button_save,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -469,7 +470,7 @@ static void create_dialogs(void)
   gtk_container_add (GTK_CONTAINER (hbuttonbox1), button_save);
   GTK_WIDGET_SET_FLAGS (button_save, GTK_CAN_DEFAULT);
 
-  button_cancel = gtk_button_new_with_label ("Cancel");
+  button_cancel = gtk_button_new_with_label (_("Cancel"));
   gtk_widget_ref (button_cancel);
   gtk_object_set_data_full (GTK_OBJECT (dialog_fileinfo), "button_cancel", button_cancel,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -522,7 +523,7 @@ static int is_our_file(char *filename)
 static void *playloop(void *priv)
 {
 	if (!gbs_ip.output->open_audio(FMT_S16_NE, rate, 2)) {
-		puts("Error opening output plugin.");
+		puts(_("Error opening output plugin."));
 		return 0;
 	}
 	while (!stopthread) {
@@ -635,5 +636,7 @@ seek:		seek,
 
 InputPlugin *get_iplugin_info(void)
 {
+	i18n_init();
+
 	return &gbs_ip;
 }
