@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.23 2003/12/07 09:18:42 mitch Exp $
+/* $Id: gbsxmms.c,v 1.24 2003/12/07 09:49:14 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *

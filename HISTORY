@@ -1,11 +1,11 @@
-<<$Id: HISTORY,v 1.5 2003/12/05 21:40:13 mitch Exp $>>
+<<$Id: HISTORY,v 1.6 2003/12/07 09:49:14 mitch Exp $>>
 
 
 gbsplay HISTORY
 
 
-2003/12/05  -  0.0.3-pre1
-~~~~~~~~~~~~~~~~~~~~~~~~~
+2003/12/07  -  0.0.3
+~~~~~~~~~~~~~~~~~~~~
 - support other architectures than Linux/i386:
   - fix some endian issues
   - fix some c type issues
@@ -19,6 +19,9 @@ gbsplay HISTORY
 
 - gbsinfo:
   - change output to a more script friendly format
+
+- gbsxmms:
+  - fix deadlock during seek
 
 - gbs2ogg.sh:
   - new script to convert .gbs to .ogg

@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.67 2003/12/07 01:39:04 ranma Exp $
+/* $Id: gbsplay.c,v 1.68 2003/12/07 09:49:14 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -321,7 +321,7 @@ void usage(int exitcode)
 		"  -Z  play subsongs in shuffle mode (repetitions possible)\n",
 	        myname,
 		fadeout,
-	        subsong_gap,
+		subsong_gap,
 	        rate,
 		subsong_timeout,
 	        silence_timeout);
