@@ -1,7 +1,17 @@
-<<$Id: HISTORY,v 1.14 2004/04/26 20:46:15 mitch Exp $>>
+<<$Id: HISTORY,v 1.15 2004/07/16 17:47:06 mitch Exp $>>
 
 
 gbsplay HISTORY
+
+2004/07/16  -  0.0.7
+~~~~~~~~~~~~~~~~~~~~
+
+Enhancements:
+
+- gbsplay:
+  - don't use random() for noise, emulate the original Gameboy
+    behaviour
+  - support more verbosity levels than just "quiet"
 
 
 2004/04/26  -  0.0.6
