@@ -1,4 +1,4 @@
-/* $Id: cfgparser.h,v 1.6 2004/03/16 14:07:18 ranmachan Exp $
+/* $Id: cfgparser.h,v 1.7 2004/03/20 18:36:02 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -8,10 +8,6 @@
 
 #ifndef _CFGPARSER_H_
 #define _CFGPARSER_H_
-
-#define CFG_ENDIAN_BE 0
-#define CFG_ENDIAN_LE 1
-#define CFG_ENDIAN_NE 2
 
 typedef void regparm (*cfg_parse_fn)(void *ptr);
 
