@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.15 2003/09/20 14:58:14 ranma Exp $
+/* $Id: gbsxmms.c,v 1.16 2003/09/22 13:38:22 ranma Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -637,7 +637,7 @@ static void seek(int time)
 
 static void pause_file(short paused)
 {
-       /* will hopefully be implemented in the future */
+       gbs_ip.output->pause(paused);
 }
 
 InputPlugin gbs_ip = {
