@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.91 2004/10/23 21:19:17 ranmachan Exp $
+/* $Id: gbsplay.c,v 1.92 2005/05/09 20:57:11 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -629,7 +629,7 @@ int main(int argc, char **argv)
 	srand(random_seed);
 
 	usercfg = get_userconfig(cfgfile);
-	cfg_parse("/etc/gbsplayrc", options);
+	cfg_parse(SYSCONF_PREFIX "/gbsplayrc", options);
 	cfg_parse(usercfg, options);
 	free(usercfg);
 	parseopts(&argc, &argv);

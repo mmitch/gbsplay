@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.86 2004/07/08 13:51:40 ranmachan Exp $
+# $Id: Makefile,v 1.87 2005/05/09 20:57:11 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -23,12 +23,23 @@ ifneq ($(noincludes),yes)
 -include config.mk
 endif
 
+XMMSPREFIX  :=
+DESTDIR     :=
+
+prefix      := $(DESTDIR)$(prefix)
+exec_prefix := $(DESTDIR)$(exec_prefix)
+bindir      := $(DESTDIR)$(bindir)
+mandir      := $(DESTDIR)$(mandir)
+docdir      := $(DESTDIR)$(docdir)
+localedir   := $(DESTDIR)$(localedir)
+
+xmmsdir     := $(DESTDIR)$(XMMSPREFIX)$(XMMS_INPUT_PLUGIN_DIR)
+
 man1dir     := $(mandir)/man1
 man5dir     := $(mandir)/man5
 contribdir  := $(docdir)/contrib
 exampledir  := $(docdir)/examples
 
-DESTDIR :=
 DISTDIR := gbsplay-$(VERSION)
 
 GBSCFLAGS  += $(EXTRA_CFLAGS)
@@ -165,8 +176,8 @@ install-default:
 	done
 
 install-gbsxmms.so:
-	install -d $(DESTDIR)$(XMMS_INPUT_PLUGIN_DIR)
-	install -m 644 gbsxmms.so $(DESTDIR)$(XMMS_INPUT_PLUGIN_DIR)/gbsxmms.so
+	install -d $(xmmsdir)
+	install -m 644 gbsxmms.so $(xmmsdir)/gbsxmms.so
 
 uninstall: uninstall-default $(EXTRA_UNINSTALL)
 
@@ -191,8 +202,8 @@ uninstall-default:
 	done
 
 uninstall-gbsxmms.so:
-	rm -f $(DESTDIR)$(XMMS_INPUT_PLUGIN_DIR)/gbsxmms.so
-	-rmdir -p $(DESTDIR)$(XMMS_INPUT_PLUGIN_DIR)
+	rm -f $(xmmsdir)/gbsxmms.so
+	-rmdir -p $(xmmsdir)
 
 dist:	distclean
 	install -d ./$(DISTDIR)

@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.67 2004/07/16 17:53:19 mitch Exp $
+# $Id: configure,v 1.68 2005/05/09 20:57:11 ranmachan Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -41,6 +41,7 @@ VERSION=0.0.7
 ## die with error
 die ()
 {
+    test -n "$1" && echo "$1"
     rm -rf "$TEMPDIR"
     exit 1
 }
@@ -187,8 +188,7 @@ cc_check()
 need_include() {
     check_include "$1"
     if [ $? -ne 0 ]; then
-	echo "Could not find $1, which is needed for compilation."
-	die
+	die "Could not find $1, which is needed for compilation."
     fi
 }
 
@@ -313,6 +313,24 @@ parseoption()
 		--localedir=*)
 		localedir="${1#--localedir=}"
 		;;
+		--sysconfdir=*)
+		sysconfdir="${1#--sysconfdir=}"
+		;;
+		--infodir=*)
+		infodir="${1#--infodir=}"
+		;;
+		--datadir=*)
+		datadir="${1#--datadir=}"
+		;;
+		--localstatedir=*)
+		localstatedir="${1#--localstatedir=}"
+		;;
+		--host=*)
+		hostalias="${1#--host=}"
+		;;
+		--target=*)
+		targetalias="${1#--target=}"
+		;;
 		--have-*)
 		eval "have_${1#--have-}=yes"
 		isknown have_${1#--have-} $1 || usage 1
@@ -400,6 +418,8 @@ Installation directories:
                          [PREFIX/man]
   --docdir=DOCDIR        install documentation in DOCDIR
                          [PREFIX/share/doc/$package]
+  --sysconfdir=SCONFDIR  look for system-wide configuration file in SCONFDIR
+                         [/etc]
 
 Optional Features:
   --disable-i18n         omit libintl support
@@ -433,6 +453,11 @@ while [ $1 ]; do
 	shift
 done
 
+## sanity check
+if [ -n "$targetalias" -a "$targetalias" != "$hostalias" ]; then
+	die "cross-compiling is not yet supported."
+fi
+
 ## check for C compiler
 
 echo -n "checking for working compiler:  "
@@ -452,16 +477,13 @@ if [ $RESULT -eq 0 ]; then
 	if [ $? -eq 0 ]; then
 	    echo "ok"
 	else
-	    echo "can't execute generated code"
-	    die
+	    die "can't execute generated code"
 	fi
     else
-	echo "no code generated"
-	die
+	die "no code generated"
     fi
 else
-    echo "error executing $CC"
-    die
+    die "error executing $CC"
 fi
 
 if [ "$use_regparm" != "no" ]; then
@@ -673,6 +695,7 @@ setdefault libdir      "$exec_prefix/lib"
 setdefault mandir      "$prefix/man"
 setdefault docdir      "$prefix/share/doc/$package"
 setdefault localedir   "$prefix/share/locale"
+setdefault sysconfdir  "/etc"
 
 setdefault use_sharedlibgbs no
 setdefault use_debug no
@@ -706,37 +729,43 @@ echo "EXTRA_LDFLAGS=$EXTRA_LDFLAGS"
 ## write configuration
 
 (
-    echo EXTRA_ALL := $EXTRA_ALL
-    echo EXTRA_CFLAGS := $EXTRA_CFLAGS
-    echo EXTRA_INSTALL := $EXTRA_INSTALL
-    echo EXTRA_LDFLAGS := $EXTRA_LDFLAGS
-    echo EXTRA_SRCS := $EXTRA_SRCS
-    echo EXTRA_UNINSTALL := $EXTRA_UNINSTALL
-    echo PTHREAD := $PTHREAD
-    echo XMMS_INPUT_PLUGIN_DIR := $XMMS_INPUT_PLUGIN_DIR
-    echo VERSION := $VERSION
-    echo prefix := $prefix
-    echo exec_prefix := $exec_prefix
-    echo bindir := $bindir
-    echo libdir := $libdir
-    echo mandir := $mandir
-    echo docdir := $docdir
-    echo localedir := $localedir
-    echo CC := $CC
-    echo build_xmmsplugin := $build_xmmsplugin
-    echo have_xgettext := $have_xgettext
+    while read var; do
+	eval "echo \"$var := \$$var\""
+    done << __EOF__
+EXTRA_ALL
+EXTRA_CFLAGS
+EXTRA_INSTALL
+EXTRA_LDFLAGS
+EXTRA_SRCS
+EXTRA_UNINSTALL
+PTHREAD
+XMMS_INPUT_PLUGIN_DIR
+VERSION
+prefix
+exec_prefix
+bindir
+libdir
+mandir
+docdir
+localedir
+sysconfdir
+CC
+build_xmmsplugin
+have_xgettext
+use_i18n
+use_sharedlibgbs
+cygwin_build
+libaudio_flags
+__EOF__
     echo plugout_devdsp := $use_devdsp
     echo plugout_nas := $use_nas
     echo plugout_stdout := $use_stdout
-    echo use_i18n := $use_i18n
-    echo use_sharedlibgbs := $use_sharedlibgbs
-    echo cygwin_build := $cygwin_build
-    echo libaudio_flags := $libaudio_flags
 ) > config.mk
 
 (
     echo "#define GBS_VERSION \"$VERSION\""
     echo "#define LOCALE_PREFIX \"$localedir\""
+    echo "#define SYSCONF_PREFIX \"$sysconfdir\""
     plugout_x DEVDSP
     plugout_x NAS
     plugout_x STDOUT

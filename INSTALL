@@ -1,4 +1,4 @@
-<<$Id: INSTALL,v 1.5 2004/09/05 23:51:36 mitch Exp $>>
+<<$Id: INSTALL,v 1.6 2005/05/09 20:57:11 ranmachan Exp $>>
 
 
 gbsplay INSTALL instructions
@@ -46,13 +46,13 @@ Remember to use the same prefix on uninstall!
 Installing the XMMS plugin to another directory is a bit tricky :-)
 Upon configure, the XMMS plugin target path is detected by running
 `xmms-config --input-plugin-dir`.  You can not change this path!
-But you can prepend it with another path.  Use DESTDIR= for this.
+But you can prepend it with another path.  Use XMMSPREFIX= for this.
 
 Example:
 
 $ ./configure --prefix=/tmp/GBSPLAY/usr
 $ make
-$ make install DESTDIR=/tmp/GBSPLAY
+$ make install XMMSPREFIX=/tmp/GBSPLAY
 
 This will install to /tmp/GBSPLAY/usr/(bin|man|share/doc) and put the
 XMMS plugin to /tmp/GBSPLAY/$(xmms-config --input-plugin-dir).
