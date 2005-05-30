@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.87 2005/05/09 20:57:11 ranmachan Exp $
+# $Id: Makefile,v 1.88 2005/05/30 18:24:52 mitch Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -223,7 +223,7 @@ dist:	distclean
 	install -d ./$(DISTDIR)/po
 	install -m 644 po/*.po ./$(DISTDIR)/po
 	install -m 644 po/subdir.mk ./$(DISTDIR)/po
-	tar -c $(DISTDIR)/ -vzf ../$(DISTDIR).tar.gz
+	tar -cvzf ../$(DISTDIR).tar.gz $(DISTDIR)/ 
 	rm -rf ./$(DISTDIR)
 
 libgbspic.a: $(objs_libgbspic)
