@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.20 2004/04/20 21:46:14 ranmachan Exp $
+/* $Id: gbs.c,v 1.21 2005/06/29 00:34:57 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -93,13 +93,13 @@ static const uint8_t playercode[] = {
 	0xac, 0xdd, 0xda, 0x48
 };
 
-regparm int gbs_init(struct gbs *gbs, int subsong)
+regparm long gbs_init(struct gbs *gbs, long subsong)
 {
 	gbhw_init(gbs->rom, gbs->romsize);
 
 	if (subsong == -1) subsong = gbs->defaultsong - 1;
 	if (subsong >= gbs->songs) {
-		fprintf(stderr, _("Subsong number out of range (min=0, max=%d).\n"), gbs->songs - 1);
+		fprintf(stderr, _("Subsong number out of range (min=0, max=%ld).\n"), gbs->songs - 1);
 		return 0;
 	}
 
@@ -120,7 +120,7 @@ regparm void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void
 	gbs->nextsubsong_cb_priv = priv;
 }
 
-static regparm int gbs_nextsubsong(struct gbs *gbs)
+static regparm long gbs_nextsubsong(struct gbs *gbs)
 {
 	if (gbs->nextsubsong_cb != NULL) {
 		return gbs->nextsubsong_cb(gbs, gbs->nextsubsong_cb_priv);
@@ -133,10 +133,10 @@ static regparm int gbs_nextsubsong(struct gbs *gbs)
 	return true;
 }
 
-regparm int gbs_step(struct gbs *gbs, int time_to_work)
+regparm long gbs_step(struct gbs *gbs, long time_to_work)
 {
-	int cycles = gbhw_step(time_to_work);
-	int time;
+	long cycles = gbhw_step(time_to_work);
+	long time;
 
 	if (cycles < 0) {
 		return false;
@@ -176,9 +176,9 @@ regparm int gbs_step(struct gbs *gbs, int time_to_work)
 	return true;
 }
 
-regparm void gbs_printinfo(struct gbs *gbs, int verbose)
+regparm void gbs_printinfo(struct gbs *gbs, long verbose)
 {
-	printf(_("GBSVersion:     %d\n"
+	printf(_("GBSVersion:     %ld\n"
 	         "Title:          \"%s\"\n"
 	         "Author:         \"%s\"\n"
 	         "Copyright:      \"%s\"\n"
@@ -187,8 +187,8 @@ regparm void gbs_printinfo(struct gbs *gbs, int verbose)
 	         "Play address:   0x%04x\n"
 	         "Stack pointer:  0x%04x\n"
 	         "File size:      0x%08x\n"
-	         "ROM size:       0x%08x (%d banks)\n"
-	         "Subsongs:       %d\n"),
+	         "ROM size:       0x%08lx (%ld banks)\n"
+	         "Subsongs:       %ld\n"),
 	       gbs->version,
 	       gbs->title,
 	       gbs->author,
@@ -202,22 +202,22 @@ regparm void gbs_printinfo(struct gbs *gbs, int verbose)
 	       gbs->romsize/0x4000,
 	       gbs->songs);
 	if (gbs->version == 2) {
-		printf(_("CRC32:		0x%08x/0x%08x (%s)\n"),
-		       (unsigned int)gbs->crc, (unsigned int)gbs->crcnow,
+		printf(_("CRC32:		0x%08lx/0x%08lx (%s)\n"),
+		       (unsigned long)gbs->crc, (unsigned long)gbs->crcnow,
 		       gbs->crc == gbs->crcnow ? _("OK") : _("Failed"));
 	}
 	if (verbose && gbs->version == 2) {
-		int i;
+		long i;
 		for (i=0; i<gbs->songs; i++) {
-			printf(_("Subsong %03d:	"), i);
+			printf(_("Subsong %03ld:	"), i);
 			if (gbs->subsong_info[i].title) {
 				printf("\"%s\" ", gbs->subsong_info[i].title);
 			} else {
 				printf("%s ", _("untitled"));
 			}
 			if (gbs->subsong_info[i].len) {
-				printf(_("(%d seconds)\n"),
-				       (int)(gbs->subsong_info[i].len >> GBS_LEN_SHIFT));
+				printf(_("(%ld seconds)\n"),
+				       (long)(gbs->subsong_info[i].len >> GBS_LEN_SHIFT));
 			} else {
 				printf("%s\n", _("no time limit"));
 			}
@@ -231,10 +231,10 @@ regparm void gbs_close(struct gbs *gbs)
 	free(gbs);
 }
 
-static regparm void writeint(uint8_t *buf, uint32_t val, int bytes)
+static regparm void writeint(uint8_t *buf, uint32_t val, long bytes)
 {
-	int shift = 0;
-	int i;
+	long shift = 0;
+	long i;
 
 	for (i=0; i<bytes; i++) {
 		buf[i] = (val >> shift) & 0xff;
@@ -242,10 +242,10 @@ static regparm void writeint(uint8_t *buf, uint32_t val, int bytes)
 	}
 }
 
-static regparm uint32_t readint(uint8_t *buf, int bytes)
+static regparm uint32_t readint(uint8_t *buf, long bytes)
 {
-	int i;
-	int shift = 0;
+	long i;
+	long shift = 0;
 	uint32_t res = 0;
 
 	for (i=0; i<bytes; i++) {
@@ -256,14 +256,14 @@ static regparm uint32_t readint(uint8_t *buf, int bytes)
 	return res;
 }
 
-regparm int gbs_write(struct gbs *gbs, char *name, int version)
+regparm long gbs_write(struct gbs *gbs, char *name, long version)
 {
-	int fd;
-	int codelen = (gbs->codelen + 15) >> 4;
+	long fd;
+	long codelen = (gbs->codelen + 15) >> 4;
 	char pad[16];
 	char strings[65536];
-	int stringofs = 0;
-	int newlen = gbs->filesize;
+	long stringofs = 0;
+	long newlen = gbs->filesize;
 
 	memset(pad, 0xff, sizeof(pad));
 
@@ -273,8 +273,8 @@ regparm int gbs_write(struct gbs *gbs, char *name, int version)
 	}
 
 	if (version == 2) {
-		int len,i;
-		int ehdrlen = 32 + 8*gbs->songs;
+		long len,i;
+		long ehdrlen = 32 + 8*gbs->songs;
 		uint32_t hdrcrc;
 
 		newlen = 0x70 + codelen*16 + ehdrlen;
@@ -338,12 +338,12 @@ regparm int gbs_write(struct gbs *gbs, char *name, int version)
 
 regparm struct gbs *gbs_open(char *name)
 {
-	int fd, i;
+	long fd, i;
 	struct stat st;
 	struct gbs *gbs = malloc(sizeof(struct gbs));
 	uint8_t *buf;
 	uint8_t *buf2 = NULL;
-	int have_ehdr = 0;
+	long have_ehdr = 0;
 
 	memset(gbs, 0, sizeof(struct gbs));
 	gbs->silence_timeout = 2;
@@ -401,7 +401,7 @@ regparm struct gbs *gbs_open(char *name)
 			have_ehdr = 1;
 		} else {
 			fprintf(stderr, _("Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n"),
-			        (unsigned int)crc, (unsigned int)realcrc);
+			        crc, realcrc);
 		}
 	}
 	if (have_ehdr) {
@@ -415,10 +415,10 @@ regparm struct gbs *gbs_open(char *name)
 	}
 	gbs->crcnow = gbs_crc32(0, buf, gbs->filesize);
 	if (have_ehdr) {
-		int gbs_titleex;
-		int gbs_authorex;
-		int gbs_copyex;
-		int entries;
+		long gbs_titleex;
+		long gbs_authorex;
+		long gbs_copyex;
+		long entries;
 
 		gbs->version = 2;
 		entries = buf2[0x1c];
@@ -435,7 +435,7 @@ regparm struct gbs *gbs_open(char *name)
 			gbs->copyright = gbs->strings + gbs_copyex;
 
 		for (i=0; i<entries; i++) {
-			int ofs = readint(&buf2[32 + 8*i + 4], 2);
+			long ofs = readint(&buf2[32 + 8*i + 4], 2);
 			gbs->subsong_info[i].len = readint(&buf2[32 + 8*i], 4);
 			if (ofs == 0xffff)
 				gbs->subsong_info[i].title = NULL;
@@ -444,7 +444,7 @@ regparm struct gbs *gbs_open(char *name)
 
 		if (gbs->crc != gbs->crcnow) {
 			fprintf(stderr, _("Warning: File CRC does not match (0x%08x != 0x%08x).\n"),
-			        (unsigned int)gbs->crc, (unsigned int)gbs->crcnow);
+			        gbs->crc, gbs->crcnow);
 		}
 	}
 
@@ -455,7 +455,7 @@ regparm struct gbs *gbs_open(char *name)
 	memcpy(&gbs->rom[0x50], playercode, sizeof(playercode));
 
 	for (i=0; i<8; i++) {
-		int addr = gbs->load + 8*i; /* jump address */
+		long addr = gbs->load + 8*i; /* jump address */
 		gbs->rom[8*i]   = 0xc3; /* jr imm16 */
 		gbs->rom[8*i+1] = addr & 0xff;
 		gbs->rom[8*i+2] = addr >> 8;

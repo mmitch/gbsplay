@@ -1,4 +1,4 @@
-/* $Id: util.h,v 1.2 2003/10/02 20:28:25 mitch Exp $
+/* $Id: util.h,v 1.3 2005/06/29 00:34:58 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -9,7 +9,7 @@
 #ifndef _UTIL_H_
 #define _UTIL_H_
 
-inline int rand_int(int max);
-void shuffle_int(int *array, int elements);
+inline long rand_long(long max);
+void shuffle_long(long *array, long elements);
 
 #endif

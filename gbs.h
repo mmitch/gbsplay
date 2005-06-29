@@ -1,4 +1,4 @@
-/* $Id: gbs.h,v 1.9 2004/03/10 01:48:15 ranmachan Exp $
+/* $Id: gbs.h,v 1.10 2005/06/29 00:34:57 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -17,7 +17,7 @@
 
 struct gbs;
 
-typedef regparm int (*gbs_nextsubsong_cb)(struct gbs *gbs, void *priv);
+typedef regparm long (*gbs_nextsubsong_cb)(struct gbs *gbs, void *priv);
 
 struct gbs_subsong_info {
 	uint32_t len;
@@ -26,9 +26,9 @@ struct gbs_subsong_info {
 
 struct gbs {
 	uint8_t *buf;
-	int version;
-	int songs;
-	int defaultsong;
+	long version;
+	long songs;
+	long defaultsong;
 	uint16_t load;
 	uint16_t init;
 	uint16_t play;
@@ -38,7 +38,7 @@ struct gbs {
 	char *title;
 	char *author;
 	char *copyright;
-	unsigned int codelen;
+	unsigned long codelen;
 	uint8_t *code;
 	uint8_t *exthdr;
 	size_t filesize;
@@ -48,23 +48,23 @@ struct gbs {
 	char *strings;
 	char v1strings[33*3];
 	uint8_t *rom;
-	unsigned int romsize;
+	unsigned long romsize;
 
 	long long ticks;
 	int16_t lmin, lmax, lvol, rmin, rmax, rvol;
-	int subsong_timeout, silence_timeout, fadeout, gap;
+	long subsong_timeout, silence_timeout, fadeout, gap;
 	long long silence_start;
-	int subsong;
+	long subsong;
 	gbs_nextsubsong_cb nextsubsong_cb;
 	void *nextsubsong_cb_priv;
 };
 
 regparm struct gbs *gbs_open(char *name);
-regparm int gbs_init(struct gbs *gbs, int subsong);
-regparm int gbs_step(struct gbs *gbs, int time_to_work);
+regparm long gbs_init(struct gbs *gbs, long subsong);
+regparm long gbs_step(struct gbs *gbs, long time_to_work);
 regparm void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv);
-regparm void gbs_printinfo(struct gbs *gbs, int verbose);
+regparm void gbs_printinfo(struct gbs *gbs, long verbose);
 regparm void gbs_close(struct gbs *gbs);
-regparm int gbs_write(struct gbs *gbs, char *name, int version);
+regparm long gbs_write(struct gbs *gbs, char *name, long version);
 
 #endif

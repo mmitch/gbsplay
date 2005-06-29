@@ -7,7 +7,7 @@ enum plugout_endian {
 	PLUGOUT_ENDIAN_NATIVE
 };
 
-typedef int     regparm (*plugout_open_fn )(enum plugout_endian endian, int rate);
+typedef long    regparm (*plugout_open_fn )(enum plugout_endian endian, long rate);
 typedef ssize_t regparm (*plugout_write_fn)(const void *buf, size_t count);
 typedef void    regparm (*plugout_close_fn)(void);
 
@@ -16,7 +16,7 @@ typedef void    regparm (*plugout_close_fn)(void);
 struct output_plugin {
 	char	*name;
 	char	*description;
-	int	flags;
+	long	flags;
 	plugout_open_fn  open;
 	plugout_write_fn write;
 	plugout_close_fn close;

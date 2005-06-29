@@ -1,4 +1,4 @@
-/* $Id: common.h,v 1.9 2004/10/23 21:19:17 ranmachan Exp $
+/* $Id: common.h,v 1.10 2005/06/29 00:34:56 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -88,21 +88,21 @@ static inline void i18n_init(void) {}
 
 #if BYTE_ORDER == BIG_ENDIAN
 
-static inline int is_le_machine() {
+static inline long is_le_machine() {
 	return false;
 }
 
-static inline int is_be_machine() {
+static inline long is_be_machine() {
 	return true;
 }
 
 #else
 
-static inline int is_le_machine() {
+static inline long is_le_machine() {
 	return true;
 }
 
-static inline int is_be_machine() {
+static inline long is_be_machine() {
 	return false;
 }
 

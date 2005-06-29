@@ -1,4 +1,4 @@
-/* $Id: plugout_devdsp.c,v 1.7 2004/10/23 21:19:17 ranmachan Exp $
+/* $Id: plugout_devdsp.c,v 1.8 2005/06/29 00:34:58 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -24,7 +24,7 @@
 
 static int fd;
 
-static int regparm devdsp_open(enum plugout_endian endian, int rate)
+static long regparm devdsp_open(enum plugout_endian endian, long rate)
 {
 	int c;
 	int flags;
@@ -50,11 +50,11 @@ static int regparm devdsp_open(enum plugout_endian endian, int rate)
 	}
 	c = rate;
 	if ((ioctl(fd, SNDCTL_DSP_SPEED, &c)) == -1) {
-		fprintf(stderr, _("ioctl(fd, SNDCTL_DSP_SPEED, %d) failed: %s\n"), rate, strerror(errno));
+		fprintf(stderr, _("ioctl(fd, SNDCTL_DSP_SPEED, %ld) failed: %s\n"), rate, strerror(errno));
 		return -1;
 	}
 	if (c != rate) {
-		fprintf(stderr, _("Requested rate %dHz, got %dHz.\n"), rate, c);
+		fprintf(stderr, _("Requested rate %ldHz, got %dHz.\n"), rate, c);
 		rate = c;
 	}
 	c=1;

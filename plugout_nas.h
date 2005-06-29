@@ -1,4 +1,4 @@
-/* $Id: plugout_nas.h,v 1.1 2004/04/02 10:40:44 mitch Exp $
+/* $Id: plugout_nas.h,v 1.2 2005/06/29 00:34:58 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -11,7 +11,7 @@
 #ifndef _PLUGOUT_NAS_H_
 #define _PLUGOUT_NAS_H_
 
-void    regparm nas_open (int endian, int rate);
+void    regparm nas_open (long endian, long rate);
 ssize_t regparm nas_write(const void *buf, size_t count);
 void    regparm nas_close();
 

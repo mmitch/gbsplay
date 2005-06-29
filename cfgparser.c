@@ -1,4 +1,4 @@
-/* $Id: cfgparser.c,v 1.12 2004/10/23 21:19:17 ranmachan Exp $
+/* $Id: cfgparser.c,v 1.13 2005/06/29 00:34:56 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -18,14 +18,14 @@
 #include "cfgparser.h"
 #include "plugout.h"
 
-static int cfg_line, cfg_char;
+static long cfg_line, cfg_char;
 static FILE *cfg_file;
 
-static int nextchar_state;
+static long nextchar_state;
 
 static regparm char nextchar(void)
 {
-	int c;
+	long c;
 
 	do {
 		if ((c = fgetc(cfg_file)) == EOF) return 0;
@@ -53,14 +53,14 @@ static regparm char nextchar(void)
 	return c;
 }
 
-static int state;
-static int nextstate;
-static int c;
+static long state;
+static long nextstate;
+static long c;
 static char *filename;
 
 static regparm void err_expect(char *s)
 {
-	fprintf(stderr, _("'%s' expected at %s line %d char %d.\n"),
+	fprintf(stderr, _("'%s' expected at %s line %ld char %ld.\n"),
 	        s, filename, cfg_line, cfg_char);
 	c = nextchar();
 	state = 0;
@@ -91,7 +91,7 @@ regparm void cfg_endian(void *ptr)
 regparm void cfg_string(void *ptr)
 {
 	char s[200];
-	unsigned int n = 0;
+	unsigned long n = 0;
 
 	if (!isalpha(c) && c != '-' && c != '_') {
 		err_expect("[a-zA-Z_-]");
@@ -110,10 +110,10 @@ regparm void cfg_string(void *ptr)
 	nextstate = 1;
 }
 
-regparm void cfg_int(void *ptr)
+regparm void cfg_long(void *ptr)
 {
 	char num[20];
-	unsigned int n = 0;
+	unsigned long n = 0;
 
 	if (!isdigit(c)) {
 		err_expect("[0-9]");
@@ -126,7 +126,7 @@ regparm void cfg_int(void *ptr)
 	         n < (sizeof(num)-1));
 	num[n] = 0;
 
-	*((int*)ptr) = atoi(num);
+	*((long*)ptr) = atoi(num);
 
 	state = 0;
 	nextstate = 1;
@@ -147,7 +147,7 @@ regparm void cfg_parse(char *fname, struct cfg_option *options)
 
 	do {
 		char option[200];
-		unsigned int n;
+		unsigned long n;
 		switch (state) {
 		case 0:
 			if (isspace(c))
@@ -187,7 +187,7 @@ regparm void cfg_parse(char *fname, struct cfg_option *options)
 			if (options[n].parse_fn)
 				options[n].parse_fn(options[n].ptr);
 			else {
-				fprintf(stderr, _("Unknown option %s at %s line %d.\n"), option, fname, cfg_line);
+				fprintf(stderr, _("Unknown option %s at %s line %ld.\n"), option, fname, cfg_line);
 				while ((c = nextchar()) != '\n' && c != 0);
 				state = 0;
 				nextstate = 1;
@@ -203,7 +203,7 @@ regparm void cfg_parse(char *fname, struct cfg_option *options)
 regparm char* get_userconfig(const char* cfgfile)
 {
 	char *homedir, *usercfg;
-	int length;
+	long length;
 
 	homedir = getenv("HOME");
 	if (!homedir || !cfgfile) return NULL;

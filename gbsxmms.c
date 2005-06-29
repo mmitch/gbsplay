@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.35 2004/03/20 22:02:05 mitch Exp $
+/* $Id: gbsxmms.c,v 1.36 2005/06/29 00:34:58 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -36,15 +36,15 @@ static char *cfgfile = ".xmms/gbsxmmsrc";
 static struct gbs *gbs;
 static pthread_mutex_t gbs_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static int subsong_gap = 2;
-static int fadeout = 3;
-static int silence_timeout = 2;
-static int subsong_timeout = 2*60;
-static int rate = 44100;
+static long subsong_gap = 2;
+static long fadeout = 3;
+static long silence_timeout = 2;
+static long subsong_timeout = 2*60;
+static long rate = 44100;
 
 static pthread_t playthread;
-static int stopthread = 1;
-static int workunit;
+static long stopthread = 1;
+static long workunit;
 
 static int16_t samples[4096];
 static struct gbhw_buffer buffer = {
@@ -66,17 +66,17 @@ static char *file_info_filename;
 static struct gbs *file_info_gbs;
 
 static struct cfg_option options[] = {
-	{ "rate", &rate, cfg_int },
-	{ "subsong_timeout", &subsong_timeout, cfg_int },
-	{ "silence_timeout", &silence_timeout, cfg_int },
-	{ "subsong_gap", &subsong_gap, cfg_int },
-	{ "fadeout", &fadeout, cfg_int },
+	{ "rate", &rate, cfg_long },
+	{ "subsong_timeout", &subsong_timeout, cfg_long },
+	{ "silence_timeout", &silence_timeout, cfg_long },
+	{ "subsong_gap", &subsong_gap, cfg_long },
+	{ "fadeout", &fadeout, cfg_long },
 	{ NULL, NULL, NULL }
 };
 
-static regparm int gbs_time(struct gbs *gbs, int subsong) {
-	int res = 0;
-	int i;
+static regparm long gbs_time(struct gbs *gbs, long subsong) {
+	long res = 0;
+	long i;
 
 	if (!gbs) return 0;
 
@@ -88,7 +88,7 @@ static regparm int gbs_time(struct gbs *gbs, int subsong) {
 	return res;
 }
 
-static void next_subsong(int flush)
+static void next_subsong(long flush)
 {
 	if (!(gbs_ip.output && gbs)) return;
 	if (!flush) {
@@ -123,7 +123,7 @@ static void about(void)
 
 static void file_info_box(char *filename)
 {
-	int titlelen = strlen(filename) + 12;
+	long titlelen = strlen(filename) + 12;
 
 	if (file_info_filename) free(file_info_filename);
 	file_info_filename = strdup(filename);
@@ -137,7 +137,7 @@ static void file_info_box(char *filename)
 	if (file_info_gbs) gbs_close(file_info_gbs);
 	if ((file_info_gbs = gbs_open(filename)) != NULL) {
 		GtkWidget *label;
-		int i;
+		long i;
 
 		gtk_entry_set_text(GTK_ENTRY(entry_game), file_info_gbs->title);
 		gtk_entry_set_text(GTK_ENTRY(entry_artist), file_info_gbs->author);
@@ -184,7 +184,7 @@ static void file_info_box(char *filename)
 			                     0, 1800, 1, 10, 10);
 			GtkWidget *spinbutton = gtk_spin_button_new(GTK_ADJUSTMENT(sb_adj), 1, 2);
 
-			snprintf(buf, sizeof(buf), "%03d:", i);
+			snprintf(buf, sizeof(buf), "%03ld:", i);
 			label = gtk_label_new(buf);
 
 			if (file_info_gbs->subsong_info[i].title)
@@ -223,7 +223,7 @@ static void writebuffer(void)
 
 static void tableenum(gpointer data, gpointer user_data)
 {
-	int i;
+	long i;
 	GtkTableChild *child = (GtkTableChild*) data;
 
 	i = child->top_attach;
@@ -236,7 +236,7 @@ static void tableenum(gpointer data, gpointer user_data)
 		{
 			float value = gtk_spin_button_get_value_as_float(GTK_SPIN_BUTTON(child->widget));
 			value *= (float)GBS_LEN_DIV;
-			file_info_gbs->subsong_info[i-1].len = (int) value;
+			file_info_gbs->subsong_info[i-1].len = (long) value;
 		}
 		break;
 	}
@@ -510,8 +510,8 @@ static void init(void)
 
 static int is_our_file(char *filename)
 {
-	int fd = open(filename, O_RDONLY);
-	int res = false;
+	long fd = open(filename, O_RDONLY);
+	long res = false;
 	char id[4];
 
 	read(fd, id, sizeof(id));
@@ -547,12 +547,12 @@ static void *playloop(void *priv)
 static void play_file(char *filename)
 {
 	if ((gbs = gbs_open(filename)) != NULL) {
-		int len = 13 +
+		long len = 13 +
 			strlen(gbs->title) +
 			strlen(gbs->author) +
 			strlen(gbs->copyright);
 		char *title = malloc(len);
-		int length = gbs_time(gbs, gbs->songs);
+		long length = gbs_time(gbs, gbs->songs);
 
 		snprintf(title, len, "%s - %s (%s)",
 		         gbs->title, gbs->author, gbs->copyright);
@@ -583,7 +583,7 @@ static void stop(void)
 
 static void set_song_info(struct gbs *gbs, char **title, int *length)
 {
-	int len = 13 + strlen(gbs->title) + strlen(gbs->author) + strlen(gbs->copyright);
+	long len = 13 + strlen(gbs->title) + strlen(gbs->author) + strlen(gbs->copyright);
 
 	*title = malloc(len);
 	*length = gbs_time(gbs, gbs->songs);

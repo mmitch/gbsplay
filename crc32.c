@@ -18,8 +18,7 @@ static unsigned long crc_table[256];
  * even on a table that someone else is using concurrently.
  */
 static regparm void make_crc_table(void) {
-  unsigned int i, j;
-  unsigned long h = 1;
+  unsigned long i, j, h = 1;
   crc_table[0] = 0;
   for (i = 128; i; i >>= 1) {
     h = (h >> 1) ^ ((h & 1) ? POLYNOMIAL : 0);

@@ -1,4 +1,4 @@
-/* $Id: plugout_devdsp.h,v 1.4 2004/03/20 20:41:26 mitch Exp $
+/* $Id: plugout_devdsp.h,v 1.5 2005/06/29 00:34:58 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -13,7 +13,7 @@
 #ifndef _PLUGOUT_DEVDSP_H_
 #define _PLUGOUT_DEVDSP_H_
 
-void    regparm devdsp_open (int endian, int rate);
+void    regparm devdsp_open (long endian, long rate);
 ssize_t regparm devdsp_write(const void *buf, size_t count);
 void    regparm devdsp_close();
 

@@ -1,4 +1,4 @@
-/* $Id: plugout_nas.c,v 1.10 2004/10/23 21:41:14 ranmachan Exp $
+/* $Id: plugout_nas.c,v 1.11 2005/06/29 00:34:58 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -31,7 +31,7 @@ static AuServer      *nas_server;
 static AuFlowID       nas_flow;
 
 /* forward function declarations */
-static int     regparm nas_open(enum plugout_endian endian, int rate);
+static long    regparm nas_open(enum plugout_endian endian, long rate);
 static ssize_t regparm nas_write(const void *buf, size_t count);
 static void    regparm nas_close();
 
@@ -69,7 +69,7 @@ static char regparm *nas_error(AuStatus status)
  */
 static AuDeviceID regparm nas_find_device(AuServer *aud)
 {
-	int i;
+	long i;
 	for (i=0; i < AuServerNumDevices(aud); i++) {
 		AuDeviceAttributes *dev = AuServerDevice(aud, i);
 		if ((AuDeviceKind(dev) == AuComponentKindPhysicalOutput) &&
@@ -89,7 +89,7 @@ static AuDeviceID regparm nas_find_device(AuServer *aud)
  * @param endian  requested endianness
  * @param rate  requested samplerate
  */
-static int regparm nas_open(enum plugout_endian endian, int rate)
+static long regparm nas_open(enum plugout_endian endian, long rate)
 {
 	char *text;
 	unsigned char nas_format;
@@ -181,12 +181,12 @@ err:
  */
 static ssize_t regparm nas_write(const void *buf, size_t count)
 {
-	int maxlen = NAS_BUFFER_SAMPLES * 2;
-	int numwritten = 0;
+	long maxlen = NAS_BUFFER_SAMPLES * 2;
+	long numwritten = 0;
 
 	while (numwritten < count) {
 		AuStatus as;
-		int writelen = count - numwritten;
+		long writelen = count - numwritten;
 
 		if (writelen > maxlen) writelen = maxlen;
 

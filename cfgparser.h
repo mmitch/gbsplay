@@ -1,4 +1,4 @@
-/* $Id: cfgparser.h,v 1.9 2004/03/21 02:46:14 ranmachan Exp $
+/* $Id: cfgparser.h,v 1.10 2005/06/29 00:34:56 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -19,7 +19,7 @@ struct cfg_option {
 };
 
 void  regparm cfg_string(void *ptr);
-void  regparm cfg_int(void *ptr);
+void  regparm cfg_long(void *ptr);
 void  regparm cfg_endian(void *ptr);
 void  regparm cfg_parse(char *fname, struct cfg_option *options);
 char* regparm get_userconfig(const char* cfgfile);

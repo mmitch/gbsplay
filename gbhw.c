@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.34 2004/10/22 22:57:04 ranmachan Exp $
+/* $Id: gbhw.c,v 1.35 2005/06/29 00:34:57 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -20,8 +20,8 @@ static uint8_t intram[0x2000];
 static uint8_t extram[0x2000];
 static uint8_t ioregs[0x80];
 static uint8_t hiram[0x80];
-static int rombank = 1;
-static int lastbank;
+static long rombank = 1;
+static long lastbank;
 
 static const char dutylookup[4] = {
 	1, 2, 4, 6
@@ -29,22 +29,22 @@ static const char dutylookup[4] = {
 
 struct gbhw_channel gbhw_ch[4];
 
-static int lminval, lmaxval, rminval, rmaxval;
+static long lminval, lmaxval, rminval, rmaxval;
 
 #define MASTER_VOL_MIN	0
 #define MASTER_VOL_MAX	256*256
-static int master_volume;
-static int master_fade;
-static int master_dstvol;
+static long master_volume;
+static long master_fade;
+static long master_dstvol;
 
-static const int vblanktc = 70256; /* ~59.7 Hz (vblankctr)*/
-static int vblankctr = 70256;
-static int timertc = 70256;
-static int timerctr = 70256;
+static const long vblanktc = 70256; /* ~59.7 Hz (vblankctr)*/
+static long vblankctr = 70256;
+static long timertc = 70256;
+static long timerctr = 70256;
 
-static const int msec_cycles = GBHW_CLOCK/1000;
+static const long msec_cycles = GBHW_CLOCK/1000;
 
-static int pause_output = 0;
+static long pause_output = 0;
 
 static gbhw_callback_fn callback;
 static void *callbackpriv;
@@ -59,18 +59,18 @@ static uint32_t tap2 = TAP2_15;
 static uint32_t lfsr = 0xffffffff;
 
 static struct gbhw_buffer *soundbuf = NULL;
-static int sound_div_tc;
-static int sound_div;
-static const int main_div_tc = 32;
-static int main_div;
-static const int sweep_div_tc = 256;
-static int sweep_div;
+static long sound_div_tc;
+static long sound_div;
+static const long main_div_tc = 32;
+static long main_div;
+static const long sweep_div_tc = 256;
+static long sweep_div;
 
-static int r_smpl;
-static int l_smpl;
-static int smpldivisor;
+static long r_smpl;
+static long l_smpl;
+static long smpldivisor;
 
-static int ch3pos;
+static long ch3pos;
 
 static regparm uint32_t rom_get(uint32_t addr)
 {
@@ -118,7 +118,7 @@ static regparm void rom_put(uint32_t addr, uint8_t val)
 		val &= 0x1f;
 		rombank = val + (val == 0);
 		if (rombank > lastbank) {
-			fprintf(stderr, "Bank %d out of range (0-%d)!\n", rombank, lastbank);
+			fprintf(stderr, "Bank %ld out of range (0-%ld)!\n", rombank, lastbank);
 			rombank = lastbank;
 		}
 	}
@@ -126,7 +126,7 @@ static regparm void rom_put(uint32_t addr, uint8_t val)
 
 static regparm void io_put(uint32_t addr, uint8_t val)
 {
-	int chn = (addr - 0xff10)/5;
+	long chn = (addr - 0xff10)/5;
 	if (addr >= 0xff80 && addr <= 0xfffe) {
 		hiram[addr & 0x7f] = val;
 		return;
@@ -150,8 +150,8 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 		case 0xff16:
 		case 0xff20:
 			{
-				int duty_ctr = val >> 6;
-				int len = val & 0x3f;
+				long duty_ctr = val >> 6;
+				long len = val & 0x3f;
 
 				gbhw_ch[chn].duty_ctr = dutylookup[duty_ctr];
 				gbhw_ch[chn].duty_tc = gbhw_ch[chn].div_tc*gbhw_ch[chn].duty_ctr/8;
@@ -163,9 +163,9 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 		case 0xff17:
 		case 0xff21:
 			{
-				int vol = val >> 4;
-				int envdir = (val >> 3) & 1;
-				int envspd = val & 7;
+				long vol = val >> 4;
+				long envdir = (val >> 3) & 1;
+				long envspd = val & 7;
 
 				gbhw_ch[chn].volume = vol;
 				gbhw_ch[chn].env_dir = envdir;
@@ -179,9 +179,9 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 		case 0xff1d:
 		case 0xff1e:
 			{
-				int div = ioregs[0x13 + 5*chn];
+				long div = ioregs[0x13 + 5*chn];
 
-				div |= ((int)ioregs[0x14 + 5*chn] & 7) << 8;
+				div |= ((long)ioregs[0x14 + 5*chn] & 7) << 8;
 				gbhw_ch[chn].div_tc = 2048 - div;
 				gbhw_ch[chn].duty_tc = gbhw_ch[chn].div_tc*gbhw_ch[chn].duty_ctr/8;
 
@@ -191,7 +191,7 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 			}
 			gbhw_ch[chn].len_enable = (ioregs[0x14 + 5*chn] & 0x40) > 0;
 
-//			printf(" ch%d: vol=%02d envd=%d envspd=%d duty_ctr=%d len=%03d len_en=%d key=%04d gate=%d%d\n", chn, gbhw_ch[chn].volume, gbhw_ch[chn].env_dir, gbhw_ch[chn].env_tc, gbhw_ch[chn].duty_ctr, gbhw_ch[chn].len, gbhw_ch[chn].len_enable, gbhw_ch[chn].div_tc, gbhw_ch[chn].leftgate, gbhw_ch[chn].rightgate);
+//			printf(" ch%ld: vol=%02d envd=%ld envspd=%ld duty_ctr=%ld len=%03d len_en=%ld key=%04d gate=%ld%ld\n", chn, gbhw_ch[chn].volume, gbhw_ch[chn].env_dir, gbhw_ch[chn].env_tc, gbhw_ch[chn].duty_ctr, gbhw_ch[chn].len, gbhw_ch[chn].len_enable, gbhw_ch[chn].div_tc, gbhw_ch[chn].leftgate, gbhw_ch[chn].rightgate);
 			break;
 		case 0xff15:
 			break;
@@ -203,7 +203,7 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 			break;
 		case 0xff1c:
 			{
-				int vol = (ioregs[0x1c] >> 5) & 3;
+				long vol = (ioregs[0x1c] >> 5) & 3;
 				gbhw_ch[2].volume = vol;
 				break;
 			}
@@ -212,9 +212,9 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 		case 0xff22:
 		case 0xff23:
 			{
-				int div = ioregs[0x22];
-				int shift = div >> 4;
-				int rate = div & 7;
+				long div = ioregs[0x22];
+				long shift = div >> 4;
+				long rate = div & 7;
 				gbhw_ch[3].div_ctr = 0;
 				gbhw_ch[3].div_tc = 1 << shift;
 				if (div & 8) {
@@ -228,7 +228,7 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 				if (rate) gbhw_ch[3].div_tc *= rate;
 				else gbhw_ch[3].div_tc /= 2;
 				if (addr == 0xff22) break;
-//				printf(" ch4: vol=%02d envd=%d envspd=%d duty_ctr=%d len=%03d len_en=%d key=%04d gate=%d%d\n", gbhw_ch[3].volume, gbhw_ch[3].env_dir, gbhw_ch[3].env_ctr, gbhw_ch[3].duty_ctr, gbhw_ch[3].len, gbhw_ch[3].len_enable, gbhw_ch[3].div_tc, gbhw_ch[3].leftgate, gbhw_ch[3].rightgate);
+//				printf(" ch4: vol=%02d envd=%ld envspd=%ld duty_ctr=%ld len=%03d len_en=%ld key=%04d gate=%ld%ld\n", gbhw_ch[3].volume, gbhw_ch[3].env_dir, gbhw_ch[3].env_ctr, gbhw_ch[3].duty_ctr, gbhw_ch[3].len, gbhw_ch[3].len_enable, gbhw_ch[3].div_tc, gbhw_ch[3].leftgate, gbhw_ch[3].rightgate);
 			}
 			gbhw_ch[chn].len_enable = (ioregs[0x23] & 0x40) > 0;
 			break;
@@ -275,7 +275,7 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 		case 0xffff:
 			break;
 		default:
-			fprintf(stderr, "iowrite to 0x%04x unimplemented (val=%02x).\n", (unsigned int)addr, val);
+			fprintf(stderr, "iowrite to 0x%04x unimplemented (val=%02x).\n", addr, val);
 			break;
 	}
 }
@@ -292,12 +292,12 @@ static regparm void extram_put(uint32_t addr, uint8_t val)
 
 static regparm void gb_sound_sweep(void)
 {
-	int i;
+	long i;
 
 	if (gbhw_ch[0].sweep_tc) {
 		gbhw_ch[0].sweep_ctr--;
 		if (gbhw_ch[0].sweep_ctr < 0) {
-			int val = gbhw_ch[0].div_tc >> gbhw_ch[0].sweep_shift;
+			long val = gbhw_ch[0].div_tc >> gbhw_ch[0].sweep_shift;
 
 			gbhw_ch[0].sweep_ctr = gbhw_ch[0].sweep_tc;
 			if (gbhw_ch[0].sweep_dir) {
@@ -343,7 +343,7 @@ static regparm void gb_sound_sweep(void)
 
 }
 
-regparm void gbhw_master_fade(int speed, int dstvol)
+regparm void gbhw_master_fade(long speed, long dstvol)
 {
 	if (dstvol < MASTER_VOL_MIN) dstvol = MASTER_VOL_MIN;
 	if (dstvol > MASTER_VOL_MAX) dstvol = MASTER_VOL_MAX;
@@ -354,13 +354,13 @@ regparm void gbhw_master_fade(int speed, int dstvol)
 }
 
 #define GET_NIBBLE(p, n) ({ \
-	int index = ((n) >> 1) & 0xf; \
-	int shift = (~(n) & 1) << 2; \
+	long index = ((n) >> 1) & 0xf; \
+	long shift = (~(n) & 1) << 2; \
 	(((p)[index] >> shift) & 0xf); })
 
-static regparm void gb_sound(int cycles)
+static regparm void gb_sound(long cycles)
 {
-	int i;
+	long i;
 	sound_div += (cycles * 65536);
 	while (sound_div_tc && sound_div > sound_div_tc) {
 		sound_div -= sound_div_tc;
@@ -401,7 +401,7 @@ static regparm void gb_sound(int cycles)
 		main_div -= main_div_tc;
 
 		for (i=0; i<2; i++) if (gbhw_ch[i].master) {
-			int val = gbhw_ch[i].volume;
+			long val = gbhw_ch[i].volume;
 			if (gbhw_ch[i].div_ctr > gbhw_ch[i].duty_tc) {
 				val = -val;
 			}
@@ -415,12 +415,12 @@ static regparm void gb_sound(int cycles)
 			}
 		}
 		if (gbhw_ch[2].master) {
-			int pos = ch3pos;
-			int val = GET_NIBBLE(&ioregs[0x30], pos);
+			long pos = ch3pos;
+			long val = GET_NIBBLE(&ioregs[0x30], pos);
 #if 0 /* Channel 3 looses the edge when interpolated */
-			int nextval = GET_NIBBLE(&ioregs[0x30], pos+1);
-			int ctr = gbhw_ch[2].div_ctr;
-			int tc = gbhw_ch[2].div_tc*2;
+			long nextval = GET_NIBBLE(&ioregs[0x30], pos+1);
+			long ctr = gbhw_ch[2].div_ctr;
+			long tc = gbhw_ch[2].div_tc*2;
 			val = (val * ctr + nextval * (tc - ctr))*2 / tc;
 			val -= 15;
 #else
@@ -435,9 +435,9 @@ static regparm void gb_sound(int cycles)
 			}
 		}
 		if (gbhw_ch[3].master) {
-//			int val = gbhw_ch[3].volume * (((lfsr >> 13) & 2)-1);
-//			int val = gbhw_ch[3].volume * ((random() & 2)-1);
-			static int val;
+//			long val = gbhw_ch[3].volume * (((lfsr >> 13) & 2)-1);
+//			long val = gbhw_ch[3].volume * ((random() & 2)-1);
+			static long val;
 			if (!gbhw_ch[3].mute) {
 				if (gbhw_ch[3].leftgate) l_smpl += val;
 				if (gbhw_ch[3].rightgate) r_smpl += val;
@@ -471,7 +471,7 @@ regparm void gbhw_setbuffer(struct gbhw_buffer *buffer)
 	soundbuf = buffer;
 }
 
-regparm void gbhw_setrate(int rate)
+regparm void gbhw_setrate(long rate)
 {
 	sound_div_tc = (long long)GBHW_CLOCK*65536/rate;
 }
@@ -494,7 +494,7 @@ regparm void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t
  */
 regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 {
-	int i;
+	long i;
 
 	rom = rombuf;
 	lastbank = ((size + 0x3fff) / 0x4000) - 1;
@@ -528,9 +528,9 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
  * @param time_to_work  emulated time in milliseconds
  * @return  elapsed cpu cycles
  */
-regparm int gbhw_step(int time_to_work)
+regparm long gbhw_step(long time_to_work)
 {
-	int cycles_total = 0;
+	long cycles_total = 0;
 
 	if (pause_output) {
 		usleep(time_to_work*1000);
@@ -540,14 +540,14 @@ regparm int gbhw_step(int time_to_work)
 	time_to_work *= msec_cycles;
 	
 	while (cycles_total < time_to_work) {
-		int maxcycles = time_to_work - cycles_total;
-		int cycles = 0;
+		long maxcycles = time_to_work - cycles_total;
+		long cycles = 0;
 
 		if (vblankctr > 0 && vblankctr < maxcycles) maxcycles = vblankctr;
 		if (timerctr > 0 && timerctr < maxcycles) maxcycles = timerctr;
 
 		while (cycles < maxcycles) {
-			int step = gbcpu_step();
+			long step = gbcpu_step();
 			if (step < 0) return step;
 			cycles += step;
 			gb_sound(step);
@@ -569,7 +569,7 @@ regparm int gbhw_step(int time_to_work)
 	return cycles_total;
 }
 
-regparm void gbhw_pause(int new_pause)
+regparm void gbhw_pause(long new_pause)
 {
 	pause_output = new_pause != 0;
 }

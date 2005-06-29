@@ -1,4 +1,4 @@
-/* $Id: gbcpu.h,v 1.9 2004/03/10 01:48:14 ranmachan Exp $
+/* $Id: gbcpu.h,v 1.10 2005/06/29 00:34:56 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -101,12 +101,12 @@ typedef regparm void (*gbcpu_put_fn)(uint32_t addr, uint8_t val);
 typedef regparm uint32_t (*gbcpu_get_fn)(uint32_t addr);
 
 extern gbcpu_regs_u gbcpu_regs;
-extern int gbcpu_halted;
-extern int gbcpu_if;
+extern long gbcpu_halted;
+extern long gbcpu_if;
 
 regparm void gbcpu_addmem(uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn);
 regparm void gbcpu_init(void);
-regparm int gbcpu_step(void);
-regparm void gbcpu_intr(int vec);
+regparm long gbcpu_step(void);
+regparm void gbcpu_intr(long vec);
 
 #endif

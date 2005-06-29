@@ -1,4 +1,4 @@
-/* $Id: gbsinfo.c,v 1.7 2004/04/13 14:14:43 mitch Exp $
+/* $Id: gbsinfo.c,v 1.8 2005/06/29 00:34:57 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -19,7 +19,7 @@
 /* global variables */
 char *myname;
 
-void usage(int exitcode)
+void usage(long exitcode)
 {
         FILE *out = exitcode ? stderr : stdout;
         fprintf(out,
@@ -40,7 +40,7 @@ void version(void)
 
 void parseopts(int *argc, char ***argv)
 {
-	int res;
+	long res;
 	myname = *argv[0];
 	while ((res = getopt(*argc, *argv, "hV")) != -1) {
 		switch (res) {

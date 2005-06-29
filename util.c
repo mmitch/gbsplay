@@ -1,4 +1,4 @@
-/* $Id: util.c,v 1.1 2003/09/19 19:35:17 mitch Exp $
+/* $Id: util.c,v 1.2 2005/06/29 00:34:58 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -11,19 +11,19 @@
 
 #include <stdlib.h>
 
-inline int rand_int(int max)
-/* return random integer from [0;max[ */
+inline long rand_long(long max)
+/* return random long from [0;max[ */
 {
-	return (int) (((double)max)*rand()/(RAND_MAX+1.0));
+	return (long) (((double)max)*rand()/(RAND_MAX+1.0));
 }
 
-void shuffle_int(int *array, int elements)
+void shuffle_long(long *array, long elements)
 /* shuffle an int array in place
  * Fisher-Yates algorithm, see `perldoc -q shuffle` :-)  */
 {
-	int i, j, temp;
+	long i, j, temp;
 	for (i = elements-1; i > 0; i--) {
-		j=rand_int(i);       /* pick element  */
+		j=rand_long(i);      /* pick element  */
 		temp = array[i];     /* swap elements */
 		array[i] = array[j];
 		array[j] = temp;

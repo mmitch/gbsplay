@@ -1,4 +1,4 @@
-/* $Id: plugout.c,v 1.1 2004/03/21 02:46:15 ranmachan Exp $
+/* $Id: plugout.c,v 1.2 2005/06/29 00:34:58 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -40,7 +40,7 @@ static struct output_plugin *plugouts[] = {
 
 regparm void plugout_list_plugins(void)
 {
-	int idx;
+	long idx;
 
 	printf(_("Available output plugins:\n\n"));
 
@@ -57,7 +57,7 @@ regparm void plugout_list_plugins(void)
 
 regparm struct output_plugin* plugout_select_by_name(char *name)
 {
-	int idx;
+	long idx;
 
 	for (idx = 0; plugouts[idx] != NULL &&
 	              strcmp(plugouts[idx]->name, name) != 0; idx++);

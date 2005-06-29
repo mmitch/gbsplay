@@ -1,4 +1,4 @@
-/* $Id: plugout_stdout.c,v 1.6 2004/10/23 21:19:17 ranmachan Exp $
+/* $Id: plugout_stdout.c,v 1.7 2005/06/29 00:34:58 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -16,7 +16,7 @@
 
 int fd;
 
-static int regparm stdout_open(enum plugout_endian endian, int rate)
+static long regparm stdout_open(enum plugout_endian endian, long rate)
 {
 	/*
 	 * clone and close STDOUT_FILENO

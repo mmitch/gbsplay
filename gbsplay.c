@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.92 2005/05/09 20:57:11 ranmachan Exp $
+/* $Id: gbsplay.c,v 1.93 2005/06/29 00:34:57 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -32,7 +32,7 @@
 #define MAGIC 5.78135971352465960412
 #define FREQ(x) (262144 / x)
 /* #define NOTE(x) ((log(FREQ(x))/LN2 - log(55)/LN2)*12 + .2) */
-#define NOTE(x) ((int)((log(FREQ(x))/LN2 - MAGIC)*12 + .2))
+#define NOTE(x) ((long)((log(FREQ(x))/LN2 - MAGIC)*12 + .2))
 
 #define MAXOCTAVE 9
 
@@ -48,31 +48,31 @@ static const char vols[5] = " -=#%";
 
 /* global variables */
 static char *myname;
-static int quit = 0;
+static long quit = 0;
 static struct termios ots;
-static int *subsong_playlist;
-static int subsong_playlist_idx = 0;
-static int pause_mode = 0;
+static long *subsong_playlist;
+static long subsong_playlist_idx = 0;
+static long pause_mode = 0;
 
-unsigned int random_seed;
+unsigned long random_seed;
 
 #define DEFAULT_REFRESH_DELAY 33
 
-static int refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
+static long refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
 
 /* default values */
-static int playmode = PLAYMODE_LINEAR;
-static int loopmode = 0;
+static long playmode = PLAYMODE_LINEAR;
+static long loopmode = 0;
 static enum plugout_endian endian = PLUGOUT_ENDIAN_NATIVE;
-static int verbosity = 3;
-static int rate = 44100;
-static int silence_timeout = 2;
-static int fadeout = 3;
-static int subsong_gap = 2;
-static int subsong_start = -1;
-static int subsong_stop = -1;
-static int subsong_timeout = 2*60;
-static int redraw = false;
+static long verbosity = 3;
+static long rate = 44100;
+static long silence_timeout = 2;
+static long fadeout = 3;
+static long subsong_gap = 2;
+static long subsong_start = -1;
+static long subsong_stop = -1;
+static long subsong_timeout = 2*60;
+static long redraw = false;
 
 static char *cfgfile = ".gbsplayrc";
 
@@ -91,23 +91,23 @@ static struct gbhw_buffer buf = {
 
 /* configuration directives */
 static struct cfg_option options[] = {
-	{ "rate", &rate, cfg_int },
-	{ "refresh_delay", &refresh_delay, cfg_int },
-	{ "verbosity", &verbosity, cfg_int },
+	{ "rate", &rate, cfg_long },
+	{ "refresh_delay", &refresh_delay, cfg_long },
+	{ "verbosity", &verbosity, cfg_long },
 	{ "endian", &endian, cfg_endian },
-	{ "subsong_timeout", &subsong_timeout, cfg_int },
-	{ "subsong_gap", &subsong_gap, cfg_int },
-	{ "fadeout", &fadeout, cfg_int },
-	{ "silence_timeout", &silence_timeout, cfg_int },
+	{ "subsong_timeout", &subsong_timeout, cfg_long },
+	{ "subsong_gap", &subsong_gap, cfg_long },
+	{ "fadeout", &fadeout, cfg_long },
+	{ "silence_timeout", &silence_timeout, cfg_long },
 	{ "output_plugin", &sound_name, cfg_string },
-	{ "loop", &loopmode, cfg_int },
+	{ "loop", &loopmode, cfg_long },
 	/* playmode not implemented yet */
 	{ NULL, NULL, NULL }
 };
 
-static regparm int getnote(int div)
+static regparm long getnote(long div)
 {
-	int n = 0;
+	long n = 0;
 
 	if (div>0) {
 		n = NOTE(div);
@@ -124,10 +124,10 @@ static regparm int getnote(int div)
 
 static regparm void precalc_notes(void)
 {
-	int i;
+	long i;
 	for (i=0; i<MAXOCTAVE*12; i++) {
 		char *s = notelookup + 4*i;
-		int n = i % 12;
+		long n = i % 12;
 
 		s[2] = '0' + i / 12;
 		n += (n > 2) + (n > 7);
@@ -143,7 +143,7 @@ static regparm void precalc_notes(void)
 static regparm char *reverse_vol(char *s)
 {
 	static char buf[5];
-	int i;
+	long i;
 
 	for (i=0; i<4; i++) {
 		buf[i] = s[3-i];
@@ -155,9 +155,9 @@ static regparm char *reverse_vol(char *s)
 
 static regparm void precalc_vols(void)
 {
-	int i, k;
+	long i, k;
 	for (k=0; k<16; k++) {
-		int j;
+		long j;
 		char *s = vollookup + 5*k;
 		i = k;
 		for (j=0; j<4; j++) {
@@ -174,7 +174,7 @@ static regparm void precalc_vols(void)
 
 static regparm void swap_endian(struct gbhw_buffer *buf)
 {
-	int i;
+	long i;
 
 	for (i=0; i<buf->pos; i++) {
 		short x = buf->data[i];
@@ -192,32 +192,32 @@ static regparm void callback(struct gbhw_buffer *buf, void *priv)
 	buf->pos = 0;
 }
 
-static regparm int *setup_playlist(int songs)
+static regparm long *setup_playlist(long songs)
 /* setup a playlist in shuffle mode */
 {
-	int i;
-	int *playlist;
+	long i;
+	long *playlist;
 	
-	playlist = (int*) calloc( songs, sizeof(int) );
+	playlist = (long*) calloc( songs, sizeof(long) );
 	for (i=0; i<songs; i++) {
 		playlist[i] = i;
 	}
 
 	/* reinit RNG with current seed - playlists shall be reproducible! */
 	srand(random_seed);
-	shuffle_int(playlist, songs);
+	shuffle_long(playlist, songs);
 
 	return playlist;
 }
 
-static regparm int get_next_subsong(struct gbs *gbs)
+static regparm long get_next_subsong(struct gbs *gbs)
 /* returns the number of the subsong that is to be played next */
 {
-	int next = -1;
+	long next = -1;
 	switch (playmode) {
 
 	case PLAYMODE_RANDOM:
-		next = rand_int(gbs->songs);
+		next = rand_long(gbs->songs);
 		break;
 
 	case PLAYMODE_SHUFFLE:
@@ -245,7 +245,7 @@ static regparm int get_prev_subsong(struct gbs *gbs)
 	switch (playmode) {
 
 	case PLAYMODE_RANDOM:
-		prev = rand_int(gbs->songs);
+		prev = rand_long(gbs->songs);
 		break;
 
 	case PLAYMODE_SHUFFLE:
@@ -299,9 +299,9 @@ static regparm void setup_playmode(struct gbs *gbs)
 	}
 }
 
-static regparm int nextsubsong_cb(struct gbs *gbs, void *priv)
+static regparm long nextsubsong_cb(struct gbs *gbs, void *priv)
 {
-	int subsong = get_next_subsong(gbs);
+	long subsong = get_next_subsong(gbs);
 
 	if (gbs->subsong == subsong_stop ||
 	    subsong >= gbs->songs) {
@@ -317,7 +317,7 @@ static regparm int nextsubsong_cb(struct gbs *gbs, void *priv)
 	return true;
 }
 
-char *endian_str(int endian)
+char *endian_str(long endian)
 {
 	switch (endian) {
 	case PLUGOUT_ENDIAN_BIG: return "big";
@@ -327,7 +327,7 @@ char *endian_str(int endian)
 	}
 }
 
-static regparm void usage(int exitcode)
+static regparm void usage(long exitcode)
 {
 	FILE *out = exitcode ? stderr : stdout;
 	fprintf(out,
@@ -335,17 +335,17 @@ static regparm void usage(int exitcode)
 		  "\n"
 		  "Available options are:\n"
 		  "  -E  endian, b == big, l == little, n == native (%s)\n"
-		  "  -f  set fadeout (%d seconds)\n"
-		  "  -g  set subsong gap (%d seconds)\n"
+		  "  -f  set fadeout (%ld seconds)\n"
+		  "  -g  set subsong gap (%ld seconds)\n"
 		  "  -h  display this help and exit\n"
 		  "  -l  loop mode\n"
 		  "  -o  select output plugin (%s)\n"
 		  "      'list' shows available plugins\n"
 		  "  -q  reduce verbosity\n"
-		  "  -r  set samplerate (%dHz)\n"
-		  "  -R  set refresh delay (%d milliseconds)\n"
-		  "  -t  set subsong timeout (%d seconds)\n"
-		  "  -T  set silence timeout (%d seconds)\n"
+		  "  -r  set samplerate (%ldHz)\n"
+		  "  -R  set refresh delay (%ld milliseconds)\n"
+		  "  -t  set subsong timeout (%ld seconds)\n"
+		  "  -T  set silence timeout (%ld seconds)\n"
 		  "  -v  increase verbosity\n"
 		  "  -V  print version and exit\n"
 		  "  -z  play subsongs in shuffle mode\n"
@@ -370,7 +370,7 @@ static regparm void version(void)
 
 static regparm void parseopts(int *argc, char ***argv)
 {
-	int res;
+	long res;
 	myname = *argv[0];
 	while ((res = getopt(*argc, *argv, "E:f:g:hlo:qr:R:t:T:vVzZ")) != -1) {
 		switch (res) {
@@ -390,10 +390,10 @@ static regparm void parseopts(int *argc, char ***argv)
 			}
 			break;
 		case 'f':
-			sscanf(optarg, "%d", &fadeout);
+			sscanf(optarg, "%ld", &fadeout);
 			break;
 		case 'g':
-			sscanf(optarg, "%d", &subsong_gap);
+			sscanf(optarg, "%ld", &subsong_gap);
 			break;
 		case 'h':
 			usage(0);
@@ -408,16 +408,16 @@ static regparm void parseopts(int *argc, char ***argv)
 			verbosity -= 1;
 			break;
 		case 'r':
-			sscanf(optarg, "%d", &rate);
+			sscanf(optarg, "%ld", &rate);
 			break;
 		case 'R':
-			sscanf(optarg, "%d", &refresh_delay);
+			sscanf(optarg, "%ld", &refresh_delay);
 			break;
 		case 't':
-			sscanf(optarg, "%d", &subsong_timeout);
+			sscanf(optarg, "%ld", &subsong_timeout);
 			break;
 		case 'T':
-			sscanf(optarg, "%d", &silence_timeout);
+			sscanf(optarg, "%ld", &silence_timeout);
 			break;
 		case 'v':
 			verbosity += 1;
@@ -473,9 +473,9 @@ static regparm void handleuserinput(struct gbs *gbs)
 	}
 }
 
-static regparm char *notestring(int ch)
+static regparm char *notestring(long ch)
 {
-	int n;
+	long n;
 
 	if (gbhw_ch[ch].mute) return "-M-";
 
@@ -487,9 +487,9 @@ static regparm char *notestring(int ch)
 	else return "nse";
 }
 
-static regparm int chvol(int ch)
+static regparm long chvol(long ch)
 {
-	int v;
+	long v;
 
 	if (gbhw_ch[ch].mute ||
 	    gbhw_ch[ch].master == 0) return 0;
@@ -501,7 +501,7 @@ static regparm int chvol(int ch)
 	return v;
 }
 
-static regparm char *volstring(int v)
+static regparm char *volstring(long v)
 {
 	if (v < 0) v = 0;
 	if (v > 15) v = 15;
@@ -511,12 +511,12 @@ static regparm char *volstring(int v)
 
 static regparm void printstatus(struct gbs *gbs)
 {
-	int time = gbs->ticks / GBHW_CLOCK;
-	int timem = time / 60;
-	int times = time % 60;
+	long time = gbs->ticks / GBHW_CLOCK;
+	long timem = time / 60;
+	long times = time % 60;
 	char *songtitle;
-	int len = gbs->subsong_info[gbs->subsong].len / 1024;
-	int lenm, lens;
+	long len = gbs->subsong_info[gbs->subsong].len / 1024;
+	long lenm, lens;
 
 	if (len == 0) {
 		len = subsong_timeout;
@@ -529,8 +529,8 @@ static regparm void printstatus(struct gbs *gbs)
 		songtitle=_("Untitled");
 	}
 	printf("\r\033[A\033[A"
-	       "Song %3d/%3d (%s)\033[K\n"
-	       "%02d:%02d/%02d:%02d",
+	       "Song %3ld/%3ld (%s)\033[K\n"
+	       "%02ld:%02ld/%02ld:%02ld",
 	       gbs->subsong+1, gbs->songs, songtitle,
 	       timem, times, lenm, lens);
 	if (verbosity>2) {
@@ -652,12 +652,12 @@ int main(int argc, char **argv)
 	gbhw_setrate(rate);
 
 	if (argc >= 2) {
-		sscanf(argv[1], "%d", &subsong_start);
+		sscanf(argv[1], "%ld", &subsong_start);
 		subsong_start--;
 	}
 
 	if (argc >= 3) {
-		sscanf(argv[2], "%d", &subsong_stop);
+		sscanf(argv[2], "%ld", &subsong_stop);
 		subsong_stop--;
 	}
 
