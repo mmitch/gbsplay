@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.88 2005/05/30 18:24:52 mitch Exp $
+# $Id: Makefile,v 1.89 2005/06/29 00:34:00 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -133,7 +133,7 @@ endif
 # include the rules for each subdir
 include $(shell find . -type f -name "subdir.mk")
 
-default: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL)
+default: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL) test
 
 # include the dependency files
 
@@ -226,6 +226,30 @@ dist:	distclean
 	tar -cvzf ../$(DISTDIR).tar.gz $(DISTDIR)/ 
 	rm -rf ./$(DISTDIR)
 
+TESTOPTS := -r 44100 -t 30 -f 0 -g 0 -T 0
+
+test: gbsplay
+	@MD5=`./gbsplay -E b -o stdout $(TESTOPTS) examples/nightmode.gbs 1 | md5sum | cut -f1 -d\ `; \
+	EXPECT="5e7bf67f321ba6aaecfb3f72fa9278e9"; \
+	if [ "$$MD5" = "$$EXPECT" ]; then \
+		echo "Bigendian output ok"; \
+	else \
+		echo "Bigendian output failed"; \
+		echo "  Expected: $$EXPECT"; \
+		echo "  Got:      $$MD5" ; \
+		exit 1; \
+	fi
+	@MD5=`./gbsplay -E l -o stdout $(TESTOPTS) examples/nightmode.gbs 1 | md5sum | cut -f1 -d\ `; \
+	EXPECT="6fc906a4662a1d2c9a6c85a180a8323c"; \
+	if [ "$$MD5" = "$$EXPECT" ]; then \
+		echo "Littleendian output ok"; \
+	else \
+		echo "Littleendian output failed"; \
+		echo "  Expected: $$EXPECT"; \
+		echo "  Got:      $$MD5" ; \
+		exit 1; \
+	fi
+
 libgbspic.a: $(objs_libgbspic)
 	$(AR) r $@ $+
 libgbs.a: $(objs_libgbs)
@@ -267,4 +291,3 @@ config.mk: configure
 
 %.5: %.in.5
 	sed -f config.sed $< > $@
-
