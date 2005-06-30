@@ -1,9 +1,9 @@
 #!/bin/sh
-# $Id: gbs2ogg.sh,v 1.8 2004/04/13 14:14:44 mitch Exp $
+# $Id: gbs2ogg.sh,v 1.9 2005/06/30 00:56:05 ranmachan Exp $
 #
 # Automatically convert all subsongs from .gbs file to .ogg files.
 # 
-# 2003-2004 (C) by Christian Garbs <mitch@cgarbs.de>
+# 2003-2005 (C) by Christian Garbs <mitch@cgarbs.de>
 #
 
 FILENAME=$1

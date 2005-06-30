@@ -1,6 +1,6 @@
-# $Id: de.po,v 1.16 2004/06/03 18:47:27 mitch Exp $
+# $Id: de.po,v 1.17 2005/06/30 00:56:06 ranmachan Exp $
 # German translations for gbsplay.
-# Copyright (C) 2003-2004 Tobias Diedrich <ranma@gmx.at>
+# Copyright (C) 2003-2005 Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
 #                         Christian Garbs <mitch@cgarbs.de>
 # This file is distributed under GNU GPL.
 #

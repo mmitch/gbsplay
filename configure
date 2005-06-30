@@ -1,10 +1,10 @@
 #!/bin/sh
-# $Id: configure,v 1.68 2005/05/09 20:57:11 ranmachan Exp $
+# $Id: configure,v 1.69 2005/06/30 00:55:56 ranmachan Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
-# 2003-2004 (C) by Christian Garbs <mitch@cgarbs.de>
-#                  Tobias Diedrich <ranma@gmx.at>
+# 2003-2005 (C) by Christian Garbs <mitch@cgarbs.de>
+#                  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
 # Licensed under GNU GPL.
 
 ## initialize variables

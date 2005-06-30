@@ -1,8 +1,8 @@
-/* $Id: cfgparser.c,v 1.13 2005/06/29 00:34:56 ranmachan Exp $
+/* $Id: cfgparser.c,v 1.14 2005/06/30 00:55:55 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
- * 2003-2004 (C) by Tobias Diedrich <ranma@gmx.at>
+ * 2003-2005 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL.
  */

@@ -1,8 +1,8 @@
-/* $Id: plugout.c,v 1.2 2005/06/29 00:34:58 ranmachan Exp $
+/* $Id: plugout.c,v 1.3 2005/06/30 00:55:58 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
- * 2003-2004 (C) by Tobias Diedrich <ranma@gmx.at>
+ * 2003-2005 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL.
  */

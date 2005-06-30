@@ -1,8 +1,8 @@
-<<$Id: COPYRIGHT,v 1.2 2004/04/13 14:14:43 mitch Exp $>>
+<<$Id: COPYRIGHT,v 1.3 2005/06/30 00:55:55 ranmachan Exp $>>
 
 gbsplay - A Gameboy sound player
 
-(C) 2003-2004 by Tobias Diedrich <ranma@gmx.at>
+(C) 2003-2005 by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
                  Christian Garbs <mitch@cgarbs.de>
                  Maximilian Rehkopf <otakon@gmx.net>
 
