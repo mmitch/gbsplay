@@ -1,4 +1,4 @@
-/* $Id: gbs.h,v 1.11 2005/06/30 00:55:57 ranmachan Exp $
+/* $Id: gbs.h,v 1.12 2005/07/15 20:19:18 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -25,7 +25,7 @@ struct gbs_subsong_info {
 };
 
 struct gbs {
-	uint8_t *buf;
+	char *buf;
 	long version;
 	long songs;
 	long defaultsong;
@@ -39,8 +39,8 @@ struct gbs {
 	char *author;
 	char *copyright;
 	unsigned long codelen;
-	uint8_t *code;
-	uint8_t *exthdr;
+	char *code;
+	char *exthdr;
 	size_t filesize;
 	uint32_t crc;
 	uint32_t crcnow;

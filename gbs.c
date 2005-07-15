@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.22 2005/06/30 00:55:57 ranmachan Exp $
+/* $Id: gbs.c,v 1.23 2005/07/15 20:19:18 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -231,7 +231,7 @@ regparm void gbs_close(struct gbs *gbs)
 	free(gbs);
 }
 
-static regparm void writeint(uint8_t *buf, uint32_t val, long bytes)
+static regparm void writeint(char *buf, uint32_t val, long bytes)
 {
 	long shift = 0;
 	long i;
@@ -242,14 +242,14 @@ static regparm void writeint(uint8_t *buf, uint32_t val, long bytes)
 	}
 }
 
-static regparm uint32_t readint(uint8_t *buf, long bytes)
+static regparm uint32_t readint(char *buf, long bytes)
 {
 	long i;
 	long shift = 0;
 	uint32_t res = 0;
 
 	for (i=0; i<bytes; i++) {
-		res |= buf[i] << shift;
+		res |= (unsigned char)buf[i] << shift;
 		shift += 8;
 	}
 
@@ -341,8 +341,8 @@ regparm struct gbs *gbs_open(char *name)
 	long fd, i;
 	struct stat st;
 	struct gbs *gbs = malloc(sizeof(struct gbs));
-	uint8_t *buf;
-	uint8_t *buf2 = NULL;
+	char *buf;
+	char *buf2 = NULL;
 	long have_ehdr = 0;
 
 	memset(gbs, 0, sizeof(struct gbs));

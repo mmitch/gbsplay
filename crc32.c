@@ -38,12 +38,12 @@ static regparm void make_crc_table(void) {
  * to data in little-endian byte and bit order to preserve the
  * property of detecting all burst errors of length 32 bits or less.
  */
-regparm unsigned long gbs_crc32(unsigned long crc, const unsigned char *buf, size_t len) {
+regparm unsigned long gbs_crc32(unsigned long crc, const char *buf, size_t len) {
   if (crc_table[255] == 0)
     make_crc_table();
   crc ^= 0xffffffff;
   while (len--)
-    crc = (crc >> 8) ^ crc_table[(crc ^ *buf++) & 0xff];
+    crc = (crc >> 8) ^ crc_table[(crc ^ (unsigned char)*buf++) & 0xff];
   return crc ^ 0xffffffff;
 }
 
