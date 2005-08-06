@@ -16,7 +16,7 @@
 
     cfg_endian;
     cfg_string;
-    cfg_int;
+    cfg_long;
     cfg_parse;
     get_userconfig;
   local:

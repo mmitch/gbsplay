@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.91 2005/08/06 19:37:45 ranmachan Exp $
+# $Id: Makefile,v 1.92 2005/08/06 20:57:32 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -97,8 +97,8 @@ uninstall-libgbs.so.1:
 	-rmdir -p $(libdir)
 
 
-libgbs.so.1: $(objs_libgbspic)
-	$(CC) -fpic -shared -Wl,-soname=$@ -Wl,--version-script,$@.ver -o $@ $+
+libgbs.so.1: $(objs_libgbspic) libgbs.so.1.ver
+	$(CC) -fpic -shared -Wl,-soname=$@ -Wl,--version-script,$@.ver -o $@ $(objs_libgbspic)
 	ln -fs $@ libgbs.so
 
 libgbs: libgbs.so.1
@@ -229,7 +229,7 @@ dist:	distclean
 TESTOPTS := -r 44100 -t 30 -f 0 -g 0 -T 0
 
 test: gbsplay
-	@MD5=`./gbsplay -E b -o stdout $(TESTOPTS) examples/nightmode.gbs 1 | md5sum | cut -f1 -d\ `; \
+	@MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH ./gbsplay -E b -o stdout $(TESTOPTS) examples/nightmode.gbs 1 | md5sum | cut -f1 -d\ `; \
 	EXPECT="5e7bf67f321ba6aaecfb3f72fa9278e9"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "Bigendian output ok"; \
@@ -239,7 +239,7 @@ test: gbsplay
 		echo "  Got:      $$MD5" ; \
 		exit 1; \
 	fi
-	@MD5=`./gbsplay -E l -o stdout $(TESTOPTS) examples/nightmode.gbs 1 | md5sum | cut -f1 -d\ `; \
+	@MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH ./gbsplay -E l -o stdout $(TESTOPTS) examples/nightmode.gbs 1 | md5sum | cut -f1 -d\ `; \
 	EXPECT="6fc906a4662a1d2c9a6c85a180a8323c"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "Littleendian output ok"; \
@@ -259,7 +259,7 @@ gbsinfo: $(objs_gbsinfo) libgbs
 gbsplay: $(objs_gbsplay) libgbs
 	$(CC) -o $(gbsplaybin) $(objs_gbsplay) $(GBSLDFLAGS) $(GBSPLAYLDFLAGS) -lm
 
-gbsxmms.so: $(objs_gbsxmms) libgbspic
+gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 	$(CC) -shared -fpic -Wl,--version-script,$@.ver -o $@ $(objs_gbsxmms) $(GBSLDFLAGS) $(PTHREAD)
 
 # rules for suffixes
