@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.89 2005/06/29 00:34:00 ranmachan Exp $
+# $Id: Makefile,v 1.90 2005/08/06 18:42:05 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -16,7 +16,7 @@ docdir      := $(prefix)/share/doc/gbsplay
 localedir   := $(prefix)/share/locale
 
 GBSCFLAGS  := -Wall
-GBSLDFLAGS := 
+GBSLDFLAGS := -Wl,-O1
 GBSPLAYLDFLAGS :=
 
 ifneq ($(noincludes),yes)
