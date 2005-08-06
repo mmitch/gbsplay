@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.90 2005/08/06 18:42:05 ranmachan Exp $
+# $Id: Makefile,v 1.91 2005/08/06 19:37:45 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -98,7 +98,7 @@ uninstall-libgbs.so.1:
 
 
 libgbs.so.1: $(objs_libgbspic)
-	$(CC) -fPIC -shared -Wl,-soname=$@ -Wl,--version-script,$@.ver -o $@ $+
+	$(CC) -fpic -shared -Wl,-soname=$@ -Wl,--version-script,$@.ver -o $@ $+
 	ln -fs $@ libgbs.so
 
 libgbs: libgbs.so.1
@@ -260,7 +260,7 @@ gbsplay: $(objs_gbsplay) libgbs
 	$(CC) -o $(gbsplaybin) $(objs_gbsplay) $(GBSLDFLAGS) $(GBSPLAYLDFLAGS) -lm
 
 gbsxmms.so: $(objs_gbsxmms) libgbspic
-	$(CC) -shared -fPIC -Wl,--version-script,$@.ver -o $@ $(objs_gbsxmms) $(GBSLDFLAGS) $(PTHREAD)
+	$(CC) -shared -fpic -Wl,--version-script,$@.ver -o $@ $(objs_gbsxmms) $(GBSLDFLAGS) $(PTHREAD)
 
 # rules for suffixes
 
@@ -268,7 +268,7 @@ gbsxmms.so: $(objs_gbsxmms) libgbspic
 
 .c.lo:
 	@echo CC $< -o $@
-	@$(CC) $(GBSCFLAGS) -fPIC -c -o $@ $<
+	@$(CC) $(GBSCFLAGS) -fpic -c -o $@ $<
 .c.o:
 	@echo CC $< -o $@
 	@$(CC) $(GBSCFLAGS) -c -o $@ $<
