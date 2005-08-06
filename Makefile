@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.92 2005/08/06 20:57:32 ranmachan Exp $
+# $Id: Makefile,v 1.93 2005/08/06 21:32:46 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -98,7 +98,7 @@ uninstall-libgbs.so.1:
 
 
 libgbs.so.1: $(objs_libgbspic) libgbs.so.1.ver
-	$(CC) -fpic -shared -Wl,-soname=$@ -Wl,--version-script,$@.ver -o $@ $(objs_libgbspic)
+	$(CC) -fpic -shared -Wl,-O1 -Wl,-soname=$@ -Wl,--version-script,$@.ver -o $@ $(objs_libgbspic)
 	ln -fs $@ libgbs.so
 
 libgbs: libgbs.so.1
