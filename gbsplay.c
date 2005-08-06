@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.94 2005/06/30 00:55:57 ranmachan Exp $
+/* $Id: gbsplay.c,v 1.95 2005/08/06 21:33:16 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -74,7 +74,7 @@ static long subsong_stop = -1;
 static long subsong_timeout = 2*60;
 static long redraw = false;
 
-static char *cfgfile = ".gbsplayrc";
+static const char cfgfile[] = ".gbsplayrc";
 
 static char *sound_name = "oss";
 static char *sound_description;
@@ -90,7 +90,7 @@ static struct gbhw_buffer buf = {
 };
 
 /* configuration directives */
-static struct cfg_option options[] = {
+static const struct cfg_option options[] = {
 	{ "rate", &rate, cfg_long },
 	{ "refresh_delay", &refresh_delay, cfg_long },
 	{ "verbosity", &verbosity, cfg_long },
@@ -591,7 +591,7 @@ static regparm void printinfo(struct gbs *gbs)
 
 static regparm void select_plugin(void)
 {
-	struct output_plugin *plugout;
+	const struct output_plugin *plugout;
 
 	if (strcmp(sound_name, "list") == 0) {
 		plugout_list_plugins();
@@ -630,7 +630,7 @@ int main(int argc, char **argv)
 
 	usercfg = get_userconfig(cfgfile);
 	cfg_parse(SYSCONF_PREFIX "/gbsplayrc", options);
-	cfg_parse(usercfg, options);
+	cfg_parse((const char*)usercfg, options);
 	free(usercfg);
 	parseopts(&argc, &argv);
 	select_plugin();

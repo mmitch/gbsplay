@@ -1,4 +1,4 @@
-/* $Id: cfgparser.c,v 1.14 2005/06/30 00:55:55 ranmachan Exp $
+/* $Id: cfgparser.c,v 1.15 2005/08/06 21:33:16 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -56,7 +56,7 @@ static regparm char nextchar(void)
 static long state;
 static long nextstate;
 static long c;
-static char *filename;
+static const char *filename;
 
 static regparm void err_expect(char *s)
 {
@@ -132,7 +132,7 @@ regparm void cfg_long(void *ptr)
 	nextstate = 1;
 }
 
-regparm void cfg_parse(char *fname, struct cfg_option *options)
+regparm void cfg_parse(const char *fname, const struct cfg_option *options)
 {
 	filename = fname;
 	cfg_file = fopen(fname, "r");

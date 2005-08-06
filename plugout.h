@@ -23,6 +23,6 @@ struct output_plugin {
 };
 
 regparm void plugout_list_plugins(void);
-regparm struct output_plugin* plugout_select_by_name(char *name);
+regparm const struct output_plugin* plugout_select_by_name(const char *name);
 
 #endif

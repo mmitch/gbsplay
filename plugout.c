@@ -1,4 +1,4 @@
-/* $Id: plugout.c,v 1.3 2005/06/30 00:55:58 ranmachan Exp $
+/* $Id: plugout.c,v 1.4 2005/08/06 21:33:16 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -16,16 +16,16 @@
 #include "plugout.h"
 
 #ifdef PLUGOUT_DEVDSP
-extern struct output_plugin plugout_devdsp;
+extern const struct output_plugin plugout_devdsp;
 #endif
 #ifdef PLUGOUT_NAS
-extern struct output_plugin plugout_nas;
+extern const struct output_plugin plugout_nas;
 #endif
 #ifdef PLUGOUT_STDOUT
-extern struct output_plugin plugout_stdout;
+extern const struct output_plugin plugout_stdout;
 #endif
 
-static struct output_plugin *plugouts[] = {
+static const struct output_plugin *plugouts[] = {
 #ifdef PLUGOUT_NAS
 	&plugout_nas,
 #endif
@@ -55,7 +55,7 @@ regparm void plugout_list_plugins(void)
 	puts("");
 }
 
-regparm struct output_plugin* plugout_select_by_name(char *name)
+regparm const struct output_plugin* plugout_select_by_name(const char *name)
 {
 	long idx;
 

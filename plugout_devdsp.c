@@ -1,4 +1,4 @@
-/* $Id: plugout_devdsp.c,v 1.9 2005/06/30 00:55:58 ranmachan Exp $
+/* $Id: plugout_devdsp.c,v 1.10 2005/08/06 21:33:16 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -79,7 +79,7 @@ static void regparm devdsp_close()
 	close(fd);
 }
 
-struct output_plugin plugout_devdsp = {
+const struct output_plugin plugout_devdsp = {
 	.name = "oss",
 	.description = "OSS sound driver",
 	.open = devdsp_open,

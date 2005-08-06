@@ -1,4 +1,4 @@
-/* $Id: plugout_nas.c,v 1.12 2005/06/30 00:55:58 ranmachan Exp $
+/* $Id: plugout_nas.c,v 1.13 2005/08/06 21:33:16 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -36,7 +36,7 @@ static ssize_t regparm nas_write(const void *buf, size_t count);
 static void    regparm nas_close();
 
 /* descripton of this plugin */
-struct output_plugin plugout_nas = {
+const struct output_plugin plugout_nas = {
 	.name = "nas",
 	.description = "NAS sound driver",
 	.open = nas_open,

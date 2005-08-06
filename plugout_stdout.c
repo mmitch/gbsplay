@@ -1,4 +1,4 @@
-/* $Id: plugout_stdout.c,v 1.7 2005/06/29 00:34:58 ranmachan Exp $
+/* $Id: plugout_stdout.c,v 1.8 2005/08/06 21:33:16 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -39,7 +39,7 @@ static void regparm stdout_close()
 	close(fd);
 }
 
-struct output_plugin plugout_stdout = {
+const struct output_plugin plugout_stdout = {
 	.name = "stdout",
 	.description = "STDOUT file writer",
 	.open = stdout_open,
