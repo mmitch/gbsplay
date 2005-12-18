@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.37 2005/06/30 00:55:58 ranmachan Exp $
+/* $Id: gbsxmms.c,v 1.38 2005/12/18 21:00:43 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -49,7 +49,7 @@ static long workunit;
 static int16_t samples[4096];
 static struct gbhw_buffer buffer = {
 .data = samples,
-.len  = sizeof(samples)/sizeof(int16_t),
+.bytes  = sizeof(samples),
 .pos  = 0,
 };
 
@@ -529,7 +529,7 @@ static void *playloop(void *priv)
 		return 0;
 	}
 	while (!stopthread) {
-		if (gbs_ip.output->buffer_free() < buffer.len*sizeof(int16_t)) {
+		if (gbs_ip.output->buffer_free() < buffer.bytes) {
 			usleep(workunit*1000);
 			continue;
 		}
@@ -558,7 +558,7 @@ static void play_file(char *filename)
 		         gbs->title, gbs->author, gbs->copyright);
 		gbs_ip.set_info(title, length, 0, rate, 2);
 
-		workunit = 1000*(buffer.len/2)/rate;
+		workunit = 1000*buffer.samples/rate;
 		gbs_init(gbs, -1);
 		gbhw_setbuffer(&buffer);
 		gbhw_setrate(rate);

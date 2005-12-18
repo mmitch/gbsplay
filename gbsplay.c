@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.95 2005/08/06 21:33:16 ranmachan Exp $
+/* $Id: gbsplay.c,v 1.96 2005/12/18 21:00:43 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -86,7 +86,7 @@ static int16_t samples[4096];
 static struct gbhw_buffer buf = {
 .data = samples,
 .pos  = 0,
-.len  = sizeof(samples)/sizeof(int16_t),
+.bytes = sizeof(samples),
 };
 
 /* configuration directives */
@@ -176,7 +176,7 @@ static regparm void swap_endian(struct gbhw_buffer *buf)
 {
 	long i;
 
-	for (i=0; i<buf->pos; i++) {
+	for (i=0; i<buf->bytes/sizeof(short); i++) {
 		short x = buf->data[i];
 		buf->data[i] = ((x & 0xff) << 8) | (x >> 8);
 	}
@@ -188,7 +188,7 @@ static regparm void callback(struct gbhw_buffer *buf, void *priv)
 	    (is_be_machine() && endian == PLUGOUT_ENDIAN_LITTLE)) {
 		swap_endian(buf);
 	}
-	sound_write(buf->data, buf->pos*sizeof(int16_t));
+	sound_write(buf->data, buf->pos*2*sizeof(int16_t));
 	buf->pos = 0;
 }
 

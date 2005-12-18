@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.37 2005/12/18 20:43:44 ranmachan Exp $
+/* $Id: gbhw.c,v 1.38 2005/12/18 21:00:43 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -32,7 +32,7 @@ struct gbhw_channel gbhw_ch[4];
 static long lminval, lmaxval, rminval, rmaxval;
 
 #define MASTER_VOL_MIN	0
-#define MASTER_VOL_MAX	256*256
+#define MASTER_VOL_MAX	(256*256)
 static long master_volume;
 static long master_fade;
 static long master_dstvol;
@@ -58,19 +58,56 @@ static uint32_t tap1 = TAP1_15;
 static uint32_t tap2 = TAP2_15;
 static uint32_t lfsr = 0xffffffff;
 
+#define SOUND_DIV_MULT 0x10000LL
+
 static struct gbhw_buffer *soundbuf = NULL;
-static long sound_div_tc;
-static long sound_div;
+static long long sound_div_tc;
 static const long main_div_tc = 32;
 static long main_div;
 static const long sweep_div_tc = 256;
 static long sweep_div;
 
-static long r_smpl;
-static long l_smpl;
-static long smpldivisor;
-
 static long ch3pos;
+
+#define IMPULSE_RES 32
+#define IMPULSE_WIDTH 11
+
+/* Filtered sinc impulse at 32 subsample offsets, each totaling exactly 256 */
+static const short base_impulse[IMPULSE_RES][IMPULSE_WIDTH] =
+{
+	{   4,  -5,   0,  -5, 134, 134,  -5,   0,  -5,   4,   0, },
+	{   4,  -5,   0,  -6, 129, 138,  -3,   0,  -5,   4,   0, },
+	{   4,  -5,   0,  -8, 124, 143,  -1,   0,  -5,   4,   0, },
+	{   4,  -5,   0,  -9, 119, 149,   0,   0,  -5,   3,   0, },
+	{   4,  -5,   0,  -9, 113, 154,   2,  -1,  -5,   3,   0, },
+	{   4,  -5,   0, -10, 108, 157,   5,  -1,  -5,   3,   0, },
+	{   4,  -4,   0, -11, 102, 161,   8,  -2,  -5,   3,   0, },
+	{   3,  -4,   0, -11,  97, 165,  11,  -2,  -5,   2,   0, },
+	{   3,  -4,   0, -11,  91, 169,  14,  -3,  -5,   2,   0, },
+	{   3,  -3,   0, -11,  85, 169,  17,  -3,  -4,   2,   1, },
+	{   3,  -3,   0, -11,  80, 172,  21,  -4,  -4,   1,   1, },
+	{   3,  -2,   0, -11,  74, 174,  25,  -5,  -4,   1,   1, },
+	{   3,  -2,   0, -10,  69, 174,  29,  -6,  -3,   1,   1, },
+	{   2,  -2,  -1, -10,  63, 178,  34,  -6,  -3,   0,   1, },
+	{   2,  -1,  -1,  -9,  58, 177,  38,  -7,  -2,   0,   1, },
+	{   2,  -1,  -1,  -9,  53, 177,  43,  -8,  -2,   0,   2, },
+	{   2,   0,  -2,  -8,  48, 176,  48,  -8,  -2,   0,   2, },
+	{   2,   0,  -2,  -8,  43, 177,  53,  -9,  -1,  -1,   2, },
+	{   1,   0,  -2,  -7,  38, 177,  58,  -9,  -1,  -1,   2, },
+	{   1,   0,  -3,  -6,  34, 178,  63, -10,  -1,  -2,   2, },
+	{   1,   1,  -3,  -6,  29, 174,  69, -10,   0,  -2,   3, },
+	{   1,   1,  -4,  -5,  25, 174,  74, -11,   0,  -2,   3, },
+	{   1,   1,  -4,  -4,  21, 172,  80, -11,   0,  -3,   3, },
+	{   1,   2,  -4,  -3,  17, 169,  85, -11,   0,  -3,   3, },
+	{   0,   2,  -5,  -3,  14, 169,  91, -11,   0,  -4,   3, },
+	{   0,   2,  -5,  -2,  11, 165,  97, -11,   0,  -4,   3, },
+	{   0,   3,  -5,  -2,   8, 161, 102, -11,   0,  -4,   4, },
+	{   0,   3,  -5,  -1,   5, 157, 108, -10,   0,  -5,   4, },
+	{   0,   3,  -5,  -1,   2, 154, 113,  -9,   0,  -5,   4, },
+	{   0,   3,  -5,   0,   0, 149, 119,  -9,   0,  -5,   4, },
+	{   0,   4,  -5,   0,  -1, 143, 124,  -8,   0,  -5,   4, },
+	{   0,   4,  -5,   0,  -3, 138, 129,  -6,   0,  -5,   4, },
+};
 
 static regparm uint32_t rom_get(uint32_t addr)
 {
@@ -359,37 +396,65 @@ regparm void gbhw_master_fade(long speed, long dstvol)
 	long shift = (~(n) & 1) << 2; \
 	(((p)[index] >> shift) & 0xf); })
 
-static regparm void gb_sound(long cycles)
+static regparm void gb_flush_buffer(void)
 {
 	long i;
-	sound_div += (cycles * 65536);
-	while (sound_div_tc && sound_div > sound_div_tc) {
-		sound_div -= sound_div_tc;
-		r_smpl *= 256;
-		l_smpl *= 256;
-		r_smpl /= smpldivisor;
-		l_smpl /= smpldivisor;
-		r_smpl *= master_volume/256;
-		l_smpl *= master_volume/256;
-		r_smpl /= 256;
-		l_smpl /= 256;
-		if (soundbuf != NULL && soundbuf->pos < soundbuf->len) {
-			soundbuf->data[soundbuf->pos++] = l_smpl;
-			soundbuf->data[soundbuf->pos++] = r_smpl;
-		}
+
+	/* integrate buffer */
+	for (i=1; i<soundbuf->samples; i++) {
+		long l_smpl, r_smpl;
+		l_smpl = soundbuf->data[i*2  ] += soundbuf->data[i*2-2];
+		r_smpl = soundbuf->data[i*2+1] += soundbuf->data[i*2-1];
 		if (l_smpl > lmaxval) lmaxval = l_smpl;
 		if (l_smpl < lminval) lminval = l_smpl;
 		if (r_smpl > rmaxval) rmaxval = r_smpl;
 		if (r_smpl < rminval) rminval = r_smpl;
-		smpldivisor = 0;
-		l_smpl = 0;
-		r_smpl = 0;
-		if (soundbuf != NULL &&
-		    callback != NULL &&
-		    soundbuf->pos >= soundbuf->len) {
-			callback(soundbuf, callbackpriv);
-		}
 	}
+	soundbuf->pos = soundbuf->samples;
+
+	if (callback != NULL) callback(soundbuf, callbackpriv);
+
+	memset(soundbuf->data, 0, soundbuf->bytes);
+	soundbuf->pos = 0;
+	soundbuf->cycles -= (sound_div_tc * soundbuf->samples) / SOUND_DIV_MULT;
+	soundbuf->data[0] = soundbuf->l_lvl;
+	soundbuf->data[1] = soundbuf->r_lvl;
+}
+
+static regparm void gb_change_level(long l_ofs, long r_ofs)
+{
+	long newpos = soundbuf->cycles * SOUND_DIV_MULT / sound_div_tc;
+	long imp_idx = (soundbuf->cycles*IMPULSE_RES*SOUND_DIV_MULT / sound_div_tc) % IMPULSE_RES;
+	long imp_l = -IMPULSE_WIDTH/2;
+	long imp_r = IMPULSE_WIDTH/2;
+	long i;
+
+	if (newpos + imp_r >= soundbuf->samples) {
+		imp_r = soundbuf->samples - newpos - 1;
+	}
+	if (newpos + imp_l < 0) {
+		imp_l = -newpos;
+	}
+
+	for (i=imp_l; i<imp_r; i++) {
+		long bufi = newpos + i;
+		long impi = i + IMPULSE_WIDTH/2;
+		soundbuf->data[bufi*2  ] += base_impulse[imp_idx][impi] * l_ofs;
+		soundbuf->data[bufi*2+1] += base_impulse[imp_idx][impi] * r_ofs;
+	}
+
+	soundbuf->l_lvl += l_ofs*256;
+	soundbuf->r_lvl += r_ofs*256;
+
+	soundbuf->pos = newpos;
+}
+
+static regparm void gb_sound(long cycles)
+{
+	long i;
+	int l_lvl = 0, r_lvl = 0;
+	static int old_l = 0, old_r = 0;
+
 	if (gbhw_ch[2].master) for (i=0; i<cycles; i++) {
 		gbhw_ch[2].div_ctr--;
 		if (gbhw_ch[2].div_ctr <= 0) {
@@ -400,6 +465,9 @@ static regparm void gb_sound(long cycles)
 	main_div += cycles;
 	while (main_div > main_div_tc) {
 		main_div -= main_div_tc;
+		soundbuf->cycles += main_div_tc;
+		if (soundbuf->cycles*SOUND_DIV_MULT >= sound_div_tc*soundbuf->samples)
+			gb_flush_buffer();
 
 		for (i=0; i<2; i++) if (gbhw_ch[i].master) {
 			long val = gbhw_ch[i].volume;
@@ -407,8 +475,8 @@ static regparm void gb_sound(long cycles)
 				val = -val;
 			}
 			if (!gbhw_ch[i].mute) {
-				if (gbhw_ch[i].leftgate) l_smpl += val;
-				if (gbhw_ch[i].rightgate) r_smpl += val;
+				if (gbhw_ch[i].leftgate) l_lvl += val;
+				if (gbhw_ch[i].rightgate) r_lvl += val;
 			}
 			gbhw_ch[i].div_ctr--;
 			if (gbhw_ch[i].div_ctr <= 0) {
@@ -431,8 +499,8 @@ static regparm void gb_sound(long cycles)
 				val = val >> (gbhw_ch[2].volume-1);
 			} else val = 0;
 			if (!gbhw_ch[2].mute) {
-				if (gbhw_ch[2].leftgate) l_smpl += val;
-				if (gbhw_ch[2].rightgate) r_smpl += val;
+				if (gbhw_ch[2].leftgate) l_lvl += val;
+				if (gbhw_ch[2].rightgate) r_lvl += val;
 			}
 		}
 		if (gbhw_ch[3].master) {
@@ -440,8 +508,8 @@ static regparm void gb_sound(long cycles)
 //			long val = gbhw_ch[3].volume * ((random() & 2)-1);
 			static long val;
 			if (!gbhw_ch[3].mute) {
-				if (gbhw_ch[3].leftgate) l_smpl += val;
-				if (gbhw_ch[3].rightgate) r_smpl += val;
+				if (gbhw_ch[3].leftgate) l_lvl += val;
+				if (gbhw_ch[3].rightgate) r_lvl += val;
 			}
 			gbhw_ch[3].div_ctr--;
 			if (gbhw_ch[3].div_ctr <= 0) {
@@ -451,7 +519,14 @@ static regparm void gb_sound(long cycles)
 				val = gbhw_ch[3].volume * ((lfsr & 2)-1);
 			}
 		}
-		smpldivisor++;
+
+		l_lvl = (l_lvl * master_volume) / MASTER_VOL_MAX;
+		r_lvl = (r_lvl * master_volume) / MASTER_VOL_MAX;
+		if (l_lvl != old_l || r_lvl != old_r) {
+			gb_change_level(l_lvl - old_l, r_lvl - old_r);
+			old_l = l_lvl;
+			old_r = r_lvl;
+		}
 
 		sweep_div += 1;
 		if (sweep_div >= sweep_div_tc) {
@@ -470,11 +545,12 @@ regparm void gbhw_setcallback(gbhw_callback_fn fn, void *priv)
 regparm void gbhw_setbuffer(struct gbhw_buffer *buffer)
 {
 	soundbuf = buffer;
+	soundbuf->samples = soundbuf->bytes / 4;
 }
 
 regparm void gbhw_setrate(long rate)
 {
-	sound_div_tc = (long long)GBHW_CLOCK*65536/rate;
+	sound_div_tc = GBHW_CLOCK*SOUND_DIV_MULT/rate;
 }
 
 regparm void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax)
