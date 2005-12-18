@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.38 2005/12/18 21:00:43 ranmachan Exp $
+/* $Id: gbhw.c,v 1.39 2005/12/18 22:19:00 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -555,6 +555,7 @@ regparm void gbhw_setrate(long rate)
 
 regparm void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax)
 {
+	if (lminval == INT_MAX) return;
 	*lmin = lminval;
 	*lmax = lmaxval;
 	*rmin = rminval;
