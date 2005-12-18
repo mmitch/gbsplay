@@ -1,4 +1,4 @@
-/* $Id: gbcpu.c,v 1.21 2005/06/30 00:55:56 ranmachan Exp $
+/* $Id: gbcpu.c,v 1.22 2005/12/18 22:37:06 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -651,7 +651,7 @@ static regparm void op_set(uint32_t op)
 	long reg = op & 7;
 	long bit = (op >> 3) & 7;
 
-	DPRINTF("\tSET %d, ", bit);
+	DPRINTF("\tSET %ld, ", bit);
 	print_reg(reg);
 	put_reg(reg, get_reg(reg) | (1 << bit));
 }
@@ -661,7 +661,7 @@ static regparm void op_res(uint32_t op)
 	long reg = op & 7;
 	long bit = (op >> 3) & 7;
 
-	DPRINTF("\tRES %d, ", bit);
+	DPRINTF("\tRES %ld, ", bit);
 	print_reg(reg);
 	put_reg(reg, get_reg(reg) & ~(1 << bit));
 }
@@ -671,7 +671,7 @@ static regparm void op_bit(uint32_t op)
 	long reg = op & 7;
 	long bit = (op >> 3) & 7;
 
-	DPRINTF("\tBIT %d, ", bit);
+	DPRINTF("\tBIT %ld, ", bit);
 	print_reg(reg);
 	gbcpu_regs.rn.f &= ~NF;
 	gbcpu_regs.rn.f |= HF | ZF;
@@ -893,7 +893,7 @@ static regparm void op_ld_imm(uint32_t op, const struct opinfo *oi)
 {
 	long ofs = get_imm16();
 
-	DPRINTF(" %s  A, [0x%04x]", oi->name, ofs);
+	DPRINTF(" %s  A, [0x%04lx]", oi->name, ofs);
 	gbcpu_regs.rn.a = mem_get(ofs);
 }
 
@@ -901,7 +901,7 @@ static regparm void op_ld_ind16_a(uint32_t op, const struct opinfo *oi)
 {
 	long ofs = get_imm16();
 
-	DPRINTF(" %s  [0x%04x], A", oi->name, ofs);
+	DPRINTF(" %s  [0x%04lx], A", oi->name, ofs);
 	mem_put(ofs, gbcpu_regs.rn.a);
 }
 
@@ -910,7 +910,7 @@ static regparm void op_ld_ind16_sp(uint32_t op, const struct opinfo *oi)
 	long ofs = get_imm16();
 	long sp = REGS16_R(gbcpu_regs, SP);
 
-	DPRINTF(" %s  [0x%04x], SP", oi->name, ofs);
+	DPRINTF(" %s  [0x%04lx], SP", oi->name, ofs);
 	mem_put(ofs, sp & 0xff);
 	mem_put(ofs+1, sp >> 8);
 }
@@ -941,7 +941,7 @@ static regparm void op_ld_reg16_imm(uint32_t op, const struct opinfo *oi)
 	long reg = (op >> 4) & 3;
 
 	reg += reg > 2; /* skip over FA */
-	DPRINTF(" %s  %s, 0x%04x", oi->name, regnamech16[reg], val);
+	DPRINTF(" %s  %s, 0x%04lx", oi->name, regnamech16[reg], val);
 	REGS16_W(gbcpu_regs, reg, val);
 }
 
@@ -973,7 +973,7 @@ static regparm void op_ld_reg8_imm(uint32_t op, const struct opinfo *oi)
 	DPRINTF(" %s  ", oi->name);
 	print_reg(reg);
 	put_reg(reg, val);
-	DPRINTF(", 0x%02x", val);
+	DPRINTF(", 0x%02lx", val);
 }
 
 static regparm void op_ldh(uint32_t op, const struct opinfo *oi)
@@ -983,7 +983,7 @@ static regparm void op_ldh(uint32_t op, const struct opinfo *oi)
 	if (op & 0x10) {
 		DPRINTF(" %s  A, ", oi->name);
 		if ((op & 2) == 0) {
-			DPRINTF("[%02x]", ofs);
+			DPRINTF("[%02lx]", ofs);
 		} else {
 			ofs = gbcpu_regs.rn.c;
 			DPRINTF("[C]");
@@ -991,7 +991,7 @@ static regparm void op_ldh(uint32_t op, const struct opinfo *oi)
 		gbcpu_regs.rn.a = mem_get(0xff00 + ofs);
 	} else {
 		if ((op & 2) == 0) {
-			DPRINTF(" %s  [%02x], A", oi->name, ofs);
+			DPRINTF(" %s  [%02lx], A", oi->name, ofs);
 		} else {
 			ofs = gbcpu_regs.rn.c;
 			DPRINTF(" %s  [C], A", oi->name);
