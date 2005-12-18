@@ -1,4 +1,4 @@
-/* $Id: gbsxmms.c,v 1.38 2005/12/18 21:00:43 ranmachan Exp $
+/* $Id: gbsxmms.c,v 1.39 2005/12/18 22:02:26 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -212,13 +212,12 @@ static void file_info_box(char *filename)
 	gtk_widget_show(dialog_fileinfo);
 }
 
-static void writebuffer(void)
+static regparm void callback(struct gbhw_buffer *buf, void *priv)
 {
 	gbs_ip.add_vis_pcm(gbs_ip.output->written_time(),
 	                   FMT_S16_NE, 2,
-	                   buffer.pos*sizeof(int16_t), buffer.data);
-	gbs_ip.output->write_audio(buffer.data, buffer.pos*sizeof(int16_t));
-	buffer.pos = 0;
+	                   buf->bytes, buf->data);
+	gbs_ip.output->write_audio(buf->data, buf->bytes);
 }
 
 static void tableenum(gpointer data, gpointer user_data)
@@ -537,8 +536,6 @@ static void *playloop(void *priv)
 		pthread_mutex_lock(&gbs_mutex);
 		if (!gbs_step(gbs, workunit)) stopthread = true;
 		pthread_mutex_unlock(&gbs_mutex);
-
-		if (!stopthread) writebuffer();
 	}
 	gbs_ip.output->close_audio();
 	return 0;
@@ -562,6 +559,7 @@ static void play_file(char *filename)
 		gbs_init(gbs, -1);
 		gbhw_setbuffer(&buffer);
 		gbhw_setrate(rate);
+		gbhw_setcallback(callback, NULL);
 		gbs->subsong_timeout = subsong_timeout;
 		gbs->gap = subsong_gap;
 		gbs->silence_timeout = silence_timeout;
