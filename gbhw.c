@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.36 2005/06/30 00:55:56 ranmachan Exp $
+/* $Id: gbhw.c,v 1.37 2005/12/18 20:43:44 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -179,9 +179,10 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 		case 0xff1d:
 		case 0xff1e:
 			{
-				long div = ioregs[0x13 + 5*chn];
+				unsigned long div = ioregs[0x13 + 5*chn];
 
 				div |= ((long)ioregs[0x14 + 5*chn] & 7) << 8;
+				div = (div + 1) & 2047;
 				gbhw_ch[chn].div_tc = 2048 - div;
 				gbhw_ch[chn].duty_tc = gbhw_ch[chn].div_tc*gbhw_ch[chn].duty_ctr/8;
 
