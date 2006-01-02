@@ -1,7 +1,30 @@
-<<$Id: HISTORY,v 1.15 2004/07/16 17:47:06 mitch Exp $>>
+<<$Id: HISTORY,v 1.16 2006/01/02 19:17:07 mitch Exp $>>
 
 
 gbsplay HISTORY
+
+
+2006/xx/xx  -  0.0.8cvs
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Enhancements:
+
+- code optimizations
+  - use long instead of int where possible, better on 64bit archs
+  - use const where possible
+
+- gbsplay:
+  - use blipbuffer-like sound generation (better quality)
+  - optimizations to channel 2 (interpolation, dc offset)
+  - NAS output honors requested endianess
+
+- build process:
+  - better autotools compatibility (needs fewer tweaks in ebuild)
+  - add regression test
+  - fix tar call in dist target for tar versions > 1.14
+  - optimize symbol hash tables
+  - use -fpic instead of -fPIC
+
 
 2004/07/16  -  0.0.7
 ~~~~~~~~~~~~~~~~~~~~
