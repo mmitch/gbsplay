@@ -1,4 +1,4 @@
-<<$Id: HISTORY,v 1.16 2006/01/02 19:17:07 mitch Exp $>>
+<<$Id: HISTORY,v 1.17 2006/01/13 22:03:38 mitch Exp $>>
 
 
 gbsplay HISTORY
@@ -19,11 +19,12 @@ Enhancements:
   - NAS output honors requested endianess
 
 - build process:
-  - better autotools compatibility (needs fewer tweaks in ebuild)
   - add regression test
+  - better autotools compatibility (needs fewer tweaks in ebuild)
   - fix tar call in dist target for tar versions > 1.14
   - optimize symbol hash tables
   - use -fpic instead of -fPIC
+  - better error message when CC is undefined
 
 
 2004/07/16  -  0.0.7
