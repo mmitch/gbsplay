@@ -1,4 +1,4 @@
-<<$Id: INSTALL,v 1.6 2005/05/09 20:57:11 ranmachan Exp $>>
+<<$Id: INSTALL,v 1.7 2006/01/13 21:54:40 ranmachan Exp $>>
 
 
 gbsplay INSTALL instructions
@@ -7,7 +7,7 @@ gbsplay INSTALL instructions
 ### BASIC INSTRUCTIONS
 
 Run "make".  This should autoconfigure and build all files.  If you
-have GTK2 and XMMS development files installed, the XMMS library will
+have GTK and XMMS development files installed, the XMMS library will
 also be built.
 
 Run "make install" (as root) to install everything to your system.
