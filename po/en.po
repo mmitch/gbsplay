@@ -1,6 +1,6 @@
-# $Id: en.po,v 1.15 2006/01/13 22:27:11 mitch Exp $
+# $Id: en.po,v 1.16 2006/01/13 22:36:16 mitch Exp $
 # English translations for gbsplay.
-# Copyright (C) 2003-2005 Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+# Copyright (C) 2003-2006 Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
 # This file is distributed under GNU GPL.
 #
 msgid ""
