@@ -1,4 +1,4 @@
-/* $Id: gbs.c,v 1.23 2005/07/15 20:19:18 ranmachan Exp $
+/* $Id: gbs.c,v 1.24 2006/01/14 21:08:03 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -197,7 +197,7 @@ regparm void gbs_printinfo(struct gbs *gbs, long verbose)
 	       gbs->init,
 	       gbs->play,
 	       gbs->stack,
-	       gbs->filesize,
+	       (unsigned int)gbs->filesize,
 	       gbs->romsize,
 	       gbs->romsize/0x4000,
 	       gbs->songs);
