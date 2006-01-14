@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.44 2006/01/14 22:11:19 ranmachan Exp $
+/* $Id: gbhw.c,v 1.45 2006/01/14 22:12:21 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -539,20 +539,22 @@ static regparm void gb_flush_buffer(void)
 {
 	long i;
 	long overlap;
+	long l_smpl, r_smpl;
 
 	/* integrate buffer */
-	soundbuf->data[0] = impbuf->data[0];
-	soundbuf->data[1] = impbuf->data[1];
-	for (i=1; i<soundbuf->samples; i++) {
-		long l_smpl, r_smpl;
-		l_smpl = soundbuf->data[i*2  ] += impbuf->data[i*2  ] + soundbuf->data[i*2-2];
-		r_smpl = soundbuf->data[i*2+1] += impbuf->data[i*2+1] + soundbuf->data[i*2-1];
+	l_smpl = soundbuf->l_lvl;
+	r_smpl = soundbuf->r_lvl;
+	for (i=0; i<soundbuf->samples; i++) {
+		l_smpl = soundbuf->data[i*2  ] = l_smpl + impbuf->data[i*2  ];
+		r_smpl = soundbuf->data[i*2+1] = r_smpl + impbuf->data[i*2+1];
 		if (l_smpl > lmaxval) lmaxval = l_smpl;
 		if (l_smpl < lminval) lminval = l_smpl;
 		if (r_smpl > rmaxval) rmaxval = r_smpl;
 		if (r_smpl < rminval) rminval = r_smpl;
 	}
 	soundbuf->pos = soundbuf->samples;
+	soundbuf->l_lvl = l_smpl;
+	soundbuf->r_lvl = r_smpl;
 
 	if (callback != NULL) callback(soundbuf, callbackpriv);
 
@@ -565,25 +567,21 @@ static regparm void gb_flush_buffer(void)
 	soundbuf->pos = 0;
 
 	impbuf->cycles -= (sound_div_tc * soundbuf->samples) / SOUND_DIV_MULT;
-	impbuf->pos -= soundbuf->samples;
-
-	impbuf->data[0] += impbuf->l_lvl;
-	impbuf->data[1] += impbuf->r_lvl;
 }
 
 static regparm void gb_change_level(long l_ofs, long r_ofs)
 {
-	long newpos = impbuf->cycles * SOUND_DIV_MULT / sound_div_tc;
+	long pos = impbuf->cycles * SOUND_DIV_MULT / sound_div_tc;
 	long imp_idx = (impbuf->cycles*IMPULSE_RES*SOUND_DIV_MULT / sound_div_tc) % IMPULSE_RES;
 	long imp_l = -IMPULSE_WIDTH/2;
 	long imp_r = IMPULSE_WIDTH/2;
 	long i;
 
-	assert(newpos + imp_r < impbuf->samples);
-	assert(newpos + imp_l >= 0);
+	assert(pos + imp_r < impbuf->samples);
+	assert(pos + imp_l >= 0);
 
 	for (i=imp_l; i<imp_r; i++) {
-		long bufi = newpos + i;
+		long bufi = pos + i;
 		long impi = i + IMPULSE_WIDTH/2;
 		impbuf->data[bufi*2  ] += base_impulse[imp_idx][impi] * l_ofs;
 		impbuf->data[bufi*2+1] += base_impulse[imp_idx][impi] * r_ofs;
@@ -591,8 +589,6 @@ static regparm void gb_change_level(long l_ofs, long r_ofs)
 
 	impbuf->l_lvl += l_ofs*256;
 	impbuf->r_lvl += r_ofs*256;
-
-	impbuf->pos = newpos;
 }
 
 static regparm void gb_sound(long cycles)
@@ -735,8 +731,6 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 	master_fade = 0;
 	if (soundbuf)
 		soundbuf->pos = 0;
-	if (impbuf)
-		impbuf->pos = 0;
 	lminval = rminval = INT_MAX;
 	lmaxval = rmaxval = INT_MIN;
 	for (i=0; i<4; i++) {
