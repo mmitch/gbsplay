@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.41 2005/12/19 20:48:37 ranmachan Exp $
+/* $Id: gbhw.c,v 1.42 2006/01/14 13:46:19 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <limits.h>
+#include <assert.h>
 
 #include "gbcpu.h"
 #include "gbhw.h"
@@ -48,6 +49,8 @@ static long pause_output = 0;
 
 static gbhw_callback_fn callback;
 static void *callbackpriv;
+static struct gbhw_buffer *soundbuf = NULL; /* externally visible output buffer */
+static struct gbhw_buffer *impbuf = NULL;   /* internal impulse output buffer */
 
 #define TAP1_15		0x4000;
 #define TAP2_15		0x2000;
@@ -60,7 +63,6 @@ static uint32_t lfsr = 0xffffffff;
 
 #define SOUND_DIV_MULT 0x10000LL
 
-static struct gbhw_buffer *soundbuf = NULL;
 static long long sound_div_tc;
 static const long main_div_tc = 32;
 static long main_div;
@@ -536,12 +538,15 @@ regparm void gbhw_master_fade(long speed, long dstvol)
 static regparm void gb_flush_buffer(void)
 {
 	long i;
+	long overlap;
 
 	/* integrate buffer */
+	soundbuf->data[0] = impbuf->data[0];
+	soundbuf->data[1] = impbuf->data[1];
 	for (i=1; i<soundbuf->samples; i++) {
 		long l_smpl, r_smpl;
-		l_smpl = soundbuf->data[i*2  ] += soundbuf->data[i*2-2];
-		r_smpl = soundbuf->data[i*2+1] += soundbuf->data[i*2-1];
+		l_smpl = soundbuf->data[i*2  ] += impbuf->data[i*2  ] + soundbuf->data[i*2-2];
+		r_smpl = soundbuf->data[i*2+1] += impbuf->data[i*2+1] + soundbuf->data[i*2-1];
 		if (l_smpl > lmaxval) lmaxval = l_smpl;
 		if (l_smpl < lminval) lminval = l_smpl;
 		if (r_smpl > rmaxval) rmaxval = r_smpl;
@@ -551,39 +556,44 @@ static regparm void gb_flush_buffer(void)
 
 	if (callback != NULL) callback(soundbuf, callbackpriv);
 
+	overlap = impbuf->samples - soundbuf->samples;
+	memmove(impbuf->data, impbuf->data+(2*soundbuf->samples), 4*overlap);
+	memset(impbuf->data + 2*overlap, 0, impbuf->bytes - 4*overlap);
+	assert(impbuf->bytes == impbuf->samples*4);
+	memset(impbuf->data, 0, impbuf->bytes);
+	assert(soundbuf->bytes == soundbuf->samples*4);
 	memset(soundbuf->data, 0, soundbuf->bytes);
 	soundbuf->pos = 0;
-	soundbuf->cycles -= (sound_div_tc * soundbuf->samples) / SOUND_DIV_MULT;
-	soundbuf->data[0] = soundbuf->l_lvl;
-	soundbuf->data[1] = soundbuf->r_lvl;
+
+	impbuf->cycles -= (sound_div_tc * soundbuf->samples) / SOUND_DIV_MULT;
+	impbuf->pos -= soundbuf->samples;
+
+	impbuf->data[0] += impbuf->l_lvl;
+	impbuf->data[1] += impbuf->r_lvl;
 }
 
 static regparm void gb_change_level(long l_ofs, long r_ofs)
 {
-	long newpos = soundbuf->cycles * SOUND_DIV_MULT / sound_div_tc;
-	long imp_idx = (soundbuf->cycles*IMPULSE_RES*SOUND_DIV_MULT / sound_div_tc) % IMPULSE_RES;
+	long newpos = impbuf->cycles * SOUND_DIV_MULT / sound_div_tc;
+	long imp_idx = (impbuf->cycles*IMPULSE_RES*SOUND_DIV_MULT / sound_div_tc) % IMPULSE_RES;
 	long imp_l = -IMPULSE_WIDTH/2;
 	long imp_r = IMPULSE_WIDTH/2;
 	long i;
 
-	if (newpos + imp_r >= soundbuf->samples) {
-		imp_r = soundbuf->samples - newpos - 1;
-	}
-	if (newpos + imp_l < 0) {
-		imp_l = -newpos;
-	}
+	assert(newpos + imp_r < impbuf->samples);
+	assert(newpos + imp_l >= 0);
 
 	for (i=imp_l; i<imp_r; i++) {
 		long bufi = newpos + i;
 		long impi = i + IMPULSE_WIDTH/2;
-		soundbuf->data[bufi*2  ] += base_impulse[imp_idx][impi] * l_ofs;
-		soundbuf->data[bufi*2+1] += base_impulse[imp_idx][impi] * r_ofs;
+		impbuf->data[bufi*2  ] += base_impulse[imp_idx][impi] * l_ofs;
+		impbuf->data[bufi*2+1] += base_impulse[imp_idx][impi] * r_ofs;
 	}
 
-	soundbuf->l_lvl += l_ofs*256;
-	soundbuf->r_lvl += r_ofs*256;
+	impbuf->l_lvl += l_ofs*256;
+	impbuf->r_lvl += r_ofs*256;
 
-	soundbuf->pos = newpos;
+	impbuf->pos = newpos;
 }
 
 static regparm void gb_sound(long cycles)
@@ -602,8 +612,8 @@ static regparm void gb_sound(long cycles)
 	main_div += cycles;
 	while (main_div > main_div_tc) {
 		main_div -= main_div_tc;
-		soundbuf->cycles += main_div_tc;
-		if (soundbuf->cycles*SOUND_DIV_MULT >= sound_div_tc*soundbuf->samples)
+		impbuf->cycles += main_div_tc;
+		if (impbuf->cycles*SOUND_DIV_MULT >= sound_div_tc*(impbuf->samples - IMPULSE_WIDTH/2))
 			gb_flush_buffer();
 
 		for (i=0; i<2; i++) if (gbhw_ch[i].master) {
@@ -683,6 +693,13 @@ regparm void gbhw_setbuffer(struct gbhw_buffer *buffer)
 {
 	soundbuf = buffer;
 	soundbuf->samples = soundbuf->bytes / 4;
+
+	if (impbuf) free(impbuf);
+	impbuf = malloc(sizeof(*impbuf) + (soundbuf->samples + IMPULSE_WIDTH + 1) * 4);
+	memset(impbuf, 0, sizeof(*impbuf));
+	impbuf->data = (void*)(impbuf+1);
+	impbuf->samples = soundbuf->samples + IMPULSE_WIDTH + 1;
+	impbuf->bytes = impbuf->samples * 4;
 }
 
 regparm void gbhw_setrate(long rate)
@@ -719,6 +736,8 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 	master_fade = 0;
 	if (soundbuf)
 		soundbuf->pos = 0;
+	if (impbuf)
+		impbuf->pos = 0;
 	lminval = rminval = INT_MAX;
 	lmaxval = rmaxval = INT_MIN;
 	for (i=0; i<4; i++) {

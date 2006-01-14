@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.96 2006/01/13 18:12:22 yuuhi Exp $
+# $Id: Makefile,v 1.97 2006/01/14 13:47:43 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -230,7 +230,7 @@ TESTOPTS := -r 44100 -t 30 -f 0 -g 0 -T 0
 
 test: gbsplay
 	@MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH ./gbsplay -E b -o stdout $(TESTOPTS) examples/nightmode.gbs 1 | md5sum | cut -f1 -d\ `; \
-	EXPECT="c57713a0bb20116fd47b99737abe604a"; \
+	EXPECT="b073ca2fdc8d9140fb7293d42a396f0f"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "Bigendian output ok"; \
 	else \
@@ -240,7 +240,7 @@ test: gbsplay
 		exit 1; \
 	fi
 	@MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH ./gbsplay -E l -o stdout $(TESTOPTS) examples/nightmode.gbs 1 | md5sum | cut -f1 -d\ `; \
-	EXPECT="fd5881350905504af7451730a816568b"; \
+	EXPECT="f39b8c4ddd1cfecf86f42e8ff38a7932"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "Littleendian output ok"; \
 	else \
