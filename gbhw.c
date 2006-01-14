@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.43 2006/01/14 20:58:55 mitch Exp $
+/* $Id: gbhw.c,v 1.44 2006/01/14 22:11:19 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -560,7 +560,6 @@ static regparm void gb_flush_buffer(void)
 	memmove(impbuf->data, impbuf->data+(2*soundbuf->samples), 4*overlap);
 	memset(impbuf->data + 2*overlap, 0, impbuf->bytes - 4*overlap);
 	assert(impbuf->bytes == impbuf->samples*4);
-	memset(impbuf->data, 0, impbuf->bytes);
 	assert(soundbuf->bytes == soundbuf->samples*4);
 	memset(soundbuf->data, 0, soundbuf->bytes);
 	soundbuf->pos = 0;
