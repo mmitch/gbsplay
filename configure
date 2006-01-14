@@ -1,9 +1,9 @@
 #!/bin/sh
-# $Id: configure,v 1.70 2006/01/13 21:09:42 ranmachan Exp $
+# $Id: configure,v 1.71 2006/01/14 20:57:09 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
-# 2003-2005 (C) by Christian Garbs <mitch@cgarbs.de>
+# 2003-2006 (C) by Christian Garbs <mitch@cgarbs.de>
 #                  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
 # Licensed under GNU GPL.
 
@@ -34,7 +34,7 @@ if [ -d /usr/ucb ]; then
 fi
 
 ## set version number
-VERSION=0.0.7
+VERSION=0.0.8
 
 ##### begin of subroutines
 
