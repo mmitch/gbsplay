@@ -1,8 +1,8 @@
-/* $Id: gbs.c,v 1.24 2006/01/14 21:08:03 ranmachan Exp $
+/* $Id: gbs.c,v 1.25 2006/01/14 21:53:44 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
- * 2003-2005 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2006 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL.
  */
