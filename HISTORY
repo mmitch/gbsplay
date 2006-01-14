@@ -1,4 +1,4 @@
-<<$Id: HISTORY,v 1.17 2006/01/13 22:03:38 mitch Exp $>>
+<<$Id: HISTORY,v 1.18 2006/01/14 11:21:25 mitch Exp $>>
 
 
 gbsplay HISTORY
@@ -17,6 +17,7 @@ Enhancements:
   - use blipbuffer-like sound generation (better quality)
   - optimizations to channel 2 (interpolation, dc offset)
   - NAS output honors requested endianess
+  - translation fixes
 
 - build process:
   - add regression test
