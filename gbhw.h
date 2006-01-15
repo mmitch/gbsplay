@@ -1,4 +1,4 @@
-/* $Id: gbhw.h,v 1.16 2005/12/18 21:00:43 ranmachan Exp $
+/* $Id: gbhw.h,v 1.17 2006/01/15 00:01:29 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -29,6 +29,8 @@ struct gbhw_channel {
 	long master;
 	long leftgate;
 	long rightgate;
+	long l_lvl;
+	long r_lvl;
 	long volume;
 	long env_dir;
 	long env_tc;

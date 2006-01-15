@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.45 2006/01/14 22:12:21 ranmachan Exp $
+/* $Id: gbhw.c,v 1.46 2006/01/15 00:01:29 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -617,41 +617,46 @@ static regparm void gb_sound(long cycles)
 				val = -val;
 			}
 			if (!gbhw_ch[i].mute) {
-				if (gbhw_ch[i].leftgate) l_lvl += val;
-				if (gbhw_ch[i].rightgate) r_lvl += val;
+				if (gbhw_ch[i].leftgate)
+					gbhw_ch[i].l_lvl = val;
+				if (gbhw_ch[i].rightgate)
+					gbhw_ch[i].r_lvl = val;
 			}
 			gbhw_ch[i].div_ctr--;
 			if (gbhw_ch[i].div_ctr <= 0) {
 				gbhw_ch[i].div_ctr = gbhw_ch[i].div_tc;
 			}
 		}
+		for (i=0; i<2; i++) {
+			l_lvl += gbhw_ch[i].l_lvl;
+			r_lvl += gbhw_ch[i].r_lvl;
+		}
 		if (gbhw_ch[2].master) {
 			long pos = ch3pos;
 			long val = GET_NIBBLE(&ioregs[0x30], pos);
-#if 0 /* Channel 3 looses the edge when interpolated */
-			long nextval = GET_NIBBLE(&ioregs[0x30], pos+1);
-			long ctr = gbhw_ch[2].div_ctr;
-			long tc = gbhw_ch[2].div_tc*2;
-			val = (val * ctr + nextval * (tc - ctr))*2 / tc;
-			val -= 15;
-#else
-			val = val*2 - 15;
-#endif
 			if (gbhw_ch[2].volume) {
 				val = val >> (gbhw_ch[2].volume-1);
 			} else val = 0;
-			if (!gbhw_ch[2].mute) {
-				if (gbhw_ch[2].leftgate) l_lvl += val;
-				if (gbhw_ch[2].rightgate) r_lvl += val;
+			val = val*2;
+			if (gbhw_ch[2].volume && !gbhw_ch[2].mute) {
+				if (gbhw_ch[2].leftgate)
+					gbhw_ch[2].l_lvl = val;
+				if (gbhw_ch[2].rightgate)
+					gbhw_ch[2].r_lvl = val;
 			}
 		}
+		l_lvl += gbhw_ch[2].l_lvl;
+		r_lvl += gbhw_ch[2].r_lvl;
+
 		if (gbhw_ch[3].master) {
 //			long val = gbhw_ch[3].volume * (((lfsr >> 13) & 2)-1);
 //			long val = gbhw_ch[3].volume * ((random() & 2)-1);
 			static long val;
 			if (!gbhw_ch[3].mute) {
-				if (gbhw_ch[3].leftgate) l_lvl += val;
-				if (gbhw_ch[3].rightgate) r_lvl += val;
+				if (gbhw_ch[3].leftgate)
+					gbhw_ch[3].l_lvl = val;
+				if (gbhw_ch[3].rightgate)
+					gbhw_ch[3].r_lvl = val;
 			}
 			gbhw_ch[3].div_ctr--;
 			if (gbhw_ch[3].div_ctr <= 0) {
@@ -661,6 +666,8 @@ static regparm void gb_sound(long cycles)
 				val = gbhw_ch[3].volume * ((lfsr & 2)-1);
 			}
 		}
+		l_lvl += gbhw_ch[3].l_lvl;
+		r_lvl += gbhw_ch[3].r_lvl;
 
 		l_lvl = (l_lvl * master_volume) / MASTER_VOL_MAX;
 		r_lvl = (r_lvl * master_volume) / MASTER_VOL_MAX;
