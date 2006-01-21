@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.72 2006/01/14 21:11:22 mitch Exp $
+# $Id: configure,v 1.73 2006/01/21 13:32:09 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -34,7 +34,7 @@ if [ -d /usr/ucb ]; then
 fi
 
 ## set version number
-VERSION=0.0.7
+VERSION=0.0.8
 
 ##### begin of subroutines
 
