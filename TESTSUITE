@@ -1,0 +1,104 @@
+<$Id: TESTSUITE,v 1.1 2006/01/22 10:41:05 mitch Exp $>
+
+testsuite for gbsplay releases
+
+legend:
+ [ ]  untested
+ [x]  works
+ [!]  error
+
+pass index  content
+---------------------------------------------------------------
+
+***  1      gbsplay
+
+     1.1      player
+[ ]  1.1.1      check different .gbs for playing problems
+[ ]  1.1.2      check quit
+[ ]  1.1.3      check pause
+[ ]  1.1.4      check channel mutes
+[ ]  1.1.5      check subsong changes
+
+     1.2      commandline
+[ ]  1.2.1      check start_at_subsong
+[ ]  1.2.2      check stop_at_subsong
+     1.2.3      check -E
+[ ]  1.2.3.1      check -Eb
+[ ]  1.2.3.2      check -El
+[ ]  1.2.3.3      check -En
+[ ]  1.2.4      check -f
+[ ]  1.2.5      check -g
+[ ]  1.2.6      check -h
+[ ]  1.2.7      check -l
+     1.2.8      check -o
+[ ]  1.2.8.1       check -o nas
+[ ]  1.2.8.2       check -o oss
+[ ]  1.2.8.3       check -o stdout
+[ ]  1.2.9      check -q
+[ ]  1.2.10     check -r
+[ ]  1.2.11     check -R
+[ ]  1.2.12     check -t
+[ ]  1.2.13     check -T
+[ ]  1.2.14     check -v
+[ ]  1.2.15     check -V
+[ ]  1.2.16     check -z
+[ ]  1.2.17     check -Z
+
+     1.3      i18n
+[ ]  1.3.1      check german translation
+
+
+***  2      gbsinfo
+
+[ ]  2.1      check output
+
+     2.2      commandline
+[ ]  2.2.1      check none
+[ ]  2.2.2      check -h
+[ ]  2.2.3      check -V
+
+     2.3      i18n
+[ ]  2.3.1      check german translation
+
+
+***  3      xmmsgbs
+
+     3.1      player
+[ ]  3.1.1      check playing
+[ ]  3.1.2      check quit
+[ ]  3.1.3      check pause
+[ ]  3.1.4      check subsong changes
+
+     3.2      track info
+[ ]  3.2.1      check display
+[ ]  3.2.2      check next
+[ ]  3.2.3      check prev
+[ ]  3.2.4      check save
+
+
+***  4      build
+[ ]  4.1      check build on i386
+[ ]  4.2      check build on amd_64
+[ ]  4.3      check build on Cygwin
+
+
+***  5      other
+[ ]  5.1      check HISTORY
+[ ]  5.2      check version number in configure
+[ ]  5.3      check for CVS tag
+
+---------------------------------------------------------------
+
+test information:
+
+version: 
+date...: 
+by.....: 
+system.: 
+
+error details:
+
+---------------------------------------------------------------
+
+Run a (partial) test and send this form with a subject like
+"gbsplay testsuite: ..." to <gbsplay-dev@lists.berlios.de>.
