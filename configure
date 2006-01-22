@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.73 2006/01/21 13:32:09 mitch Exp $
+# $Id: configure,v 1.74 2006/01/22 17:29:14 ranmachan Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -17,6 +17,10 @@ EXTRA_SRCS=
 EXTRA_UNINSTALL=
 XMMS_INPUT_PLUGIN_DIR=
 CC="${CC-gcc}" # use gcc by default
+HOSTOS=`uname`
+HOSTARCH=`uname -m`
+TARGETOS="$HOSTOS"
+TARGETARCH="$HOSTARCH"
 
 package=gbsplay
 prefix=/usr/local
@@ -486,7 +490,12 @@ else
     die "error executing '$CC'"
 fi
 
-if [ "$use_regparm" != "no" ]; then
+if [ "$use_regparm" != "no" -a \( \
+     "$TARGETARCH" = "i386" -o    \
+     "$TARGETARCH" = "i486" -o    \
+     "$TARGETARCH" = "i586" -o    \
+     "$TARGETARCH" = "i686" \) -a \
+     "$TARGETOS" = "Linux" ]; then
     cc_check "checking for regparm support" use_regparm <<EOF
 void __attribute__((regparm(3))) foo(void)
 {
