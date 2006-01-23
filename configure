@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.74 2006/01/22 17:29:14 ranmachan Exp $
+# $Id: configure,v 1.75 2006/01/23 21:18:58 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -430,7 +430,7 @@ Optional Features:
   --enable-debug         build with debug code
   --enable-sharedlibgbs  build libgbs as a shared library
 
-Optional Packages:
+Optional Modules:
   --without-xmmsplugin   do not build xmms input plugin
 
 Output Plugins:
