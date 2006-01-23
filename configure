@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.75 2006/01/23 21:18:58 mitch Exp $
+# $Id: configure,v 1.76 2006/01/23 21:21:44 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -429,6 +429,8 @@ Optional Features:
   --disable-i18n         omit libintl support
   --enable-debug         build with debug code
   --enable-sharedlibgbs  build libgbs as a shared library
+  --enable-regparm       build with explicit regparm support
+                         (enabled by default on Linux x86 only)
 
 Optional Modules:
   --without-xmmsplugin   do not build xmms input plugin
