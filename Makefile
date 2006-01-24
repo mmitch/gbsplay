@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.98 2006/01/15 00:05:03 ranmachan Exp $
+# $Id: Makefile,v 1.99 2006/01/24 22:19:33 mitch Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -83,10 +83,39 @@ endif
 
 ifeq ($(use_sharedlibgbs),yes)
 GBSLDFLAGS += -L. -lgbs
+objs += $(objs_libgbspic)
+ifeq ($(cygwin_build),yes)
+EXTRA_INSTALL += install-cyggbs-1.dll
+EXTRA_UNINSTALL += uninstall-cyggbs-1.dll
+
+
+install-cyggbs-1.dll:
+	install -d $(bindir)
+	install -d $(libdir)
+	install -m 644 cyggbs-1.dll $(bindir)/cyggbs-1.dll
+	install -m 644 libgbs.dll.a $(libdir)/libgbs.dll.a
+
+uninstall-cyggbs-1.dll:
+	rm -f $(bindir)/cyggbs-1.dll
+	rm -f $(libdir)/libgbs.dll.a
+	-rmdir -p $(libdir)
+
+
+cyggbs-1.dll: $(objs_libgbspic) libgbs.so.1.ver
+	$(CC) -fpic -shared -Wl,-O1 -Wl,-soname=$@ -Wl,--version-script,libgbs.so.1.ver -o $@ $(objs_libgbspic) $(EXTRA_LDFLAGS)
+
+libgbs.dll.a:
+	dlltool --input-def libgbs.def --dllname cyggbs-1.dll --output-lib libgbs.dll.a -k
+
+libgbs: cyggbs-1.dll libgbs.dll.a
+	touch libgbs
+
+libgbspic: cyggbs-1.dll libgbs.dll.a
+	touch libgbspic
+else
 EXTRA_INSTALL += install-libgbs.so.1
 EXTRA_UNINSTALL += uninstall-libgbs.so.1
 
-objs += $(objs_libgbspic)
 
 install-libgbs.so.1:
 	install -d $(libdir)
@@ -106,6 +135,7 @@ libgbs: libgbs.so.1
 
 libgbspic: libgbs.so.1
 	touch libgbspic
+endif
 else
 objs += $(objs_libgbs)
 objs_gbsplay += libgbs.a
