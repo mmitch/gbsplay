@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.76 2006/01/23 21:21:44 mitch Exp $
+# $Id: configure,v 1.77 2006/01/24 20:41:35 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -464,6 +464,19 @@ if [ -n "$targetalias" -a "$targetalias" != "$hostalias" ]; then
 	die "cross-compiling is not yet supported."
 fi
 
+## on Linux x86, regparm defaults to on
+
+if [ \( "$TARGETARCH" = "i386" -o    \
+        "$TARGETARCH" = "i486" -o    \
+        "$TARGETARCH" = "i586" -o    \
+        "$TARGETARCH" = "i686" \) -a \
+        "$TARGETOS" = "Linux" ]; then
+    setdefault use_regparm yes
+else
+    setdefault use_regparm no
+fi
+
+
 ## check for C compiler
 
 echo -n "checking for working compiler:  "
@@ -492,12 +505,7 @@ else
     die "error executing '$CC'"
 fi
 
-if [ "$use_regparm" != "no" -a \( \
-     "$TARGETARCH" = "i386" -o    \
-     "$TARGETARCH" = "i486" -o    \
-     "$TARGETARCH" = "i586" -o    \
-     "$TARGETARCH" = "i686" \) -a \
-     "$TARGETOS" = "Linux" ]; then
+if [ "$use_regparm" != "no" ]; then
     cc_check "checking for regparm support" use_regparm <<EOF
 void __attribute__((regparm(3))) foo(void)
 {
