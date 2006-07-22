@@ -1,18 +1,17 @@
 #!/bin/sh
-# $Id: configure,v 1.77 2006/01/24 20:41:35 mitch Exp $
+# $Id: configure,v 1.78 2006/07/22 16:26:49 ranmachan Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
 # 2003-2006 (C) by Christian Garbs <mitch@cgarbs.de>
 #                  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
 # Licensed under GNU GPL.
+#
 
 ## initialize variables
 
 EXTRA_ALL=
-EXTRA_CFLAGS="$CFLAGS"
 EXTRA_INSTALL=
-EXTRA_LDFLAGS="$LDFLAGS"
 EXTRA_SRCS=
 EXTRA_UNINSTALL=
 XMMS_INPUT_PLUGIN_DIR=
@@ -87,7 +86,7 @@ find_lib()
     eval "val=\"\$lib${lib}_path\""
     if [ ! -z "$val" ]; then
         return 0
-    else 
+    else
         for dir in "" $libdirs; do
             msg="looking for -l$lib"
             flags="-l$lib"
@@ -122,37 +121,67 @@ remove_dupes()
     echo "$newflags"
 }
 
+append_nodupe()
+{
+    varname="$1"
+    dupe=0
+
+    while [ -n "$2" ]; do
+        eval "flags=\"\$$varname\""
+        append="$2"
+
+        if [ -n "$flags" ]; then
+            for i in $flags; do
+                test "$i" = "$append" && dupe=1
+            done
+        fi
+
+        if [ $dupe -eq 0 ]; then
+            if [ -z "$flags" ]; then
+                eval "${varname}=\"$append\""
+            else
+                eval "${varname}=\"$flags $append\""
+            fi
+        fi
+        shift
+    done
+}
+
 ## check for needed extra libraries and library paths for a lib
 check_libs()
 {
-    INFILE="$TEMPDIR/cc.c"
-    OUTFILE="$TEMPDIR/cc"
+    INFILE="$TEMPDIR/cl.c"
+    OUTFILE="$TEMPDIR/cl"
     checklib="$1"
     extralibs="$2"
     extralibdirs="$3"
     name="$4"
     extraflags="$5"
+    msg="${6--l$checklib}"
+    cflags="$CFLAGS $LDFLAGS"
+
+    cat > "$INFILE"
+
+    cc_check "checking if we need additional libs for $msg" "" "$extraflags" "no" "yes" < "$INFILE"
+    test $? -eq 0 && return 0
 
     for extralib in $extralibs; do
         find_lib $extralib "$extralibdirs"
         test $? -ne 0 && return 1
         eval "val=\"\$lib${extralib}_path\""
         if [ "$val" != " " ]; then
-             extraflags="$extraflags -L$val"
+            append_nodupe extraflags "-L$val"
         fi
     done
-    extraflags=`remove_dupes "$extraflags"`
 
-    cat > "$INFILE"
-    minerrs=`$CC -o "$OUTFILE" "$INFILE" -l$checklib $extraflags 2>&1 | wc -l`
+    minerrs=`$CC -o "$OUTFILE" "$INFILE" $cflags -l$checklib $extraflags 2>&1 | wc -l`
     for extralib in $extralibs; do
-        errs=`$CC -o "$OUTFILE" "$INFILE" -l$checklib -l$extralib $extraflags 2>&1 | wc -l`
+        errs=`$CC -o "$OUTFILE" "$INFILE" $cflags -l$checklib -l$extralib $extraflags 2>&1 | wc -l`
         if [ $errs -lt $minerrs ]; then
             minerrs=$errs
-            extraflags="$extraflags -l$extralib"
+            append_nodupe extraflags "-l$extralib"
         fi
     done
-    extraflags=`remove_dupes "$extraflags"`
 
     if [ $minerrs -ne 0 ]; then
         return 1
@@ -169,7 +198,7 @@ cc_check()
     OUTFILE="$TEMPDIR/cc"
     name="$1"
     varname="$2"
-    flags="$3"
+    flags="$CFLAGS $LDFLAGS $3"
     okmsg="${4-ok}"
     errmsg="${5-not found}"
 
@@ -427,6 +456,8 @@ Installation directories:
 
 Optional Features:
   --disable-i18n         omit libintl support
+  --disable-regparm      do not use register arguments on x86
+  --disable-ssp          disable stack smashing protection
   --enable-debug         build with debug code
   --enable-sharedlibgbs  build libgbs as a shared library
   --enable-regparm       build with explicit regparm support
@@ -443,7 +474,7 @@ EOF
 	exit $1
 }
 
-OPTS="build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_debug use_stdout use_devdsp use_nas"
+OPTS="build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_ssp use_debug use_stdout use_devdsp use_nas"
 
 ## load user config
 if [ -f config.conf ]; then
@@ -488,7 +519,7 @@ int main(char argc, char **argv) {
     return 0;
 }
 EOF
-$CC -o "$OUTFILE" "$INFILE"
+$CC -o "$OUTFILE" "$INFILE" $CFLAGS $LDFLAGS
 RESULT=$?
 if [ $RESULT -eq 0 ]; then
     if [ -s "$OUTFILE" ]; then
@@ -516,6 +547,20 @@ int main(int argc, char **argv)
 	return 0;
 }
 EOF
+fi
+
+if [ "$use_ssp" != "no" ]; then
+    cc_check "checking for -fstack-protector support" use_ssp "-fstack-protector" <<EOF
+int main(int argc, char **argv)
+{
+    return 0;
+}
+EOF
+    if [ $? -eq 0 ]; then
+        append_nodupe CFLAGS "-fstack-protector"
+        append_nodupe LDFLAGS "-fstack-protector"
+        append_nodupe CFLAGS "--param=ssp-buffer-size=4"
+    fi
 fi
 
 # Check CVS time
@@ -565,7 +610,7 @@ EOF
     fi
     if [ $retval1 -eq 0 -a $retval2 -eq 0 ]; then
         if [ "$include_audio_audiolib_h_path" != " " ]; then
-            EXTRA_CFLAGS="$EXTRA_CFLAGS -I$include_audio_audiolib_h_path"
+            append_nodupe CFLAGS "-I$include_audio_audiolib_h_path"
         fi
         use_nas=yes
     fi
@@ -591,11 +636,11 @@ if [ "$use_i18n" != no ]; then
     use_i18n=no
     if [ "$have_locale_h" = "yes" -a "$have_libintl_h" = "yes" ]; then
         if [ "$include_locale_h_path" != " " ]; then
-            EXTRA_CFLAGS="$EXTRA_CFLAGS -I$include_locale_h_path"
+            append_nodupe CFLAGS "-I$include_locale_h_path"
             EXTRA_I18NFLAGS="$EXTRA_I18NFLAGS -I$include_locale_h_path"
         fi
         if [ "$include_libintl_h_path" != " " ]; then
-            EXTRA_CFLAGS="$EXTRA_CFLAGS -I$include_libintl_h_path"
+            append_nodupe CFLAGS "-I$include_libintl_h_path"
             EXTRA_I18NFLAGS="$EXTRA_I18NFLAGS -I$include_libintl_h_path"
         fi
         use_i18n=yes
@@ -603,7 +648,7 @@ if [ "$use_i18n" != no ]; then
 fi
 
 if [ "$use_i18n" = "yes" ]; then
-    check_libs c "intl" "/usr/local/lib" "" "$EXTRA_I18NFLAGS" <<EOF
+    check_libs c "intl" "/usr/local/lib" "" "$EXTRA_I18NFLAGS" "i18n" <<EOF
 #include <libintl.h>
 int main(int argc, char **argv)
 {
@@ -612,7 +657,7 @@ int main(int argc, char **argv)
 }
 EOF
     if [ $? -eq 0 -a "$libc_flags" != "" ]; then
-        EXTRA_LDFLAGS="$EXTRA_LDFLAGS $libc_flags"
+        append_nodupe LDFLAGS "$libc_flags"
     fi
 fi
 
@@ -698,7 +743,7 @@ fi
 ## can XMMS be built?
 
 if [ "$build_xmmsplugin" != "no" -a "$GLIB_CFLAGS" -a "$XMMS_CFLAGS" -a "XMMS_INPUT_PLUGIN_DIR" -a "$PTHREAD" ]; then
-    EXTRA_CFLAGS="$EXTRA_CFLAGS $GLIB_CFLAGS $XMMS_CFLAGS"
+    append_nodupe CFLAGS $GLIB_CFLAGS $XMMS_CFLAGS
     EXTRA_INSTALL="$EXTRA_INSTALL install-gbsxmms.so"
     EXTRA_UNINSTALL="$EXTRA_UNINSTALL uninstall-gbsxmms.so"
     build_xmmsplugin=yes
@@ -729,19 +774,21 @@ printoptional features use
 ARCH=`uname -m`
 case $ARCH in
 	i?86)
-	EXTRA_CFLAGS="$EXTRA_CFLAGS -Os -pipe -march=$ARCH"
+	append_nodupe CFLAGS -Os -pipe -march=$ARCH
 	;;
 	*)
-	EXTRA_CFLAGS="$EXTRA_CFLAGS -Os -pipe"
+	append_nodupe CFLAGS -Os -pipe
 	;;
 esac
 
 if [ "$use_debug" = "yes" ]; then
-	EXTRA_CFLAGS="$EXTRA_CFLAGS -g3"
+	append_nodupe CFLAGS -g3
 else
-	EXTRA_CFLAGS="$EXTRA_CFLAGS -fomit-frame-pointer"
+	append_nodupe CFLAGS -fomit-frame-pointer
 fi
 
+EXTRA_CFLAGS="$CFLAGS"
+EXTRA_LDFLAGS="$LDFLAGS"
 echo "EXTRA_CFLAGS=$EXTRA_CFLAGS"
 echo "EXTRA_LDFLAGS=$EXTRA_LDFLAGS"
 
@@ -800,3 +847,5 @@ __EOF__
 
 rm -rf "$TEMPDIR"
 test -s $ERRORLOG || rm $ERRORLOG
+
+# vim:set ts=4 et:
