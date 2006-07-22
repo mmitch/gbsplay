@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.99 2006/01/24 22:19:33 mitch Exp $
+# $Id: Makefile,v 1.100 2006/07/22 16:32:59 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -15,7 +15,7 @@ mandir      := $(prefix)/man
 docdir      := $(prefix)/share/doc/gbsplay
 localedir   := $(prefix)/share/locale
 
-GBSCFLAGS  := -Wall
+GBSCFLAGS  := -Wall -fsigned-char -D_FORTIFY_SOURCE=2
 GBSLDFLAGS := -Wl,-O1
 GBSPLAYLDFLAGS :=
 
