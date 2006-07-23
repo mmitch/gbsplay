@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.46 2006/01/15 00:01:29 ranmachan Exp $
+/* $Id: gbhw.c,v 1.47 2006/07/23 10:58:45 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -63,7 +63,7 @@ static uint32_t lfsr = 0xffffffff;
 
 #define SOUND_DIV_MULT 0x10000LL
 
-static long long sound_div_tc;
+static long long sound_div_tc = 0;
 static const long main_div_tc = 32;
 static long main_div;
 static const long sweep_div_tc = 256;
@@ -691,6 +691,13 @@ regparm void gbhw_setcallback(gbhw_callback_fn fn, void *priv)
 	callbackpriv = priv;
 }
 
+static regparm void gbhw_impbuf_reset(struct gbhw_buffer *impbuf)
+{
+	assert(sound_div_tc != 0);
+	impbuf->cycles = sound_div_tc * IMPULSE_WIDTH/2 / SOUND_DIV_MULT;
+	memset(impbuf->data, 0, impbuf->bytes);
+}
+
 regparm void gbhw_setbuffer(struct gbhw_buffer *buffer)
 {
 	soundbuf = buffer;
@@ -698,10 +705,10 @@ regparm void gbhw_setbuffer(struct gbhw_buffer *buffer)
 
 	if (impbuf) free(impbuf);
 	impbuf = malloc(sizeof(*impbuf) + (soundbuf->samples + IMPULSE_WIDTH + 1) * 4);
-	memset(impbuf, 0, sizeof(*impbuf));
 	impbuf->data = (void*)(impbuf+1);
 	impbuf->samples = soundbuf->samples + IMPULSE_WIDTH + 1;
 	impbuf->bytes = impbuf->samples * 4;
+	gbhw_impbuf_reset(impbuf);
 }
 
 regparm void gbhw_setrate(long rate)
@@ -730,6 +737,7 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 {
 	long i;
 
+	if (impbuf) gbhw_impbuf_reset(impbuf);
 	rom = rombuf;
 	lastbank = ((size + 0x3fff) / 0x4000) - 1;
 	rombank = 1;
