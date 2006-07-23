@@ -1,4 +1,4 @@
-/* $Id: common.h,v 1.11 2005/06/30 00:55:56 ranmachan Exp $
+/* $Id: common.h,v 1.12 2006/07/23 13:28:46 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -8,8 +8,12 @@
 
 #ifndef _COMMON_H_
 #define _COMMON_H_
+/*@-onlytrans@*/
 
 #include "config.h"
+#include <stdio.h>
+#include <errno.h>
+#include <string.h>
 
 #ifndef true
 #define true (0==0)
@@ -32,7 +36,7 @@
 
 #  if GBS_PRESERVE_TEXTDOMAIN == 1
 
-static inline char* _(const char *msgid)
+static /*@dependent@*/ inline char* _(const char *msgid)
 {
 	char *olddomain = textdomain(NULL);
 	char *olddir = bindtextdomain(olddomain, NULL);
@@ -47,13 +51,22 @@ static inline char* _(const char *msgid)
 
 #  else
 
-#    define _(x) gettext(x)
+static inline /*@dependent@*/ char* _(const char *msgid)
+{
+	return gettext(msgid);
+}
 
 static inline void i18n_init(void)
 {
-	setlocale(LC_ALL, "");
-	bindtextdomain(TEXTDOMAIN, LOCALE_PREFIX);
-	textdomain(TEXTDOMAIN);
+	if (setlocale(LC_ALL, "") == NULL) {
+		fprintf(stderr, "setlocale() failed\n");
+	}
+	if (bindtextdomain(TEXTDOMAIN, LOCALE_PREFIX) == NULL) {
+		fprintf(stderr, "bindtextdomain() failed: %s\n", strerror(errno));
+	}
+	if (textdomain(TEXTDOMAIN) == NULL) {
+		fprintf(stderr, "textdomain() failed: %s\n", strerror(errno));
+	}
 }
 
 #  endif
@@ -108,4 +121,5 @@ static inline long is_be_machine() {
 
 #endif
 
+/*@=onlytrans@*/
 #endif

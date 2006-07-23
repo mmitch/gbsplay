@@ -1,4 +1,4 @@
-/* $Id: cfgparser.c,v 1.15 2005/08/06 21:33:16 ranmachan Exp $
+/* $Id: cfgparser.c,v 1.16 2006/07/23 13:28:46 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -13,19 +13,22 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include <string.h>
+#include <assert.h>
 
 #include "common.h"
 #include "cfgparser.h"
 #include "plugout.h"
 
 static long cfg_line, cfg_char;
-static FILE *cfg_file;
+static /*@null@*/ FILE *cfg_file;
 
 static long nextchar_state;
 
 static regparm char nextchar(void)
 {
 	long c;
+
+	assert(cfg_file != NULL);
 
 	do {
 		if ((c = fgetc(cfg_file)) == EOF) return 0;
@@ -50,7 +53,7 @@ static regparm char nextchar(void)
 		}
 	} while (nextchar_state != 0);
 
-	return c;
+	return (char)c;
 }
 
 static long state;
@@ -146,7 +149,7 @@ regparm void cfg_parse(const char *fname, const struct cfg_option *options)
 	c = nextchar();
 
 	do {
-		char option[200];
+		char option[200] = "";
 		unsigned long n;
 		switch (state) {
 		case 0:
@@ -197,7 +200,7 @@ regparm void cfg_parse(const char *fname, const struct cfg_option *options)
 		}
 	} while (c != 0);
 
-	fclose(cfg_file);
+	(void)fclose(cfg_file);
 }
 
 regparm char* get_userconfig(const char* cfgfile)
@@ -210,7 +213,11 @@ regparm char* get_userconfig(const char* cfgfile)
 
 	length  = strlen(homedir) + strlen(cfgfile) + 2;
 	usercfg = malloc(length);
-	snprintf(usercfg, length, "%s/%s", homedir, cfgfile);
+	if (usercfg == NULL) {
+		fprintf(stderr, "%s\n", _("Memory allocation failed!"));
+		return NULL;
+	}
+	(void)snprintf(usercfg, length, "%s/%s", homedir, cfgfile);
 
 	return usercfg;
 }

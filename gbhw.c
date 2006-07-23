@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.47 2006/07/23 10:58:45 ranmachan Exp $
+/* $Id: gbhw.c,v 1.48 2006/07/23 13:28:46 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -48,9 +48,9 @@ static const long msec_cycles = GBHW_CLOCK/1000;
 static long pause_output = 0;
 
 static gbhw_callback_fn callback;
-static void *callbackpriv;
-static struct gbhw_buffer *soundbuf = NULL; /* externally visible output buffer */
-static struct gbhw_buffer *impbuf = NULL;   /* internal impulse output buffer */
+static /*@null@*/ /*@dependent@*/ void *callbackpriv;
+static /*@null@*/ /*@dependent@*/ struct gbhw_buffer *soundbuf = NULL; /* externally visible output buffer */
+static /*@null@*/ /*@only@*/ struct gbhw_buffer *impbuf = NULL;   /* internal impulse output buffer */
 
 #define TAP1_15		0x4000;
 #define TAP2_15		0x2000;
@@ -356,7 +356,7 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 		case 0xff1d:
 		case 0xff1e:
 			{
-				unsigned long div = ioregs[0x13 + 5*chn];
+				long div = ioregs[0x13 + 5*chn];
 
 				div |= ((long)ioregs[0x14 + 5*chn] & 7) << 8;
 				gbhw_ch[chn].div_tc = 2048 - div;
@@ -541,6 +541,9 @@ static regparm void gb_flush_buffer(void)
 	long overlap;
 	long l_smpl, r_smpl;
 
+	assert(soundbuf != NULL);
+	assert(impbuf != NULL);
+
 	/* integrate buffer */
 	l_smpl = soundbuf->l_lvl;
 	r_smpl = soundbuf->r_lvl;
@@ -571,12 +574,15 @@ static regparm void gb_flush_buffer(void)
 
 static regparm void gb_change_level(long l_ofs, long r_ofs)
 {
-	long pos = impbuf->cycles * SOUND_DIV_MULT / sound_div_tc;
-	long imp_idx = (impbuf->cycles*IMPULSE_RES*SOUND_DIV_MULT / sound_div_tc) % IMPULSE_RES;
+	long pos;
+	long imp_idx;
 	long imp_l = -IMPULSE_WIDTH/2;
 	long imp_r = IMPULSE_WIDTH/2;
 	long i;
 
+	assert(impbuf != NULL);
+	pos = (long)(impbuf->cycles * SOUND_DIV_MULT / sound_div_tc);
+	imp_idx = (long)(impbuf->cycles*IMPULSE_RES*SOUND_DIV_MULT / sound_div_tc) % IMPULSE_RES;
 	assert(pos + imp_r < impbuf->samples);
 	assert(pos + imp_l >= 0);
 
@@ -594,8 +600,10 @@ static regparm void gb_change_level(long l_ofs, long r_ofs)
 static regparm void gb_sound(long cycles)
 {
 	long i;
-	int l_lvl = 0, r_lvl = 0;
-	static int old_l = 0, old_r = 0;
+	long l_lvl = 0, r_lvl = 0;
+	static long old_l = 0, old_r = 0;
+
+	assert(impbuf != NULL);
 
 	if (gbhw_ch[2].master) for (i=0; i<cycles; i++) {
 		gbhw_ch[2].div_ctr--;
@@ -694,7 +702,7 @@ regparm void gbhw_setcallback(gbhw_callback_fn fn, void *priv)
 static regparm void gbhw_impbuf_reset(struct gbhw_buffer *impbuf)
 {
 	assert(sound_div_tc != 0);
-	impbuf->cycles = sound_div_tc * IMPULSE_WIDTH/2 / SOUND_DIV_MULT;
+	impbuf->cycles = (long)(sound_div_tc * IMPULSE_WIDTH/2 / SOUND_DIV_MULT);
 	memset(impbuf->data, 0, impbuf->bytes);
 }
 
@@ -705,6 +713,11 @@ regparm void gbhw_setbuffer(struct gbhw_buffer *buffer)
 
 	if (impbuf) free(impbuf);
 	impbuf = malloc(sizeof(*impbuf) + (soundbuf->samples + IMPULSE_WIDTH + 1) * 4);
+	if (impbuf == NULL) {
+		fprintf(stderr, "%s", _("Memory allocation failed!\n"));
+		return;
+	}
+	memset(impbuf, 0, sizeof(*impbuf));
 	impbuf->data = (void*)(impbuf+1);
 	impbuf->samples = soundbuf->samples + IMPULSE_WIDTH + 1;
 	impbuf->bytes = impbuf->samples * 4;
@@ -775,7 +788,7 @@ regparm long gbhw_step(long time_to_work)
 	long cycles_total = 0;
 
 	if (pause_output) {
-		usleep(time_to_work*1000);
+		(void)usleep(time_to_work*1000);
 		return 0;
 	}
 

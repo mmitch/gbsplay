@@ -1,4 +1,4 @@
-/* $Id: gbhw.h,v 1.17 2006/01/15 00:01:29 ranmachan Exp $
+/* $Id: gbhw.h,v 1.18 2006/07/23 13:28:46 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -15,7 +15,7 @@
 #define GBHW_CLOCK 4194304
 
 struct gbhw_buffer {
-	int16_t *data;
+	/*@dependent@*/ int16_t *data;
 	long pos;
 	long l_lvl;
 	long r_lvl;
@@ -49,11 +49,11 @@ struct gbhw_channel {
 
 extern struct gbhw_channel gbhw_ch[4];
 
-typedef regparm void (*gbhw_callback_fn)(struct gbhw_buffer *buf, void *priv);
+typedef regparm void (*gbhw_callback_fn)(/*@temp@*/ struct gbhw_buffer *buf, /*@temp@*/ void *priv);
 
-regparm void gbhw_setcallback(gbhw_callback_fn fn, void *priv);
+regparm void gbhw_setcallback(/*@dependent@*/ gbhw_callback_fn fn, /*@dependent@*/ void *priv);
 regparm void gbhw_setrate(long rate);
-regparm void gbhw_setbuffer(struct gbhw_buffer *buffer);
+regparm void gbhw_setbuffer(/*@dependent@*/ struct gbhw_buffer *buffer);
 regparm void gbhw_init(uint8_t *rombuf, uint32_t size);
 regparm void gbhw_pause(long new_pause);
 regparm void gbhw_master_fade(long speed, long dstvol);

@@ -1,4 +1,4 @@
-/* $Id: gbs.h,v 1.12 2005/07/15 20:19:18 ranmachan Exp $
+/* $Id: gbs.h,v 1.13 2006/07/23 13:28:46 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -59,12 +59,12 @@ struct gbs {
 	void *nextsubsong_cb_priv;
 };
 
-regparm struct gbs *gbs_open(char *name);
+regparm /*@only@*/ /*@null@*/ struct gbs *gbs_open(char *name);
 regparm long gbs_init(struct gbs *gbs, long subsong);
 regparm long gbs_step(struct gbs *gbs, long time_to_work);
 regparm void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv);
 regparm void gbs_printinfo(struct gbs *gbs, long verbose);
-regparm void gbs_close(struct gbs *gbs);
+regparm void gbs_close(/*@only@*/ /*@out@*/ struct gbs *gbs);
 regparm long gbs_write(struct gbs *gbs, char *name, long version);
 
 #endif

@@ -1,4 +1,4 @@
-/* $Id: gbsinfo.c,v 1.9 2005/06/30 00:55:57 ranmachan Exp $
+/* $Id: gbsinfo.c,v 1.10 2006/07/23 13:28:46 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -34,7 +34,7 @@ void usage(long exitcode)
 
 void version(void)
 {
-	puts("gbsplay " GBS_VERSION);
+	(void)puts("gbsplay " GBS_VERSION);
 	exit(0);
 }
 
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
                 usage(1);
         }
 
-	if ((gbs = gbs_open(argv[0])) == NULL) exit(1);
+	if ((gbs = gbs_open(argv[0])) == NULL) exit(EXIT_FAILURE);
 	gbs_printinfo(gbs, 1);
 	gbs_close(gbs);
 

@@ -1,4 +1,4 @@
-/* $Id: gbcpu.h,v 1.11 2005/06/30 00:55:56 ranmachan Exp $
+/* $Id: gbcpu.h,v 1.12 2006/07/23 13:28:46 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -43,7 +43,7 @@ static inline void foo(void)
 #define DPRINTF(...) foo()
 #define DEB(x) foo()
 */
-#define DPRINTF(...)
+#define DPRINTF(...) do { } while (0)
 #define DEB(x)
 #define OPINFO(name, fn) {fn}
 

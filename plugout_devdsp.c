@@ -1,4 +1,4 @@
-/* $Id: plugout_devdsp.c,v 1.10 2005/08/06 21:33:16 ranmachan Exp $
+/* $Id: plugout_devdsp.c,v 1.11 2006/07/23 13:28:46 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -76,7 +76,7 @@ static ssize_t regparm devdsp_write(const void *buf, size_t count)
 
 static void regparm devdsp_close()
 {
-	close(fd);
+	(void)close(fd);
 }
 
 const struct output_plugin plugout_devdsp = {

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.101 2006/07/23 11:02:17 ranmachan Exp $
+# $Id: Makefile,v 1.102 2006/07/23 13:28:46 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -15,6 +15,28 @@ mandir      := $(prefix)/man
 docdir      := $(prefix)/share/doc/gbsplay
 localedir   := $(prefix)/share/locale
 
+SPLINT := splint
+
+SPLINTFLAGS := \
+	+quiet \
+	-exportlocal \
+	-unrecog \
+	-immediatetrans \
+	-fullinitblock \
+	-namechecks \
+	-preproc \
+	-fcnuse \
+	-predboolint \
+	-boolops \
+	-formatconst \
+	-type \
+	+unixlib \
+	+boolint \
+	+matchanyintegral \
+	+charint \
+	-predboolothers \
+	-shiftnegative \
+	-shiftimplementation
 GBSCFLAGS  := -Wall -fsigned-char -D_FORTIFY_SOURCE=2
 GBSLDFLAGS := -Wl,-O1
 GBSPLAYLDFLAGS :=
@@ -301,6 +323,7 @@ gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 	@$(CC) $(GBSCFLAGS) -fpic -c -o $@ $<
 .c.o:
 	@echo CC $< -o $@
+	@(test -x "`which $(SPLINT)`" && $(SPLINT) $(SPLINTFLAGS) $<) || true
 	@$(CC) $(GBSCFLAGS) -c -o $@ $<
 .c.i:
 	$(CC) -E $(GBSCFLAGS) -o $@ $<

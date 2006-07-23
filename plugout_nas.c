@@ -1,4 +1,4 @@
-/* $Id: plugout_nas.c,v 1.13 2005/08/06 21:33:16 ranmachan Exp $
+/* $Id: plugout_nas.c,v 1.14 2006/07/23 13:28:46 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -12,6 +12,10 @@
  * by me (Tobias Diedrich), I'd dare to say the only function left from
  * the xmms code is nas_find_device, but I did not check that. :-)
  */
+
+/*@-nullpass@*/
+/*@-onlytrans@*/
+/*@-uniondef@*/
 
 #include "common.h"
 
@@ -27,8 +31,8 @@
 #define NAS_BUFFER_SAMPLES 8192
 
 /* global variables */
-static AuServer      *nas_server;
-static AuFlowID       nas_flow;
+static /*@null@*/ AuServer *nas_server;
+static AuFlowID             nas_flow;
 
 /* forward function declarations */
 static long    regparm nas_open(enum plugout_endian endian, long rate);
@@ -52,7 +56,7 @@ const struct output_plugin plugout_nas = {
  * @param status  NAS status code to convert
  * @return  Pointer to static buffer with the resulting error message
  */
-static char regparm *nas_error(AuStatus status)
+static regparm  /*@temp@*/ char *nas_error(AuStatus status)
 {
 	static char s[100];
 
@@ -91,10 +95,10 @@ static AuDeviceID regparm nas_find_device(AuServer *aud)
  */
 static long regparm nas_open(enum plugout_endian endian, long rate)
 {
-	char *text;
+	char *text = "";
 	unsigned char nas_format;
 	AuElement nas_elements[3];
-	AuStatus  status;
+	AuStatus  status = AuBadValue;
 	AuDeviceID nas_device;
 
 	switch (endian) {
@@ -185,7 +189,7 @@ static ssize_t regparm nas_write(const void *buf, size_t count)
 	long numwritten = 0;
 
 	while (numwritten < count) {
-		AuStatus as;
+		AuStatus as = AuBadValue;
 		long writelen = count - numwritten;
 
 		if (writelen > maxlen) writelen = maxlen;
@@ -201,14 +205,14 @@ static ssize_t regparm nas_write(const void *buf, size_t count)
 			 * Does not fit in remaining buffer space,
 			 * wait a bit and try again
 			 */
-			usleep(1000);
+			(void)usleep(1000);
 			continue;
 		}
 		if (as != AuSuccess) {
 			/*
 			 * Unexpected error happened
 			 */
-			nas_error(as);
+			fprintf(stderr, "%s\n", nas_error(as));
 			break;
 		}
 		numwritten += writelen;
