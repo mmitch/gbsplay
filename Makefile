@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.102 2006/07/23 13:28:46 ranmachan Exp $
+# $Id: Makefile,v 1.103 2006/11/18 14:34:51 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -38,7 +38,7 @@ SPLINTFLAGS := \
 	-shiftnegative \
 	-shiftimplementation
 GBSCFLAGS  := -Wall -fsigned-char -D_FORTIFY_SOURCE=2
-GBSLDFLAGS := -Wl,-O1
+GBSLDFLAGS := -Wl,-O1 -lm
 GBSPLAYLDFLAGS :=
 
 ifneq ($(noincludes),yes)
@@ -76,8 +76,8 @@ examples       := examples/nightmode.gbs examples/gbsplayrc_sample
 mans           := gbsplay.1    gbsinfo.1    gbsplayrc.5
 mans_src       := gbsplay.in.1 gbsinfo.in.1 gbsplayrc.in.5
 
-objs_libgbspic := gbcpu.lo gbhw.lo gbs.lo cfgparser.lo crc32.lo
-objs_libgbs    := gbcpu.o  gbhw.o  gbs.o  cfgparser.o  crc32.o
+objs_libgbspic := gbcpu.lo gbhw.lo gbs.lo cfgparser.lo crc32.lo impulsegen.lo
+objs_libgbs    := gbcpu.o  gbhw.o  gbs.o  cfgparser.o  crc32.o  impulsegen.o
 objs_gbsplay   := gbsplay.o util.o plugout.o
 objs_gbsinfo   := gbsinfo.o
 objs_gbsxmms   := gbsxmms.lo
@@ -282,7 +282,7 @@ TESTOPTS := -r 44100 -t 30 -f 0 -g 0 -T 0
 
 test: gbsplay
 	@MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH ./gbsplay -E b -o stdout $(TESTOPTS) examples/nightmode.gbs 1 | md5sum | cut -f1 -d\ `; \
-	EXPECT="2d5607a5f285b9446befc62d0c0572ab"; \
+	EXPECT="2afcb31f848327951a27293b471f227a"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "Bigendian output ok"; \
 	else \
@@ -292,7 +292,7 @@ test: gbsplay
 		exit 1; \
 	fi
 	@MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH ./gbsplay -E l -o stdout $(TESTOPTS) examples/nightmode.gbs 1 | md5sum | cut -f1 -d\ `; \
-	EXPECT="cd3023b3b42fcc9bec7298f6a87a3493"; \
+	EXPECT="3e89143f93bdd432ff9c824ce0a468c2"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "Littleendian output ok"; \
 	else \
