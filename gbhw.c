@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.49 2006/11/18 14:34:52 ranmachan Exp $
+/* $Id: gbhw.c,v 1.50 2006/11/18 14:43:36 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -74,6 +74,7 @@ static long ch3pos;
 
 static long impulse_n_shift = 7;
 static long impulse_w_shift = 5;
+static double impulse_cutoff = 1.0;
 
 static short *base_impulse = NULL;
 
@@ -615,7 +616,7 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 
 	if (base_impulse)
 		free(base_impulse);
-	base_impulse = gen_impulsetab(impulse_w_shift, impulse_n_shift, 1.0);
+	base_impulse = gen_impulsetab(impulse_w_shift, impulse_n_shift, impulse_cutoff);
 }
 
 /**
