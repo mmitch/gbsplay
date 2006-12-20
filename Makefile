@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.103 2006/11/18 14:34:51 ranmachan Exp $
+# $Id: Makefile,v 1.104 2006/12/20 20:51:28 ranmachan Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -85,6 +85,10 @@ objs_gbsxmms   := gbsxmms.lo
 # gbsplay output plugins
 ifeq ($(plugout_devdsp),yes)
 objs_gbsplay += plugout_devdsp.o
+endif
+ifeq ($(plugout_alsa),yes)
+objs_gbsplay += plugout_alsa.o
+GBSPLAYLDFLAGS += -lasound $(libaudio_flags)
 endif
 ifeq ($(plugout_nas),yes)
 objs_gbsplay += plugout_nas.o

@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.78 2006/07/22 16:26:49 ranmachan Exp $
+# $Id: configure,v 1.79 2006/12/20 20:51:28 ranmachan Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -468,13 +468,14 @@ Optional Modules:
 
 Output Plugins:
   --disable-devdsp       omit /dev/dsp sound output plugin
+  --disable-alsa         omit ALSA sound output plugin
   --disable-stdout       omit stdout file writer plugin
   --disable-nas          omit NAS sound output plugin
 EOF
 	exit $1
 }
 
-OPTS="build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_ssp use_debug use_stdout use_devdsp use_nas"
+OPTS="build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_ssp use_debug use_stdout use_devdsp use_alsa use_nas"
 
 ## load user config
 if [ -f config.conf ]; then
@@ -596,6 +597,11 @@ need_include inttypes.h
 if [ "$use_devdsp" != no ]; then
     check_include sys/soundcard.h
     use_devdsp=$have_sys_soundcard_h
+fi
+
+if [ "$use_alsa" != no ]; then
+    check_include alsa/asoundlib.h
+    use_alsa=$have_alsa_asoundlib_h
 fi
 
 if [ "$use_nas" != no ]; then
@@ -824,6 +830,7 @@ cygwin_build
 libaudio_flags
 __EOF__
     echo plugout_devdsp := $use_devdsp
+    echo plugout_alsa := $use_alsa
     echo plugout_nas := $use_nas
     echo plugout_stdout := $use_stdout
 ) > config.mk
@@ -833,6 +840,7 @@ __EOF__
     echo "#define LOCALE_PREFIX \"$localedir\""
     echo "#define SYSCONF_PREFIX \"$sysconfdir\""
     plugout_x DEVDSP
+    plugout_x ALSA
     plugout_x NAS
     plugout_x STDOUT
     use_x I18N
