@@ -1,15 +1,15 @@
-# $Id: de.po,v 1.19 2006/01/13 22:36:16 mitch Exp $
+# $Id: de.po,v 1.20 2008/06/20 20:37:16 mitch Exp $
 # German translations for gbsplay.
-# Copyright (C) 2003-2006 Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
-#                         Christian Garbs <mitch@cgarbs.de>
+# Copyright (C) 2003-2006,2008 Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+# 			     Christian Garbs <mitch@cgarbs.de>
 # This file is distributed under GNU GPL.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-01-13 23:07+0100\n"
-"PO-Revision-Date: 2006-01-13 23:26+0100\n"
+"POT-Creation-Date: 2008-06-20 22:20+0200\n"
+"PO-Revision-Date: 2008-06-20 22:31+0200\n"
 "Last-Translator: Christian Garbs <mitch@cgarbs.de>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -21,9 +21,7 @@ msgstr ""
 msgid ""
 "\n"
 "Caught signal %d, exiting...\n"
-msgstr ""
-"\n"
-"Signal %d abgefangen, beende Ausführung...\n"
+msgstr "\nSignal %d abgefangen, beende Ausführung...\n"
 
 msgid ""
 "\n"
@@ -32,7 +30,7 @@ msgid ""
 msgstr ""
 "\n"
 "Befehle:  [p] vorheriger Subsong   [n]ächster Subsong   [q] Player beenden\n"
-"          [ ] Pause/Weiterspielen   [1-4] Kanal stumm schalten"
+"          [ ] Pause/Weiterspielen   [1-4] Kanal stummschalten"
 
 #, c-format
 msgid ""
@@ -108,11 +106,15 @@ msgid "Could not open /dev/dsp: %s\n"
 msgstr "Konnte /dev/dsp nicht öffnen: %s\n"
 
 #, c-format
+msgid "Could not open ALSA PCM device '%s': %s\n"
+msgstr "Konnte ALSA-PCM-Gerät '%s' nicht öffnen: %s\n"
+
+#, c-format
 msgid "Could not open output plugin \"%s\"\n"
-msgstr "Could not open output plugin \"%s\"\n"
+msgstr "Konnte Ausgabemethode \"%s\" nicht öffnen\n"
 
 msgid "Error opening output plugin."
-msgstr "Konnte Ausgabeplugin nicht öffnen."
+msgstr "Konnte Ausgabemethode nicht öffnen."
 
 msgid "Extended Info"
 msgstr "Erweiterte Informationen"
@@ -168,6 +170,12 @@ msgstr "Spiel:"
 msgid "Length    "
 msgstr "Länge    "
 
+msgid "Memory allocation failed!"
+msgstr "Speicherreservierung fehlgeschlagen!"
+
+msgid "Memory allocation failed!\n"
+msgstr "Speicherreservierung fehlgeschlagen!\n"
+
 msgid "Next"
 msgstr "Nächster"
 
@@ -222,42 +230,44 @@ msgid ""
 "Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
 "\n"
 "Available options are:\n"
-"  -E  endian, b == big, l == little, n == native (%s)\n"
-"  -f  set fadeout (%ld seconds)\n"
-"  -g  set subsong gap (%ld seconds)\n"
-"  -h  display this help and exit\n"
-"  -l  loop mode\n"
-"  -o  select output plugin (%s)\n"
-"      'list' shows available plugins\n"
-"  -q  reduce verbosity\n"
-"  -r  set samplerate (%ldHz)\n"
-"  -R  set refresh delay (%ld milliseconds)\n"
-"  -t  set subsong timeout (%ld seconds)\n"
-"  -T  set silence timeout (%ld seconds)\n"
-"  -v  increase verbosity\n"
-"  -V  print version and exit\n"
-"  -z  play subsongs in shuffle mode\n"
-"  -Z  play subsongs in random mode (repetitions possible)\n"
+"  -E        endian, b == big, l == little, n == native (%s)\n"
+"  -f        set fadeout (%ld seconds)\n"
+"  -g        set subsong gap (%ld seconds)\n"
+"  -h        display this help and exit\n"
+"  -l        loop mode\n"
+"  -o        select output plugin (%s)\n"
+"            'list' shows available plugins\n"
+"  -q        reduce verbosity\n"
+"  -r        set samplerate (%ldHz)\n"
+"  -R        set refresh delay (%ld milliseconds)\n"
+"  -t        set subsong timeout (%ld seconds)\n"
+"  -T        set silence timeout (%ld seconds)\n"
+"  -v        increase verbosity\n"
+"  -V        print version and exit\n"
+"  -z        play subsongs in shuffle mode\n"
+"  -Z        play subsongs in random mode (repetitions possible)\n"
+"  -1 to -4  mute a channel on startup\n"
 msgstr ""
 "Benutzung: %s [Option(en)] <GBS-Datei> [starte_bei_Subsong [stoppe_bei_Subsong] ]\n"
 "\n"
 "Verfügbare Optionen sind:\n"
-"  -E  endian, b == big, l == little, n == native (%s)\n"
-"  -f  Ausblendzeit (%ld Sekunden)\n"
-"  -g  Pause zwischen Subsongs (%ld Sekunden)\n"
-"  -h  Diese Hilfe anzeigen und Programm beenden\n"
-"  -l  Endloswiedergabe\n"
-"  -o  Wahl der Ausgabemethode (%s)\n"
-"      'list' zeigt alle Möglichkeiten\n"
-"  -q  Geschwätzigkeit verringern\n"
-"  -r  Abspielrate (%ldHz)\n"
-"  -R  Anzeigeverzögerung (%ld Millisekunden)\n"
-"  -t  Subsong Zeitlimit (%ld Sekunden)\n"
-"  -T  Subsong Zeitlimit für Stille (%ld Sekunden)\n"
-"  -v  Geschwätzigkeit erhöhen\n"
-"  -V  Version anzeigen und Programm beenden\n"
-"  -z  Subsongs durcheinandergewürfelt abspielen\n"
-"  -Z  Subsongs zufällig abspielen (Wiederholungen möglich)\n"
+"  -E        endian, b == big, l == little, n == native (%s)\n"
+"  -f        Ausblendzeit (%ld Sekunden)\n"
+"  -g        Pause zwischen Subsongs (%ld Sekunden)\n"
+"  -h        Diese Hilfe anzeigen und Programm beenden\n"
+"  -l        Endloswiedergabe\n"
+"  -o        Wahl der Ausgabemethode (%s)\n"
+"            'list' zeigt alle Möglichkeiten\n"
+"  -q        Geschwätzigkeit verringern\n"
+"  -r        Abspielrate (%ldHz)\n"
+"  -R        Anzeigeverzögerung (%ld Millisekunden)\n"
+"  -t        Subsong Zeitlimit (%ld Sekunden)\n"
+"  -T        Subsong Zeitlimit für Stille (%ld Sekunden)\n"
+"  -v        Geschwätzigkeit erhöhen\n"
+"  -V        Version anzeigen und Programm beenden\n"
+"  -z        Subsongs durcheinandergewürfelt abspielen\n"
+"  -Z        Subsongs zufällig abspielen (Wiederholungen möglich)\n"
+"  -1 to -4  Kanal beim Starten stummschalten\n"
 
 #, c-format
 msgid ""
@@ -307,6 +317,42 @@ msgstr "ioctl(fd, SNDCTL_DSP_STEREO, %d) fehlgeschlagen: %s\n"
 
 msgid "no time limit"
 msgstr "Kein Zeitlimit"
+
+#, c-format
+msgid "snd_pcm_hw_params failed: %s\n"
+msgstr "snd_pcm_hw_params fehlgeschlagen: %s\n"
+
+#, c-format
+msgid "snd_pcm_hw_params_any failed: %s\n"
+msgstr "snd_pcm_hw_params_any fehlgeschlagen: %s\n"
+
+#, c-format
+msgid "snd_pcm_hw_params_set_access failed: %s\n"
+msgstr "snd_pcm_hw_params_set_access fehlgeschlagen: %s\n"
+
+#, c-format
+msgid "snd_pcm_hw_params_set_buffer_size failed: %s\n"
+msgstr "snd_pcm_hw_params_set_buffer_size fehlgeschlagen: %s\n"
+
+#, c-format
+msgid "snd_pcm_hw_params_set_channels failed: %s\n"
+msgstr "snd_pcm_hw_params_set_channels fehlgeschlagen: %s\n"
+
+#, c-format
+msgid "snd_pcm_hw_params_set_format failed: %s\n"
+msgstr "snd_pcm_hw_params_set_format fehlgeschlagen: %s\n"
+
+#, c-format
+msgid "snd_pcm_hw_params_set_periods failed: %s\n"
+msgstr "snd_pcm_hw_params_set_periods fehlgeschlagen: %s\n"
+
+#, c-format
+msgid "snd_pcm_hw_params_set_rate_near failed: %s\n"
+msgstr "snd_pcm_hw_params_set_rate_near fehlgeschlagen: %s\n"
+
+#, c-format
+msgid "snd_pcm_writei failed: %s\n"
+msgstr "snd_pcm_writei fehlgeschlagen: %s\n"
 
 msgid "untitled"
 msgstr "Unbenannt"
