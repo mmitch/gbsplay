@@ -1,9 +1,9 @@
-/* $Id: gbsplay.c,v 1.96 2005/12/18 21:00:43 ranmachan Exp $
+/* $Id: gbsplay.c,v 1.97 2008/06/20 20:36:57 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
- * 2003-2005 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
- *                  Christian Garbs <mitch@cgarbs.de>
+ * 2003-2005,2008 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ *                       Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL.
  */
 
@@ -334,22 +334,23 @@ static regparm void usage(long exitcode)
 	        _("Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
 		  "\n"
 		  "Available options are:\n"
-		  "  -E  endian, b == big, l == little, n == native (%s)\n"
-		  "  -f  set fadeout (%ld seconds)\n"
-		  "  -g  set subsong gap (%ld seconds)\n"
-		  "  -h  display this help and exit\n"
-		  "  -l  loop mode\n"
-		  "  -o  select output plugin (%s)\n"
-		  "      'list' shows available plugins\n"
-		  "  -q  reduce verbosity\n"
-		  "  -r  set samplerate (%ldHz)\n"
-		  "  -R  set refresh delay (%ld milliseconds)\n"
-		  "  -t  set subsong timeout (%ld seconds)\n"
-		  "  -T  set silence timeout (%ld seconds)\n"
-		  "  -v  increase verbosity\n"
-		  "  -V  print version and exit\n"
-		  "  -z  play subsongs in shuffle mode\n"
-		  "  -Z  play subsongs in random mode (repetitions possible)\n"),
+		  "  -E        endian, b == big, l == little, n == native (%s)\n"
+		  "  -f        set fadeout (%ld seconds)\n"
+		  "  -g        set subsong gap (%ld seconds)\n"
+		  "  -h        display this help and exit\n"
+		  "  -l        loop mode\n"
+		  "  -o        select output plugin (%s)\n"
+		  "            'list' shows available plugins\n"
+		  "  -q        reduce verbosity\n"
+		  "  -r        set samplerate (%ldHz)\n"
+		  "  -R        set refresh delay (%ld milliseconds)\n"
+		  "  -t        set subsong timeout (%ld seconds)\n"
+		  "  -T        set silence timeout (%ld seconds)\n"
+		  "  -v        increase verbosity\n"
+		  "  -V        print version and exit\n"
+		  "  -z        play subsongs in shuffle mode\n"
+		  "  -Z        play subsongs in random mode (repetitions possible)\n"
+		  "  -1 to -4  mute a channel on startup\n"),
 	        myname,
 	        endian_str(endian),
 		fadeout,
@@ -372,10 +373,16 @@ static regparm void parseopts(int *argc, char ***argv)
 {
 	long res;
 	myname = *argv[0];
-	while ((res = getopt(*argc, *argv, "E:f:g:hlo:qr:R:t:T:vVzZ")) != -1) {
+	while ((res = getopt(*argc, *argv, "1234E:f:g:hlo:qr:R:t:T:vVzZ")) != -1) {
 		switch (res) {
 		default:
 			usage(1);
+			break;
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+			gbhw_ch[res-'1'].mute ^= 1;
 			break;
 		case 'E':
 			if (strcasecmp(optarg, "b") == 0) {
