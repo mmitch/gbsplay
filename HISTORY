@@ -1,4 +1,4 @@
-<<$Id: HISTORY,v 1.24 2008/06/20 20:43:27 mitch Exp $>>
+<<$Id: HISTORY,v 1.25 2008/06/20 21:02:43 mitch Exp $>>
 
 
 gbsplay HISTORY
@@ -10,6 +10,7 @@ gbsplay HISTORY
 Bugfixes:
 
 - muted channel settings were lost on subsong change
+- config parser works again
 
 Enhancements:
 

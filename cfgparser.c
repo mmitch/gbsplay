@@ -1,9 +1,9 @@
-/* $Id: cfgparser.c,v 1.16 2006/07/23 13:28:46 ranmachan Exp $
+/* $Id: cfgparser.c,v 1.17 2008/06/20 21:02:43 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
- * 2003-2005 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
- *                  Christian Garbs <mitch@cgarbs.de>
+ * 2003-2005,2008 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ *                       Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL.
  */
 
@@ -148,8 +148,8 @@ regparm void cfg_parse(const char *fname, const struct cfg_option *options)
 	cfg_char = 0;
 	c = nextchar();
 
+	char option[200] = "";
 	do {
-		char option[200] = "";
 		unsigned long n;
 		switch (state) {
 		case 0:
@@ -170,7 +170,7 @@ regparm void cfg_parse(const char *fname, const struct cfg_option *options)
 			          c == '-' ||
 			          c == '_') &&
 			          n < (sizeof(option)-1));
-			option[n] = 0;
+			option[n] = '\0';
 			state = 0;
 			nextstate = 2;
 			break;
