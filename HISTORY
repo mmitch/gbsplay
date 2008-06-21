@@ -1,13 +1,7 @@
-<<$Id: HISTORY,v 1.27 2008/06/21 12:50:21 mitch Exp $>>
+<<$Id: HISTORY,v 1.28 2008/06/21 13:00:08 mitch Exp $>>
 
 
 gbsplay HISTORY
-
-
-2008/xx/xx  -  0.0.9cvs
-~~~~~~~~~~~~~~~~~~~~~~~
-
- -
 
 
 2008/06/21  -  0.0.9  (the Still Alive release)
@@ -22,6 +16,7 @@ Enhancements:
 
 - gbsplay:
   - allow channel mute on gbsplay startup
+  - add ALSA plugout
 
 
 2006/01/21  -  0.0.8
