@@ -1,11 +1,11 @@
-<<$Id: HISTORY,v 1.25 2008/06/20 21:02:43 mitch Exp $>>
+<<$Id: HISTORY,v 1.26 2008/06/21 12:44:12 mitch Exp $>>
 
 
 gbsplay HISTORY
 
 
-2006/xx/xx  -  0.0.8cvs
-~~~~~~~~~~~~~~~~~~~~~~~
+2008/06/21  -  0.0.9  (the Still Alive release)
+~~~~~~~~~~~~~~~~~~~~
 
 Bugfixes:
 
@@ -14,7 +14,8 @@ Bugfixes:
 
 Enhancements:
 
-- allow channel mute on gbsplay startup
+- gbsplay:
+  - allow channel mute on gbsplay startup
 
 
 2006/01/21  -  0.0.8
