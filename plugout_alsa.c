@@ -1,4 +1,4 @@
-/* $Id: plugout_alsa.c,v 1.1 2006/12/20 20:51:28 ranmachan Exp $
+/* $Id: plugout_alsa.c,v 1.2 2008/06/21 12:53:03 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -80,13 +80,11 @@ static long regparm alsa_open(enum plugout_endian endian, long rate)
 	}
 
 	if ((err = snd_pcm_hw_params_set_periods(pcm_handle, hwparams, 4, 0)) < 0) {
-	      fprintf(stderr, _("snd_pcm_hw_params_set_periods failed: %s\n"), snd_strerror(err));
-		return -1;
+		fprintf(stderr, _("snd_pcm_hw_params_set_periods failed: %s\n"), snd_strerror(err));
 	}
 
 	if ((err = snd_pcm_hw_params_set_buffer_size(pcm_handle, hwparams, 8192)) < 0) {
 		fprintf(stderr, _("snd_pcm_hw_params_set_buffer_size failed: %s\n"), snd_strerror(err));
-		return -1;
 	}
 
 	if ((err = snd_pcm_hw_params(pcm_handle, hwparams)) < 0) {
