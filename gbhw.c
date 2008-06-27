@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.53 2008/06/27 18:29:47 ranmachan Exp $
+/* $Id: gbhw.c,v 1.54 2008/06/27 18:54:04 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -382,8 +382,10 @@ static regparm void gb_flush_buffer(void)
 	l_smpl = soundbuf->l_lvl;
 	r_smpl = soundbuf->r_lvl;
 	for (i=0; i<soundbuf->samples; i++) {
-		l_smpl = soundbuf->data[i*2  ] = l_smpl + impbuf->data[i*2  ];
-		r_smpl = soundbuf->data[i*2+1] = r_smpl + impbuf->data[i*2+1];
+		l_smpl = l_smpl + impbuf->data[i*2  ];
+		r_smpl = r_smpl + impbuf->data[i*2+1];
+		soundbuf->data[i*2  ] = l_smpl * master_volume / MASTER_VOL_MAX;
+		soundbuf->data[i*2+1] = r_smpl * master_volume / MASTER_VOL_MAX;
 		if (l_smpl > lmaxval) lmaxval = l_smpl;
 		if (l_smpl < lminval) lminval = l_smpl;
 		if (r_smpl > rmaxval) rmaxval = r_smpl;
@@ -455,6 +457,7 @@ static regparm void gb_sound(long cycles)
 				long val = GET_NIBBLE(&ioregs[0x30], pos);
 				long old_l = gbhw_ch[2].l_lvl;
 				long old_r = gbhw_ch[2].r_lvl;
+				long l_diff, r_diff;
 				gbhw_ch[2].div_ctr = gbhw_ch[2].div_tc*2;
 				if (gbhw_ch[2].volume) {
 					val = val >> (gbhw_ch[2].volume-1);
@@ -466,7 +469,9 @@ static regparm void gb_sound(long cycles)
 					if (gbhw_ch[2].rightgate)
 						gbhw_ch[2].r_lvl = val;
 				}
-				gb_change_level(gbhw_ch[2].l_lvl - old_l, gbhw_ch[2].r_lvl - old_r);
+				l_diff = gbhw_ch[2].l_lvl - old_l;
+				r_diff = gbhw_ch[2].r_lvl - old_r;
+				gb_change_level(l_diff, r_diff);
 			}
 		}
 
@@ -493,8 +498,6 @@ static regparm void gb_sound(long cycles)
 				l_lvl += gbhw_ch[i].l_lvl;
 				r_lvl += gbhw_ch[i].r_lvl;
 			}
-			l_lvl += gbhw_ch[2].l_lvl;
-			r_lvl += gbhw_ch[2].r_lvl;
 
 			if (gbhw_ch[3].master) {
 //				long val = gbhw_ch[3].volume * (((lfsr >> 13) & 2)-1);
@@ -516,8 +519,6 @@ static regparm void gb_sound(long cycles)
 			l_lvl += gbhw_ch[3].l_lvl;
 			r_lvl += gbhw_ch[3].r_lvl;
 
-			l_lvl = (l_lvl * master_volume) / MASTER_VOL_MAX;
-			r_lvl = (r_lvl * master_volume) / MASTER_VOL_MAX;
 			if (l_lvl != old_l || r_lvl != old_r) {
 				gb_change_level(l_lvl - old_l, r_lvl - old_r);
 				old_l = l_lvl;
