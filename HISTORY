@@ -1,4 +1,4 @@
-<<$Id: HISTORY,v 1.29 2008/06/21 13:01:16 mitch Exp $>>
+<<$Id: HISTORY,v 1.30 2008/06/27 17:42:44 mitch Exp $>>
 
 
 gbsplay HISTORY
@@ -6,6 +6,10 @@ gbsplay HISTORY
 
 2008/xx/xx  -  0.0.9cvs
 ~~~~~~~~~~~~~~~~~~~~
+
+Bugfixes:
+
+- remove possible garbage sounds on songchange
 
 
 2008/06/21  -  0.0.9  (the Still Alive release)
