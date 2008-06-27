@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.52 2008/06/27 15:56:39 ranmachan Exp $
+/* $Id: gbhw.c,v 1.53 2008/06/27 18:29:47 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -436,96 +436,99 @@ static regparm void gb_change_level(long l_ofs, long r_ofs)
 
 static regparm void gb_sound(long cycles)
 {
-	long i;
+	long i, j;
 	long l_lvl = 0, r_lvl = 0;
 	static long old_l = 0, old_r = 0;
 
 	assert(impbuf != NULL);
 
-	if (gbhw_ch[2].master) for (i=0; i<cycles; i++) {
-		gbhw_ch[2].div_ctr--;
-		if (gbhw_ch[2].div_ctr <= 0) {
-			gbhw_ch[2].div_ctr = gbhw_ch[2].div_tc*2;
-			ch3pos++;
-		}
-	}
-	main_div += cycles;
-	while (main_div > main_div_tc) {
-		main_div -= main_div_tc;
-		impbuf->cycles += main_div_tc;
+	for (j=0; j<cycles; j++) {
+		main_div++;
+		impbuf->cycles++;
 		if (impbuf->cycles*SOUND_DIV_MULT >= sound_div_tc*(impbuf->samples - IMPULSE_WIDTH/2))
 			gb_flush_buffer();
 
-		for (i=0; i<2; i++) if (gbhw_ch[i].master) {
-			long val = gbhw_ch[i].volume;
-			if (gbhw_ch[i].div_ctr > gbhw_ch[i].duty_tc) {
-				val = -val;
-			}
-			if (!gbhw_ch[i].mute) {
-				if (gbhw_ch[i].leftgate)
-					gbhw_ch[i].l_lvl = val;
-				if (gbhw_ch[i].rightgate)
-					gbhw_ch[i].r_lvl = val;
-			}
-			gbhw_ch[i].div_ctr--;
-			if (gbhw_ch[i].div_ctr <= 0) {
-				gbhw_ch[i].div_ctr = gbhw_ch[i].div_tc;
-			}
-		}
-		for (i=0; i<2; i++) {
-			l_lvl += gbhw_ch[i].l_lvl;
-			r_lvl += gbhw_ch[i].r_lvl;
-		}
 		if (gbhw_ch[2].master) {
-			long pos = ch3pos;
-			long val = GET_NIBBLE(&ioregs[0x30], pos);
-			if (gbhw_ch[2].volume) {
-				val = val >> (gbhw_ch[2].volume-1);
-			} else val = 0;
-			val = val*2;
-			if (gbhw_ch[2].volume && !gbhw_ch[2].mute) {
-				if (gbhw_ch[2].leftgate)
-					gbhw_ch[2].l_lvl = val;
-				if (gbhw_ch[2].rightgate)
-					gbhw_ch[2].r_lvl = val;
+			gbhw_ch[2].div_ctr--;
+			if (gbhw_ch[2].div_ctr <= 0) {
+				long pos = ch3pos++;
+				long val = GET_NIBBLE(&ioregs[0x30], pos);
+				long old_l = gbhw_ch[2].l_lvl;
+				long old_r = gbhw_ch[2].r_lvl;
+				gbhw_ch[2].div_ctr = gbhw_ch[2].div_tc*2;
+				if (gbhw_ch[2].volume) {
+					val = val >> (gbhw_ch[2].volume-1);
+				} else val = 0;
+				val = val*2;
+				if (gbhw_ch[2].volume && !gbhw_ch[2].mute) {
+					if (gbhw_ch[2].leftgate)
+						gbhw_ch[2].l_lvl = val;
+					if (gbhw_ch[2].rightgate)
+						gbhw_ch[2].r_lvl = val;
+				}
+				gb_change_level(gbhw_ch[2].l_lvl - old_l, gbhw_ch[2].r_lvl - old_r);
 			}
 		}
-		l_lvl += gbhw_ch[2].l_lvl;
-		r_lvl += gbhw_ch[2].r_lvl;
 
-		if (gbhw_ch[3].master) {
-//			long val = gbhw_ch[3].volume * (((lfsr >> 13) & 2)-1);
-//			long val = gbhw_ch[3].volume * ((random() & 2)-1);
-			static long val;
-			if (!gbhw_ch[3].mute) {
-				if (gbhw_ch[3].leftgate)
-					gbhw_ch[3].l_lvl = val;
-				if (gbhw_ch[3].rightgate)
-					gbhw_ch[3].r_lvl = val;
+		if (main_div > main_div_tc) {
+			main_div -= main_div_tc;
+
+			for (i=0; i<2; i++) if (gbhw_ch[i].master) {
+				long val = gbhw_ch[i].volume;
+				if (gbhw_ch[i].div_ctr > gbhw_ch[i].duty_tc) {
+					val = -val;
+				}
+				if (!gbhw_ch[i].mute) {
+					if (gbhw_ch[i].leftgate)
+						gbhw_ch[i].l_lvl = val;
+					if (gbhw_ch[i].rightgate)
+						gbhw_ch[i].r_lvl = val;
+				}
+				gbhw_ch[i].div_ctr--;
+				if (gbhw_ch[i].div_ctr <= 0) {
+					gbhw_ch[i].div_ctr = gbhw_ch[i].div_tc;
+				}
 			}
-			gbhw_ch[3].div_ctr--;
-			if (gbhw_ch[3].div_ctr <= 0) {
-				gbhw_ch[3].div_ctr = gbhw_ch[3].div_tc;
-				lfsr = (lfsr << 1) | (((lfsr & tap1) > 0) ^ ((lfsr & tap2) > 0));
-//				val = gbhw_ch[3].volume * ((random() & 2)-1);
-				val = gbhw_ch[3].volume * ((lfsr & 2)-1);
+			for (i=0; i<2; i++) {
+				l_lvl += gbhw_ch[i].l_lvl;
+				r_lvl += gbhw_ch[i].r_lvl;
 			}
-		}
-		l_lvl += gbhw_ch[3].l_lvl;
-		r_lvl += gbhw_ch[3].r_lvl;
+			l_lvl += gbhw_ch[2].l_lvl;
+			r_lvl += gbhw_ch[2].r_lvl;
 
-		l_lvl = (l_lvl * master_volume) / MASTER_VOL_MAX;
-		r_lvl = (r_lvl * master_volume) / MASTER_VOL_MAX;
-		if (l_lvl != old_l || r_lvl != old_r) {
-			gb_change_level(l_lvl - old_l, r_lvl - old_r);
-			old_l = l_lvl;
-			old_r = r_lvl;
-		}
+			if (gbhw_ch[3].master) {
+//				long val = gbhw_ch[3].volume * (((lfsr >> 13) & 2)-1);
+//				long val = gbhw_ch[3].volume * ((random() & 2)-1);
+				static long val;
+				if (!gbhw_ch[3].mute) {
+					if (gbhw_ch[3].leftgate)
+						gbhw_ch[3].l_lvl = val;
+					if (gbhw_ch[3].rightgate)
+						gbhw_ch[3].r_lvl = val;
+				}
+				gbhw_ch[3].div_ctr--;
+				if (gbhw_ch[3].div_ctr <= 0) {
+					gbhw_ch[3].div_ctr = gbhw_ch[3].div_tc;
+					lfsr = (lfsr << 1) | (((lfsr & tap1) > 0) ^ ((lfsr & tap2) > 0));
+					val = gbhw_ch[3].volume * ((lfsr & 2)-1);
+				}
+			}
+			l_lvl += gbhw_ch[3].l_lvl;
+			r_lvl += gbhw_ch[3].r_lvl;
 
-		sweep_div += 1;
-		if (sweep_div >= sweep_div_tc) {
-			sweep_div = 0;
-			gb_sound_sweep();
+			l_lvl = (l_lvl * master_volume) / MASTER_VOL_MAX;
+			r_lvl = (r_lvl * master_volume) / MASTER_VOL_MAX;
+			if (l_lvl != old_l || r_lvl != old_r) {
+				gb_change_level(l_lvl - old_l, r_lvl - old_r);
+				old_l = l_lvl;
+				old_r = r_lvl;
+			}
+
+			sweep_div += 1;
+			if (sweep_div >= sweep_div_tc) {
+				sweep_div = 0;
+				gb_sound_sweep();
+			}
 		}
 	}
 }
