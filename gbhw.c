@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.51 2008/06/20 20:13:22 mitch Exp $
+/* $Id: gbhw.c,v 1.52 2008/06/27 15:56:39 ranmachan Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -540,6 +540,8 @@ static regparm void gbhw_impbuf_reset(struct gbhw_buffer *impbuf)
 {
 	assert(sound_div_tc != 0);
 	impbuf->cycles = (long)(sound_div_tc * IMPULSE_WIDTH/2 / SOUND_DIV_MULT);
+	impbuf->l_lvl = 0;
+	impbuf->r_lvl = 0;
 	memset(impbuf->data, 0, impbuf->bytes);
 }
 
@@ -597,8 +599,11 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 	rombank = 1;
 	master_volume = MASTER_VOL_MAX;
 	master_fade = 0;
-	if (soundbuf)
+	if (soundbuf) {
 		soundbuf->pos = 0;
+		soundbuf->l_lvl = 0;
+		soundbuf->r_lvl = 0;
+	}
 	lminval = rminval = INT_MAX;
 	lmaxval = rmaxval = INT_MIN;
 	for (i=0; i<4; i++) {
