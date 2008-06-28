@@ -1,4 +1,4 @@
-<<$Id: HISTORY,v 1.33 2008/06/28 12:30:07 mitch Exp $>>
+<<$Id: HISTORY,v 1.34 2008/06/28 13:07:23 mitch Exp $>>
 
 
 gbsplay HISTORY
@@ -22,6 +22,7 @@ Enhancements:
 
 - build process:
   - installation of contrib scripts is optional
+  - remove bashishms from configure script
 
 
 2008/06/21  -  0.0.9  (the Still Alive release)

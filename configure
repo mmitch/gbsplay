@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.85 2008/06/28 12:30:07 mitch Exp $
+# $Id: configure,v 1.86 2008/06/28 13:07:23 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -115,7 +115,7 @@ remove_dupes()
             test "$i" = "$j" && dupe=1
         done
         if [ $dupe -eq 0 ]; then
-            newflags="`test -z "$newflags" || echo -n "$newflags "`$i"
+            newflags="`test -z "$newflags" || printf "$newflags "`$i"
         fi
     done
     echo "$newflags"
@@ -202,7 +202,7 @@ cc_check()
     okmsg="${4-ok}"
     errmsg="${5-not found}"
 
-    test "$name" && echo -n "$name:  "
+    test "$name" && printf "$name:  "
 
     cat > "$INFILE"
     $CC -o "$OUTFILE" "$INFILE" $flags
@@ -310,14 +310,14 @@ isknown()
 # of type $2 (build, use)
 printoptional()
 {
-	echo -n "${3-optional} $1:"
+	printf "${3-optional} $1:"
 	for i in $OPTS; do
 		eval "val=\$$i"
 		if [ "${i#${2}_}" != "$i" ]; then
 			if [ "$val" = "yes" ]; then
-				echo -n " +${i#${2}_}"
+				printf " +${i#${2}_}"
 			elif [ "$val" = "no" ]; then
-				echo -n " -${i#${2}_}"
+				printf " -${i#${2}_}"
 			fi
 		fi
 	done
@@ -480,7 +480,7 @@ OPTS="build_contrib build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_s
 
 ## load user config
 if [ -f config.conf ]; then
-	echo -n "loading config.conf... "
+	printf "loading config.conf... "
 	while read line; do
 		parseoption $line
 	done < config.conf
@@ -515,7 +515,7 @@ setdefault build_contrib yes
 
 ## check for C compiler
 
-echo -n "checking for working compiler:  "
+printf "checking for working compiler:  "
 INFILE="$TEMPDIR/cc.c"
 OUTFILE="$TEMPDIR/cc"
 
@@ -632,7 +632,7 @@ if [ "$use_i18n" != no ]; then
 
     ## check for gettext
 
-    echo -n "checking for gettext tools:  "
+    printf "checking for gettext tools:  "
     have_xgettext=yes
     for i in xgettext msgmerge msgfmt msgen; do
         if [ "`which $i`" = "" ]; then
@@ -705,7 +705,7 @@ EOF
 
     ## check for glib development files
 
-    echo -n "checking for glib-dev:  "
+    printf "checking for glib-dev:  "
     CONFIG=`which glib-config`
     if [ $? -eq 0 ]; then
         GLIB_CFLAGS=`glib-config --cflags`
@@ -720,7 +720,7 @@ EOF
 
     ## check for xmms development files
 
-    echo -n "checking for xmms-dev:  "
+    printf "checking for xmms-dev:  "
     CONFIG=`which xmms-config`
     if [ $? -eq 0 ]; then
         XMMS_CFLAGS=`xmms-config --cflags` 
@@ -741,7 +741,7 @@ fi
 
 ## check for cygwin environment
 
-echo -n "checking for Cygwin environment:  "
+printf "checking for Cygwin environment:  "
 if [ "`uname -o`" = "Cygwin" ]; then
     cygwin_build=yes
     echo "ok"
