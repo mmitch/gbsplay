@@ -1,4 +1,4 @@
-<<$Id: HISTORY,v 1.31 2008/06/28 08:21:23 mitch Exp $>>
+<<$Id: HISTORY,v 1.32 2008/06/28 09:57:10 mitch Exp $>>
 
 
 gbsplay HISTORY
@@ -10,6 +10,13 @@ gbsplay HISTORY
 Bugfixes:
 
 - remove possible garbage sounds on songchange
+
+Removals:
+
+- gbsxmms:
+  As it is currently broken and propably won't be fixed soon,
+  building of the XMMS plugin is now disabled by default.
+  If you want to try to fix it, use 'configure --with-xmmsplugin'
 
 
 2008/06/21  -  0.0.9  (the Still Alive release)

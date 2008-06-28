@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.83 2008/06/21 13:01:16 mitch Exp $
+# $Id: configure,v 1.84 2008/06/28 09:57:10 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -23,6 +23,8 @@ TARGETARCH="$HOSTARCH"
 
 package=gbsplay
 prefix=/usr/local
+
+build_xmmsplugin=no
 
 ## define sane environment
 unset LC_ALL LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY \
@@ -464,7 +466,7 @@ Optional Features:
                          (enabled by default on Linux x86 only)
 
 Optional Modules:
-  --without-xmmsplugin   do not build xmms input plugin
+  --with-xmmsplugin      build XMMS input plugin
 
 Output Plugins:
   --disable-devdsp       omit /dev/dsp sound output plugin
