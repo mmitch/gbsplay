@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.86 2008/06/28 13:07:23 mitch Exp $
+# $Id: configure,v 1.87 2008/06/28 13:27:34 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -466,6 +466,7 @@ Optional Features:
 Optional Modules:
   --with-xmmsplugin      build XMMS input plugin
   --without-contrib      don't install contrib scripts
+  --without-test         don't test gbsplay output during build
 
 Output Plugins:
   --disable-devdsp       omit /dev/dsp sound output plugin
@@ -476,7 +477,7 @@ EOF
 	exit $1
 }
 
-OPTS="build_contrib build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_ssp use_debug use_stdout use_devdsp use_alsa use_nas"
+OPTS="build_contrib build_test build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_ssp use_debug use_stdout use_devdsp use_alsa use_nas"
 
 ## load user config
 if [ -f config.conf ]; then
@@ -512,6 +513,7 @@ fi
 ## more defaults
 setdefault build_xmmsplugin no
 setdefault build_contrib yes
+setdefault build_test yes
 
 ## check for C compiler
 
@@ -826,8 +828,9 @@ docdir
 localedir
 sysconfdir
 CC
-build_xmmsplugin
 build_contrib
+build_test
+build_xmmsplugin
 have_xgettext
 use_i18n
 use_sharedlibgbs

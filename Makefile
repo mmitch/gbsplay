@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.106 2008/06/28 12:30:07 mitch Exp $
+# $Id: Makefile,v 1.107 2008/06/28 13:27:34 mitch Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -104,6 +104,11 @@ EXTRA_INSTALL += install-contrib
 EXTRA_UNINSTALL += uninstall-contrib
 endif
 
+# test built binary?
+ifeq ($(build_test),yes)
+TEST_TARGETS += test
+endif
+
 # Cygwin automatically adds .exe to binaries.
 # We should notice that or we can't rm the files later!
 gbsplaybin     := gbsplay
@@ -194,7 +199,7 @@ endif
 # include the rules for each subdir
 include $(shell find . -type f -name "subdir.mk")
 
-default: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL) test
+default: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL) $(TEST_TARGETS)
 
 # include the dependency files
 
