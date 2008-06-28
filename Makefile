@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.105 2008/06/27 20:16:52 ranmachan Exp $
+# $Id: Makefile,v 1.106 2008/06/28 12:30:07 mitch Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -98,6 +98,12 @@ ifeq ($(plugout_stdout),yes)
 objs_gbsplay += plugout_stdout.o
 endif
 
+# install contrib files?
+ifeq ($(build_contrib),yes)
+EXTRA_INSTALL += install-contrib
+EXTRA_UNINSTALL += uninstall-contrib
+endif
+
 # Cygwin automatically adds .exe to binaries.
 # We should notice that or we can't rm the files later!
 gbsplaybin     := gbsplay
@@ -113,7 +119,6 @@ objs += $(objs_libgbspic)
 ifeq ($(cygwin_build),yes)
 EXTRA_INSTALL += install-cyggbs-1.dll
 EXTRA_UNINSTALL += uninstall-cyggbs-1.dll
-
 
 install-cyggbs-1.dll:
 	install -d $(bindir)
@@ -217,19 +222,21 @@ install-default:
 	install -d $(man1dir)
 	install -d $(man5dir)
 	install -d $(docdir)
-	install -d $(contribdir)
 	install -d $(exampledir)
 	install -m 755 $(gbsplaybin) $(gbsinfobin) $(bindir)
 	install -m 644 gbsplay.1 gbsinfo.1 $(man1dir)
 	install -m 644 gbsplayrc.5 $(man5dir)
 	install -m 644 $(docs) $(docdir)
-	install -m 644 $(contribs) $(contribdir)
 	install -m 644 $(examples) $(exampledir)
 	for i in $(mos); do \
 		base=`basename $$i`; \
 		install -d $(localedir)/$${base%.mo}/LC_MESSAGES; \
 		install -m 644 $$i $(localedir)/$${base%.mo}/LC_MESSAGES/gbsplay.mo; \
 	done
+
+install-contrib:
+	install -d $(contribdir)
+	install -m 644 $(contribs) $(contribdir)
 
 install-gbsxmms.so:
 	install -d $(xmmsdir)
@@ -244,8 +251,6 @@ uninstall-default:
 	-rmdir -p $(man1dir)
 	rm -f $(man5dir)/gbsplayrc.5 $(man5dir)/gbsplayrc.5	
 	-rmdir -p $(man5dir)
-	rm -rf $(contribdir)
-	-rmdir -p $(contribdir)
 	rm -rf $(exampledir)
 	-rmdir -p $(exampledir)
 	rm -rf $(docdir)
@@ -256,6 +261,10 @@ uninstall-default:
 		rm -f $(localedir)/$${base%.mo}/LC_MESSAGES/gbsplay.mo; \
 		rmdir -p $(localedir)/$${base%.mo}/LC_MESSAGES; \
 	done
+
+uninstall-contrib:
+	rm -rf $(contribdir)
+	-rmdir -p $(contribdir)
 
 uninstall-gbsxmms.so:
 	rm -f $(xmmsdir)/gbsxmms.so

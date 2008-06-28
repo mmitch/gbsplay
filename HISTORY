@@ -1,4 +1,4 @@
-<<$Id: HISTORY,v 1.32 2008/06/28 09:57:10 mitch Exp $>>
+<<$Id: HISTORY,v 1.33 2008/06/28 12:30:07 mitch Exp $>>
 
 
 gbsplay HISTORY
@@ -17,6 +17,11 @@ Removals:
   As it is currently broken and propably won't be fixed soon,
   building of the XMMS plugin is now disabled by default.
   If you want to try to fix it, use 'configure --with-xmmsplugin'
+
+Enhancements:
+
+- build process:
+  - installation of contrib scripts is optional
 
 
 2008/06/21  -  0.0.9  (the Still Alive release)
