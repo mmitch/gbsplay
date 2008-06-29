@@ -1,4 +1,4 @@
-<<$Id: HISTORY,v 1.35 2008/06/28 13:27:34 mitch Exp $>>
+<<$Id: HISTORY,v 1.36 2008/06/29 10:57:52 mitch Exp $>>
 
 
 gbsplay HISTORY
@@ -19,6 +19,9 @@ Removals:
   If you want to try to fix it, use 'configure --with-xmmsplugin'
 
 Enhancements:
+
+- contrib:
+  - clarify license of gbs2ogg.sh (it's GPL'ed)
 
 - build process:
   - installation of contrib scripts is optional
