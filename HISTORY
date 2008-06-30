@@ -1,4 +1,4 @@
-<<$Id: HISTORY,v 1.36 2008/06/29 10:57:52 mitch Exp $>>
+<<$Id: HISTORY,v 1.37 2008/06/30 20:51:31 mitch Exp $>>
 
 
 gbsplay HISTORY
@@ -19,6 +19,9 @@ Removals:
   If you want to try to fix it, use 'configure --with-xmmsplugin'
 
 Enhancements:
+
+- gbsplay
+  - more accurate handling of channel 3 and master volume
 
 - contrib:
   - clarify license of gbs2ogg.sh (it's GPL'ed)
