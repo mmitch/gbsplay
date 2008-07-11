@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.88 2008/07/11 20:12:25 mitch Exp $
+# $Id: configure,v 1.89 2008/07/11 20:27:04 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -777,6 +777,7 @@ setdefault sysconfdir  "/etc"
 setdefault use_sharedlibgbs no
 setdefault use_debug no
 
+setdefault use_midi yes
 setdefault use_stdout yes
 
 printoptional modules build
