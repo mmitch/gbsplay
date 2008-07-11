@@ -1,4 +1,4 @@
-/* $Id: gbhw.c,v 1.54 2008/06/27 18:54:04 ranmachan Exp $
+/* $Id: gbhw.c,v 1.55 2008/07/11 20:12:25 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -47,12 +47,17 @@ static long timerctr = 70256;
 
 static const long msec_cycles = GBHW_CLOCK/1000;
 
+static long sum_cycles;
+
 static long pause_output = 0;
 
 static gbhw_callback_fn callback;
 static /*@null@*/ /*@dependent@*/ void *callbackpriv;
 static /*@null@*/ /*@dependent@*/ struct gbhw_buffer *soundbuf = NULL; /* externally visible output buffer */
 static /*@null@*/ /*@only@*/ struct gbhw_buffer *impbuf = NULL;   /* internal impulse output buffer */
+
+static gbhw_iocallback_fn iocallback;
+static /*@null@*/ /*@dependent@*/ void *iocallback_priv;
 
 #define TAP1_15		0x4000;
 #define TAP2_15		0x2000;
@@ -137,6 +142,8 @@ static regparm void rom_put(uint32_t addr, uint8_t val)
 
 static regparm void io_put(uint32_t addr, uint8_t val)
 {
+	iocallback(sum_cycles, addr, val, iocallback_priv);
+
 	long chn = (addr - 0xff10)/5;
 	if (addr >= 0xff80 && addr <= 0xfffe) {
 		hiram[addr & 0x7f] = val;
@@ -540,6 +547,12 @@ regparm void gbhw_setcallback(gbhw_callback_fn fn, void *priv)
 	callbackpriv = priv;
 }
 
+regparm void gbhw_setiocallback(gbhw_iocallback_fn fn, void *priv)
+{
+	iocallback = fn;
+	iocallback_priv = priv;
+}
+
 static regparm void gbhw_impbuf_reset(struct gbhw_buffer *impbuf)
 {
 	assert(sound_div_tc != 0);
@@ -620,6 +633,9 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 	memset(intram, 0, sizeof(intram));
 	memset(hiram, 0, sizeof(hiram));
 	memset(ioregs, 0, sizeof(ioregs));
+
+	sum_cycles = 0;
+
 	gbcpu_init();
 	gbcpu_addmem(0x00, 0x3f, rom_put, rom_get);
 	gbcpu_addmem(0x40, 0x7f, rom_put, rombank_get);
@@ -658,6 +674,7 @@ regparm long gbhw_step(long time_to_work)
 			long step = gbcpu_step();
 			if (step < 0) return step;
 			cycles += step;
+			sum_cycles += step;
 			gb_sound(step);
 		}
 

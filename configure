@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: configure,v 1.87 2008/06/28 13:27:34 mitch Exp $
+# $Id: configure,v 1.88 2008/07/11 20:12:25 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #
@@ -471,13 +471,14 @@ Optional Modules:
 Output Plugins:
   --disable-devdsp       omit /dev/dsp sound output plugin
   --disable-alsa         omit ALSA sound output plugin
-  --disable-stdout       omit stdout file writer plugin
+  --disable-midi         omit MIDI file writer plugin
   --disable-nas          omit NAS sound output plugin
+  --disable-stdout       omit stdout file writer plugin
 EOF
 	exit $1
 }
 
-OPTS="build_contrib build_test build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_ssp use_debug use_stdout use_devdsp use_alsa use_nas"
+OPTS="build_contrib build_test build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_ssp use_debug use_stdout use_devdsp use_alsa use_nas use_midi"
 
 ## load user config
 if [ -f config.conf ]; then
@@ -839,6 +840,7 @@ libaudio_flags
 __EOF__
     echo plugout_devdsp := $use_devdsp
     echo plugout_alsa := $use_alsa
+    echo plugout_midi := $use_midi
     echo plugout_nas := $use_nas
     echo plugout_stdout := $use_stdout
 ) > config.mk
@@ -849,6 +851,7 @@ __EOF__
     echo "#define SYSCONF_PREFIX \"$sysconfdir\""
     plugout_x DEVDSP
     plugout_x ALSA
+    plugout_x MIDI
     plugout_x NAS
     plugout_x STDOUT
     use_x I18N

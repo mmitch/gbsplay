@@ -1,4 +1,4 @@
-/* $Id: gbsplay.c,v 1.97 2008/06/20 20:36:57 mitch Exp $
+/* $Id: gbsplay.c,v 1.98 2008/07/11 20:12:25 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -79,6 +79,8 @@ static const char cfgfile[] = ".gbsplayrc";
 static char *sound_name = "oss";
 static char *sound_description;
 static plugout_open_fn  sound_open;
+static plugout_skip_fn  sound_skip;
+static plugout_io_fn    sound_io;
 static plugout_write_fn sound_write;
 static plugout_close_fn sound_close;
 
@@ -180,6 +182,12 @@ static regparm void swap_endian(struct gbhw_buffer *buf)
 		short x = buf->data[i];
 		buf->data[i] = ((x & 0xff) << 8) | (x >> 8);
 	}
+}
+
+static regparm void iocallback(long cycles, uint32_t addr, uint8_t val, void *priv)
+{
+	if (sound_io)
+		sound_io(cycles, addr, val);
 }
 
 static regparm void callback(struct gbhw_buffer *buf, void *priv)
@@ -314,6 +322,8 @@ static regparm long nextsubsong_cb(struct gbs *gbs, void *priv)
 	}
 
 	gbs_init(gbs, subsong);
+	if (sound_skip)
+		sound_skip(subsong);
 	return true;
 }
 
@@ -456,11 +466,15 @@ static regparm void handleuserinput(struct gbs *gbs)
 				gbs->subsong += gbs->songs;
 			}
 			gbs_init(gbs, gbs->subsong);
+			if (sound_skip)
+				sound_skip(gbs->subsong);
 			break;
 		case 'n':
 			gbs->subsong = get_next_subsong(gbs);
 			gbs->subsong %= gbs->songs;
 			gbs_init(gbs, gbs->subsong);
+			if (sound_skip)
+				sound_skip(gbs->subsong);
 			break;
 		case 'q':
 		case 27:
@@ -613,6 +627,8 @@ static regparm void select_plugin(void)
 	}
 
 	sound_open = plugout->open;
+	sound_skip = plugout->skip;
+	sound_io = plugout->io;
 	sound_write = plugout->write;
 	sound_close = plugout->close;
 	sound_description = plugout->description;
@@ -655,6 +671,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
+	gbhw_setiocallback(iocallback, NULL);
 	gbhw_setcallback(callback, NULL);
 	gbhw_setrate(rate);
 
@@ -694,6 +711,8 @@ int main(int argc, char **argv)
 	gbhw_setbuffer(&buf);
 	gbs_set_nextsubsong_cb(gbs, nextsubsong_cb, NULL);
 	gbs_init(gbs, gbs->subsong);
+	if (sound_skip)
+		sound_skip(gbs->subsong);
 	printinfo(gbs);
 	tcgetattr(STDIN_FILENO, &ts);
 	ots = ts;

@@ -1,4 +1,4 @@
-/* $Id: gbhw.h,v 1.18 2006/07/23 13:28:46 ranmachan Exp $
+/* $Id: gbhw.h,v 1.19 2008/07/11 20:12:25 mitch Exp $
  *
  * gbsplay is a Gameboy sound player
  *
@@ -50,8 +50,10 @@ struct gbhw_channel {
 extern struct gbhw_channel gbhw_ch[4];
 
 typedef regparm void (*gbhw_callback_fn)(/*@temp@*/ struct gbhw_buffer *buf, /*@temp@*/ void *priv);
+typedef regparm void (*gbhw_iocallback_fn)(long cycles, uint32_t addr, uint8_t valu, /*@temp@*/ void *priv);
 
 regparm void gbhw_setcallback(/*@dependent@*/ gbhw_callback_fn fn, /*@dependent@*/ void *priv);
+regparm void gbhw_setiocallback(/*@dependent@*/ gbhw_iocallback_fn fn, /*@dependent@*/ void *priv);
 regparm void gbhw_setrate(long rate);
 regparm void gbhw_setbuffer(/*@dependent@*/ struct gbhw_buffer *buffer);
 regparm void gbhw_init(uint8_t *rombuf, uint32_t size);

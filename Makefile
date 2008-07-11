@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.107 2008/06/28 13:27:34 mitch Exp $
+# $Id: Makefile,v 1.108 2008/07/11 20:12:25 mitch Exp $
 
 .PHONY: all default distclean clean install dist
 
@@ -96,6 +96,9 @@ GBSPLAYLDFLAGS += -laudio $(libaudio_flags)
 endif
 ifeq ($(plugout_stdout),yes)
 objs_gbsplay += plugout_stdout.o
+endif
+ifeq ($(plugout_midi),yes)
+objs_gbsplay += plugout_midi.o
 endif
 
 # install contrib files?
