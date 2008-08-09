@@ -21,6 +21,7 @@
 
 #include "plugout.h"
 
+#define FILENAMESIZE 32
 #define LN2 .69314718055994530941
 #define MAGIC 5.78135971352465960412
 #define FREQ(x) (262144 / (x))
@@ -100,8 +101,10 @@ static int midi_write_event(long cycles, const uint8_t *s, unsigned int n)
 static int midi_open_track(int subsong)
 {
 	char *filename;
-
-	if (asprintf(&filename, "gbsplay-%d.mid", subsong + 1) == -1)
+	if ((filename = malloc(FILENAMESIZE)) == NULL)
+		goto out;
+	
+	if (snprintf(filename, FILENAMESIZE, "gbsplay-%d.mid", subsong + 1) >= FILENAMESIZE)
 		goto out;
 
 	file = fopen(filename, "wb");
