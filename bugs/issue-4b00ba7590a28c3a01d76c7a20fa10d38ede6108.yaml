@@ -3,10 +3,10 @@ title: add bash-completion
 desc: Provide a template file that enables full bash-autocomplete support for the gbsplay and gbsinfo binaries.
 type: :feature
 component: gbsplay
-release: 
+release: 0.0.91
 reporter: Christian Garbs <mitch@cgarbs.de>
-status: :in_progress
-disposition: 
+status: :closed
+disposition: :fixed
 creation_time: 2004-11-21 08:38:30.268013 Z
 references: []
 
@@ -20,3 +20,11 @@ log_events:
   - Christian Garbs <mitch@cgarbs.de>
   - changed status from unstarted to in_progress
   - ""
+- - 2008-08-09 22:53:26.602111 Z
+  - Christian Garbs <mitch@cgarbs.de>
+  - assigned to release 0.0.91 from unassigned
+  - it's finished, so include it in the release
+- - 2008-08-09 22:53:46.377582 Z
+  - Christian Garbs <mitch@cgarbs.de>
+  - closed with disposition fixed
+  - "\"boah, was fuer ein Krampf!\""

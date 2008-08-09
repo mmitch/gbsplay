@@ -1,26 +1,66 @@
-# gbsplay bash completion
+# gbsplay/gbsinfo bash completion
 #
-# author: Christian Garbs
+# 2008 (c) Christian Garbs <mitch@cgarbs.de>
+# licensed under GNU GPL
 #
-# based on ditz bash completion code
+# based on the ditz bash completion code
 
 _gbsplay() 
 {
-    cur=${COMP_WORDS[COMP_CWORD]}
+    local cur=${COMP_WORDS[COMP_CWORD]}
+
     if [ "${cur:0:1}" = '-' ]; then
-	# it's an option
+	# looks like an option, return list of all options
 	COMPREPLY=( $( compgen -W "-E -f -g -h -l -o -q -r -R -t -T -v -V -z -Z -1 -2 -3 -4" -- $cur ) )
+    elif [[ "${COMP_WORDS[$(( ${COMP_CWORD} - 1))]}" =~ '^-.*o$' ]]; then
+	# previous word contained -o, return list of plugouts
+	COMPREPLY=( $( compgen -W "$(gbsplay -o list 2>/dev/null | ( read; cut -d -  -f 1 ))" -- $cur ) )
     else
-	prev=${COMP_WORDS[$(( $COMP_CWORD - 1))]}
-	# does not work yet?
-	if [ "$COMP_CWORD" -gt 1 ] && [[ "$prev" =~ '^-.*o$' ]]; then
-	    COMPREPLY=( $( compgen -W "$(gbsplay -o list 2>/dev/null | ( read; cut -d -  -f 1 ))" -- $cur ) )
-	else
-	    :
-	    # filename competion missing
-	    # subsong completion missing
+	# calculate position of filename
+	local filepos=1
+	while [ "${COMP_WORDS[filepos]:0:1}" = '-' ]; do
+	    if [[ "${COMP_WORDS[$(( filepos ))]}" =~ '^-.*o$' ]]; then
+		# jump over parameter to -o
+		let filepos++
+	    fi
+	    let filepos++
+	done
+	if [ $(( $COMP_CWORD - $filepos )) -eq 0 ] ; then
+	    # this is the filename
+	    COMPREPLY=( $( compgen -f -X '!*.gbs' -- $cur) $(compgen -d -o dirnames -- $cur ))
+	elif [ $(( $COMP_CWORD - $filepos )) -eq 1 ] ; then
+	    # this is the subsong start
+	    COMPREPLY=( $( compgen -W "$(seq $(gbsinfo ${COMP_WORDS[filepos]} 2>/dev/null | grep ^Subsongs | cut -d: -f 2) 2>/dev/null)" -- $cur ) )
+	elif [ $(( $COMP_CWORD - $filepos )) -eq 2 ] ; then
+	    # this is the subsong stop...
+	    if [[ ${COMP_WORDS[COMP_CWORD - 1]} =~ '^[0-9]+$' ]] ; then
+		# ...but only if subsong start was given before
+		COMPREPLY=( $( compgen -W "$(seq $(gbsinfo ${COMP_WORDS[filepos]} 2>/dev/null | grep ^Subsongs | cut -d: -f 2) 2>/dev/null)" -- $cur ) )
+	    fi
 	fi
-    fi 
+    fi
 }
 
-complete -F _gbsplay -o default gbsplay
+
+_gbsinfo() 
+{
+    local cur=${COMP_WORDS[COMP_CWORD]}
+
+    if [ "${cur:0:1}" = '-' ]; then
+	# looks like an option, return list of all options
+	COMPREPLY=( $( compgen -W "-h -V" -- $cur ) )
+    else
+	# calculate position of filename
+	local filepos=1
+	while [ "${COMP_WORDS[filepos]:0:1}" = '-' ]; do
+	    let filepos++
+	done
+	if [ $(( $COMP_CWORD - $filepos )) -eq 0 ] ; then
+	    # this is the filename
+	    COMPREPLY=( $( compgen -f -X '!*.gbs' -- $cur) $(compgen -d -o dirnames -- $cur ))
+	fi
+    fi
+}
+
+complete -F _gbsplay -o plusdirs gbsplay
+complete -F _gbsinfo -o plusdirs gbsinfo

@@ -68,7 +68,7 @@ GBSLDFLAGS += $(EXTRA_LDFLAGS)
 export CC GBSCFLAGS GBSLDFLAGS
 
 docs           := README HISTORY COPYRIGHT
-contribs       := contrib/gbs2ogg.sh
+contribs       := contrib/gbs2ogg.sh contrib/gbsplay.bashcompletion
 examples       := examples/nightmode.gbs examples/gbsplayrc_sample
 
 mans           := gbsplay.1    gbsinfo.1    gbsplayrc.5

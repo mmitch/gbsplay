@@ -24,6 +24,7 @@ Enhancements:
 
 - contrib:
   - clarify license of gbs2ogg.sh (it's GPL'ed)
+  - add bash completion script for gbsplay and gbsinfo
 
 - build process:
   - installation of contrib scripts is optional
