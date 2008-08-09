@@ -1,0 +1,16 @@
+--- !ditz.rubyforge.org,2008-03-06/project 
+name: gbsplay
+version: "0.4"
+components: 
+- !ditz.rubyforge.org,2008-03-06/component 
+  name: gbsplay
+releases: 
+- !ditz.rubyforge.org,2008-03-06/release 
+  name: 0.0.91
+  status: :unreleased
+  release_time: 
+  log_events: 
+  - - 2008-08-09 08:12:36.653514 Z
+    - Christian Garbs <mitch@cgarbs.de>
+    - created
+    - ""
