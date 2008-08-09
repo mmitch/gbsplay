@@ -299,12 +299,10 @@ static ssize_t regparm midi_write(const void *buf, size_t count)
 	return count;
 }
 
-static int regparm midi_close(void)
+static void regparm midi_close(void)
 {
 	if (file)
-		return midi_close_track();
-
-	return 0;
+		midi_close_track();
 }
 
 const struct output_plugin plugout_midi = {

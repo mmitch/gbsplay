@@ -26,3 +26,11 @@ log_events:
   - Christian Garbs <mitch@cgarbs.de>
   - changed status from unstarted to in_progress
   - ""
+- - 2008-08-09 09:37:39.052496 Z
+  - Christian Garbs <mitch@cgarbs.de>
+  - commented
+  - "one warning remains:\n\
+    CC plugout_midi.c -o plugout_midi.o   \n\
+    plugout_midi.c: In function \xE2\x80\x98midi_io\xE2\x80\x99:\n\
+    plugout_midi.c:290: warning: suggest parentheses around + or - in operand of &\n\n\
+    I can't decypher this construct:\n        case 0xff1c:\n                volume[2] = 32 * ((4 - ((val >> 5)) & 3) % 4);\n                break;"
