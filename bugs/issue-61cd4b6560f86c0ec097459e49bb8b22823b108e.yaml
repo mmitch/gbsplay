@@ -1,5 +1,5 @@
 --- !ditz.rubyforge.org,2008-03-06/issue 
-title: remove warning in plugout_midi
+title: remove warnings in plugout_midi
 desc: "CC plugout_midi.c -o plugout_midi.o\n\
   plugout_midi.c: In function \xE2\x80\x98midi_open_track\xE2\x80\x99:\n\
   plugout_midi.c:104: warning: implicit declaration of function \xE2\x80\x98asprintf\xE2\x80\x99\n\
@@ -11,7 +11,7 @@ type: :task
 component: gbsplay
 release: 0.0.91
 reporter: Christian Garbs <mitch@cgarbs.de>
-status: :unstarted
+status: :in_progress
 disposition: 
 creation_time: 2008-08-09 08:13:21.176747 Z
 references: []
@@ -21,4 +21,8 @@ log_events:
 - - 2008-08-09 08:13:22.493176 Z
   - Christian Garbs <mitch@cgarbs.de>
   - created
+  - ""
+- - 2008-08-09 09:20:46.029530 Z
+  - Christian Garbs <mitch@cgarbs.de>
+  - changed status from unstarted to in_progress
   - ""
