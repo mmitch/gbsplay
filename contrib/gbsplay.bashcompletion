@@ -1,0 +1,26 @@
+# gbsplay bash completion
+#
+# author: Christian Garbs
+#
+# based on ditz bash completion code
+
+_gbsplay() 
+{
+    cur=${COMP_WORDS[COMP_CWORD]}
+    if [ "${cur:0:1}" = '-' ]; then
+	# it's an option
+	COMPREPLY=( $( compgen -W "-E -f -g -h -l -o -q -r -R -t -T -v -V -z -Z -1 -2 -3 -4" -- $cur ) )
+    else
+	prev=${COMP_WORDS[$(( $COMP_CWORD - 1))]}
+	# does not work yet?
+	if [ "$COMP_CWORD" -gt 1 ] && [[ "$prev" =~ '^-.*o$' ]]; then
+	    COMPREPLY=( $( compgen -W "$(gbsplay -o list 2>/dev/null | ( read; cut -d -  -f 1 ))" -- $cur ) )
+	else
+	    :
+	    # filename competion missing
+	    # subsong completion missing
+	fi
+    fi 
+}
+
+complete -F _gbsplay -o default gbsplay
