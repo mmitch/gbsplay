@@ -1,5 +1,4 @@
-/* $Id: gbhw.h,v 1.19 2008/07/11 20:12:25 mitch Exp $
- *
+/*
  * gbsplay is a Gameboy sound player
  *
  * 2003-2005 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>

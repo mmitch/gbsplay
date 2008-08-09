@@ -1,5 +1,4 @@
-/* $Id: plugout_nas.h,v 1.2 2005/06/29 00:34:58 ranmachan Exp $
- *
+/*
  * gbsplay is a Gameboy sound player
  *
  * 2004 (C) by Christian Garbs <mitch@cgarbs.de>

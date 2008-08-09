@@ -1,5 +1,3 @@
-# $Id: Makefile,v 1.108 2008/07/11 20:12:25 mitch Exp $
-
 .PHONY: all default distclean clean install dist
 
 all: default

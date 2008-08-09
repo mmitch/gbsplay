@@ -1,5 +1,4 @@
-/* $Id: impulsegen.c,v 1.1 2006/11/18 14:34:52 ranmachan Exp $
- *
+/*
  * gbsplay is a Gameboy sound player
  *
  * 2003-2006 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>

@@ -1,5 +1,3 @@
-# $Id: subdir.mk,v 1.4 2003/12/28 19:28:13 ranma Exp $
-
 ifeq ($(have_xgettext),yes)
 
 pos  := $(wildcard po/*.po)

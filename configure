@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id: configure,v 1.89 2008/07/11 20:27:04 mitch Exp $
 #
 # generate config.mk for gbsplay Makefile
 #

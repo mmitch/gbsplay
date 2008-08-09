@@ -1,5 +1,4 @@
-/* $Id: plugout_alsa.c,v 1.2 2008/06/21 12:53:03 ranmachan Exp $
- *
+/*
  * gbsplay is a Gameboy sound player
  *
  * 2006 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>

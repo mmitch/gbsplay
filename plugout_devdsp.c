@@ -1,5 +1,4 @@
-/* $Id: plugout_devdsp.c,v 1.11 2006/07/23 13:28:46 ranmachan Exp $
- *
+/*
  * gbsplay is a Gameboy sound player
  *
  * 2003-2005 (C) by Christian Garbs <mitch@cgarbs.de>

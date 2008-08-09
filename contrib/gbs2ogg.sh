@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id: gbs2ogg.sh,v 1.10 2008/06/29 10:57:55 mitch Exp $
 #
 # Automatically convert all subsongs from .gbs file to .ogg files.
 # 
