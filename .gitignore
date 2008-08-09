@@ -1,4 +1,6 @@
 *.d
+*.o
 *.lo
 *.mo
 config.conf
+*~
