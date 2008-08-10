@@ -5,7 +5,7 @@ type: :feature
 component: gbsplay
 release: 0.0.91
 reporter: Christian Garbs <mitch@cgarbs.de>
-status: :closed
+status: :in_progress
 disposition: :fixed
 creation_time: 2004-11-21 08:38:30.268013 Z
 references: []
@@ -28,3 +28,10 @@ log_events:
   - Christian Garbs <mitch@cgarbs.de>
   - closed with disposition fixed
   - "\"boah, was fuer ein Krampf!\""
+- - 2008-08-10 08:42:42.089931 Z
+  - Christian Garbs <mitch@cgarbs.de>
+  - changed status from closed to in_progress
+  - |-
+    completion does not work 100%:
+    dirnames are added to _every_ command (should only happen for filename part)
+    and fallthrough after gbsplay options only expands to dirnames, a redirection to a file (> somefile) is not expanded as it should
