@@ -14,7 +14,7 @@ _gbsplay()
 	COMPREPLY=( $( compgen -W "-E -f -g -h -l -o -q -r -R -t -T -v -V -z -Z -1 -2 -3 -4" -- $cur ) )
     elif [[ "${COMP_WORDS[$(( ${COMP_CWORD} - 1))]}" =~ '^-.*o$' ]]; then
 	# previous word contained -o, return list of plugouts
-	COMPREPLY=( $( compgen -W "$(gbsplay -o list 2>/dev/null | ( read; cut -d -  -f 1 ))" -- $cur ) )
+	COMPREPLY=( $( compgen -W "$(gbsplay -o list 2>/dev/null | ( read; cut -d -  -f 1 )) list" -- $cur ) )
     else
 	# calculate position of filename
 	local filepos=1
