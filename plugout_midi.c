@@ -287,7 +287,7 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 #endif
 		break;
 	case 0xff1c:
-		volume[2] = 32 * ((4 - ((val >> 5)) & 3) % 4);
+		volume[2] = 32 * ((4 - (val >> 5)) & 3);
 		break;
 	}
 
