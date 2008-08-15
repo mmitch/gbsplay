@@ -2,8 +2,8 @@
 gbsplay HISTORY
 
 
-2008/xx/xx  -  0.0.9cvs
-~~~~~~~~~~~~~~~~~~~~
+2008/08/15  -  0.0.91
+~~~~~~~~~~~~~~~~~~~~~
 
 Bugfixes:
 
@@ -24,7 +24,7 @@ Enhancements:
 
 - contrib:
   - clarify license of gbs2ogg.sh (it's GPL'ed)
-  - add bash completion script for gbsplay and gbsinfo
+  - add (unfinished) bash completion script for gbsplay and gbsinfo
 
 - build process:
   - installation of contrib scripts is optional

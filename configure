@@ -36,7 +36,7 @@ if [ -d /usr/ucb ]; then
 fi
 
 ## set version number
-VERSION=0.0.9cvs
+VERSION=0.0.91
 
 ##### begin of subroutines
 
