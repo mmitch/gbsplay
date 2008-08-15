@@ -3,7 +3,7 @@ title: add bash-completion
 desc: Provide a template file that enables full bash-autocomplete support for the gbsplay and gbsinfo binaries.
 type: :feature
 component: gbsplay
-release: 0.0.91
+release: 
 reporter: Christian Garbs <mitch@cgarbs.de>
 status: :in_progress
 disposition: :fixed
@@ -35,3 +35,7 @@ log_events:
     completion does not work 100%:
     dirnames are added to _every_ command (should only happen for filename part)
     and fallthrough after gbsplay options only expands to dirnames, a redirection to a file (> somefile) is not expanded as it should
+- - 2008-08-15 17:32:58.332495 Z
+  - Christian Garbs <mitch@cgarbs.de>
+  - unassigned from release 0.0.91
+  - no solution for current problems in sight, see news:g7n37a$suo$1@yggdrasil.mitch.h.shuttle.de in de.comp.os.unix.shell for further details
