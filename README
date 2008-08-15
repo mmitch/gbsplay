@@ -14,8 +14,7 @@ Bug reports:     http://www.cgarbs.de/ditz/gbsplay/
                  send new bugs to the mailing list
 
 This program emulates the sound hardware of the Nintendo Gameboy.  It
-is able to play the sounds from a Gameboy module dump (.GBS format)
-over /dev/dsp.
+is able to play the sounds from a Gameboy module dump (.GBS format).
 
 gbsplay is compatible to GBSv1.  It uses a backwards compatible extension
 to store additional information in the file.  The gbsplay package contains
