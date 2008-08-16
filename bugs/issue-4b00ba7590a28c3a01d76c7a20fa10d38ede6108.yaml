@@ -39,3 +39,7 @@ log_events:
   - Christian Garbs <mitch@cgarbs.de>
   - unassigned from release 0.0.91
   - no solution for current problems in sight, see news:g7n37a$suo$1@yggdrasil.mitch.h.shuttle.de in de.comp.os.unix.shell for further details
+- - 2008-08-16 10:34:28.818301 Z
+  - Christian Garbs <mitch@cgarbs.de>
+  - commented
+  - Thanks to news:6gm2pvFgkq6cU1@mid.uni-berlin.de everything is quite fine now.  Only filenames and directories with whitespace wreak havoc.
