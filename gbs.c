@@ -455,7 +455,7 @@ regparm struct gbs *gbs_open(char *name)
 
 	for (i=0; i<8; i++) {
 		long addr = gbs->load + 8*i; /* jump address */
-		gbs->rom[8*i]   = 0xc3; /* jr imm16 */
+		gbs->rom[8*i]   = 0xc3; /* jp imm16 */
 		gbs->rom[8*i+1] = addr & 0xff;
 		gbs->rom[8*i+2] = addr >> 8;
 	}
