@@ -1,6 +1,6 @@
 
 gbsplay uses ditz <http://ditz.rubyforge.org> as a bug and issue tracking
-system.  We use the stable ditz version (currently 0.4).
+system.  We use the stable ditz version (currently 0.5).
 
 New issues should be send as merge requests of ditz issues or can simply be
 reported via email to the developer's mailing list at
