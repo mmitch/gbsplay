@@ -23,3 +23,15 @@ log_events:
   - Christian Garbs <mitch@cgarbs.de>
   - created
   - imported from gbsplay-dev mailing list
+- - 2008-08-22 21:37:52.239192 Z
+  - Christian Garbs <mitch@cgarbs.de>
+  - commented
+  - |-
+    mgb is the file format of the Paragon 5 Gameboy Tracker (http://www.nullsleep.com/programs/p5_tracker.zip)
+    from Paragon5 (http://www.paragon5.com/).  A WinAmp plugin is here: http://support.xmplay.com/file_comment.php?id=24
+    
+    Support for the mgb format would require writing a sound player routine for the GameBoy that plays the mgb files.
+    If this is done, gbsplay should be able to play the resulting file (player and music).
+    
+    I think that Paragon5 already has done this so that mgb files can be played on a real GameBoy, but I'm not sure.
+    Without access to their player, everything would have to be reverse engineered.
