@@ -387,6 +387,12 @@ parseoption()
 		eval "build_${1#--without-}=no"
 		isknown build_${1#--without-} || usage 1
 		;;
+		CFLAGS=*)
+		CFLAGS="${1#CFLAGS=}"
+		;;
+		LDFLAGS=*)
+		LDFLAGS="${1#LDFLAGS=}"
+		;;
 		--help)
 		usage 0
 		;;
