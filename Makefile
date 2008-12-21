@@ -65,7 +65,7 @@ DISTDIR := gbsplay-$(VERSION)
 GBSCFLAGS  += $(EXTRA_CFLAGS)
 GBSLDFLAGS += $(EXTRA_LDFLAGS)
 
-export CC GBSCFLAGS GBSLDFLAGS
+export CC HOSTCC BUILDCC GBSCFLAGS GBSLDFLAGS
 
 docs           := README HISTORY COPYRIGHT
 contribs       := contrib/gbs2ogg.sh contrib/gbsplay.bashcompletion
@@ -164,7 +164,7 @@ uninstall-libgbs.so.1:
 
 
 libgbs.so.1: $(objs_libgbspic) libgbs.so.1.ver
-	$(CC) -fpic -shared -Wl,-O1 -Wl,-soname=$@ -Wl,--version-script,$@.ver -o $@ $(objs_libgbspic)
+	$(BUILDCC) -fpic -shared -Wl,-O1 -Wl,-soname=$@ -Wl,--version-script,$@.ver -o $@ $(objs_libgbspic)
 	ln -fs $@ libgbs.so
 
 libgbs: libgbs.so.1
@@ -326,12 +326,12 @@ libgbspic.a: $(objs_libgbspic)
 libgbs.a: $(objs_libgbs)
 	$(AR) r $@ $+
 gbsinfo: $(objs_gbsinfo) libgbs
-	$(CC) -o $(gbsinfobin) $(objs_gbsinfo) $(GBSLDFLAGS)
+	$(BUILDCC) -o $(gbsinfobin) $(objs_gbsinfo) $(GBSLDFLAGS)
 gbsplay: $(objs_gbsplay) libgbs
-	$(CC) -o $(gbsplaybin) $(objs_gbsplay) $(GBSLDFLAGS) $(GBSPLAYLDFLAGS) -lm
+	$(BUILDCC) -o $(gbsplaybin) $(objs_gbsplay) $(GBSLDFLAGS) $(GBSPLAYLDFLAGS) -lm
 
 gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
-	$(CC) -shared -fpic -Wl,--version-script,$@.ver -o $@ $(objs_gbsxmms) $(GBSLDFLAGS) $(PTHREAD)
+	$(BUILDCC) -shared -fpic -Wl,--version-script,$@.ver -o $@ $(objs_gbsxmms) $(GBSLDFLAGS) $(PTHREAD)
 
 # rules for suffixes
 
@@ -339,15 +339,15 @@ gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 
 .c.lo:
 	@echo CC $< -o $@
-	@$(CC) $(GBSCFLAGS) -fpic -c -o $@ $<
+	@$(BUILDCC) $(GBSCFLAGS) -fpic -c -o $@ $<
 .c.o:
 	@echo CC $< -o $@
 	@(test -x "`which $(SPLINT)`" && $(SPLINT) $(SPLINTFLAGS) $<) || true
-	@$(CC) $(GBSCFLAGS) -c -o $@ $<
+	@$(BUILDCC) $(GBSCFLAGS) -c -o $@ $<
 .c.i:
-	$(CC) -E $(GBSCFLAGS) -o $@ $<
+	$(BUILDCC) -E $(GBSCFLAGS) -o $@ $<
 .c.s:
-	$(CC) -S $(GBSCFLAGS) -fverbose-asm -o $@ $<
+	$(BUILDCC) -S $(GBSCFLAGS) -fverbose-asm -o $@ $<
 
 # rules for generated files
 

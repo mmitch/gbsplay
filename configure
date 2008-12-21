@@ -15,10 +15,12 @@ EXTRA_SRCS=
 EXTRA_UNINSTALL=
 XMMS_INPUT_PLUGIN_DIR=
 CC="${CC-gcc}" # use gcc by default
+HOSTCC="$CC"
 HOSTOS=`uname`
 HOSTARCH=`uname -m`
-TARGETOS="$HOSTOS"
-TARGETARCH="$HOSTARCH"
+BUILDCC="$HOSTCC"
+BUILDOS="$HOSTOS"
+BUILDARCH="$HOSTARCH"
 
 package=gbsplay
 prefix=/usr/local
@@ -173,9 +175,9 @@ check_libs()
         fi
     done
 
-    minerrs=`$CC -o "$OUTFILE" "$INFILE" $cflags -l$checklib $extraflags 2>&1 | wc -l`
+    minerrs=`$BUILDCC -o "$OUTFILE" "$INFILE" $cflags -l$checklib $extraflags 2>&1 | wc -l`
     for extralib in $extralibs; do
-        errs=`$CC -o "$OUTFILE" "$INFILE" $cflags -l$checklib -l$extralib $extraflags 2>&1 | wc -l`
+        errs=`$BUILDCC -o "$OUTFILE" "$INFILE" $cflags -l$checklib -l$extralib $extraflags 2>&1 | wc -l`
         if [ $errs -lt $minerrs ]; then
             minerrs=$errs
             append_nodupe extraflags "-l$extralib"
@@ -204,7 +206,7 @@ cc_check()
     test "$name" && printf "$name:  "
 
     cat > "$INFILE"
-    $CC -o "$OUTFILE" "$INFILE" $flags
+    $BUILDCC -o "$OUTFILE" "$INFILE" $flags
     RESULT=$?
     if [ $RESULT -eq 0 ]; then
 	test "$name" && echo "$okmsg"
@@ -359,9 +361,11 @@ parseoption()
 		;;
 		--host=*)
 		hostalias="${1#--host=}"
+		HOSTCC="${hostalias}-${CC}"
 		;;
-		--target=*)
-		targetalias="${1#--target=}"
+		--build=*)
+		buildalias="${1#--build=}"
+		BUILDCC="${buildalias}-${CC}"
 		;;
 		--have-*)
 		eval "have_${1#--have-}=yes"
@@ -499,18 +503,14 @@ while [ $1 ]; do
 	shift
 done
 
-## sanity check
-if [ -n "$targetalias" -a "$targetalias" != "$hostalias" ]; then
-	die "cross-compiling is not yet supported."
-fi
 
 ## on Linux x86, regparm defaults to on
 
-if [ \( "$TARGETARCH" = "i386" -o    \
-        "$TARGETARCH" = "i486" -o    \
-        "$TARGETARCH" = "i586" -o    \
-        "$TARGETARCH" = "i686" \) -a \
-        "$TARGETOS" = "Linux" ]; then
+if [ \( "$BUILDARCH" = "i386" -o    \
+        "$BUILDARCH" = "i486" -o    \
+        "$BUILDARCH" = "i586" -o    \
+        "$BUILDARCH" = "i686" \) -a \
+        "$BUILDOS" = "Linux" ]; then
     setdefault use_regparm yes
 else
     setdefault use_regparm no
@@ -520,6 +520,10 @@ fi
 setdefault build_xmmsplugin no
 setdefault build_contrib yes
 setdefault build_test yes
+## disable test when cross-compiling
+if [ -n "$buildalias" -a "$buildalias" != "$hostalias" ]; then
+    build_test=no
+fi
 
 ## check for C compiler
 
@@ -532,21 +536,33 @@ int main(char argc, char **argv) {
     return 0;
 }
 EOF
-$CC -o "$OUTFILE" "$INFILE" $CFLAGS $LDFLAGS
+$BUILDCC -o "$OUTFILE" "$INFILE" $CFLAGS $LDFLAGS
 RESULT=$?
 if [ $RESULT -eq 0 ]; then
-    if [ -s "$OUTFILE" ]; then
-	"$OUTFILE"
-	if [ $? -eq 0 ]; then
-	    echo "ok"
-	else
-	    die "can't execute generated code"
-	fi
+    if [ "$buildalias" -a "$buildalias" != "$hostalias" ]; then
+	echo "cross-compiling, skipping execute check"
     else
-	die "no code generated"
+	if [ -s "$OUTFILE" ]; then
+	    "$OUTFILE"
+	    if [ $? -eq 0 ]; then
+		echo "ok"
+	    else
+		die "can't execute generated code"
+	    fi
+	else
+	    die "no code generated"
+	fi
     fi
 else
-    die "error executing '$CC'"
+    die "error executing '$BUILDCC'"
+fi
+
+
+cc_check "checking if cc supports -Wdeclaration-after-statement" "" "-Wdeclaration-after-statement" yes no <<EOF
+int main(char argc, char **argv) { return 0; }
+EOF
+if [ $? -eq 0 ]; then
+	append_nodupe CFLAGS "-Wdeclaration-after-statement"
 fi
 
 if [ "$use_regparm" != "no" ]; then
@@ -835,6 +851,8 @@ docdir
 localedir
 sysconfdir
 CC
+BUILDCC
+HOSTCC
 build_contrib
 build_test
 build_xmmsplugin
