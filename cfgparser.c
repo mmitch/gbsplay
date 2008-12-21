@@ -136,6 +136,8 @@ regparm void cfg_long(void *ptr)
 
 regparm void cfg_parse(const char *fname, const struct cfg_option *options)
 {
+	char option[200] = "";
+
 	filename = fname;
 	cfg_file = fopen(fname, "r");
 	if (cfg_file == NULL) return;
@@ -147,7 +149,6 @@ regparm void cfg_parse(const char *fname, const struct cfg_option *options)
 	cfg_char = 0;
 	c = nextchar();
 
-	char option[200] = "";
 	do {
 		unsigned long n;
 		switch (state) {

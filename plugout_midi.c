@@ -232,6 +232,7 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 	static long div[4] = {0, 0, 0, 0};
 	static long note[4] = {0, 0, 0, 0};
 	static int volume[4] = {0, 0, 0, 0};
+	int new_note;
 
 	long chan = (addr - 0xff10) / 5;
 
@@ -253,7 +254,7 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 		div[chan] &= 0x00ff;
 		div[chan] |= ((long) (val & 7)) << 8;
 
-		int new_note = NOTE(2048 - div[chan]) + 21;
+		new_note = NOTE(2048 - div[chan]) + 21;
 
 		/* Channel start trigger */
 		if (val & 0x80) {
