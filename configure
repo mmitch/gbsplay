@@ -7,23 +7,40 @@
 # Licensed under GNU GPL.
 #
 
+## initialize interpreter parameters
+
+set -u # bail on use of uninitialized variables
+
 ## initialize variables
 
 EXTRA_ALL=
 EXTRA_INSTALL=
 EXTRA_SRCS=
 EXTRA_UNINSTALL=
+EXTRA_I18NFLAGS=
 XMMS_INPUT_PLUGIN_DIR=
 CC="${CC-gcc}" # use gcc by default
+CFLAGS="${CFLAGS-}"
+LDFLAGS="${LDFLAGS-}"
 HOSTCC="$CC"
 HOSTOS=`uname`
 HOSTARCH=`uname -m`
 BUILDCC="$HOSTCC"
 BUILDOS="$HOSTOS"
 BUILDARCH="$HOSTARCH"
+TMPDIR=${TMPDIR-/tmp}
 
 package=gbsplay
 prefix=/usr/local
+exec_prefix=
+bindir=
+libdir=
+mandir=
+docdir=
+localedir=
+sysconfdir=
+buildalias=
+hostalias=
 
 ## define sane environment
 unset LC_ALL LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY \
@@ -54,9 +71,9 @@ die ()
 check_include()
 {
     include="$1"
-    includedirs="$2 /usr/local/include"
+    includedirs="${2-} /usr/local/include"
     includename="`echo $include | sed -e 's@[/\.]@_@g'`"
-    eval "value=\$have_$includename"
+    eval "value=\${have_${includename}-}"
     test -z "$value" || return
 
     flags=""
@@ -82,7 +99,7 @@ EOF
 find_lib()
 {
     lib="$1"
-    libdirs="$2"
+    libdirs="${2-}"
 
     eval "val=\"\$lib${lib}_path\""
     if [ ! -z "$val" ]; then
@@ -127,7 +144,7 @@ append_nodupe()
     varname="$1"
     dupe=0
 
-    while [ -n "$2" ]; do
+    while [ -n "${2-}" ]; do
         eval "flags=\"\$$varname\""
         append="$2"
 
@@ -154,12 +171,14 @@ check_libs()
     INFILE="$TEMPDIR/cl.c"
     OUTFILE="$TEMPDIR/cl"
     checklib="$1"
-    extralibs="$2"
-    extralibdirs="$3"
-    name="$4"
-    extraflags="$5"
+    extralibs="${2-}"
+    extralibdirs="${3-}"
+    name="${4-}"
+    extraflags="${5-}"
     msg="${6--l$checklib}"
     cflags="$CFLAGS $LDFLAGS"
+
+    eval "lib${checklib}_flags="
 
     cat > "$INFILE"
 
@@ -199,7 +218,7 @@ cc_check()
     OUTFILE="$TEMPDIR/cc"
     name="$1"
     varname="$2"
-    flags="$CFLAGS $LDFLAGS $3"
+    flags="$CFLAGS $LDFLAGS ${3-}"
     okmsg="${4-ok}"
     errmsg="${5-not found}"
 
@@ -488,6 +507,9 @@ EOF
 }
 
 OPTS="build_contrib build_test build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_ssp use_debug use_stdout use_devdsp use_alsa use_nas use_midi"
+for OPT in $OPTS; do
+	eval "${OPT}="
+done
 
 ## load user config
 if [ -f config.conf ]; then
@@ -498,11 +520,10 @@ if [ -f config.conf ]; then
 	echo ok
 fi
 
-while [ $1 ]; do
+while [ ${1-} ]; do
 	parseoption $1
 	shift
 done
-
 
 ## on Linux x86, regparm defaults to on
 
@@ -698,6 +719,7 @@ fi
 if [ "$build_xmmsplugin" != "no" ]; then
     ## check for pthread
 
+    PTHREAD=
     check_include pthread.h
     if [ "$have_pthread_h" = "yes" ]; then
         cc_check "checking for Linux flavoured pthread" have_pthread "-lpthread" found no <<EOF
@@ -731,6 +753,7 @@ EOF
 
     printf "checking for glib-dev:  "
     CONFIG=`which glib-config`
+    GLIB_CFLAGS=
     if [ $? -eq 0 ]; then
         GLIB_CFLAGS=`glib-config --cflags`
         if [ $? -eq 0 ]; then
@@ -746,6 +769,7 @@ EOF
 
     printf "checking for xmms-dev:  "
     CONFIG=`which xmms-config`
+    XMMS_CFLAGS=
     if [ $? -eq 0 ]; then
         XMMS_CFLAGS=`xmms-config --cflags` 
         if [ $? -eq 0 ]; then
@@ -761,6 +785,10 @@ EOF
     else
         echo "xmms-config not found!"
     fi
+else
+    GLIB_CFLAGS=
+    XMMS_CFLAGS=
+    PTHREAD=
 fi
 
 ## check for cygwin environment
