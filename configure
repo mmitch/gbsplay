@@ -832,17 +832,7 @@ setdefault use_stdout yes
 printoptional modules build
 printoptional features use
 
-## architecture dependent CFLAGS
-
-ARCH=`uname -m`
-case $ARCH in
-	i?86)
-	append_nodupe CFLAGS -Os -pipe -march=$ARCH
-	;;
-	*)
-	append_nodupe CFLAGS -Os -pipe
-	;;
-esac
+append_nodupe CFLAGS -Os -pipe
 
 if [ "$use_debug" = "yes" ]; then
 	append_nodupe CFLAGS -g3
@@ -858,6 +848,7 @@ echo "EXTRA_LDFLAGS=$EXTRA_LDFLAGS"
 ## write configuration
 
 (
+    set +u  # Allow uninitialised vars here
     while read var; do
 	eval "echo \"$var := \$$var\""
     done << __EOF__
@@ -898,6 +889,7 @@ __EOF__
 ) > config.mk
 
 (
+    set +u  # Allow uninitialised vars here
     echo "#define GBS_VERSION \"$VERSION\""
     echo "#define LOCALE_PREFIX \"$localedir\""
     echo "#define SYSCONF_PREFIX \"$sysconfdir\""
