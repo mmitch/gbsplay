@@ -205,8 +205,7 @@ static int note_on(long cycles, int channel, int note, int velocity)
 {
 	uint8_t event[3];
 
-	//event[0] = 0x90 | channel;
-	event[0] = 0x90;
+	event[0] = 0x90 | channel;
 	event[1] = note;
 	event[2] = velocity;
 
@@ -220,8 +219,7 @@ static int note_off(long cycles, int channel, int note)
 {
 	uint8_t event[3];
 
-	//event[0] = 0x80 | channel;
-	event[0] = 0x80;
+	event[0] = 0x80 | channel;
 	event[1] = note;
 	event[2] = 0;
 
