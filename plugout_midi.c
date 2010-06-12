@@ -67,20 +67,24 @@ static int midi_write_u16(uint16_t x)
 
 static int midi_write_varlen(unsigned long x)
 {
-	do {
-		uint8_t s;
+	uint8_t data[4];
+	unsigned int i;
 
-		s = x & 0x7f;
+	for (i = 0; i < 4; ++i) {
+		data[3 - i] = (x & 0x7f) | 0x80;
 		x >>= 7;
-		if (x)
-			s |= 0x80;
 
-		if (fwrite(&s, 1, 1, file) != 1)
-			return 1;
+		if (!x) {
+			++i;
+			break;
+		}
+	}
 
-		++track_length;
-	} while(x);
+	data[3] &= ~0x80;
+	if (fwrite(data + 4 - i, 1, i, file) != i)
+		return 1;
 
+	track_length += i;
 	return 0;
 }
 
