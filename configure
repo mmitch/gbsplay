@@ -2,8 +2,8 @@
 #
 # generate config.mk for gbsplay Makefile
 #
-# 2003-2006,2008 (C) by Christian Garbs <mitch@cgarbs.de>
-#                       Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+# 2003-2006,2008,2010 (C) by Christian Garbs <mitch@cgarbs.de>
+#                            Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
 # Licensed under GNU GPL.
 #
 
@@ -56,7 +56,7 @@ if [ -d /usr/ucb ]; then
 fi
 
 ## set version number
-VERSION=0.0.91cvs
+VERSION=0.0.91
 
 ##### begin of subroutines
 
@@ -614,30 +614,10 @@ EOF
     fi
 fi
 
-# Check CVS time
+# Check git timestamp
 
-if [ -f CVS/Entries ]; then
-    cc_check <<EOF
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <time.h>
-
-int main(int argc, char **argv)
-{
-	char date[200];
-	struct stat st;
-
-	lstat("CVS/Entries", &st);
-	strftime(date, sizeof(date), "%Y%m%d", gmtime(&st.st_mtime));
-	puts(date);
-
-	return 0;
-}
-EOF
-	if [ $? -eq 0 ]; then
-		VERSION=${VERSION}+cvs`$TEMPDIR/cc`
-	fi
+if [ -f .git/HEAD ]; then
+	VERSION=${VERSION}+git`git log --date=short -n 1 | grep ^Date: | head -n 1 | sed -e 's/^.* //' -e 's/-//g'`
 fi
 
 ## check for various headers
