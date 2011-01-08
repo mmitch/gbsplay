@@ -20,6 +20,7 @@ EXTRA_UNINSTALL=
 EXTRA_I18NFLAGS=
 XMMS_INPUT_PLUGIN_DIR=
 CC="${CC-gcc}" # use gcc by default
+AR="${AR-ar}" # use ar by default
 CFLAGS="${CFLAGS-}"
 LDFLAGS="${LDFLAGS-}"
 HOSTCC="$CC"
@@ -910,6 +911,7 @@ mandir
 docdir
 localedir
 sysconfdir
+AR
 CC
 BUILDCC
 HOSTCC
