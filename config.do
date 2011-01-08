@@ -190,6 +190,6 @@ contribdir
 xmmsdir
 __EOF__
     
-) >> config.sh
+) > config.sh
 
 cat config.h config.sed config.sh configure | redo-stamp
