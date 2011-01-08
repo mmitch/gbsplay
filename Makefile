@@ -255,7 +255,7 @@ uninstall-default:
 	-rmdir -p $(bindir)
 	rm -f $(man1dir)/gbsplay.1 $(man1dir)/gbsinfo.1
 	-rmdir -p $(man1dir)
-	rm -f $(man5dir)/gbsplayrc.5 $(man5dir)/gbsplayrc.5	
+	rm -f $(man5dir)/gbsplayrc.5
 	-rmdir -p $(man5dir)
 	rm -rf $(exampledir)
 	-rmdir -p $(exampledir)
