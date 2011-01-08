@@ -7,6 +7,8 @@ redo-ifchange configure
 # TODO: nearly everything behaves differently when set in ENV before call!
 # this is not redo-compatible I think!
 
+TESTOPTS="-r 44100 -t 30 -f 0 -g 0 -T 0"
+
 prefix=/usr/local
 exec_prefix=$prefix
 
@@ -174,8 +176,11 @@ pos
 mos
 DISTDIR
 VERSION
+EXTRA_ALL
+TEST_TARGETS
+TESTOPTS
 __EOF__
     
 ) >> config.sh
 
-cat config.h config.mk config.sed config.sh configure | redo-stamp
+cat config.h config.sed config.sh configure | redo-stamp
