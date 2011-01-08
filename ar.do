@@ -1,4 +1,4 @@
 redo-ifchange config
 . ./config.sh
-redo-ifchange $objs $dsts $mans
-
+echo "$AR r \$@" > $3
+chmod a+x $3

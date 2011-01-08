@@ -4,119 +4,9 @@ all: default
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
 
-prefix      := /usr/local
-exec_prefix := $(prefix)
-
-bindir      := $(exec_prefix)/bin
-libdir      := $(exec_prefix)/lib
-mandir      := $(prefix)/man
-docdir      := $(prefix)/share/doc/gbsplay
-localedir   := $(prefix)/share/locale
-
-SPLINT := splint
-
-SPLINTFLAGS := \
-	+quiet \
-	-exportlocal \
-	-unrecog \
-	-immediatetrans \
-	-fullinitblock \
-	-namechecks \
-	-preproc \
-	-fcnuse \
-	-predboolint \
-	-boolops \
-	-formatconst \
-	-type \
-	+unixlib \
-	+boolint \
-	+matchanyintegral \
-	+charint \
-	-predboolothers \
-	-shiftnegative \
-	-shiftimplementation
-GBSCFLAGS  := -Wall -fsigned-char -D_FORTIFY_SOURCE=2
-GBSLDFLAGS := -Wl,-O1 -lm
-GBSPLAYLDFLAGS :=
 
 ifneq ($(noincludes),yes)
 -include config.mk
-endif
-
-XMMSPREFIX  :=
-DESTDIR     :=
-
-prefix      := $(DESTDIR)$(prefix)
-exec_prefix := $(DESTDIR)$(exec_prefix)
-bindir      := $(DESTDIR)$(bindir)
-mandir      := $(DESTDIR)$(mandir)
-docdir      := $(DESTDIR)$(docdir)
-localedir   := $(DESTDIR)$(localedir)
-
-xmmsdir     := $(DESTDIR)$(XMMSPREFIX)$(XMMS_INPUT_PLUGIN_DIR)
-
-man1dir     := $(mandir)/man1
-man5dir     := $(mandir)/man5
-contribdir  := $(docdir)/contrib
-exampledir  := $(docdir)/examples
-
-DISTDIR := gbsplay-$(VERSION)
-
-GBSCFLAGS  += $(EXTRA_CFLAGS)
-GBSLDFLAGS += $(EXTRA_LDFLAGS)
-
-export CC HOSTCC BUILDCC GBSCFLAGS GBSLDFLAGS
-
-docs           := README HISTORY COPYRIGHT
-contribs       := contrib/gbs2ogg.sh contrib/gbsplay.bashcompletion
-examples       := examples/nightmode.gbs examples/gbsplayrc_sample
-
-mans           := gbsplay.1    gbsinfo.1    gbsplayrc.5
-mans_src       := gbsplay.in.1 gbsinfo.in.1 gbsplayrc.in.5
-
-objs_libgbspic := gbcpu.lo gbhw.lo gbs.lo cfgparser.lo crc32.lo impulsegen.lo
-objs_libgbs    := gbcpu.o  gbhw.o  gbs.o  cfgparser.o  crc32.o  impulsegen.o
-objs_gbsplay   := gbsplay.o util.o plugout.o
-objs_gbsinfo   := gbsinfo.o
-objs_gbsxmms   := gbsxmms.lo
-
-# gbsplay output plugins
-ifeq ($(plugout_devdsp),yes)
-objs_gbsplay += plugout_devdsp.o
-endif
-ifeq ($(plugout_alsa),yes)
-objs_gbsplay += plugout_alsa.o
-GBSPLAYLDFLAGS += -lasound $(libaudio_flags)
-endif
-ifeq ($(plugout_nas),yes)
-objs_gbsplay += plugout_nas.o
-GBSPLAYLDFLAGS += -laudio $(libaudio_flags)
-endif
-ifeq ($(plugout_stdout),yes)
-objs_gbsplay += plugout_stdout.o
-endif
-ifeq ($(plugout_midi),yes)
-objs_gbsplay += plugout_midi.o
-endif
-
-# install contrib files?
-ifeq ($(build_contrib),yes)
-EXTRA_INSTALL += install-contrib
-EXTRA_UNINSTALL += uninstall-contrib
-endif
-
-# test built binary?
-ifeq ($(build_test),yes)
-TEST_TARGETS += test
-endif
-
-# Cygwin automatically adds .exe to binaries.
-# We should notice that or we can't rm the files later!
-gbsplaybin     := gbsplay
-gbsinfobin     := gbsinfo
-ifeq ($(cygwin_build),yes)
-gbsplaybin     :=$(gbsplaybin).exe
-gbsinfobin     :=$(gbsinfobin).exe
 endif
 
 ifeq ($(use_sharedlibgbs),yes)
@@ -150,6 +40,8 @@ libgbs: cyggbs-1.dll libgbs.dll.a
 libgbspic: cyggbs-1.dll libgbs.dll.a
 	touch libgbspic
 else
+
+
 EXTRA_INSTALL += install-libgbs.so.1
 EXTRA_UNINSTALL += uninstall-libgbs.so.1
 
@@ -172,30 +64,12 @@ libgbs: libgbs.so.1
 
 libgbspic: libgbs.so.1
 	touch libgbspic
+
 endif
 else
-objs += $(objs_libgbs)
-objs_gbsplay += libgbs.a
-objs_gbsinfo += libgbs.a
-ifeq ($(build_xmmsplugin),yes)
-objs += $(objs_libgbspic)
-objs_gbsxmms += libgbspic.a
-endif # build_xmmsplugin
-
-libgbs: libgbs.a
-	touch libgbs
-
-libgbspic: libgbspic.a
-	touch libgbspic
+## EXPORTED
 endif # use_sharedlibs
 
-objs += $(objs_gbsplay) $(objs_gbsinfo)
-dsts += gbsplay gbsinfo
-
-ifeq ($(build_xmmsplugin),yes)
-objs += $(objs_gbsxmms)
-dsts += gbsxmms.so
-endif
 
 # include the rules for each subdir
 include $(shell find . -type f -name "subdir.mk")
@@ -323,12 +197,6 @@ test: gbsplay
 
 libgbspic.a: $(objs_libgbspic)
 	$(AR) r $@ $+
-libgbs.a: $(objs_libgbs)
-	$(AR) r $@ $+
-gbsinfo: $(objs_gbsinfo) libgbs
-	$(BUILDCC) -o $(gbsinfobin) $(objs_gbsinfo) $(GBSLDFLAGS)
-gbsplay: $(objs_gbsplay) libgbs
-	$(BUILDCC) -o $(gbsplaybin) $(objs_gbsplay) $(GBSLDFLAGS) $(GBSPLAYLDFLAGS) -lm
 
 gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 	$(BUILDCC) -shared -fpic -Wl,--version-script,$@.ver -o $@ $(objs_gbsxmms) $(GBSLDFLAGS) $(PTHREAD)

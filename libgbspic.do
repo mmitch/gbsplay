@@ -1,0 +1,1 @@
+redo-ifchange libgbspic.a
