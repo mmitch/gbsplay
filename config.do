@@ -68,8 +68,8 @@ docs="README HISTORY COPYRIGHT"
 contribs="contrib/gbs2ogg.sh contrib/gbsplay.bashcompletion"
 examples="examples/nightmode.gbs examples/gbsplayrc_sample"
 
-mans="      gbsplay.1    gbsinfo.1    gbsplayrc.5"
-# mans_src="gbsplay.in.1 gbsinfo.in.1 gbsplayrc.in.5" TODO unneeded?!
+mans="    gbsplay.1    gbsinfo.1    gbsplayrc.5"
+mans_src="gbsplay.in.1 gbsinfo.in.1 gbsplayrc.in.5"
 
 objs_libgbspic="gbcpu.lo gbhw.lo gbs.lo cfgparser.lo crc32.lo impulsegen.lo"
 objs_libgbs="   gbcpu.o  gbhw.o  gbs.o  cfgparser.o  crc32.o  impulsegen.o"
@@ -153,7 +153,11 @@ fi
     done << __EOF__
 objs
 dsts
+docs
+examples
+contribs
 mans
+mans_src
 SPLINT
 SPLINTFLAGS
 AR
@@ -168,6 +172,8 @@ objs_gbsinfo
 objs_libgbs
 pos
 mos
+DISTDIR
+VERSION
 __EOF__
     
 ) >> config.sh

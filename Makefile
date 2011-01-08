@@ -70,23 +70,7 @@ else
 ## EXPORTED
 endif # use_sharedlibs
 
-
-# include the rules for each subdir
-include $(shell find . -type f -name "subdir.mk")
-
 default: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL) $(TEST_TARGETS)
-
-
-distclean: clean
-	find . -regex ".*\.d" -exec rm -f "{}" \;
-	rm -f ./config.mk ./config.h ./config.err ./config.sed
-
-clean:
-	find . -regex ".*\.\([aos]\|lo\|mo\|pot\|so\(\.[0-9]\)?\)" -exec rm -f "{}" \;
-	find . -name "*~" -exec rm -f "{}" \;
-	rm -f libgbs libgbspic
-	rm -f $(mans)
-	rm -f $(gbsplaybin) $(gbsinfobin)
 
 install: all install-default $(EXTRA_INSTALL)
 
@@ -213,9 +197,6 @@ gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 
 config.mk: configure
 	./configure
-
-%.d: %.c config.mk
-	@echo DEP $< -o $@
 
 %.1: %.in.1
 	sed -f config.sed $< > $@
