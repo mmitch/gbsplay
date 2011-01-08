@@ -1,13 +1,16 @@
+all:
+	@echo "This is not the Makefile you're looking for."
+	@echo ""
+	@echo "The build process of gbsplay has been switched to redo, see https://github.com/apenwarr/redo"
+	@echo "The following targets are available:"
+	@echo "  redo all        - configure and build"
+	@echo "  redo install    - install"
+	@echo "  redo uninstall  - uninstall (only works properly without configuration changes)"
+	@echo "  redo clean      - clean up"
+	@echo "  redo distclean  - completely start over"
+	@echo "  redo dist       - export a clean .tar.gz"
+
 .PHONY: all default distclean clean install dist
-
-all: default
-
-noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
-
-
-ifneq ($(noincludes),yes)
--include config.mk
-endif
 
 ifeq ($(use_sharedlibgbs),yes)
 GBSLDFLAGS += -L. -lgbs
@@ -70,8 +73,6 @@ else
 ## EXPORTED
 endif # use_sharedlibs
 
-default: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL) $(TEST_TARGETS)
-
 install: all install-default $(EXTRA_INSTALL)
 
 install-default:
@@ -127,26 +128,6 @@ uninstall-gbsxmms.so:
 	rm -f $(xmmsdir)/gbsxmms.so
 	-rmdir -p $(xmmsdir)
 
-dist:	distclean
-	install -d ./$(DISTDIR)
-	sed 's/^VERSION=.*/VERSION=$(VERSION)/' < configure > ./$(DISTDIR)/configure
-	chmod 755 ./$(DISTDIR)/configure
-	install -m 644 Makefile ./$(DISTDIR)/
-	install -m 644 *.c ./$(DISTDIR)/
-	install -m 644 *.h ./$(DISTDIR)/
-	install -m 644 *.ver ./$(DISTDIR)/
-	install -m 644 $(mans_src) ./$(DISTDIR)/
-	install -m 644 $(docs) INSTALL CODINGSTYLE ./$(DISTDIR)/
-	install -d ./$(DISTDIR)/examples
-	install -m 644 $(examples) ./$(DISTDIR)/examples
-	install -d ./$(DISTDIR)/contrib
-	install -m 644 $(contribs) ./$(DISTDIR)/contrib
-	install -d ./$(DISTDIR)/po
-	install -m 644 po/*.po ./$(DISTDIR)/po
-	install -m 644 po/subdir.mk ./$(DISTDIR)/po
-	tar -cvzf ../$(DISTDIR).tar.gz $(DISTDIR)/ 
-	rm -rf ./$(DISTDIR)
-
 TESTOPTS := -r 44100 -t 30 -f 0 -g 0 -T 0
 
 test: gbsplay
@@ -171,9 +152,6 @@ test: gbsplay
 		exit 1; \
 	fi
 
-libgbspic.a: $(objs_libgbspic)
-	$(AR) r $@ $+
-
 gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 	$(BUILDCC) -shared -fpic -Wl,--version-script,$@.ver -o $@ $(objs_gbsxmms) $(GBSLDFLAGS) $(PTHREAD)
 
@@ -184,22 +162,7 @@ gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 .c.lo:
 	@echo CC $< -o $@
 	@$(BUILDCC) $(GBSCFLAGS) -fpic -c -o $@ $<
-.c.o:
-	@echo CC $< -o $@
-	@(test -x "`which $(SPLINT)`" && $(SPLINT) $(SPLINTFLAGS) $<) || true
-	@$(BUILDCC) $(GBSCFLAGS) -c -o $@ $<
 .c.i:
 	$(BUILDCC) -E $(GBSCFLAGS) -o $@ $<
 .c.s:
 	$(BUILDCC) -S $(GBSCFLAGS) -fverbose-asm -o $@ $<
-
-# rules for generated files
-
-config.mk: configure
-	./configure
-
-%.1: %.in.1
-	sed -f config.sed $< > $@
-
-%.5: %.in.5
-	sed -f config.sed $< > $@
