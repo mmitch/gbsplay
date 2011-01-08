@@ -76,13 +76,6 @@ include $(shell find . -type f -name "subdir.mk")
 
 default: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL) $(TEST_TARGETS)
 
-# include the dependency files
-
-ifneq ($(noincludes),yes)
-deps := $(patsubst %.o,%.d,$(filter %.o,$(objs)))
-deps += $(patsubst %.lo,%.d,$(filter %.lo,$(objs)))
--include $(deps)
-endif
 
 distclean: clean
 	find . -regex ".*\.d" -exec rm -f "{}" \;
@@ -154,7 +147,6 @@ dist:	distclean
 	install -d ./$(DISTDIR)
 	sed 's/^VERSION=.*/VERSION=$(VERSION)/' < configure > ./$(DISTDIR)/configure
 	chmod 755 ./$(DISTDIR)/configure
-	install -m 755 depend.sh ./$(DISTDIR)/
 	install -m 644 Makefile ./$(DISTDIR)/
 	install -m 644 *.c ./$(DISTDIR)/
 	install -m 644 *.h ./$(DISTDIR)/
@@ -224,7 +216,6 @@ config.mk: configure
 
 %.d: %.c config.mk
 	@echo DEP $< -o $@
-	@./depend.sh $< config.mk > $@ || rm -f $@
 
 %.1: %.in.1
 	sed -f config.sed $< > $@
