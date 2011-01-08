@@ -45,7 +45,7 @@ GBSLDFLAGS="-Wl,-O1 -lm"
 GBSPLAYLDFLAGS=
 
 XMMSPREFIX=
-DESTDIR=
+DESTDIR=/tmp
 
 prefix=$DESTDIR$prefix
 exec_prefix=$DESTDIR$exec_prefix
@@ -179,6 +179,15 @@ VERSION
 EXTRA_ALL
 TEST_TARGETS
 TESTOPTS
+EXTRA_INSTALL
+bindir
+man1dir
+man5dir
+docdir
+exampledir
+localedir
+contribdir
+xmmsdir
 __EOF__
     
 ) >> config.sh
