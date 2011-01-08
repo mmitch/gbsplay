@@ -138,6 +138,15 @@ if [ $build_xmmsplugin = yes ] ; then
 fi
 
 
+
+
+
+if [ $have_xgettext = yes ] ; then
+    pos=po/*.po
+    mos=$(echo $pos | sed 's/\.po/.mo/g')
+    dsts="$dsts $mos"
+fi
+
 (
     while read var; do
 	eval "echo \"$var=\\\"\$$var\\\"\""
@@ -157,6 +166,8 @@ gbsinfobin
 objs_gbsplay
 objs_gbsinfo
 objs_libgbs
+pos
+mos
 __EOF__
     
 ) >> config.sh
