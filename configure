@@ -890,6 +890,47 @@ __EOF__
 
 (
     set +u  # Allow uninitialised vars here
+    while read var; do
+	eval "echo \"$var=\\\"\$$var\\\"\""
+    done << __EOF__
+EXTRA_ALL
+EXTRA_CFLAGS
+EXTRA_INSTALL
+EXTRA_LDFLAGS
+EXTRA_SRCS
+EXTRA_UNINSTALL
+PTHREAD
+XMMS_INPUT_PLUGIN_DIR
+VERSION
+prefix
+exec_prefix
+bindir
+libdir
+mandir
+docdir
+localedir
+sysconfdir
+CC
+BUILDCC
+HOSTCC
+build_contrib
+build_test
+build_xmmsplugin
+have_xgettext
+use_i18n
+use_sharedlibgbs
+cygwin_build
+libaudio_flags
+__EOF__
+    echo plugout_devdsp=$use_devdsp
+    echo plugout_alsa=$use_alsa
+    echo plugout_midi=$use_midi
+    echo plugout_nas=$use_nas
+    echo plugout_stdout=$use_stdout
+) > config.sh
+
+(
+    set +u  # Allow uninitialised vars here
     echo "#define GBS_VERSION \"$VERSION\""
     echo "#define LOCALE_PREFIX \"$localedir\""
     echo "#define SYSCONF_PREFIX \"$sysconfdir\""
