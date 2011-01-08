@@ -1,4 +1,4 @@
 redo-ifchange config
 . ./config.sh
 redo-ifchange all
-redo install-default $EXTRA_INSTALL
+redo $EXTRA_UNINSTALL uninstall-default

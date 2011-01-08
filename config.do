@@ -45,7 +45,7 @@ GBSLDFLAGS="-Wl,-O1 -lm"
 GBSPLAYLDFLAGS=
 
 XMMSPREFIX=
-DESTDIR=/tmp
+DESTDIR=
 
 prefix=$DESTDIR$prefix
 exec_prefix=$DESTDIR$exec_prefix
@@ -70,7 +70,9 @@ docs="README HISTORY COPYRIGHT"
 contribs="contrib/gbs2ogg.sh contrib/gbsplay.bashcompletion"
 examples="examples/nightmode.gbs examples/gbsplayrc_sample"
 
-mans="    gbsplay.1    gbsinfo.1    gbsplayrc.5"
+mans_1="gbsplay.1 gbsinfo.1"
+mans_5="gbsplayrc.5"
+mans="$mans_1 $mans_5"
 mans_src="gbsplay.in.1 gbsinfo.in.1 gbsplayrc.in.5"
 
 objs_libgbspic="gbcpu.lo gbhw.lo gbs.lo cfgparser.lo crc32.lo impulsegen.lo"
@@ -159,6 +161,8 @@ docs
 examples
 contribs
 mans
+mans_1
+mans_5
 mans_src
 SPLINT
 SPLINTFLAGS
@@ -188,6 +192,7 @@ exampledir
 localedir
 contribdir
 xmmsdir
+EXTRA_UNINSTALL
 __EOF__
     
 ) > config.sh

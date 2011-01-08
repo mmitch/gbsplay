@@ -73,34 +73,6 @@ else
 ## EXPORTED
 endif # use_sharedlibs
 
-uninstall: uninstall-default $(EXTRA_UNINSTALL)
-
-uninstall-default:
-	rm -f $(bindir)/$(gbsplaybin) $(bindir)/$(gbsinfobin)
-	-rmdir -p $(bindir)
-	rm -f $(man1dir)/gbsplay.1 $(man1dir)/gbsinfo.1
-	-rmdir -p $(man1dir)
-	rm -f $(man5dir)/gbsplayrc.5 $(man5dir)/gbsplayrc.5	
-	-rmdir -p $(man5dir)
-	rm -rf $(exampledir)
-	-rmdir -p $(exampledir)
-	rm -rf $(docdir)
-	-mkdir -p $(docdir)
-	-rmdir -p $(docdir)
-	-for i in $(mos); do \
-		base=`basename $$i`; \
-		rm -f $(localedir)/$${base%.mo}/LC_MESSAGES/gbsplay.mo; \
-		rmdir -p $(localedir)/$${base%.mo}/LC_MESSAGES; \
-	done
-
-uninstall-contrib:
-	rm -rf $(contribdir)
-	-rmdir -p $(contribdir)
-
-uninstall-gbsxmms.so:
-	rm -f $(xmmsdir)/gbsxmms.so
-	-rmdir -p $(xmmsdir)
-
 gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 	$(BUILDCC) -shared -fpic -Wl,--version-script,$@.ver -o $@ $(objs_gbsxmms) $(GBSLDFLAGS) $(PTHREAD)
 
