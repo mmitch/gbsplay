@@ -2,7 +2,7 @@
 # Example gbsplay configuration file
 #
 rate = 48000           # this is a comment
-quiet=0                # should work without whitespace too
+verbosity=0            # should work without whitespace too
 endian = n             # native endian
 
 # '\' can be used as escape and tabs are whitespace

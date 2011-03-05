@@ -382,7 +382,7 @@ static regparm void parseopts(int *argc, char ***argv)
 {
 	long res;
 	myname = *argv[0];
-	while ((res = getopt(*argc, *argv, "1234E:f:g:hlo:qr:R:t:T:vVzZ")) != -1) {
+	while ((res = getopt(*argc, *argv, "1234c:E:f:g:hlo:qr:R:t:T:vVzZ")) != -1) {
 		switch (res) {
 		default:
 			usage(1);
@@ -392,6 +392,9 @@ static regparm void parseopts(int *argc, char ***argv)
 		case '3':
 		case '4':
 			gbhw_ch[res-'1'].mute ^= 1;
+			break;
+		case 'c':
+			cfg_parse(optarg, options);
 			break;
 		case 'E':
 			if (strcasecmp(optarg, "b") == 0) {
