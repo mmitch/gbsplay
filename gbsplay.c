@@ -92,16 +92,16 @@ static struct gbhw_buffer buf = {
 
 /* configuration directives */
 static const struct cfg_option options[] = {
+	{ "endian", &endian, cfg_endian },
+	{ "fadeout", &fadeout, cfg_long },
+	{ "loop", &loopmode, cfg_long },
+	{ "output_plugin", &sound_name, cfg_string },
 	{ "rate", &rate, cfg_long },
 	{ "refresh_delay", &refresh_delay, cfg_long },
-	{ "verbosity", &verbosity, cfg_long },
-	{ "endian", &endian, cfg_endian },
-	{ "subsong_timeout", &subsong_timeout, cfg_long },
-	{ "subsong_gap", &subsong_gap, cfg_long },
-	{ "fadeout", &fadeout, cfg_long },
 	{ "silence_timeout", &silence_timeout, cfg_long },
-	{ "output_plugin", &sound_name, cfg_string },
-	{ "loop", &loopmode, cfg_long },
+	{ "subsong_gap", &subsong_gap, cfg_long },
+	{ "subsong_timeout", &subsong_timeout, cfg_long },
+	{ "verbosity", &verbosity, cfg_long },
 	/* playmode not implemented yet */
 	{ NULL, NULL, NULL }
 };
