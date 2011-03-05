@@ -3,6 +3,14 @@
 
 #include <stdint.h>
 
+#include "config.h"
+
+#if PLUGOUT_ALSA == 1
+#  define PLUGOUT_DEFAULT "alsa"
+#else
+#  define PLUGOUT_DEFAULT "oss"
+#endif
+
 enum plugout_endian {
 	PLUGOUT_ENDIAN_BIG,
 	PLUGOUT_ENDIAN_LITTLE,
