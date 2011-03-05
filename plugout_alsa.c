@@ -98,7 +98,15 @@ static ssize_t regparm alsa_write(const void *buf, size_t count)
 {
 	snd_pcm_sframes_t retval;
 
-	retval = snd_pcm_writei(pcm_handle, buf, count / 4);
+	do {
+		retval = snd_pcm_writei(pcm_handle, buf, count / 4);
+		if (retval != -ESTRPIPE)
+			break;
+
+		/* resume from suspend */
+		while (snd_pcm_resume(pcm_handle) == -EAGAIN)
+			sleep(1);
+	} while (1);
 	if (retval < 0) {
 		fprintf(stderr, _("snd_pcm_writei failed: %s\n"), snd_strerror(retval));
 		snd_pcm_prepare(pcm_handle);
