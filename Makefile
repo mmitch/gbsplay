@@ -79,6 +79,7 @@ objs_libgbs    := gbcpu.o  gbhw.o  gbs.o  cfgparser.o  crc32.o  impulsegen.o
 objs_gbsplay   := gbsplay.o util.o plugout.o
 objs_gbsinfo   := gbsinfo.o
 objs_gbsxmms   := gbsxmms.lo
+objs_test_gbs  := test_gbs.o
 
 # gbsplay output plugins
 ifeq ($(plugout_devdsp),yes)
@@ -114,9 +115,11 @@ endif
 # We should notice that or we can't rm the files later!
 gbsplaybin     := gbsplay
 gbsinfobin     := gbsinfo
+test_gbsbin    := test_gbs
 ifeq ($(cygwin_build),yes)
 gbsplaybin     :=$(gbsplaybin).exe
 gbsinfobin     :=$(gbsinfobin).exe
+test_gbsbin    :=$(test_gbsbin).exe
 endif
 
 ifeq ($(use_sharedlibgbs),yes)
@@ -177,6 +180,7 @@ else
 objs += $(objs_libgbs)
 objs_gbsplay += libgbs.a
 objs_gbsinfo += libgbs.a
+objs_test_gbs += libgbs.a
 ifeq ($(build_xmmsplugin),yes)
 objs += $(objs_libgbspic)
 objs_gbsxmms += libgbspic.a
@@ -299,7 +303,8 @@ dist:	distclean
 
 TESTOPTS := -r 44100 -t 30 -f 0 -g 0 -T 0
 
-test: gbsplay
+test: gbsplay test_gbs
+	@LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH ./test_gbs /tmp/test_gbs.out
 	@MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH ./gbsplay -E b -o stdout $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | md5sum | cut -f1 -d\ `; \
 	EXPECT="5269fdada196a6b67d947428ea3ca934"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
@@ -329,6 +334,8 @@ gbsinfo: $(objs_gbsinfo) libgbs
 	$(BUILDCC) -o $(gbsinfobin) $(objs_gbsinfo) $(GBSLDFLAGS)
 gbsplay: $(objs_gbsplay) libgbs
 	$(BUILDCC) -o $(gbsplaybin) $(objs_gbsplay) $(GBSLDFLAGS) $(GBSPLAYLDFLAGS) -lm
+test_gbs: $(objs_test_gbs) libgbs
+	$(BUILDCC) -o $(test_gbsbin) $(objs_test_gbs) $(GBSLDFLAGS)
 
 gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 	$(BUILDCC) -shared -fpic -Wl,--version-script,$@.ver -o $@ $(objs_gbsxmms) $(GBSLDFLAGS) $(PTHREAD)

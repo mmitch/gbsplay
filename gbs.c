@@ -276,10 +276,14 @@ regparm long gbs_write(struct gbs *gbs, char *name, long version)
 	char strings[65536];
 	long stringofs = 0;
 	long newlen = gbs->filesize;
+	long namelen = strlen(name);
+	char *tmpname = malloc(namelen + sizeof(".tmp\0"));
 
+	memcpy(tmpname, name, namelen);
+	sprintf(&tmpname[namelen], ".tmp");
 	memset(pad, 0xff, sizeof(pad));
 
-	if ((fd = open(name, O_WRONLY|O_CREAT|O_TRUNC, 0644)) == -1) {
+	if ((fd = open(tmpname, O_WRONLY|O_CREAT|O_TRUNC, 0644)) == -1) {
 		fprintf(stderr, _("Could not open %s: %s\n"), name, strerror(errno));
 		return 0;
 	}
@@ -342,7 +346,15 @@ regparm long gbs_write(struct gbs *gbs, char *name, long version)
 			gbs->buf[3] = 1;
 		}
 	}
-	write(fd, gbs->buf, newlen);
+	if (write(fd, gbs->buf, newlen) == newlen) {
+		int ret = 1;
+		close(fd);
+		if (rename(tmpname, name) == -1) {
+			fprintf(stderr, _("Could not rename %s to %s: %s\n"), tmpname, name, strerror(errno));
+			ret = 0;
+		}
+		return ret;
+	}
 	close(fd);
 
 	return 1;
@@ -368,7 +380,10 @@ regparm struct gbs *gbs_open(char *name)
 	}
 	fstat(fd, &st);
 	gbs->buf = buf = malloc(st.st_size);
-	read(fd, buf, st.st_size);
+	if (read(fd, buf, st.st_size) != st.st_size) {
+		fprintf(stderr, _("Could not read %s: %s\n"), name, strerror(errno));
+		return NULL;
+	}
 	if (strncmp(buf, GBS_MAGIC, 3) != 0) {
 		fprintf(stderr, _("Not a GBS-File: %s\n"), name);
 		return NULL;
