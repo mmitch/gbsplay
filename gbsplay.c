@@ -40,6 +40,9 @@
 #define PLAYMODE_RANDOM  2
 #define PLAYMODE_SHUFFLE 3
 
+/* Color Stuff: */
+#include "color.h"
+
 /* lookup tables */
 static char notelookup[4*MAXOCTAVE*12];
 static char vollookup[5*16];
@@ -204,7 +207,7 @@ static regparm long *setup_playlist(long songs)
 {
 	long i;
 	long *playlist;
-	
+
 	playlist = (long*) calloc( songs, sizeof(long) );
 	for (i=0; i<songs; i++) {
 		playlist[i] = i;
@@ -340,7 +343,7 @@ static regparm void usage(long exitcode)
 {
 	FILE *out = exitcode ? stderr : stdout;
 	fprintf(out,
-	        _("Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
+		_("Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
 		  "\n"
 		  "Available options are:\n"
 		  "  -E        endian, b == big, l == little, n == native (%s)\n"
@@ -360,15 +363,15 @@ static regparm void usage(long exitcode)
 		  "  -z        play subsongs in shuffle mode\n"
 		  "  -Z        play subsongs in random mode (repetitions possible)\n"
 		  "  -1 to -4  mute a channel on startup\n"),
-	        myname,
-	        endian_str(endian),
+		myname,
+		endian_str(endian),
 		fadeout,
 		subsong_gap,
 		sound_name,
-	        rate,
+		rate,
 		refresh_delay,
 		subsong_timeout,
-	        silence_timeout);
+		silence_timeout);
 	exit(exitcode);
 }
 
@@ -600,8 +603,9 @@ static regparm void printinfo(struct gbs *gbs)
 {
 	if (verbosity>0) {
 		gbs_printinfo(gbs, 0);
-		puts(_("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player\n" \
-		         "           [ ] pause/resume   [1-4] mute channel"));
+		BOLD();
+		printf("commands: [p]revious subsoung  [n]ext subsong  [q]uit player\n [ ] pause/resume  [1-4] mute channels\n");
+		NORMAL();
 	}
 	if (verbosity>1) {
 		puts("\n\n"); /* additional newlines for the status display */
@@ -621,7 +625,7 @@ static regparm void select_plugin(void)
 	plugout = plugout_select_by_name(sound_name);
 	if (plugout == NULL) {
 		fprintf(stderr, _("\"%s\" is not a known output plugin.\n\n"),
-		        sound_name);
+			sound_name);
 		exit(1);
 	}
 
@@ -666,7 +670,7 @@ int main(int argc, char **argv)
 
 	if (sound_open(endian, rate) != 0) {
 		fprintf(stderr, _("Could not open output plugin \"%s\"\n"),
-		        sound_name);
+			sound_name);
 		exit(1);
 	}
 
@@ -700,7 +704,7 @@ int main(int argc, char **argv)
 	} else if (subsong_stop >= gbs->songs) {
 		subsong_stop = -1;
 	}
-	
+
 	gbs->subsong = subsong_start;
 	gbs->subsong_timeout = subsong_timeout;
 	gbs->silence_timeout = silence_timeout;
