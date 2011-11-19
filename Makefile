@@ -81,6 +81,8 @@ objs_gbsinfo   := gbsinfo.o
 objs_gbsxmms   := gbsxmms.lo
 objs_test_gbs  := test_gbs.o
 
+tests          := util.test
+
 # gbsplay output plugins
 ifeq ($(plugout_devdsp),yes)
 objs_gbsplay += plugout_devdsp.o
@@ -116,10 +118,12 @@ endif
 gbsplaybin     := gbsplay
 gbsinfobin     := gbsinfo
 test_gbsbin    := test_gbs
+test_bin       := test
 ifeq ($(cygwin_build),yes)
 gbsplaybin     :=$(gbsplaybin).exe
 gbsinfobin     :=$(gbsinfobin).exe
 test_gbsbin    :=$(test_gbsbin).exe
+test_bin       :=$(test).exe
 endif
 
 ifeq ($(use_sharedlibgbs),yes)
@@ -303,8 +307,8 @@ dist:	distclean
 
 TESTOPTS := -r 44100 -t 30 -f 0 -g 0 -T 0
 
-test: gbsplay test_gbs
-	@LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH ./test_gbs /tmp/test_gbs.out
+test: gbsplay $(tests) test_gbs
+	@echo Verifying output correctness for examples/nightmode.gbs:
 	@MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH ./gbsplay -c examples/gbsplayrc_sample -E b -o stdout $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | md5sum | cut -f1 -d\ `; \
 	EXPECT="5269fdada196a6b67d947428ea3ca934"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
@@ -360,6 +364,12 @@ gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 
 config.mk: configure
 	./configure
+
+%.test: %.c
+	@echo -n "TEST $< "
+	@$(HOSTCC) -DENABLE_TEST=1 -o $(test_bin) $<
+	@./$(test_bin)
+	@rm ./$(test_bin)
 
 %.d: %.c config.mk
 	@echo DEP $< -o $@

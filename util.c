@@ -9,6 +9,8 @@
  */
 
 #include <stdlib.h>
+#include "util.h"
+#include "test.h"
 
 inline long rand_long(long max)
 /* return random long from [0;max[ */
@@ -28,3 +30,20 @@ void shuffle_long(long *array, long elements)
 		array[j] = temp;
 	}
 }
+
+test void test_shuffle()
+{
+	long array[]          = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	long shuffled_array[] = { 2, 8, 9, 1, 6, 4, 5, 3, 7 };
+	long len = sizeof(array) / sizeof(*array);
+	int i;
+
+	srand(0);
+	shuffle_long(array, len);
+
+	for (i=0; i<len; i++) {
+		ASSERT_EQUAL("%ld", array[i], shuffled_array[i]);
+	}
+}
+TEST(test_shuffle);
+TEST_EOF;
