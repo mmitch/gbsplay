@@ -190,17 +190,18 @@ regparm long gbs_step(struct gbs *gbs, long time_to_work)
 
 regparm void gbs_printinfo(struct gbs *gbs, long verbose)
 {
-	printf(_("GBSVersion:     %ld\n"
-	         "Title:          \"%s\"\n"
-	         "Author:         \"%s\"\n"
-	         "Copyright:      \"%s\"\n"
-	         "Load address:   0x%04x\n"
-	         "Init address:   0x%04x\n"
-	         "Play address:   0x%04x\n"
-	         "Stack pointer:  0x%04x\n"
-	         "File size:      0x%08x\n"
-	         "ROM size:       0x%08lx (%ld banks)\n"
-	         "Subsongs:       %ld\n"),
+	printf(_("GBSVersion:       %ld\n"
+	         "Title:            \"%s\"\n"
+	         "Author:           \"%s\"\n"
+	         "Copyright:        \"%s\"\n"
+	         "Load address:     0x%04x\n"
+	         "Init address:     0x%04x\n"
+	         "Play address:     0x%04x\n"
+	         "Stack pointer:    0x%04x\n"
+	         "File size:        0x%08x\n"
+	         "ROM size:         0x%08lx (%ld banks)\n"
+	         "Subsongs:         %ld\n"
+	         "Default subsong:  %ld\n"),
 	       gbs->version,
 	       gbs->title,
 	       gbs->author,
@@ -212,7 +213,8 @@ regparm void gbs_printinfo(struct gbs *gbs, long verbose)
 	       (unsigned int)gbs->filesize,
 	       gbs->romsize,
 	       gbs->romsize/0x4000,
-	       gbs->songs);
+	       gbs->songs,
+	       gbs->defaultsong);
 	if (gbs->version == 2) {
 		printf(_("CRC32:		0x%08lx/0x%08lx (%s)\n"),
 		       (unsigned long)gbs->crc, (unsigned long)gbs->crcnow,
