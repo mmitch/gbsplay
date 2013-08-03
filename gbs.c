@@ -1,8 +1,8 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2006 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
- *                  Christian Garbs <mitch@cgarbs.de>
+ * 2003-2006,2013 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ *                       Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL.
  */
 
@@ -388,14 +388,24 @@ regparm struct gbs *gbs_open(char *name)
 		fprintf(stderr, _("Not a GBS-File: %s\n"), name);
 		return NULL;
 	}
-	gbs->version = buf[3];
+	gbs->version = buf[0x03];
 	if (gbs->version != 1) {
-		fprintf(stderr, _("GBS Version %d unsupported.\n"), buf[3]);
+		fprintf(stderr, _("GBS Version %d unsupported.\n"), gbs->version);
 		return NULL;
 	}
 
 	gbs->songs = buf[0x04];
+	if (gbs->songs < 1) {
+		fprintf(stderr, _("Number of songs = %d is unreasonable.\n"), gbs->songs);
+		return NULL;
+	}
+
 	gbs->defaultsong = buf[0x05];
+	if (gbs->defaultsong < 1 || gbs->defaultsong > gbs->songs) {
+		fprintf(stderr, _("Default song %d is out of range [1..%d].\n"), gbs->defaultsong, gbs->songs);
+		return NULL;
+	}
+
 	gbs->load  = readint(&buf[0x06], 2);
 	gbs->init  = readint(&buf[0x08], 2);
 	gbs->play  = readint(&buf[0x0a], 2);

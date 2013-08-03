@@ -552,7 +552,7 @@ static regparm void printstatus(struct gbs *gbs)
 		songtitle=_("Untitled");
 	}
 	printf("\r\033[A\033[A"
-	       "Song %3ld/%3ld (%s)\033[K\n"
+	       "Song %3d/%3d (%s)\033[K\n"
 	       "%02ld:%02ld/%02ld:%02ld",
 	       gbs->subsong+1, gbs->songs, songtitle,
 	       timem, times, lenm, lens);
