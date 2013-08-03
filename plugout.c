@@ -1,8 +1,8 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2005 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
- *                  Christian Garbs <mitch@cgarbs.de>
+ * 2003-2005,2013 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ *                       Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL.
  */
 
@@ -55,10 +55,10 @@ regparm void plugout_list_plugins(void)
 {
 	long idx;
 
-	printf(_("Available output plugins:\n\n"));
+	printf("%s", _("Available output plugins:\n\n"));
 
 	if (plugouts[0] == NULL) {
-		printf(_("No output plugins available.\n\n"));
+		printf("%s", _("No output plugins available.\n\n"));
 		return;
 	}
 
