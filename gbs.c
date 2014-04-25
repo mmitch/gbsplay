@@ -190,7 +190,7 @@ regparm long gbs_step(struct gbs *gbs, long time_to_work)
 
 regparm void gbs_printinfo(struct gbs *gbs, long verbose)
 {
-	printf(_("GBSVersion:       %ld\n"
+	printf(_("GBSVersion:       %u\n"
 	         "Title:            \"%s\"\n"
 	         "Author:           \"%s\"\n"
 	         "Copyright:        \"%s\"\n"
@@ -200,8 +200,8 @@ regparm void gbs_printinfo(struct gbs *gbs, long verbose)
 	         "Stack pointer:    0x%04x\n"
 	         "File size:        0x%08x\n"
 	         "ROM size:         0x%08lx (%ld banks)\n"
-	         "Subsongs:         %ld\n"
-	         "Default subsong:  %ld\n"),
+	         "Subsongs:         %u\n"
+	         "Default subsong:  %u\n"),
 	       gbs->version,
 	       gbs->title,
 	       gbs->author,
