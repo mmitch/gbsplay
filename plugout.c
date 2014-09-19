@@ -29,6 +29,9 @@ extern const struct output_plugin plugout_stdout;
 #ifdef PLUGOUT_MIDI
 extern const struct output_plugin plugout_midi;
 #endif
+#ifdef PLUGOUT_DSOUND
+extern const struct output_plugin plugout_dsound;
+#endif
 
 typedef /*@null@*/ const struct output_plugin* output_plugin_const_t;
 
@@ -47,6 +50,9 @@ static output_plugin_const_t plugouts[] = {
 #endif
 #ifdef PLUGOUT_MIDI
 	&plugout_midi,
+#endif
+#ifdef PLUGOUT_DSOUND
+	&plugout_dsound,
 #endif
 	NULL
 };

@@ -4,3 +4,11 @@
 *.mo
 config.*
 *~
+*.exe
+gbsinfo.1
+gbsplay.1
+gbsplayrc.5
+libgbs
+*.a
+*.dll
+*.so

@@ -101,7 +101,7 @@ find_lib()
     lib="$1"
     libdirs="${2-}"
 
-    eval "val=\"\$lib${lib}_path\""
+    eval "val=\"\${lib${lib}_path-}\""
     if [ ! -z "$val" ]; then
         return 0
     else
@@ -506,7 +506,7 @@ EOF
 	exit $1
 }
 
-OPTS="build_contrib build_test build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_ssp use_debug use_stdout use_devdsp use_alsa use_nas use_midi"
+OPTS="build_contrib build_test build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_ssp use_debug use_stdout use_devdsp use_alsa use_nas use_midi use_dsound"
 for OPT in $OPTS; do
 	eval "${OPT}="
 done
@@ -631,6 +631,23 @@ fi
 if [ "$use_alsa" != no ]; then
     check_include alsa/asoundlib.h
     use_alsa=$have_alsa_asoundlib_h
+fi
+
+if [ "$use_dsound" != no ]; then
+	check_include dsound.h
+	retval1=$?
+	retval2=1
+	if [ $retval1 -eq 0 ]; then
+		check_libs dsound "dsound dsound3d" <<EOF
+#include <windows.h>
+#include <dsound.h>
+int main(char argc, char** argv) { LPDIRECTSOUND8 lp; HRESULT hr = DirectSoundCreate8(NULL, &lp, NULL); if (SUCCEEDED(hr)) IDirectSound8_Release(lp); return 0; }
+EOF
+		retval2=$?
+	fi
+	if [ $retval1 -eq 0 -a $retval2 -eq 0 ]; then
+		use_dsound=$have_dsound_h
+	fi
 fi
 
 if [ "$use_nas" != no ]; then
@@ -861,6 +878,7 @@ use_sharedlibgbs
 cygwin_build
 libaudio_flags
 __EOF__
+    echo plugout_dsound := $use_dsound
     echo plugout_devdsp := $use_devdsp
     echo plugout_alsa := $use_alsa
     echo plugout_midi := $use_midi
@@ -874,6 +892,7 @@ __EOF__
     echo "#define GBS_VERSION \"$VERSION\""
     echo "#define LOCALE_PREFIX \"$localedir\""
     echo "#define SYSCONF_PREFIX \"$sysconfdir\""
+    plugout_x DSOUND
     plugout_x DEVDSP
     plugout_x ALSA
     plugout_x MIDI
