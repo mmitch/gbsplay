@@ -5,7 +5,9 @@
 
 #include "config.h"
 
-#if PLUGOUT_ALSA == 1
+#if PLUGOUT_DSOUND == 1
+#  define PLUGOUT_DEFAULT "dsound"
+#elif PLUGOUT_ALSA == 1
 #  define PLUGOUT_DEFAULT "alsa"
 #else
 #  define PLUGOUT_DEFAULT "oss"
