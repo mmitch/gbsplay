@@ -2,8 +2,8 @@
 #
 # generate config.mk for gbsplay Makefile
 #
-# 2003-2006,2008,2010 (C) by Christian Garbs <mitch@cgarbs.de>
-#                            Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+# 2003-2006,2008,2010,2015 (C) by Christian Garbs <mitch@cgarbs.de>
+#                                 Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
 # Licensed under GNU GPL.
 #
 
@@ -616,7 +616,7 @@ fi
 # Check git timestamp
 
 if [ -f .git/HEAD ]; then
-	VERSION=${VERSION}+git`git log --date=short -n 1 | grep ^Date: | head -n 1 | sed -e 's/^.* //' -e 's/-//g'`
+	VERSION=`git describe --tags`
 fi
 
 ## check for various headers
