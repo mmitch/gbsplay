@@ -79,6 +79,7 @@ static char *sound_name = PLUGOUT_DEFAULT;
 static char *sound_description;
 static plugout_open_fn  sound_open;
 static plugout_skip_fn  sound_skip;
+static plugout_pause_fn sound_pause;
 static plugout_io_fn    sound_io;
 static plugout_write_fn sound_write;
 static plugout_close_fn sound_close;
@@ -485,6 +486,7 @@ static regparm void handleuserinput(struct gbs *gbs)
 		case ' ':
 			pause_mode = !pause_mode;
 			gbhw_pause(pause_mode);
+			if (sound_pause) sound_pause(pause_mode);
 			break;
 		case '1':
 		case '2':
@@ -633,6 +635,7 @@ static regparm void select_plugin(void)
 	sound_io = plugout->io;
 	sound_write = plugout->write;
 	sound_close = plugout->close;
+	sound_pause = plugout->pause;
 	sound_description = plugout->description;
 
 	if (plugout->flags & PLUGOUT_USES_STDOUT) {
