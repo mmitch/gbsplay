@@ -50,13 +50,14 @@ static inline void foo(void)
 
 #if BYTE_ORDER == LITTLE_ENDIAN
 
-#define REGS16_R(r, i) (*((uint16_t*)&r.ri[i*2]))
-#define REGS16_W(r, i, x) (*((uint16_t*)&r.ri[i*2])) = x
+#define REGS16_R(r, i) (r.rw[i])
+#define REGS16_W(r, i, x) (r.rw[i]) = x
 #define REGS8_R(r, i) (r.ri[i^1])
 #define REGS8_W(r, i, x) (r.ri[i^1]) = x
 
 typedef union {
 		uint8_t ri[12];
+		uint16_t rw[6];
 		struct {
 			uint8_t c;
 			uint8_t b;
@@ -73,13 +74,14 @@ typedef union {
 
 #else
 
-#define REGS16_R(r, i) (*((uint16_t*)&r.ri[i*2]))
-#define REGS16_W(r, i, x) (*((uint16_t*)&r.ri[i*2])) = x
+#define REGS16_R(r, i) (r.rw[i])
+#define REGS16_W(r, i, x) (r.rw[i]) = x
 #define REGS8_R(r, i) (r.ri[i])
 #define REGS8_W(r, i, x) (r.ri[i]) = x
 
 typedef union {
 		uint8_t ri[12];
+		uint16_t rw[6];
 		struct {
 			uint8_t b;
 			uint8_t c;
