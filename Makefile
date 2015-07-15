@@ -101,6 +101,10 @@ endif
 ifeq ($(plugout_midi),yes)
 objs_gbsplay += plugout_midi.o
 endif
+ifeq ($(plugout_pulse),yes)
+objs_gbsplay += plugout_pulse.o
+GBSPLAYLDFLAGS += -lpulse-simple -lpulse
+endif
 
 # install contrib files?
 ifeq ($(build_contrib),yes)
