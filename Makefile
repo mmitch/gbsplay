@@ -105,6 +105,10 @@ ifeq ($(plugout_pulse),yes)
 objs_gbsplay += plugout_pulse.o
 GBSPLAYLDFLAGS += -lpulse-simple -lpulse
 endif
+ifeq ($(plugout_dsound),yes)
+objs_gbsplay += plugout_dsound.o
+GBSPLAYLDFLAGS += -ldsound $(libdsound_flags)
+endif
 
 # install contrib files?
 ifeq ($(build_contrib),yes)
@@ -359,6 +363,7 @@ gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 	@echo CC $< -o $@
 	@(test -x "`which $(SPLINT)`" && $(SPLINT) $(SPLINTFLAGS) $<) || true
 	@$(BUILDCC) $(GBSCFLAGS) -c -o $@ $<
+
 .c.i:
 	$(BUILDCC) -E $(GBSCFLAGS) -o $@ $<
 .c.s:
