@@ -836,7 +836,6 @@ setdefault use_debug no
 
 setdefault use_midi yes
 setdefault use_stdout yes
-setdefault use_pulse yes
 
 printoptional modules build
 printoptional features use
