@@ -7,6 +7,8 @@
 
 #if PLUGOUT_DSOUND == 1
 #  define PLUGOUT_DEFAULT "dsound"
+#elif PLUGOUT_PULSE == 1
+#  define PLUGOUT_DEFAULT "pulse"
 #elif PLUGOUT_ALSA == 1
 #  define PLUGOUT_DEFAULT "alsa"
 #else
