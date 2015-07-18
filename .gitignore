@@ -13,3 +13,6 @@ libgbs
 *.dll
 *.so
 *.pot
+gbsinfo
+gbsplay
+test_gbs
