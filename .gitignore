@@ -12,3 +12,4 @@ libgbs
 *.a
 *.dll
 *.so
+*.pot
