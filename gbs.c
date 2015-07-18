@@ -398,13 +398,13 @@ regparm struct gbs *gbs_open(char *name)
 
 	gbs->songs = buf[0x04];
 	if (gbs->songs < 1) {
-		fprintf(stderr, _("Number of songs = %d is unreasonable.\n"), gbs->songs);
+		fprintf(stderr, _("Number of subsongs = %d is unreasonable.\n"), gbs->songs);
 		return NULL;
 	}
 
 	gbs->defaultsong = buf[0x05];
 	if (gbs->defaultsong < 1 || gbs->defaultsong > gbs->songs) {
-		fprintf(stderr, _("Default song %d is out of range [1..%d].\n"), gbs->defaultsong, gbs->songs);
+		fprintf(stderr, _("Default subsong %d is out of range [1..%d].\n"), gbs->defaultsong, gbs->songs);
 		return NULL;
 	}
 
