@@ -236,6 +236,7 @@ clean:
 	rm -f libgbs libgbspic
 	rm -f $(mans)
 	rm -f $(gbsplaybin) $(gbsinfobin)
+	rm -f $(test_gbsbin) $(test_bin)
 
 install: all install-default $(EXTRA_INSTALL)
 
