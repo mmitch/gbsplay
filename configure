@@ -54,8 +54,9 @@ if [ -d /usr/ucb ]; then
     PATH="/usr/ucb:$PATH"
 fi
 
-## set version number
-VERSION=0.0.91
+## set default version number to unknown
+# will be overwritten on git build or tar.gz export
+VERSION=unknown
 
 ##### begin of subroutines
 
