@@ -552,14 +552,15 @@ if [ \( "$BUILDARCH" = "i386" -o    \
         "$BUILDARCH" = "i686" \) -a \
         "$BUILDOS" = "Linux" ]; then
     setdefault use_regparm yes
+    setdefault build_test yes
 else
     setdefault use_regparm no
+    setdefault build_test no
 fi
 
 ## more defaults
 setdefault build_xmmsplugin no
 setdefault build_contrib yes
-setdefault build_test yes
 ## disable test when cross-compiling
 if [ -n "$buildalias" -a "$buildalias" != "$hostalias" ]; then
     build_test=no
