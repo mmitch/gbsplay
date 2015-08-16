@@ -68,6 +68,7 @@ GBSLDFLAGS += $(EXTRA_LDFLAGS)
 export CC HOSTCC BUILDCC GBSCFLAGS GBSLDFLAGS
 
 docs           := README HISTORY COPYRIGHT
+docs-dist      := INSTALL CODINGSTYLE TESTSUITE gbsformat.txt
 contribs       := contrib/gbs2ogg.sh contrib/gbsplay.bashcompletion
 examples       := examples/nightmode.gbs examples/gbsplayrc_sample
 
@@ -301,9 +302,9 @@ dist:	distclean
 	install -m 644 Makefile ./$(DISTDIR)/
 	install -m 644 *.c ./$(DISTDIR)/
 	install -m 644 *.h ./$(DISTDIR)/
-	install -m 644 *.ver ./$(DISTDIR)/
+	install -m 644 *.ver *.def ./$(DISTDIR)/
 	install -m 644 $(mans_src) ./$(DISTDIR)/
-	install -m 644 $(docs) INSTALL CODINGSTYLE ./$(DISTDIR)/
+	install -m 644 $(docs) $(docs-dist) ./$(DISTDIR)/
 	install -d ./$(DISTDIR)/examples
 	install -m 644 $(examples) ./$(DISTDIR)/examples
 	install -d ./$(DISTDIR)/contrib
@@ -311,6 +312,7 @@ dist:	distclean
 	install -d ./$(DISTDIR)/po
 	install -m 644 po/*.po ./$(DISTDIR)/po
 	install -m 644 po/subdir.mk ./$(DISTDIR)/po
+	install -m 644 .gitignore ./$(DISTDIR)/
 	tar -cvzf ../$(DISTDIR).tar.gz $(DISTDIR)/ 
 	rm -rf ./$(DISTDIR)
 
