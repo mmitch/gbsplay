@@ -503,6 +503,7 @@ Output Plugins:
   --disable-midi         omit MIDI file writer plugin
   --disable-nas          omit NAS sound output plugin
   --disable-pulse        omit PulseAudio sound output plugin
+  --disable-dsound       omit Direct Sound output plugin
   --disable-stdout       omit stdout file writer plugin
 EOF
 	exit $1
