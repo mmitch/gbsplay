@@ -61,7 +61,7 @@ VERSION=unknown
 ##### begin of subroutines
 
 ## die with error
-die ()
+die()
 {
     test -n "$1" && echo "$1"
     rm -rf "$TEMPDIR"
@@ -343,6 +343,22 @@ printoptional()
 		fi
 	done
 	echo
+}
+
+# remember state of use_$1
+remember_use()
+{
+    eval "remembered=\$use_$1"
+}
+
+# check state of use_$1 against remembered state
+# error out if option was requested but can't be satisfied after checks
+recheck_use()
+{
+    eval "val=\$use_$1"
+    if [ "$remembered" = 'yes' -a "$val" != 'yes' ]; then
+	die "error: --enable-$1 was requested but is not available"
+    fi
 }
 
 # parse option $1
@@ -627,16 +643,21 @@ fi
 need_include inttypes.h
 
 if [ "$use_devdsp" != no ]; then
+    remember_use devdsp
     check_include sys/soundcard.h
     use_devdsp=$have_sys_soundcard_h
+    recheck_use devdsp
 fi
 
 if [ "$use_alsa" != no ]; then
+    remember_use alsa
     check_include alsa/asoundlib.h
     use_alsa=$have_alsa_asoundlib_h
+    recheck_use alsa
 fi
 
 if [ "$use_dsound" != no ]; then
+    remember_use dsound
     check_include dsound.h
     retval1=$?
     retval2=1
@@ -653,17 +674,22 @@ int main(char argc, char** argv) {
 EOF
         retval2=$?
     fi
+    use_dsound=no
     if [ $retval1 -eq 0 -a $retval2 -eq 0 ]; then
         use_dsound=$have_dsound_h
     fi
+    recheck_use dsound
 fi
 
 if [ "$use_pulse" != no ]; then
+    remember_use pulse
     check_include pulse/simple.h
     use_pulse=$have_pulse_simple_h
+    recheck_use pulse
 fi
 
 if [ "$use_nas" != no ]; then
+    remember_use nas
     check_include audio/audiolib.h "/usr/X11R6/include"
     retval1=$?
     retval2=1
@@ -673,15 +699,18 @@ int main(char argc, char **argv) { return 0; }
 EOF
         retval2=$?
     fi
+    use_nas=no
     if [ $retval1 -eq 0 -a $retval2 -eq 0 ]; then
         if [ "$include_audio_audiolib_h_path" != " " ]; then
             append_nodupe CFLAGS "-I$include_audio_audiolib_h_path"
         fi
         use_nas=yes
     fi
+    recheck_use nas
 fi
 
 if [ "$use_i18n" != no ]; then
+    remember_use i18n
     check_include locale.h
     check_include libintl.h
 
@@ -710,6 +739,7 @@ if [ "$use_i18n" != no ]; then
         fi
         use_i18n=yes
     fi
+    recheck_use i18n
 fi
 
 if [ "$use_i18n" = "yes" ]; then
