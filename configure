@@ -549,7 +549,8 @@ done
 if [ \( "$BUILDARCH" = "i386" -o    \
         "$BUILDARCH" = "i486" -o    \
         "$BUILDARCH" = "i586" -o    \
-        "$BUILDARCH" = "i686" \) -a \
+        "$BUILDARCH" = "i686" -o    \
+        "$BUILDARCH" = "x86_64" \) -a \
         "$BUILDOS" = "Linux" ]; then
     setdefault use_regparm yes
     setdefault build_test yes
