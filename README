@@ -11,7 +11,6 @@ Licensed under GNU GPL.
 Homepage/Repo:   https://github.com/mmitch/gbsplay/
 Email contact:   <gbsplay-dev@lists.uguu.de>
 Bug reports:     please send new bugs to the mailing list
-		 old tracker: http://www.cgarbs.de/ditz/gbsplay/
 
 This program emulates the sound hardware of the Nintendo Gameboy.  It
 is able to play the sounds from a Gameboy module dump (.GBS format).
