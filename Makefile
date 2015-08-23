@@ -1,5 +1,17 @@
 .PHONY: all default distclean clean install dist
 
+ifeq ("$(origin V)", "command line")
+  VERBOSE = $(V)
+endif
+ifndef VERBOSE
+  VERBOSE = 0
+endif
+ifeq ($(VERBOSE),1)
+  Q =
+else
+  Q = @
+endif
+
 all: default
 
 noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
@@ -65,7 +77,7 @@ DISTDIR := gbsplay-$(VERSION)
 GBSCFLAGS  += $(EXTRA_CFLAGS)
 GBSLDFLAGS += $(EXTRA_LDFLAGS)
 
-export CC HOSTCC BUILDCC GBSCFLAGS GBSLDFLAGS
+export Q VERBOSE CC HOSTCC BUILDCC GBSCFLAGS GBSLDFLAGS
 
 docs           := README HISTORY COPYRIGHT
 docs-dist      := INSTALL CODINGSTYLE TESTSUITE gbsformat.txt
@@ -320,7 +332,7 @@ TESTOPTS := -r 44100 -t 30 -f 0 -g 0 -T 0
 
 test: gbsplay $(tests) test_gbs
 	@echo Verifying output correctness for examples/nightmode.gbs:
-	@MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH ./gbsplay -c examples/gbsplayrc_sample -E b -o stdout $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | md5sum | cut -f1 -d\ `; \
+	$(Q)MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH ./gbsplay -c examples/gbsplayrc_sample -E b -o stdout $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | md5sum | cut -f1 -d\ `; \
 	EXPECT="5269fdada196a6b67d947428ea3ca934"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "Bigendian output ok"; \
@@ -330,7 +342,7 @@ test: gbsplay $(tests) test_gbs
 		echo "  Got:      $$MD5" ; \
 		exit 1; \
 	fi
-	@MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH ./gbsplay -c examples/gbsplayrc_sample -E l -o stdout $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | md5sum | cut -f1 -d\ `; \
+	$(Q)MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH ./gbsplay -c examples/gbsplayrc_sample -E l -o stdout $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | md5sum | cut -f1 -d\ `; \
 	EXPECT="3c005a70135621d8eb3e0dc20982eba8"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "Littleendian output ok"; \
@@ -361,11 +373,11 @@ gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 
 .c.lo:
 	@echo CC $< -o $@
-	@$(BUILDCC) $(GBSCFLAGS) -fpic -c -o $@ $<
+	$(Q)$(BUILDCC) $(GBSCFLAGS) -fpic -c -o $@ $<
 .c.o:
 	@echo CC $< -o $@
-	@(test -x "`which $(SPLINT)`" && $(SPLINT) $(SPLINTFLAGS) $<) || true
-	@$(BUILDCC) $(GBSCFLAGS) -c -o $@ $<
+	$(Q)(test -x "`which $(SPLINT)`" && $(SPLINT) $(SPLINTFLAGS) $<) || true
+	$(Q)$(BUILDCC) $(GBSCFLAGS) -c -o $@ $<
 
 .c.i:
 	$(BUILDCC) -E $(GBSCFLAGS) -o $@ $<
@@ -379,13 +391,13 @@ config.mk: configure
 
 %.test: %.c
 	@echo -n "TEST $< "
-	@$(HOSTCC) -DENABLE_TEST=1 -o $(test_bin) $<
-	@./$(test_bin)
-	@rm ./$(test_bin)
+	$(Q)$(HOSTCC) -DENABLE_TEST=1 -o $(test_bin) $<
+	$(Q)./$(test_bin)
+	$(Q)rm ./$(test_bin)
 
 %.d: %.c config.mk
 	@echo DEP $< -o $@
-	@./depend.sh $< config.mk > $@ || rm -f $@
+	$(Q)./depend.sh $< config.mk > $@ || rm -f $@
 
 %.1: %.in.1
 	sed -f config.sed $< > $@
