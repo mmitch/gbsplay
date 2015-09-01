@@ -94,13 +94,22 @@ static long regparm alsa_open(enum plugout_endian endian, long rate)
 	return 0;
 }
 
+static long is_suspended(snd_pcm_sframes_t retval)
+{
+#ifdef HAVE_ESTRPIPE
+	return retval == -ESTRPIPE;
+#else
+	return snd_pcm_state(pcm_handle) == SND_PCM_STATE_SUSPENDED;
+#endif
+}
+
 static ssize_t regparm alsa_write(const void *buf, size_t count)
 {
 	snd_pcm_sframes_t retval;
 
 	do {
 		retval = snd_pcm_writei(pcm_handle, buf, count / 4);
-		if (retval != -ESTRPIPE)
+		if (!is_suspended(retval))
 			break;
 
 		/* resume from suspend */

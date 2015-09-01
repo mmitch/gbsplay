@@ -655,6 +655,16 @@ if [ "$use_alsa" != no ]; then
     remember_use alsa
     check_include alsa/asoundlib.h
     use_alsa=$have_alsa_asoundlib_h
+    cc_check "checking for ESTRPIPE support" have_estrpipe <<EOF
+#include <errno.h>
+#include <alsa/asoundlib.h>
+int main(int argc, char **argv)
+{
+    if (ESTRPIPE == 0)
+        return 1;  /* Never reached. */
+    return 0;
+}
+EOF
     recheck_use alsa
 fi
 
@@ -947,6 +957,7 @@ __EOF__
     plugout_x STDOUT
     use_x I18N
     use_x REGPARM
+    have_x ESTRPIPE
     echo "#endif"
 ) > config.h
 
