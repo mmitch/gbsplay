@@ -621,7 +621,7 @@ EOF
 fi
 
 if [ "$use_ssp" != "no" ]; then
-    cc_check "checking for -fstack-protector support" use_ssp "-fstack-protector" <<EOF
+    cc_check "checking for -fstack-protector support" use_ssp "-fstack-protector -Werror" <<EOF
 int main(int argc, char **argv)
 {
     return 0;
