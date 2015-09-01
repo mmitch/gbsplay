@@ -8,7 +8,7 @@
 #ifndef _UTIL_H_
 #define _UTIL_H_
 
-inline long rand_long(long max);
+long rand_long(long max);
 void shuffle_long(long *array, long elements);
 
 #endif

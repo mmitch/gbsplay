@@ -12,7 +12,7 @@
 #include "util.h"
 #include "test.h"
 
-extern inline long rand_long(long max)
+long rand_long(long max)
 /* return random long from [0;max[ */
 {
 	return (long) (((double)max)*rand()/(RAND_MAX+1.0));
