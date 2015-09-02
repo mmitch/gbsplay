@@ -72,7 +72,7 @@ die()
 check_include()
 {
     include="$1"
-    includedirs="${2-} /usr/local/include"
+    includedirs="${2-} /usr/local/include /opt/local/include"
     includename="`echo $include | sed -e 's@[/\.]@_@g'`"
     eval "value=\${have_${includename}-}"
     test -z "$value" || return
@@ -84,7 +84,7 @@ check_include()
         test -z "$dir" || flags="-I$dir"
         cc_check "$msg" have_$includename "$flags" ok <<EOF
 #include <$include>
-int main(char argc, char **argv) {
+int main(int argc, char **argv) {
     return 0;
 }
 EOF
@@ -100,7 +100,7 @@ EOF
 find_lib()
 {
     lib="$1"
-    libdirs="${2-}"
+    libdirs="${2-} /usr/local/lib /opt/local/lib"
 
     eval "val=\"\${lib${lib}_path-}\""
     if [ ! -z "$val" ]; then
@@ -112,7 +112,7 @@ find_lib()
             test -z "$dir" || msg="$msg in $dir"
             test -z "$dir" || flags="$flags -L$dir"
             cc_check "$msg" "" "$flags" ok <<EOF
-int main(char argc, char **argv) { return 0; }
+int main(int argc, char **argv) { return 0; }
 EOF
             if [ $? -eq 0 ]; then
                 eval "lib${lib}_path=\"$dir \""
@@ -574,7 +574,7 @@ INFILE="$TEMPDIR/cc.c"
 OUTFILE="$TEMPDIR/cc"
 
 cat > "$INFILE" <<EOF
-int main(char argc, char **argv) {
+int main(int argc, char **argv) {
     return 0;
 }
 EOF
@@ -601,7 +601,7 @@ fi
 
 
 cc_check "checking if cc supports -Wdeclaration-after-statement" "" "-Wdeclaration-after-statement" yes no <<EOF
-int main(char argc, char **argv) { return 0; }
+int main(int argc, char **argv) { return 0; }
 EOF
 if [ $? -eq 0 ]; then
 	append_nodupe CFLAGS "-Wdeclaration-after-statement"
@@ -677,7 +677,7 @@ if [ "$use_dsound" != no ]; then
         check_libs dsound "dsound dsound3d" <<EOF
 #include <windows.h>
 #include <dsound.h>
-int main(char argc, char** argv) {
+int main(int argc, char** argv) {
     LPDIRECTSOUND8 lp;
     HRESULT hr = DirectSoundCreate8(NULL, &lp, NULL);
     if (SUCCEEDED(hr)) IDirectSound8_Release(lp);
@@ -707,7 +707,7 @@ if [ "$use_nas" != no ]; then
     retval2=1
     if [ $retval1 -eq 0 ]; then
         check_libs audio "X11 Xt m" "/usr/X11R6/lib /usr/X11/lib /usr/lib/X11" <<EOF
-int main(char argc, char **argv) { return 0; }
+int main(int argc, char **argv) { return 0; }
 EOF
         retval2=$?
     fi
@@ -755,7 +755,7 @@ if [ "$use_i18n" != no ]; then
 fi
 
 if [ "$use_i18n" = "yes" ]; then
-    check_libs c "intl" "/usr/local/lib" "" "$EXTRA_I18NFLAGS" "i18n" <<EOF
+    check_libs c "intl" "" "" "$EXTRA_I18NFLAGS" "i18n" <<EOF
 #include <libintl.h>
 int main(int argc, char **argv)
 {
