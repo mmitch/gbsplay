@@ -9,6 +9,7 @@
     gbs_write;
 
     gbhw_ch;
+    gbhw_setiocallback;
     gbhw_setcallback;
     gbhw_setbuffer;
     gbhw_setrate;
