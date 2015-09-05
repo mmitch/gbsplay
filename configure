@@ -625,53 +625,21 @@ else
     die "error executing '$BUILDCC'"
 fi
 
-
-if cc_has_flag "-Wdeclaration-after-statement"; then
-    append_nodupe CFLAGS "-Wdeclaration-after-statement"
-fi
-
-if [ "$use_hardening" != "no" ]; then
-    if cc_has_flag "-Wl,-z,relro"; then
-        append_nodupe LDFLAGS "-Wl,-z,relro"
-    fi
-
-    if cc_has_flag "-Wl,-z,now"; then
-        append_nodupe LDFLAGS "-Wl,-z,now"
-    fi
-
-    if cc_has_flag "-Wl,-pie"; then
-        append_nodupe LDFLAGS "-Wl,-pie"
-    elif cc_has_flag "-pie"; then
-        append_nodupe LDFLAGS "-pie"
-    fi
-
-    if cc_has_flag "-fstack-protector-strong"; then
-        append_nodupe CFLAGS "-fstack-protector-strong"
-        append_nodupe LDFLAGS "-fstack-protector-strong"
-    elif cc_has_flag "-fstack-protector"; then
-        append_nodupe CFLAGS "-fstack-protector"
-        append_nodupe LDFLAGS "-fstack-protector"
-        append_nodupe CFLAGS "--param=ssp-buffer-size=4"
-    fi
-fi
-
-if [ "$use_regparm" != "no" ]; then
-    cc_check "checking for regparm support" use_regparm <<EOF
-void __attribute__((regparm(3))) foo(void)
-{
-}
-int main(int argc, char **argv)
-{
-    foo();
-    return 0;
-}
-EOF
-fi
-
 # Check git timestamp
 
 if [ -f .git/HEAD ]; then
     VERSION=`git describe --tags`
+fi
+
+## check for cygwin environment
+
+printf "checking if OS is Cygwin:  "
+if [ "`uname -o`" = "Cygwin" ]; then
+    cygwin_build=yes
+    echo "yes"
+else
+    cygwin_build=no
+    echo "no"
 fi
 
 ## check for various headers
@@ -702,7 +670,7 @@ EOF
     recheck_use alsa
 fi
 
-if [ "$use_dsound" != no ]; then
+if [ "$cygwin_build" = yes -a "$use_dsound" != no ]; then
     remember_use dsound
     check_include dsound.h
     retval1=$?
@@ -877,17 +845,6 @@ else
     PTHREAD=
 fi
 
-## check for cygwin environment
-
-printf "checking for Cygwin environment:  "
-if [ "`uname -o`" = "Cygwin" ]; then
-    cygwin_build=yes
-    echo "ok"
-else
-    cygwin_build=no
-    echo "no"
-fi
-
 ## can XMMS be built?
 
 if [ "$build_xmmsplugin" != "no" -a "$GLIB_CFLAGS" -a "$XMMS_CFLAGS" -a "XMMS_INPUT_PLUGIN_DIR" -a "$PTHREAD" ]; then
@@ -897,6 +854,50 @@ if [ "$build_xmmsplugin" != "no" -a "$GLIB_CFLAGS" -a "$XMMS_CFLAGS" -a "XMMS_IN
     build_xmmsplugin=yes
 else
     build_xmmsplugin=no
+fi
+
+## check compiler features
+
+if cc_has_flag "-Wdeclaration-after-statement"; then
+    append_nodupe CFLAGS "-Wdeclaration-after-statement"
+fi
+
+if [ "$use_hardening" != "no" ]; then
+    if cc_has_flag "-Wl,-z,relro"; then
+        append_nodupe LDFLAGS "-Wl,-z,relro"
+    fi
+
+    if cc_has_flag "-Wl,-z,now"; then
+        append_nodupe LDFLAGS "-Wl,-z,now"
+    fi
+
+    if cc_has_flag "-Wl,-pie"; then
+        append_nodupe LDFLAGS "-Wl,-pie"
+    elif cc_has_flag "-pie"; then
+        append_nodupe LDFLAGS "-pie"
+    fi
+
+    if cc_has_flag "-fstack-protector-strong"; then
+        append_nodupe CFLAGS "-fstack-protector-strong"
+        append_nodupe LDFLAGS "-fstack-protector-strong"
+    elif cc_has_flag "-fstack-protector"; then
+        append_nodupe CFLAGS "-fstack-protector"
+        append_nodupe LDFLAGS "-fstack-protector"
+        append_nodupe CFLAGS "--param=ssp-buffer-size=4"
+    fi
+fi
+
+if [ "$use_regparm" != "no" ]; then
+    cc_check "checking for regparm support" use_regparm <<EOF
+void __attribute__((regparm(3))) foo(void)
+{
+}
+int main(int argc, char **argv)
+{
+    foo();
+    return 0;
+}
+EOF
 fi
 
 ## set variables we have no test for to default values if not set
