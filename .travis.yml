@@ -9,6 +9,8 @@ matrix:
   exclude:
     - os: osx
       compiler: gcc
+    - os: osx
+      env: CONFIGURE_FLAGS=--enable-sharedlibgbs
 addons:
   apt:
     packages:
