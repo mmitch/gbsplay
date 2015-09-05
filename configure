@@ -919,7 +919,6 @@ printoptional modules build
 printoptional features use
 
 append_nodupe CFLAGS -D_FORTIFY_SOURCE=2 -Wall -fsigned-char
-append_nodupe LDFLAGS -lm
 
 if [ "$use_debug" = "yes" ]; then
     append_nodupe CFLAGS -g3

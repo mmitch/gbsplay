@@ -191,7 +191,7 @@ uninstall-libgbs.so.1:
 
 
 libgbs.so.1: $(objs_libgbspic) libgbs.so.1.ver
-	$(BUILDCC) -fpic -shared -Wl,-soname=$@ -Wl,--version-script,$@.ver -o $@ $(objs_libgbspic)
+	$(BUILDCC) -fpic -shared -Wl,-soname=$@ -Wl,--version-script,$@.ver -o $@ $(objs_libgbspic) -lm
 	ln -fs $@ libgbs.so
 
 libgbs: libgbs.so.1
@@ -201,6 +201,7 @@ libgbspic: libgbs.so.1
 	touch libgbspic
 endif
 else
+GBSLDFLAGS += -lm
 objs += $(objs_libgbs)
 objs_gbsplay += libgbs.a
 objs_gbsinfo += libgbs.a
