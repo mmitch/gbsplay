@@ -2,9 +2,9 @@ language: c
 os:
   - linux
   - osx
-matrix:
-  allow_failures:
-    - os: osx
+env:
+  - CONFIGURE_FLAGS=
+  - CONFIGURE_FLAGS=--enable-sharedlibgbs
 addons:
   apt:
     packages:

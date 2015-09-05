@@ -12,6 +12,7 @@
 ## initialize interpreter parameters
 
 set -u # bail on use of uninitialized variables
+trap 'exit_trap' EXIT
 
 ## initialize variables
 
@@ -22,6 +23,7 @@ EXTRA_UNINSTALL=
 EXTRA_I18NFLAGS=
 XMMS_INPUT_PLUGIN_DIR=
 CC="${CC-gcc}" # use gcc by default
+CONFIGURE_FLAGS="${CONFIGURE_FLAGS- }"
 CFLAGS="${CFLAGS-}"
 LDFLAGS="${LDFLAGS-}"
 HOSTCC="$CC"
@@ -61,6 +63,13 @@ fi
 VERSION=unknown
 
 ##### begin of subroutines
+
+exit_trap()
+{
+    EXIT_CODE=$?
+    test $EXIT_CODE -ne 0 && tail config.err
+    exit $EXIT_CODE
+}
 
 ## die with error
 die()
@@ -549,6 +558,12 @@ if [ -f config.conf ]; then
     echo ok
 fi
 
+## flags from CONFIGURE_FLAGS env (for travis-ci)
+for flag in ${CONFIGURE_FLAGS}; do
+    parseoption $flag
+done
+
+## commandline flags
 while [ ${1-} ]; do
     parseoption $1
     shift
