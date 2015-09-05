@@ -47,9 +47,6 @@ SPLINTFLAGS := \
 	-predboolothers \
 	-shiftnegative \
 	-shiftimplementation
-GBSCFLAGS  := -Wall -fsigned-char -D_FORTIFY_SOURCE=2
-GBSLDFLAGS := -Wl,-O1 -lm
-GBSPLAYLDFLAGS :=
 
 ifneq ($(noincludes),yes)
 -include config.mk
@@ -74,8 +71,10 @@ exampledir  := $(docdir)/examples
 
 DISTDIR := gbsplay-$(VERSION)
 
-GBSCFLAGS  += $(EXTRA_CFLAGS)
-GBSLDFLAGS += $(EXTRA_LDFLAGS)
+GBSCFLAGS  := $(EXTRA_CFLAGS)
+GBSLDFLAGS := $(EXTRA_LDFLAGS) -pie
+# Additional ldflags for the gbsplay executable
+GBSPLAYLDFLAGS :=
 
 export Q VERBOSE CC HOSTCC BUILDCC GBSCFLAGS GBSLDFLAGS
 
@@ -167,7 +166,7 @@ uninstall-cyggbs-1.dll:
 
 
 cyggbs-1.dll: $(objs_libgbspic) libgbs.so.1.ver
-	$(CC) -fpic -shared -Wl,-O1 -Wl,-soname=$@ -Wl,--version-script,libgbs.so.1.ver -o $@ $(objs_libgbspic) $(EXTRA_LDFLAGS)
+	$(CC) -fpic -shared -Wl,-soname=$@ -Wl,--version-script,libgbs.so.1.ver -o $@ $(objs_libgbspic) $(EXTRA_LDFLAGS)
 
 libgbs.dll.a:
 	dlltool --input-def libgbs.def --dllname cyggbs-1.dll --output-lib libgbs.dll.a -k
@@ -192,7 +191,7 @@ uninstall-libgbs.so.1:
 
 
 libgbs.so.1: $(objs_libgbspic) libgbs.so.1.ver
-	$(BUILDCC) -fpic -shared -Wl,-O1 -Wl,-soname=$@ -Wl,--version-script,$@.ver -o $@ $(objs_libgbspic)
+	$(BUILDCC) -fpic -shared -Wl,-soname=$@ -Wl,--version-script,$@.ver -o $@ $(objs_libgbspic)
 	ln -fs $@ libgbs.so
 
 libgbs: libgbs.so.1
@@ -377,7 +376,7 @@ gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 .c.o:
 	@echo CC $< -o $@
 	$(Q)(test -x "`which $(SPLINT)`" && $(SPLINT) $(SPLINTFLAGS) $<) || true
-	$(Q)$(BUILDCC) $(GBSCFLAGS) -c -o $@ $<
+	$(Q)$(BUILDCC) $(GBSCFLAGS) -fpie -c -o $@ $<
 
 .c.i:
 	$(BUILDCC) -E $(GBSCFLAGS) -o $@ $<

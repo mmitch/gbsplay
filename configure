@@ -241,6 +241,14 @@ cc_check()
     fi
 }
 
+cc_has_flag()
+{
+    flag="$1"
+    cc_check "checking if cc supports ${flag}" "" "${flag} -Werror" yes no <<EOF
+int main(int argc, char **argv) { return 0; }
+EOF
+}
+
 need_include() {
     check_include "$1"
     if [ $? -ne 0 ]; then
@@ -527,7 +535,7 @@ EOF
     exit $1
 }
 
-OPTS="build_contrib build_test build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_ssp use_debug use_stdout use_devdsp use_alsa use_nas use_pulse use_midi use_dsound"
+OPTS="build_contrib build_test build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_ssp_strong use_ssp use_debug use_stdout use_devdsp use_alsa use_nas use_pulse use_midi use_dsound"
 for OPT in $OPTS; do
     eval "${OPT}="
 done
@@ -602,11 +610,31 @@ else
 fi
 
 
-cc_check "checking if cc supports -Wdeclaration-after-statement" "" "-Wdeclaration-after-statement" yes no <<EOF
-int main(int argc, char **argv) { return 0; }
-EOF
-if [ $? -eq 0 ]; then
+if cc_has_flag "-Wdeclaration-after-statement"; then
     append_nodupe CFLAGS "-Wdeclaration-after-statement"
+fi
+
+if cc_has_flag "-Wl,-z,relro"; then
+    append_nodupe LDFLAGS "-Wl,-z,relro"
+fi
+
+if cc_has_flag "-Wl,-z,now"; then
+    append_nodupe LDFLAGS "-Wl,-z,now"
+fi
+
+if [ "$use_ssp_strong" != "no" ]; then
+    if cc_has_flag "-fstack-protector-strong"; then
+        append_nodupe CFLAGS "-fstack-protector-strong"
+        append_nodupe LDFLAGS "-fstack-protector-strong"
+    fi
+fi
+
+if [ "$use_ssp_strong" != "yes" -a "$use_ssp" != "no" ]; then
+    if cc_has_flag "-fstack-protector"; then
+        append_nodupe CFLAGS "-fstack-protector"
+        append_nodupe LDFLAGS "-fstack-protector"
+        append_nodupe CFLAGS "--param=ssp-buffer-size=4"
+    fi
 fi
 
 if [ "$use_regparm" != "no" ]; then
@@ -620,20 +648,6 @@ int main(int argc, char **argv)
     return 0;
 }
 EOF
-fi
-
-if [ "$use_ssp" != "no" ]; then
-    cc_check "checking for -fstack-protector support" use_ssp "-fstack-protector -Werror" <<EOF
-int main(int argc, char **argv)
-{
-    return 0;
-}
-EOF
-    if [ $? -eq 0 ]; then
-        append_nodupe CFLAGS "-fstack-protector"
-        append_nodupe LDFLAGS "-fstack-protector"
-        append_nodupe CFLAGS "--param=ssp-buffer-size=4"
-    fi
 fi
 
 # Check git timestamp
@@ -886,12 +900,13 @@ setdefault use_stdout yes
 printoptional modules build
 printoptional features use
 
-append_nodupe CFLAGS -Os -pipe
+append_nodupe CFLAGS -D_FORTIFY_SOURCE=2 -Wall -fsigned-char
+append_nodupe LDFLAGS -lm
 
 if [ "$use_debug" = "yes" ]; then
     append_nodupe CFLAGS -g3
 else
-    append_nodupe CFLAGS -fomit-frame-pointer
+    append_nodupe CFLAGS -Os -pipe -fomit-frame-pointer
 fi
 
 EXTRA_CFLAGS="$CFLAGS"
