@@ -1,5 +1,7 @@
 #!/bin/sh
 #
+# vim:set ts=4 et:
+#
 # generate config.mk for gbsplay Makefile
 #
 # 2003-2006,2008,2010,2015 (C) by Christian Garbs <mitch@cgarbs.de>
@@ -229,20 +231,20 @@ cc_check()
     $BUILDCC -o "$OUTFILE" "$INFILE" $flags
     RESULT=$?
     if [ $RESULT -eq 0 ]; then
-	test "$name" && echo "$okmsg"
-	test "$varname" && eval "$varname=yes"
-	return 0
+        test "$name" && echo "$okmsg"
+        test "$varname" && eval "$varname=yes"
+        return 0
     else
-	test "$name" && echo "$errmsg"
-	test "$varname" && eval "$varname=no"
-	return 1
+        test "$name" && echo "$errmsg"
+        test "$varname" && eval "$varname=no"
+        return 1
     fi
 }
 
 need_include() {
     check_include "$1"
     if [ $? -ne 0 ]; then
-	die "Could not find $1, which is needed for compilation."
+        die "Could not find $1, which is needed for compilation."
     fi
 }
 
@@ -251,9 +253,9 @@ have_x() {
     localvar="have_`echo $1 | tr A-Z a-z`"
     eval "result=\$$localvar"
     if [ "$result" = "yes" ]; then
-	echo "#define HAVE_$1 1"
+        echo "#define HAVE_$1 1"
     else
-	echo "/* #undef HAVE_$1 */"
+        echo "/* #undef HAVE_$1 */"
     fi
 }
 
@@ -261,9 +263,9 @@ plugout_x() {
     localvar="use_`echo $1 | tr A-Z a-z`"
     eval "result=\$$localvar"
     if [ "$result" = "yes" ]; then
-	echo "#define PLUGOUT_$1 1"
+        echo "#define PLUGOUT_$1 1"
     else
-	echo "/* #undef PLUGOUT_$1 */"
+        echo "/* #undef PLUGOUT_$1 */"
     fi
 }
 
@@ -271,9 +273,9 @@ use_x() {
     localvar="use_`echo $1 | tr A-Z a-z`"
     eval "result=\$$localvar"
     if [ "$result" = "yes" ]; then
-	echo "#define USE_$1 1"
+        echo "#define USE_$1 1"
     else
-	echo "/* #undef USE_$1 */"
+        echo "/* #undef USE_$1 */"
     fi
 }
 
@@ -284,14 +286,14 @@ which()
     IFS=:
     PROGRAM="$1"
     for ELEMENT in $PATH; do
-	if [ -z "$ELEMENT" ]; then
-	    ELEMENT=.
-	fi
-	if [ -f "$ELEMENT/$PROGRAM" ] && [ -x "$ELEMENT/$PROGRAM" ]; then
-	    IFS="$IFS_SAVE"
-	    echo "$ELEMENT/$PROGRAM"
-	    return 0
-	fi
+        if [ -z "$ELEMENT" ]; then
+            ELEMENT=.
+        fi
+        if [ -f "$ELEMENT/$PROGRAM" ] && [ -x "$ELEMENT/$PROGRAM" ]; then
+            IFS="$IFS_SAVE"
+            echo "$ELEMENT/$PROGRAM"
+            return 0
+        fi
     done
     IFS="$IFS_SAVE"
     return 1
@@ -301,48 +303,48 @@ which()
 # really the same as $var="${var-$default}"
 setdefault()
 {
-	eval "value=\$$1"
-	if [ -z "$value" ]; then
-		eval "$1=$2"
-	fi
+    eval "value=\$$1"
+    if [ -z "$value" ]; then
+        eval "$1=$2"
+    fi
 }
 
 # check if $1 is a known feature
 isknown()
 {
-	for i in $OPTS; do
-		if [ "$i" = "$1" ]; then
-			return 0
-		fi
-	done
+    for i in $OPTS; do
+        if [ "$i" = "$1" ]; then
+            return 0
+        fi
+    done
 
-	if [ "${1#use_}" != "$1" ]; then
-		echo "unknown feature '${1#use_}'"
-	elif [ "${1#build_}" != "$1" ]; then
-		echo "unknown module '${1#build_}'"
-	else
-		echo "unknown option '$2'"
-	fi
-	echo
-	return 1
+    if [ "${1#use_}" != "$1" ]; then
+        echo "unknown feature '${1#use_}'"
+    elif [ "${1#build_}" != "$1" ]; then
+        echo "unknown module '${1#build_}'"
+    else
+        echo "unknown option '$2'"
+    fi
+    echo
+    return 1
 }
 
 # list enabled $1 (modules, features)
 # of type $2 (build, use)
 printoptional()
 {
-	printf "${3-optional} $1:"
-	for i in $OPTS; do
-		eval "val=\$$i"
-		if [ "${i#${2}_}" != "$i" ]; then
-			if [ "$val" = "yes" ]; then
-				printf " +${i#${2}_}"
-			elif [ "$val" = "no" ]; then
-				printf " -${i#${2}_}"
-			fi
-		fi
-	done
-	echo
+    printf "${3-optional} $1:"
+    for i in $OPTS; do
+        eval "val=\$$i"
+        if [ "${i#${2}_}" != "$i" ]; then
+            if [ "$val" = "yes" ]; then
+                printf " +${i#${2}_}"
+            elif [ "$val" = "no" ]; then
+                printf " -${i#${2}_}"
+            fi
+        fi
+    done
+    echo
 }
 
 # remember state of use_$1
@@ -357,91 +359,91 @@ recheck_use()
 {
     eval "val=\$use_$1"
     if [ "$remembered" = 'yes' -a "$val" != 'yes' ]; then
-	die "error: --enable-$1 was requested but is not available"
+        die "error: --enable-$1 was requested but is not available"
     fi
 }
 
 # parse option $1
 parseoption()
 {
-	case $1 in
-		--prefix=*)
-		prefix="${1#--prefix=}"
-		;;
-		--exec-prefix=*)
-		exec_prefix="${1#--exec-prefix=}"
-		;;
-		--bindir=*)
-		bindir="${1#--bindir=}"
-		;;
-		--mandir=*)
-		mandir="${1#--mandir=}"
-		;;
-		--docdir=*)
-		docdir="${1#--docdir=}"
-		;;
-		--localedir=*)
-		localedir="${1#--localedir=}"
-		;;
-		--sysconfdir=*)
-		sysconfdir="${1#--sysconfdir=}"
-		;;
-		--infodir=*)
-		infodir="${1#--infodir=}"
-		;;
-		--datadir=*)
-		datadir="${1#--datadir=}"
-		;;
-		--localstatedir=*)
-		localstatedir="${1#--localstatedir=}"
-		;;
-		--host=*)
-		hostalias="${1#--host=}"
-		HOSTCC="${hostalias}-${CC}"
-		;;
-		--build=*)
-		buildalias="${1#--build=}"
-		BUILDCC="${buildalias}-${CC}"
-		;;
-		--have-*)
-		eval "have_${1#--have-}=yes"
-		isknown have_${1#--have-} $1 || usage 1
-		;;
-		--donthave-*)
-		eval "have_${1#--donthave-}=no"
-		isknown have_${1#--donthave-} $1 || usage 1
-		;;
-		--enable-*)
-		eval "use_${1#--enable-}=yes"
-		isknown use_${1#--enable-} || usage 1
-		;;
-		--disable-*)
-		eval "use_${1#--disable-}=no"
-		isknown use_${1#--disable-} || usage 1
-		;;
-		--with-*)
-		eval "build_${1#--with-}=yes"
-		isknown build_${1#--with-} || usage 1
-		;;
-		--without-*)
-		eval "build_${1#--without-}=no"
-		isknown build_${1#--without-} || usage 1
-		;;
-		CFLAGS=*)
-		CFLAGS="${1#CFLAGS=}"
-		;;
-		LDFLAGS=*)
-		LDFLAGS="${1#LDFLAGS=}"
-		;;
-		--help)
-		usage 0
-		;;
-		*)
-		echo "unknown option '$1'"
-		echo
-		usage 1
-		;;
-	esac
+    case $1 in
+    --prefix=*)
+        prefix="${1#--prefix=}"
+        ;;
+    --exec-prefix=*)
+        exec_prefix="${1#--exec-prefix=}"
+        ;;
+    --bindir=*)
+        bindir="${1#--bindir=}"
+        ;;
+    --mandir=*)
+        mandir="${1#--mandir=}"
+        ;;
+    --docdir=*)
+        docdir="${1#--docdir=}"
+        ;;
+    --localedir=*)
+        localedir="${1#--localedir=}"
+        ;;
+    --sysconfdir=*)
+        sysconfdir="${1#--sysconfdir=}"
+        ;;
+    --infodir=*)
+        infodir="${1#--infodir=}"
+        ;;
+    --datadir=*)
+        datadir="${1#--datadir=}"
+        ;;
+    --localstatedir=*)
+        localstatedir="${1#--localstatedir=}"
+        ;;
+    --host=*)
+        hostalias="${1#--host=}"
+        HOSTCC="${hostalias}-${CC}"
+        ;;
+    --build=*)
+        buildalias="${1#--build=}"
+        BUILDCC="${buildalias}-${CC}"
+        ;;
+    --have-*)
+        eval "have_${1#--have-}=yes"
+        isknown have_${1#--have-} $1 || usage 1
+        ;;
+    --donthave-*)
+        eval "have_${1#--donthave-}=no"
+        isknown have_${1#--donthave-} $1 || usage 1
+        ;;
+    --enable-*)
+        eval "use_${1#--enable-}=yes"
+        isknown use_${1#--enable-} || usage 1
+        ;;
+    --disable-*)
+        eval "use_${1#--disable-}=no"
+        isknown use_${1#--disable-} || usage 1
+        ;;
+    --with-*)
+        eval "build_${1#--with-}=yes"
+        isknown build_${1#--with-} || usage 1
+        ;;
+    --without-*)
+        eval "build_${1#--without-}=no"
+        isknown build_${1#--without-} || usage 1
+        ;;
+    CFLAGS=*)
+        CFLAGS="${1#CFLAGS=}"
+        ;;
+    LDFLAGS=*)
+        LDFLAGS="${1#LDFLAGS=}"
+        ;;
+    --help)
+        usage 0
+        ;;
+    *)
+        echo "unknown option '$1'"
+        echo
+        usage 1
+        ;;
+    esac
 }
 ##### end of subroutines
 
@@ -477,7 +479,7 @@ fi
 
 usage()
 {
-	cat<<EOF
+    cat<<EOF
 Usage: $0 [OPTION]...
 
 Configuration:
@@ -522,26 +524,26 @@ Output Plugins:
   --disable-dsound       omit Direct Sound output plugin
   --disable-stdout       omit stdout file writer plugin
 EOF
-	exit $1
+    exit $1
 }
 
 OPTS="build_contrib build_test build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_ssp use_debug use_stdout use_devdsp use_alsa use_nas use_pulse use_midi use_dsound"
 for OPT in $OPTS; do
-	eval "${OPT}="
+    eval "${OPT}="
 done
 
 ## load user config
 if [ -f config.conf ]; then
-	printf "loading config.conf... "
-	while read line; do
-		parseoption $line
-	done < config.conf
-	echo ok
+    printf "loading config.conf... "
+    while read line; do
+        parseoption $line
+    done < config.conf
+    echo ok
 fi
 
 while [ ${1-} ]; do
-	parseoption $1
-	shift
+    parseoption $1
+    shift
 done
 
 ## on Linux x86, regparm defaults to on
@@ -582,18 +584,18 @@ $BUILDCC -o "$OUTFILE" "$INFILE" $CFLAGS $LDFLAGS
 RESULT=$?
 if [ $RESULT -eq 0 ]; then
     if [ "$buildalias" -a "$buildalias" != "$hostalias" ]; then
-	echo "cross-compiling, skipping execute check"
+        echo "cross-compiling, skipping execute check"
     else
-	if [ -s "$OUTFILE" ]; then
-	    "$OUTFILE"
-	    if [ $? -eq 0 ]; then
-		echo "ok"
-	    else
-		die "can't execute generated code"
-	    fi
-	else
-	    die "no code generated"
-	fi
+    if [ -s "$OUTFILE" ]; then
+        "$OUTFILE"
+        if [ $? -eq 0 ]; then
+            echo "ok"
+        else
+            die "can't execute generated code"
+        fi
+    else
+        die "no code generated"
+    fi
     fi
 else
     die "error executing '$BUILDCC'"
@@ -604,7 +606,7 @@ cc_check "checking if cc supports -Wdeclaration-after-statement" "" "-Wdeclarati
 int main(int argc, char **argv) { return 0; }
 EOF
 if [ $? -eq 0 ]; then
-	append_nodupe CFLAGS "-Wdeclaration-after-statement"
+    append_nodupe CFLAGS "-Wdeclaration-after-statement"
 fi
 
 if [ "$use_regparm" != "no" ]; then
@@ -614,8 +616,8 @@ void __attribute__((regparm(3))) foo(void)
 }
 int main(int argc, char **argv)
 {
-	foo();
-	return 0;
+    foo();
+    return 0;
 }
 EOF
 fi
@@ -637,7 +639,7 @@ fi
 # Check git timestamp
 
 if [ -f .git/HEAD ]; then
-	VERSION=`git describe --tags`
+    VERSION=`git describe --tags`
 fi
 
 ## check for various headers
@@ -732,9 +734,9 @@ if [ "$use_i18n" != no ]; then
     have_xgettext=yes
     for i in xgettext msgmerge msgfmt msgen; do
         if [ "`which $i`" = "" ]; then
-	    test "$have_xgettext" = "yes" && echo "not ok"
-	    have_xgettext=no
-	    echo "$i is missing"
+            test "$have_xgettext" = "yes" && echo "not ok"
+            have_xgettext=no
+            echo "$i is missing"
         fi
     done
     test "$have_xgettext" = "yes" && echo "ok"
@@ -759,8 +761,8 @@ if [ "$use_i18n" = "yes" ]; then
 #include <libintl.h>
 int main(int argc, char **argv)
 {
-	bindtextdomain("foo", "bar");
-	return 0;
+    bindtextdomain("foo", "bar");
+    return 0;
 }
 EOF
     if [ $? -eq 0 -a "$libc_flags" != "" ]; then
@@ -783,9 +785,9 @@ int main(int argc, char **argv)
 }
 EOF
         if [ $? -eq 0 ]; then
-	    PTHREAD="-lpthread"
+            PTHREAD="-lpthread"
         else
-	    cc_check "checking FreeBSD-flavoured pthread" have_pthread "-pthread" found no <<EOF
+            cc_check "checking FreeBSD-flavoured pthread" have_pthread "-pthread" found no <<EOF
 #include <pthread.h>
 int main(int argc, char **argv)
 {
@@ -793,11 +795,11 @@ int main(int argc, char **argv)
     return 0;
 }
 EOF
-	    if [ $? -eq 0 ]; then
-	        PTHREAD="-pthread"
-	    else
-	        echo "no known pthread implementation found!"
-	    fi
+            if [ $? -eq 0 ]; then
+                PTHREAD="-pthread"
+            else
+                echo "no known pthread implementation found!"
+            fi
         fi
     fi
 
@@ -809,9 +811,9 @@ EOF
     if [ $? -eq 0 ]; then
         GLIB_CFLAGS=`glib-config --cflags`
         if [ $? -eq 0 ]; then
-	    echo "ok"
+            echo "ok"
         else
-	    echo "error running glib-config --cflags!"
+            echo "error running glib-config --cflags!"
         fi
     else
         echo "glib-config not found!"
@@ -825,14 +827,14 @@ EOF
     if [ $? -eq 0 ]; then
         XMMS_CFLAGS=`xmms-config --cflags` 
         if [ $? -eq 0 ]; then
-	    XMMS_INPUT_PLUGIN_DIR=`xmms-config --input-plugin-dir`
-	    if [ $? -eq 0 ]; then
-	        echo "ok"
-	    else
-	        echo "error running xmms-config --input-plugin-dir!"
-	    fi
+            XMMS_INPUT_PLUGIN_DIR=`xmms-config --input-plugin-dir`
+            if [ $? -eq 0 ]; then
+                echo "ok"
+            else
+                echo "error running xmms-config --input-plugin-dir!"
+            fi
         else
-	    echo "error running xmms-config --cflags!"
+        echo "error running xmms-config --cflags!"
         fi
     else
         echo "xmms-config not found!"
@@ -887,9 +889,9 @@ printoptional features use
 append_nodupe CFLAGS -Os -pipe
 
 if [ "$use_debug" = "yes" ]; then
-	append_nodupe CFLAGS -g3
+    append_nodupe CFLAGS -g3
 else
-	append_nodupe CFLAGS -fomit-frame-pointer
+    append_nodupe CFLAGS -fomit-frame-pointer
 fi
 
 EXTRA_CFLAGS="$CFLAGS"
@@ -902,7 +904,7 @@ echo "EXTRA_LDFLAGS=$EXTRA_LDFLAGS"
 (
     set +u  # Allow uninitialised vars here
     while read var; do
-	eval "echo \"$var := \$$var\""
+        eval "echo \"$var := \$$var\""
     done << __EOF__
 EXTRA_ALL
 EXTRA_CFLAGS
@@ -969,5 +971,3 @@ __EOF__
 
 rm -rf "$TEMPDIR"
 test -s $ERRORLOG || rm $ERRORLOG
-
-# vim:set ts=4 et:
