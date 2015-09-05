@@ -5,6 +5,10 @@ os:
 env:
   - CONFIGURE_FLAGS=
   - CONFIGURE_FLAGS=--enable-sharedlibgbs
+matrix:
+  exclude:
+    - os: osx
+      compiler: gcc
 addons:
   apt:
     packages:
