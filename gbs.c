@@ -111,7 +111,7 @@ regparm long gbs_init(struct gbs *gbs, long subsong)
 
 	if (subsong == -1) subsong = gbs->defaultsong - 1;
 	if (subsong >= gbs->songs) {
-		fprintf(stderr, _("Subsong number out of range (min=0, max=%ld).\n"), gbs->songs - 1);
+		fprintf(stderr, _("Subsong number out of range (min=0, max=%d).\n"), (int)gbs->songs - 1);
 		return 0;
 	}
 

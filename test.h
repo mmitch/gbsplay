@@ -21,13 +21,9 @@
 	} \
 } while(0)
 
-#ifndef ENABLE_TEST
+#ifdef ENABLE_TEST
 
-#define test static __attribute__((unused))
-#define TEST(func) static __attribute__((unused)) int test_ ## func
-#define TEST_EOF static __attribute__((unused)) int test_eof
-
-#else
+#if defined(__GNUC__) && !defined(__APPLE__)
 
 #include "config.h"
 #include "common.h"
@@ -71,6 +67,24 @@ int main(int argc, char** argv)
 	return 0;
 }
 
+#else
+
+int main(int argc, char** argv)
+{
+	printf(" builtin tests not supported on this platform.\n");
+	return 0;
+}
+
+#endif /* defined(__GNUC__) && !defined(__APPLE__) */
+
 #endif /* ENABLE_TEST */
 
+#ifndef TEST_EOF
+
+#define test static __attribute__((unused))
+#define TEST(func) static __attribute__((unused)) int test_ ## func
+#define TEST_EOF static __attribute__((unused)) int test_eof
+
 #endif
+
+#endif /* _TEST_H_ */

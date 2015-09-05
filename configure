@@ -512,7 +512,7 @@ Installation directories:
 Optional Features:
   --disable-i18n         omit libintl support
   --disable-regparm      do not use register arguments on x86
-  --disable-ssp          disable stack smashing protection
+  --disable-hardening    disable hardening flags
   --enable-debug         build with debug code
   --enable-sharedlibgbs  build libgbs as a shared library
   --enable-regparm       build with explicit regparm support
@@ -535,7 +535,7 @@ EOF
     exit $1
 }
 
-OPTS="build_contrib build_test build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_ssp_strong use_ssp use_debug use_stdout use_devdsp use_alsa use_nas use_pulse use_midi use_dsound"
+OPTS="build_contrib build_test build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_hardening use_debug use_stdout use_devdsp use_alsa use_nas use_pulse use_midi use_dsound"
 for OPT in $OPTS; do
     eval "${OPT}="
 done
@@ -572,6 +572,7 @@ fi
 ## more defaults
 setdefault build_xmmsplugin no
 setdefault build_contrib yes
+setdefault use_hardening yes
 ## disable test when cross-compiling
 if [ -n "$buildalias" -a "$buildalias" != "$hostalias" ]; then
     build_test=no
@@ -614,23 +615,25 @@ if cc_has_flag "-Wdeclaration-after-statement"; then
     append_nodupe CFLAGS "-Wdeclaration-after-statement"
 fi
 
-if cc_has_flag "-Wl,-z,relro"; then
-    append_nodupe LDFLAGS "-Wl,-z,relro"
-fi
+if [ "$use_hardening" != "no" ]; then
+    if cc_has_flag "-Wl,-z,relro"; then
+        append_nodupe LDFLAGS "-Wl,-z,relro"
+    fi
 
-if cc_has_flag "-Wl,-z,now"; then
-    append_nodupe LDFLAGS "-Wl,-z,now"
-fi
+    if cc_has_flag "-Wl,-z,now"; then
+        append_nodupe LDFLAGS "-Wl,-z,now"
+    fi
 
-if [ "$use_ssp_strong" != "no" ]; then
+    if cc_has_flag "-Wl,-pie"; then
+        append_nodupe LDFLAGS "-Wl,-pie"
+    elif cc_has_flag "-pie"; then
+        append_nodupe LDFLAGS "-pie"
+    fi
+
     if cc_has_flag "-fstack-protector-strong"; then
         append_nodupe CFLAGS "-fstack-protector-strong"
         append_nodupe LDFLAGS "-fstack-protector-strong"
-    fi
-fi
-
-if [ "$use_ssp_strong" != "yes" -a "$use_ssp" != "no" ]; then
-    if cc_has_flag "-fstack-protector"; then
+    elif cc_has_flag "-fstack-protector"; then
         append_nodupe CFLAGS "-fstack-protector"
         append_nodupe LDFLAGS "-fstack-protector"
         append_nodupe CFLAGS "--param=ssp-buffer-size=4"

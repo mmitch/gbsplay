@@ -72,7 +72,7 @@ exampledir  := $(docdir)/examples
 DISTDIR := gbsplay-$(VERSION)
 
 GBSCFLAGS  := $(EXTRA_CFLAGS)
-GBSLDFLAGS := $(EXTRA_LDFLAGS) -pie
+GBSLDFLAGS := $(EXTRA_LDFLAGS)
 # Additional ldflags for the gbsplay executable
 GBSPLAYLDFLAGS :=
 
