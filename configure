@@ -762,6 +762,8 @@ if [ "$use_i18n" = "yes" ]; then
 int main(int argc, char **argv)
 {
     bindtextdomain("foo", "bar");
+    textdomain("foo");
+    gettext("msg");
     return 0;
 }
 EOF
