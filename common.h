@@ -19,6 +19,15 @@
 #define false (!true)
 #endif
 
+#define WARN_N(n, ...) { \
+	static long ctr = n; \
+	if (ctr) { \
+		ctr--; \
+		fprintf(stderr, __VA_ARGS__); \
+	} \
+}
+#define WARN_ONCE(...) WARN_N(1, __VA_ARGS__)
+
 #define TEXTDOMAIN "gbsplay"
 #define N_(x) x
 

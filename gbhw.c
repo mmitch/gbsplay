@@ -109,8 +109,13 @@ static regparm uint32_t io_get(uint32_t addr)
 		return ioregs[addr & 0x7f];
 	}
 	if (addr == 0xff00) return 0;
+	if (addr == 0xff70) {
+		/* GBC ram bank switch */
+		WARN_ONCE("ioread from SVBK (CGB mode) ignored.\n");
+		return 0xff;
+	}
 	if (addr == 0xffff) return ioregs[0x7f];
-	fprintf(stderr, "ioread from 0x%04x unimplemented.\n", (unsigned int)addr);
+	WARN_ONCE("ioread from 0x%04x unimplemented.\n", (unsigned int)addr);
 	DPRINTF("io_get(%04x)\n", addr);
 	return 0xff;
 }
@@ -133,9 +138,11 @@ static regparm void rom_put(uint32_t addr, uint8_t val)
 		val &= 0x1f;
 		rombank = val + (val == 0);
 		if (rombank > lastbank) {
-			fprintf(stderr, "Bank %ld out of range (0-%ld)!\n", rombank, lastbank);
+			WARN_ONCE("Bank %ld out of range (0-%ld)!\n", rombank, lastbank);
 			rombank = lastbank;
 		}
+	} else {
+		WARN_ONCE("rom write of %02x to %04x ignored\n", val, addr);
 	}
 }
 
@@ -262,6 +269,9 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 		case 0xff26:
 			ioregs[0x26] = 0x80;
 			break;
+		case 0xff70:
+			WARN_ONCE("iowrite to SVBK (CGB mode) ignored.\n");
+			break;
 		case 0xff00:
 		case 0xff24:
 		case 0xff27:
@@ -289,10 +299,11 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 		case 0xff3d:
 		case 0xff3e:
 		case 0xff3f:
+		case 0xff50: /* bootrom lockout reg */
 		case 0xffff:
 			break;
 		default:
-			fprintf(stderr, "iowrite to 0x%04x unimplemented (val=%02x).\n", addr, val);
+			WARN_ONCE("iowrite to 0x%04x unimplemented (val=%02x).\n", addr, val);
 			break;
 	}
 }
