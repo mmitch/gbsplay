@@ -1300,14 +1300,13 @@ static regparm void op_push(uint32_t op, const struct opinfo *oi)
 	DPRINTF(" %s %s\t", oi->name, regnamech16[reg]);
 }
 
-static regparm void op_push_af(uint32_t op, const struct opinfo *oi)
+static regparm void op_push_af(/*@unused@*/ uint32_t op, const struct opinfo *oi)
 {
-	long reg = op >> 4 & 3;
 	uint16_t tmp = gbcpu_regs.rn.a << 8;
 
 	tmp |= gbcpu_regs.rn.f;
 	push(tmp);
-	DPRINTF(" %s %s\t", oi->name, regnamech16[reg]);
+	DPRINTF(" %s %s\t", oi->name, regnamech16[op >> 4 & 3]);
 }
 
 static regparm void op_pop(uint32_t op, const struct opinfo *oi)
@@ -1318,14 +1317,13 @@ static regparm void op_pop(uint32_t op, const struct opinfo *oi)
 	DPRINTF(" %s %s\t", oi->name, regnamech16[reg]);
 }
 
-static regparm void op_pop_af(uint32_t op, const struct opinfo *oi)
+static regparm void op_pop_af(/*@unused@*/ uint32_t op, const struct opinfo *oi)
 {
-	long reg = op >> 4 & 3;
 	uint16_t tmp = pop();
 
 	gbcpu_regs.rn.f = tmp & 0xf0;
 	gbcpu_regs.rn.a = tmp >> 8;
-	DPRINTF(" %s %s\t", oi->name, regnamech16[reg]);
+	DPRINTF(" %s %s\t", oi->name, regnamech16[op >> 4 & 3]);
 }
 
 static regparm void op_cpl(/*@unused@*/ uint32_t op, const struct opinfo *oi)
@@ -1495,6 +1493,37 @@ static regparm void op_nop(/*@unused@*/ uint32_t op, const struct opinfo *oi)
 	DPRINTF(" %s", oi->name);
 }
 
+static regparm void op_daa(/*@unused@*/ uint32_t op, const struct opinfo *oi)
+{
+	long a = gbcpu_regs.rn.a;
+	long f = gbcpu_regs.rn.f;
+
+	if (f & NF) {
+		if (f & HF) {
+			a -= 0x06;
+			a &= 0xff;
+		}
+		if (f & CF)
+			a -= 0x60;
+	} else {
+		if (f & HF || (a & 0xf) > 9)
+			a += 0x06;
+		if (f & CF || a > 0x9f)
+			a += 0x60;
+	}
+	f &= ~(HF | ZF);
+
+	if (a > 0xff)
+		f |= CF;
+	a &= 0xff;
+	if (a == 0)
+		f |= ZF;
+
+	gbcpu_regs.rn.a = (uint8_t)a;
+	gbcpu_regs.rn.f = (uint8_t)f;
+	DPRINTF(" %s", oi->name);
+}
+
 static const struct opinfo ops[256] = {
 	OPINFO("\tNOP", &op_nop),		/* opcode 00 */
 	OPINFO("\tLD", &op_ld_reg16_imm),		/* opcode 01 */
@@ -1535,7 +1564,7 @@ static const struct opinfo ops[256] = {
 	OPINFO("\tINC", &op_inc),		/* opcode 24 */
 	OPINFO("\tDEC", &op_dec),		/* opcode 25 */
 	OPINFO("\tLD", &op_ld_reg8_imm),		/* opcode 26 */
-	OPINFO("\tUNKN", &op_unknown),		/* opcode 27 */
+	OPINFO("\tDAA", &op_daa),		/* opcode 27 */
 	OPINFO("\tJR", &op_jr_cond),		/* opcode 28 */
 	OPINFO("\tADD", &op_add_hl),		/* opcode 29 */
 	OPINFO("\tLDI", &op_ld_reg16_a),		/* opcode 2a */
