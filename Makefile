@@ -149,6 +149,13 @@ endif
 ifeq ($(use_sharedlibgbs),yes)
 GBSLDFLAGS += -L. -lgbs
 objs += $(objs_libgbspic)
+
+libgbs.so.1.ver: libgbs_whitelist.txt gen_linkercfg.sh
+	./gen_linkercfg.sh libgbs_whitelist.txt $@ ver
+
+libgbs.def: libgbs_whitelist.txt gen_linkercfg.sh
+	./gen_linkercfg.sh libgbs_whitelist.txt $@ def
+
 ifeq ($(cygwin_build),yes)
 EXTRA_INSTALL += install-cyggbs-1.dll
 EXTRA_UNINSTALL += uninstall-cyggbs-1.dll
@@ -164,11 +171,10 @@ uninstall-cyggbs-1.dll:
 	rm -f $(libdir)/libgbs.dll.a
 	-rmdir -p $(libdir)
 
-
 cyggbs-1.dll: $(objs_libgbspic) libgbs.so.1.ver
 	$(CC) -fpic -shared -Wl,-soname=$@ -Wl,--version-script,libgbs.so.1.ver -o $@ $(objs_libgbspic) $(EXTRA_LDFLAGS)
 
-libgbs.dll.a:
+libgbs.dll.a: libgbs.def
 	dlltool --input-def libgbs.def --dllname cyggbs-1.dll --output-lib libgbs.dll.a -k
 
 libgbs: cyggbs-1.dll libgbs.dll.a
@@ -246,7 +252,7 @@ distclean: clean
 clean:
 	find . -regex ".*\.\([aos]\|lo\|mo\|pot\|so\(\.[0-9]\)?\)" -exec rm -f "{}" \;
 	find . -name "*~" -exec rm -f "{}" \;
-	rm -f libgbs libgbspic
+	rm -f libgbs libgbspic libgbs.def libgbs.so.1.ver
 	rm -f $(mans)
 	rm -f $(gbsplaybin) $(gbsinfobin)
 	rm -f $(test_gbsbin) $(test_bin)
