@@ -17,7 +17,7 @@
 #if DEBUG == 1
 static const char regnames[12] = "BCDEHLFASPPC";
 static const char *regnamech16[6] = {
-	"BC", "DE", "HL", "FA", "SP", "PC"
+	"BC", "DE", "HL", "AF", "SP", "PC"
 };
 static const char *conds[4] = {
 	"NZ", "Z", "NC", "C"
@@ -1300,11 +1300,31 @@ static regparm void op_push(uint32_t op, const struct opinfo *oi)
 	DPRINTF(" %s %s\t", oi->name, regnamech16[reg]);
 }
 
+static regparm void op_push_af(uint32_t op, const struct opinfo *oi)
+{
+	long reg = op >> 4 & 3;
+	uint16_t tmp = gbcpu_regs.rn.a << 8;
+
+	tmp |= gbcpu_regs.rn.f;
+	push(tmp);
+	DPRINTF(" %s %s\t", oi->name, regnamech16[reg]);
+}
+
 static regparm void op_pop(uint32_t op, const struct opinfo *oi)
 {
 	long reg = op >> 4 & 3;
 
 	REGS16_W(gbcpu_regs, reg, pop());
+	DPRINTF(" %s %s\t", oi->name, regnamech16[reg]);
+}
+
+static regparm void op_pop_af(uint32_t op, const struct opinfo *oi)
+{
+	long reg = op >> 4 & 3;
+	uint16_t tmp = pop();
+
+	gbcpu_regs.rn.f = tmp & 0xf0;
+	gbcpu_regs.rn.a = tmp >> 8;
 	DPRINTF(" %s %s\t", oi->name, regnamech16[reg]);
 }
 
@@ -1717,11 +1737,11 @@ static const struct opinfo ops[256] = {
 	OPINFO("\tXOR", &op_xor_imm),		/* opcode ee */
 	OPINFO("\tRST", &op_rst),		/* opcode ef */
 	OPINFO("\tLDH", &op_ldh),		/* opcode f0 */
-	OPINFO("\tPOP", &op_pop),		/* opcode f1 */
+	OPINFO("\tPOP", &op_pop_af),		/* opcode f1 */
 	OPINFO("\tLDH", &op_ldh),		/* opcode f2 */
 	OPINFO("\tDI", &op_di),		/* opcode f3 */
 	OPINFO("\tUNKN", &op_unknown),		/* opcode f4 */
-	OPINFO("\tPUSH", &op_push),		/* opcode f5 */
+	OPINFO("\tPUSH", &op_push_af),		/* opcode f5 */
 	OPINFO("\tOR", &op_or_imm),		/* opcode f6 */
 	OPINFO("\tRST", &op_rst),		/* opcode f7 */
 	OPINFO("\tLD", &op_ld_hlsp),		/* opcode f8 */
