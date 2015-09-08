@@ -1901,7 +1901,7 @@ static regparm void blargg_debug(void)
 	fprintf(stderr, "\nBlargg debug output:\n");
 
 	for (i = 0xa004; i < 0xb000; i++) {
-		char c = mem_get(i);
+		uint8_t c = mem_get(i);
 		if (c == 0 || c >= 128) {
 			return;
 		}
