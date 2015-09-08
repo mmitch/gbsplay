@@ -5,6 +5,10 @@ os:
 env:
   - CONFIGURE_FLAGS=
   - CONFIGURE_FLAGS=--enable-sharedlibgbs
+script:
+  - ./configure && make && make test
+  - make distclean
+  - make dist
 matrix:
   exclude:
     - os: osx
