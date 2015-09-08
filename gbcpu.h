@@ -19,7 +19,7 @@
 #define BC	0
 #define DE	1
 #define HL	2
-#define FA	3
+#define AF	3
 #define SP	4
 #define PC	5
 
