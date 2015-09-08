@@ -320,7 +320,7 @@ dist:	distclean
 	install -m 644 Makefile ./$(DISTDIR)/
 	install -m 644 *.c ./$(DISTDIR)/
 	install -m 644 *.h ./$(DISTDIR)/
-	install -m 644 *.ver *.def ./$(DISTDIR)/
+	install -m 644 *.ver ./$(DISTDIR)/
 	install -m 644 $(mans_src) ./$(DISTDIR)/
 	install -m 644 $(docs) $(docs-dist) ./$(DISTDIR)/
 	install -d ./$(DISTDIR)/examples
