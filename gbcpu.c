@@ -1241,7 +1241,7 @@ static regparm void op_sbc(uint32_t op, const struct opinfo *oi)
 	gbcpu_regs.rn.f = NF;
 	if (new < 0x100) gbcpu_regs.rn.f |= CF;
 	if ((old & 15) - (reg & 15) - c < 0) gbcpu_regs.rn.f |= HF;
-	if (new == 0) gbcpu_regs.rn.f |= ZF;
+	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
 static regparm void op_sbc_imm(/*@unused@*/ uint32_t op, const struct opinfo *oi)
@@ -1258,7 +1258,7 @@ static regparm void op_sbc_imm(/*@unused@*/ uint32_t op, const struct opinfo *oi
 	gbcpu_regs.rn.f = NF;
 	if (new < 0x100) gbcpu_regs.rn.f |= CF;
 	if ((old & 15) - (imm & 15) - c < 0) gbcpu_regs.rn.f |= HF;
-	if (new == 0) gbcpu_regs.rn.f |= ZF;
+	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
 static regparm void op_and(uint32_t op, const struct opinfo *oi)
