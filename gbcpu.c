@@ -1248,7 +1248,7 @@ static regparm void op_sbc_imm(/*@unused@*/ uint32_t op, const struct opinfo *oi
 {
 	uint8_t imm = get_imm8();
 	uint8_t old = gbcpu_regs.rn.a;
-	uint8_t new = old + 0x100;
+	long new = old + 0x100;
 	long c = (gbcpu_regs.rn.f & CF) > 0;
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
