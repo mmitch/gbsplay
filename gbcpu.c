@@ -1135,34 +1135,37 @@ static regparm void op_add_hl(uint32_t op, const struct opinfo *oi)
 
 static regparm void op_adc(uint32_t op, const struct opinfo *oi)
 {
+	uint8_t reg = get_reg(op & 7);
 	uint8_t old = gbcpu_regs.rn.a;
-	uint8_t new;
+	long new = old;
+	long c = (gbcpu_regs.rn.f & CF) > 0;
 
 	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
-	gbcpu_regs.rn.a += get_reg(op & 7);
-	gbcpu_regs.rn.a += (gbcpu_regs.rn.f & CF) > 0;
-	gbcpu_regs.rn.f &= ~NF;
-	new = gbcpu_regs.rn.a;
-	if (old > new) gbcpu_regs.rn.f |= CF; else gbcpu_regs.rn.f &= ~CF;
-	if ((old & 15) > (new & 15)) gbcpu_regs.rn.f |= HF; else gbcpu_regs.rn.f &= ~HF;
-	if (new == 0) gbcpu_regs.rn.f |= ZF; else gbcpu_regs.rn.f &= ~ZF;
+	new += reg;
+	new += c;
+	gbcpu_regs.rn.f = 0;
+	gbcpu_regs.rn.a = new;
+	if (new > 0xff) gbcpu_regs.rn.f |= CF;
+	if ((old & 15) + (reg & 15) + c > 15) gbcpu_regs.rn.f |= HF;
+	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
 static regparm void op_adc_imm(/*@unused@*/ uint32_t op, const struct opinfo *oi)
 {
 	uint8_t imm = get_imm8();
 	uint8_t old = gbcpu_regs.rn.a;
-	uint8_t new = old;
+	long new = old;
+	long c = (gbcpu_regs.rn.f & CF) > 0;
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new += imm;
-	new += (gbcpu_regs.rn.f & CF) > 0;
-	gbcpu_regs.rn.f &= ~NF;
+	new += c;
+	gbcpu_regs.rn.f = 0;
 	gbcpu_regs.rn.a = new;
-	if (old > new) gbcpu_regs.rn.f |= CF; else gbcpu_regs.rn.f &= ~CF;
-	if ((old & 15) > (new & 15)) gbcpu_regs.rn.f |= HF; else gbcpu_regs.rn.f &= ~HF;
-	if (new == 0) gbcpu_regs.rn.f |= ZF; else gbcpu_regs.rn.f &= ~ZF;
+	if (new > 0xff) gbcpu_regs.rn.f |= CF;
+	if ((old & 15) + (imm & 15) + c > 15) gbcpu_regs.rn.f |= HF;
+	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
 static regparm void op_cp(uint32_t op, const struct opinfo *oi)
@@ -1225,17 +1228,19 @@ static regparm void op_sub_imm(/*@unused@*/ uint32_t op, const struct opinfo *oi
 
 static regparm void op_sbc(uint32_t op, const struct opinfo *oi)
 {
+	uint8_t reg = get_reg(op & 7);
 	uint8_t old = gbcpu_regs.rn.a;
-	uint8_t new;
+	long new = old + 0x100;
+	long c = (gbcpu_regs.rn.f & CF) > 0;
 
 	DPRINTF(" %s A, ", oi->name);
 	print_reg(op & 7);
-	gbcpu_regs.rn.a -= get_reg(op & 7);
-	gbcpu_regs.rn.a -= (gbcpu_regs.rn.f & CF) > 0;
-	new = gbcpu_regs.rn.a;
+	new -= reg;
+	new -= c;
+	gbcpu_regs.rn.a = new;
 	gbcpu_regs.rn.f = NF;
-	if (old < new) gbcpu_regs.rn.f |= CF;
-	if ((old & 15) < (new & 15)) gbcpu_regs.rn.f |= HF;
+	if (new < 0x100) gbcpu_regs.rn.f |= CF;
+	if ((old & 15) - (reg & 15) - c < 0) gbcpu_regs.rn.f |= HF;
 	if (new == 0) gbcpu_regs.rn.f |= ZF;
 }
 
@@ -1243,15 +1248,16 @@ static regparm void op_sbc_imm(/*@unused@*/ uint32_t op, const struct opinfo *oi
 {
 	uint8_t imm = get_imm8();
 	uint8_t old = gbcpu_regs.rn.a;
-	uint8_t new = old;
+	uint8_t new = old + 0x100;
+	long c = (gbcpu_regs.rn.f & CF) > 0;
 
 	DPRINTF(" %s A, $0x%02x", oi->name, imm);
 	new -= imm;
-	new -= (gbcpu_regs.rn.f & CF) > 0;
+	new -= c;
 	gbcpu_regs.rn.a = new;
 	gbcpu_regs.rn.f = NF;
-	if (old < new) gbcpu_regs.rn.f |= CF;
-	if ((old & 15) < (new & 15)) gbcpu_regs.rn.f |= HF;
+	if (new < 0x100) gbcpu_regs.rn.f |= CF;
+	if ((old & 15) - (imm & 15) - c < 0) gbcpu_regs.rn.f |= HF;
 	if (new == 0) gbcpu_regs.rn.f |= ZF;
 }
 
