@@ -940,8 +940,9 @@ static regparm void op_ld_hlsp(/*@unused@*/ uint32_t op, const struct opinfo *oi
 	else DPRINTF(" %s  HL, SP-0x%02x", oi->name, -ofs);
 	REGS16_W(gbcpu_regs, HL, new);
 	gbcpu_regs.rn.f = 0;
-	if (old > new) gbcpu_regs.rn.f |= CF;
-	if ((old & 0xfff) > (new & 0xfff)) gbcpu_regs.rn.f |= HF;
+	/* flags are based on LOW-BYTE */
+	if ((old & 0xff) > (new & 0xff)) gbcpu_regs.rn.f |= CF;
+	if ((old & 0xf) > (new & 0xf)) gbcpu_regs.rn.f |= HF;
 }
 
 static regparm void op_ld_sphl(/*@unused@*/ uint32_t op, const struct opinfo *oi)
@@ -1082,8 +1083,9 @@ static regparm void op_add_sp_imm(/*@unused@*/ uint32_t op, const struct opinfo 
 	new += imm;
 	REGS16_W(gbcpu_regs, SP, new);
 	gbcpu_regs.rn.f = 0;
-	if (old > new) gbcpu_regs.rn.f |= CF;
-	if ((old & 0xfff) > (new & 0xfff)) gbcpu_regs.rn.f |= HF;
+	/* flags are based on LOW-BYTE */
+	if ((old & 0xff) > (new & 0xff)) gbcpu_regs.rn.f |= CF;
+	if ((old & 0xf) > (new & 0xf)) gbcpu_regs.rn.f |= HF;
 }
 
 static regparm void op_add(uint32_t op, const struct opinfo *oi)
