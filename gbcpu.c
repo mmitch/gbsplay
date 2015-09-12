@@ -709,7 +709,6 @@ static regparm void op_rla(/*@unused@*/ uint32_t op, const struct opinfo *oi)
 	res  = res << 1;
 	res |= (gbcpu_regs.rn.f & CF) >> 4;
 	gbcpu_regs.rn.f = (gbcpu_regs.rn.a >> 7) << 4;
-	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	gbcpu_regs.rn.a = res;
 }
 
@@ -745,7 +744,6 @@ static regparm void op_rlca(/*@unused@*/ uint32_t op, const struct opinfo *oi)
 	res  = res << 1;
 	res |= gbcpu_regs.rn.a >> 7;
 	gbcpu_regs.rn.f = (gbcpu_regs.rn.a >> 7) << 4;
-	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	gbcpu_regs.rn.a = res;
 }
 
@@ -787,7 +785,6 @@ static regparm void op_rra(/*@unused@*/ uint32_t op, const struct opinfo *oi)
 	res  = res >> 1;
 	res |= (gbcpu_regs.rn.f & CF) << 3;
 	gbcpu_regs.rn.f = (gbcpu_regs.rn.a & 1) << 4;
-	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	gbcpu_regs.rn.a = res;
 }
 
@@ -815,7 +812,6 @@ static regparm void op_rrca(/*@unused@*/ uint32_t op, const struct opinfo *oi)
 	res  = res >> 1;
 	res |= gbcpu_regs.rn.a << 7;
 	gbcpu_regs.rn.f = (gbcpu_regs.rn.a & 1) << 4;
-	if (res == 0) gbcpu_regs.rn.f |= ZF;
 	gbcpu_regs.rn.a = res;
 }
 
