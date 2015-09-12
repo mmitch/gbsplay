@@ -17,6 +17,9 @@
 #include "gbhw.h"
 #include "impulsegen.h"
 
+#define REG_IF 0x0f
+#define REG_IE 0x7f /* Nominally 0xff, but we remap it to 0x7f internally. */
+
 static uint8_t *rom;
 static uint8_t intram[0x2000];
 static uint8_t extram[0x2000];
@@ -680,6 +683,21 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 	base_impulse = gen_impulsetab(impulse_w_shift, impulse_n_shift, impulse_cutoff);
 }
 
+regparm void gbhw_check_if(void)
+{
+	uint8_t mask = 0x01; /* lowest bit is highest priority irq */
+	uint8_t vec = 0x40;
+	while (mask <= 0x10) {
+		if (ioregs[REG_IF] & ioregs[REG_IE] & mask) {
+			ioregs[REG_IF] &= ~mask;
+			gbcpu_intr(vec);
+			break;
+		}
+		vec += 0x08;
+		mask <<= 1;
+	}
+}
+
 /**
  * @param time_to_work  emulated time in milliseconds
  * @return  elapsed cpu cycles
@@ -703,7 +721,9 @@ regparm long gbhw_step(long time_to_work)
 		if (timerctr > 0 && timerctr < maxcycles) maxcycles = timerctr;
 
 		while (cycles < maxcycles) {
-			long step = gbcpu_step();
+			long step;
+			gbhw_check_if();
+			step = gbcpu_step();
 			if (step < 0) return step;
 			cycles += step;
 			sum_cycles += step;
@@ -711,14 +731,14 @@ regparm long gbhw_step(long time_to_work)
 		}
 
 		if (vblankctr > 0) vblankctr -= cycles;
-		if (vblankctr <= 0 && gbcpu_if && (ioregs[0x7f] & 1)) {
+		if (vblankctr <= 0 && gbcpu_if) {
 			vblankctr += vblanktc;
-			gbcpu_intr(0x40);
+			ioregs[REG_IF] |= 0x01;
 		}
 		if (timerctr > 0) timerctr -= cycles;
-		if (timerctr <= 0 && gbcpu_if && (ioregs[0x7f] & 4)) {
+		if (timerctr <= 0 && gbcpu_if && (ioregs[0x07] & 4)) {
 			timerctr += timertc;
-			gbcpu_intr(0x48);
+			ioregs[REG_IF] |= 0x04;
 		}
 		cycles_total += cycles;
 	}

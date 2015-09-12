@@ -569,13 +569,13 @@ static gbcpu_put_fn putlookup[256] = {
 
 static inline regparm uint32_t mem_get(uint32_t addr)
 {
-	gbcpu_get_fn fn = getlookup[addr >> 8];
+	gbcpu_get_fn fn = getlookup[(addr >> 8) & 0xff];
 	return fn(addr);
 }
 
 static inline regparm void mem_put(uint32_t addr, uint32_t val)
 {
-	gbcpu_put_fn fn = putlookup[addr >> 8];
+	gbcpu_put_fn fn = putlookup[(addr >> 8) & 0xff];
 	fn(addr, val);
 }
 
@@ -1404,6 +1404,7 @@ static regparm void op_ret(/*@unused@*/ uint32_t op, const struct opinfo *oi)
 
 static regparm void op_reti(/*@unused@*/ uint32_t op, const struct opinfo *oi)
 {
+	gbcpu_if = 1;
 	REGS16_W(gbcpu_regs, PC, pop());
 	DPRINTF(" %s", oi->name);
 }
@@ -1887,6 +1888,7 @@ regparm void gbcpu_init(void)
 regparm void gbcpu_intr(long vec)
 {
 	gbcpu_halted = 0;
+	gbcpu_if = 0;
 	push(REGS16_R(gbcpu_regs, PC));
 	REGS16_W(gbcpu_regs, PC, vec);
 }

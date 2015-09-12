@@ -27,63 +27,63 @@
 /* called with subsong in a, load address in hl */
 static const uint8_t playercode[] = {
 /* Part 1, hardware init */
-	0xf5,              /* 0050:  push af         */
-	0xe5,              /* 0051:  push hl         */
-	0x01, 0x30, 0x00,  /* 0052:  ld   bc, 0x0030 */
-	0x11, 0x10, 0xff,  /* 0055:  ld   de, 0xff10 */
-	0x21, 0x9f, 0x00,  /* 0058:  ld   hl, 0x009f */
+	0xf5,              /* 0070:  push af         */
+	0xe5,              /* 0071:  push hl         */
+	0x01, 0x30, 0x00,  /* 0072:  ld   bc, 0x0030 */
+	0x11, 0x10, 0xff,  /* 0075:  ld   de, 0xff10 */
+	0x21, 0xbf, 0x00,  /* 0078:  ld   hl, 0x00bf */
 	                   /*   l1:                  */
-	0x2a,              /* 005b:  ldi  a, [hl]    */
-	0x12,              /* 005c:  ld   [de], a    */
-	0x13,              /* 005d:  inc  de         */
-	0x0b,              /* 005e:  dec  bc         */
-	0x78,              /* 005f:  ld   a, b       */
-	0xb1,              /* 0060:  or   a, c       */
-	0x20, 0xf8,        /* 0061:  jr nz l1 ; ($-8)*/
-	0xe1,              /* 0063:  pop  hl         */
-	0xe5,              /* 0064:  push hl         */
-	0x01, 0x0e, 0x00,  /* 0065:  ld   bc, 0x000e */
-	0x09,              /* 0068:  add  hl, bc     */
-	0x2a,              /* 0069:  ldi  a, [hl]    */
-	0xe0, 0x06,        /* 006a:  ldh  [0x06], a  */
-	0x2a,              /* 006c:  ldi  a, [hl]    */
-	0xe0, 0x07,        /* 006d:  ldh  [0x07], a  */
-	0x11, 0xff, 0xff,  /* 006f:  ld   de, 0xffff */
-	0xcb, 0x57,        /* 0072:  bit  2, a       */
-	0x3e, 0x01,        /* 0074:  ld   a, 0x01    */
-	0x28, 0x02,        /* 0076:  jr z l2 ; ($+2) */
-	0x3e, 0x04,        /* 0078:  ld   a, 0x04    */
+	0x2a,              /* 007b:  ldi  a, [hl]    */
+	0x12,              /* 007c:  ld   [de], a    */
+	0x13,              /* 007d:  inc  de         */
+	0x0b,              /* 007e:  dec  bc         */
+	0x78,              /* 007f:  ld   a, b       */
+	0xb1,              /* 0080:  or   a, c       */
+	0x20, 0xf8,        /* 0081:  jr nz l1 ; ($-8)*/
+	0xe1,              /* 0083:  pop  hl         */
+	0xe5,              /* 0084:  push hl         */
+	0x01, 0x0e, 0x00,  /* 0085:  ld   bc, 0x000e */
+	0x09,              /* 0088:  add  hl, bc     */
+	0x2a,              /* 0089:  ldi  a, [hl]    */
+	0xe0, 0x06,        /* 008a:  ldh  [0x06], a  */
+	0x2a,              /* 008c:  ldi  a, [hl]    */
+	0xe0, 0x07,        /* 008d:  ldh  [0x07], a  */
+	0x11, 0xff, 0xff,  /* 008f:  ld   de, 0xffff */
+	0xcb, 0x57,        /* 0092:  bit  2, a       */
+	0x3e, 0x01,        /* 0094:  ld   a, 0x01    */
+	0x28, 0x02,        /* 0096:  jr z l2 ; ($+2) */
+	0x3e, 0x04,        /* 0098:  ld   a, 0x04    */
 	                   /*   l2:                  */
-	0x12,              /* 007a:  ld   [de], a    */
-	0xe1,              /* 007b:  pop  hl         */
-	0xf1,              /* 007c:  pop  af         */
+	0x12,              /* 009a:  ld   [de], a    */
+	0xe1,              /* 009b:  pop  hl         */
+	0xf1,              /* 009c:  pop  af         */
 /* Part 2, wrapper for replayer code */
-	0x57,              /* 007d:  ld   d, a       */
-	0xe5,              /* 007e:  push hl         */
-	0x01, 0x08, 0x00,  /* 007f:  ld   bc, 0x0008 */
-	0x09,              /* 0082:  add  hl, bc     */
-	0x2a,              /* 0083:  ldi  a, [hl]    */
-	0x66,              /* 0084:  ld   h, [hl]    */
-	0x6f,              /* 0085:  ld   l, a       */
-	0x7a,              /* 0086:  ld   a, d       */
-	0x01, 0x8c, 0x00,  /* 0087:  ld   bc, 0x008c */
-	0xc5,              /* 008a:  push bc         */
-	0xe9,              /* 008b:  jp   hl         */
+	0x57,              /* 009d:  ld   d, a       */
+	0xe5,              /* 009e:  push hl         */
+	0x01, 0x08, 0x00,  /* 009f:  ld   bc, 0x0008 */
+	0x09,              /* 00a2:  add  hl, bc     */
+	0x2a,              /* 00a3:  ldi  a, [hl]    */
+	0x66,              /* 00a4:  ld   h, [hl]    */
+	0x6f,              /* 00a5:  ld   l, a       */
+	0x7a,              /* 00a6:  ld   a, d       */
+	0x01, 0xac, 0x00,  /* 00a7:  ld   bc, 0x00ac */
+	0xc5,              /* 00aa:  push bc         */
+	0xe9,              /* 00ab:  jp   hl         */
 	                   /*   l3:                  */
-	0xfb,              /* 008c:  ei              */
-	0x76,              /* 008d:  halt            */
-	0xe1,              /* 008e:  pop  hl         */
-	0xe5,              /* 008f:  push hl         */
-	0x01, 0x0a, 0x00,  /* 0090:  ld   bc, 0x000a */
-	0x09,              /* 0093:  add  hl, bc     */
-	0x2a,              /* 0094:  ldi  a, [hl]    */
-	0x66,              /* 0095:  ld   h, [hl]    */
-	0x6f,              /* 0096:  ld   l, a       */
-	0x7a,              /* 0097:  ld   a, d       */
-	0x01, 0x9d, 0x00,  /* 0098:  ld   bc, 0x009d */
-	0xc5,              /* 009b:  push bc         */
-	0xe9,              /* 009c:  jp   hl         */
-	0x18, 0xed,        /* 009d:  jr l3 ; ($-19)  */
+	0xfb,              /* 00ac:  ei              */
+	0x76,              /* 00ad:  halt            */
+	0xe1,              /* 00ae:  pop  hl         */
+	0xe5,              /* 00af:  push hl         */
+	0x01, 0x0a, 0x00,  /* 00b0:  ld   bc, 0x000a */
+	0x09,              /* 00b3:  add  hl, bc     */
+	0x2a,              /* 00b4:  ldi  a, [hl]    */
+	0x66,              /* 00b5:  ld   h, [hl]    */
+	0x6f,              /* 00b6:  ld   l, a       */
+	0x7a,              /* 00b7:  ld   a, d       */
+	0x01, 0xbd, 0x00,  /* 00b8:  ld   bc, 0x00bd */
+	0xc5,              /* 00bb:  push bc         */
+	0xe9,              /* 00bc:  jp   hl         */
+	0x18, 0xed,        /* 00bd:  jr l3 ; ($-19)  */
 
 /* 009f: initdata
  *
@@ -116,7 +116,7 @@ regparm long gbs_init(struct gbs *gbs, long subsong)
 	}
 
 	gbs->subsong = subsong;
-	REGS16_W(gbcpu_regs, PC, 0x0050); /* playercode entry point */
+	REGS16_W(gbcpu_regs, PC, 0x0070); /* playercode entry point */
 	REGS16_W(gbcpu_regs, SP, gbs->stack);
 	REGS16_W(gbcpu_regs, HL, gbs->load - 0x70);
 	gbcpu_regs.rn.a = subsong;
@@ -491,7 +491,7 @@ regparm struct gbs *gbs_open(char *name)
 
 	gbs->rom = calloc(1, gbs->romsize);
 	memcpy(&gbs->rom[gbs->load - 0x70], buf, 0x70 + gbs->codelen);
-	memcpy(&gbs->rom[0x50], playercode, sizeof(playercode));
+	memcpy(&gbs->rom[0x70], playercode, sizeof(playercode));
 
 	for (i=0; i<8; i++) {
 		long addr = gbs->load + 8*i; /* jump address */
@@ -499,8 +499,11 @@ regparm struct gbs *gbs_open(char *name)
 		gbs->rom[8*i+1] = addr & 0xff;
 		gbs->rom[8*i+2] = addr >> 8;
 	}
-	gbs->rom[0x40] = 0xc9; /* reti */
-	gbs->rom[0x48] = 0xc9; /* reti */
+	gbs->rom[0x40] = 0xc9; /* reti (V-Blank) */
+	gbs->rom[0x48] = 0xc9; /* reti (LCD Stat) */
+	gbs->rom[0x50] = 0xc9; /* reti (Timer) */
+	gbs->rom[0x58] = 0xc9; /* reti (Serial) */
+	gbs->rom[0x60] = 0xc9; /* reti (Joypad) */
 
 	close(fd);
 
