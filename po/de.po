@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-18 22:20+0200\n"
+"POT-Creation-Date: 2015-09-13 18:26+0200\n"
 "PO-Revision-Date: 2015-07-18 22:22+0200\n"
 "Last-Translator: Christian Garbs <mitch@cgarbs.de>\n"
 "Language-Team: none\n"
@@ -33,6 +33,9 @@ msgstr ""
 "\n"
 "Befehle:  [p] vorheriger Subsong   [n]‰chster Subsong   [q] Player beenden\n"
 "          [ ] Pause/Weiterspielen   [1-4] Kanal stummschalten"
+
+msgid " + VBlank (ugetab)"
+msgstr " + VBlank (ugetab)"
 
 #, c-format
 msgid ""
@@ -230,8 +233,16 @@ msgid "Subsong %03ld:\t"
 msgstr "Subsong %03ld:\t"
 
 #, c-format
-msgid "Subsong number out of range (min=0, max=%ld).\n"
-msgstr "Subsong-Nummer auﬂerhalb des Wertebereichs (min=0, max=%ld).\n"
+msgid "Subsong number out of range (min=0, max=%d).\n"
+msgstr "Subsong-Nummer auﬂerhalb des Wertebereichs (min=0, max=%d).\n"
+
+#, c-format
+msgid "Timing:           %2.2fHz timer%s\n"
+msgstr "Timing:           %2.2fHz timer%s\n"
+
+#, c-format
+msgid "Timing:           59.7Hz vblank\n"
+msgstr "Timing:           59.7Hz vblank\n"
 
 msgid "Title"
 msgstr "Titel"

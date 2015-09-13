@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-18 22:20+0200\n"
+"POT-Creation-Date: 2015-09-13 18:26+0200\n"
 "PO-Revision-Date: 2015-07-18 22:22+0200\n"
 "Last-Translator: Tobias Diedrich <ranma+gbsplay@tdiedrich.de>\n"
 "Language-Team: none\n"
@@ -32,6 +32,9 @@ msgstr ""
 "\n"
 "commands:  [p]revious subsong   [n]ext subsong   [q]uit player\n"
 "           [ ] pause/resume   [1-4] mute channel"
+
+msgid " + VBlank (ugetab)"
+msgstr " + VBlank (ugetab)"
 
 #, c-format
 msgid ""
@@ -229,8 +232,16 @@ msgid "Subsong %03ld:\t"
 msgstr "Subsong %03ld:\t"
 
 #, c-format
-msgid "Subsong number out of range (min=0, max=%ld).\n"
-msgstr "Subsong number out of range (min=0, max=%ld).\n"
+msgid "Subsong number out of range (min=0, max=%d).\n"
+msgstr "Subsong number out of range (min=0, max=%d).\n"
+
+#, c-format
+msgid "Timing:           %2.2fHz timer%s\n"
+msgstr "Timing:           %2.2fHz timer%s\n"
+
+#, c-format
+msgid "Timing:           59.7Hz vblank\n"
+msgstr "Timing:           59.7Hz vblank\n"
 
 msgid "Title"
 msgstr "Title"
@@ -404,3 +415,6 @@ msgstr "untitled"
 
 #~ msgid "Number of songs = %d is unreasonable.\n"
 #~ msgstr "Number of songs = %d is unreasonable.\n"
+
+#~ msgid "Subsong number out of range (min=0, max=%ld).\n"
+#~ msgstr "Subsong number out of range (min=0, max=%ld).\n"

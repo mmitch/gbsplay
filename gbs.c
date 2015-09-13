@@ -134,6 +134,16 @@ regparm void gbs_printinfo(struct gbs *gbs, long verbose)
 	       gbs->romsize/0x4000,
 	       gbs->songs,
 	       gbs->defaultsong);
+	if (gbs->tac & 0x04) {
+		long timertc = (256-gbs->tma) * (16 << (((gbs->tac+3) & 3) << 1));
+		if (gbs->tac & 0x80)
+			timertc /= 2;
+		printf(_("Timing:           %2.2fHz timer%s\n"),
+		       GBHW_CLOCK / (float)timertc,
+		       (gbs->tac & 0x78) == 0x40 ? _(" + VBlank (ugetab)") : "");
+	} else {
+		printf(_("Timing:           59.7Hz vblank\n"));
+	}
 	if (gbs->version == 2) {
 		printf(_("CRC32:		0x%08lx/0x%08lx (%s)\n"),
 		       (unsigned long)gbs->crc, (unsigned long)gbs->crcnow,
@@ -418,7 +428,7 @@ regparm struct gbs *gbs_open(char *name)
 	gbs->rom[0x73] = 0xe0; /* ldh [ff06], a */
 	gbs->rom[0x74] = 0x06;
 	gbs->rom[0x75] = 0x3e; /* ld a, gbs->tac */
-	gbs->rom[0x76] = gbs->tac;
+	gbs->rom[0x76] = gbs->tac & ~0x40;
 	gbs->rom[0x77] = 0xe0; /* ldh [ff07], a */
 	gbs->rom[0x78] = 0x07;
 	gbs->rom[0x79] = 0x3e; /* ld a, #0x05 */
@@ -440,7 +450,16 @@ regparm struct gbs *gbs_open(char *name)
 		gbs->rom[8*i+1] = addr & 0xff;
 		gbs->rom[8*i+2] = addr >> 8;
 	}
-	if (gbs->tac & 0x04) { /* timer enabled */
+	if ((gbs->tac & 0x78) == 0x40) { /* ugetab int vector extension */
+		/* V-Blank */
+		gbs->rom[0x40] = 0xc3; /* jp imm16 */
+		gbs->rom[0x41] = (gbs->load + 0x40) & 0xff;
+		gbs->rom[0x42] = (gbs->load + 0x40) >> 8;
+		/* Timer */
+		gbs->rom[0x50] = 0xc3; /* jp imm16 */
+		gbs->rom[0x51] = (gbs->load + 0x48) & 0xff;
+		gbs->rom[0x52] = (gbs->load + 0x48) >> 8;
+	} else if (gbs->tac & 0x04) { /* timer enabled */
 		/* V-Blank */
 		gbs->rom[0x40] = 0xc9; /* reti */
 		/* Timer */
