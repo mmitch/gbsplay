@@ -29,6 +29,7 @@ struct gbs {
 	uint8_t version;
 	uint8_t songs;
 	uint8_t defaultsong;
+	uint8_t defaultbank;
 	uint16_t load;
 	uint16_t init;
 	uint16_t play;

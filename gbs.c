@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "common.h"
 #include "gbhw.h"
@@ -23,6 +24,7 @@
 
 #define GBS_MAGIC		"GBS"
 #define GBS_EXTHDR_MAGIC	"GBSX"
+#define GBR_MAGIC		"GBRF"
 
 regparm long gbs_init(struct gbs *gbs, long subsong)
 {
@@ -34,6 +36,9 @@ regparm long gbs_init(struct gbs *gbs, long subsong)
 		return 0;
 	}
 
+	if (gbs->defaultbank != 1) {
+		gbcpu_mem_put(0x2000, gbs->defaultbank);
+	}
 	gbhw_io_put(0xff06, gbs->tma);
 	gbhw_io_put(0xff07, gbs->tac);
 	gbhw_io_put(0xffff, 0x05);
@@ -157,6 +162,9 @@ regparm void gbs_printinfo(struct gbs *gbs, long verbose)
 		       (gbs->tac & 0x78) == 0x40 ? _(" + VBlank (ugetab)") : "");
 	} else {
 		printf(_("Timing:           59.7Hz vblank\n"));
+	}
+	if (gbs->defaultbank != 1) {
+		printf(_("Bank @0x4000:     %d\n"), gbs->defaultbank);
 	}
 	if (gbs->version == 2) {
 		printf(_("CRC32:		0x%08lx/0x%08lx (%s)\n"),
@@ -313,14 +321,15 @@ regparm long gbs_write(struct gbs *gbs, char *name, long version)
 	return 1;
 }
 
-regparm struct gbs *gbs_open(char *name)
+static regparm struct gbs *gbr_open(char *name)
 {
 	long fd, i;
 	struct stat st;
 	struct gbs *gbs = malloc(sizeof(struct gbs));
 	char *buf;
-	char *buf2 = NULL;
-	long have_ehdr = 0;
+	char *na_str = _("gbr / not available");
+	uint16_t vsync_addr;
+	uint16_t timer_addr;
 
 	memset(gbs, 0, sizeof(struct gbs));
 	gbs->silence_timeout = 2;
@@ -338,6 +347,111 @@ regparm struct gbs *gbs_open(char *name)
 		fprintf(stderr, _("Could not read %s: %s\n"), name, strerror(errno));
 		gbs_free(gbs);
 		return NULL;
+	}
+	if (strncmp(buf, GBR_MAGIC, 4) != 0) {
+		fprintf(stderr, _("Not a GBR-File: %s\n"), name);
+		gbs_free(gbs);
+		return NULL;
+	}
+	if (buf[0x05] != 0) {
+		fprintf(stderr, _("Unsupported default bank @0x0000: %d\n"), buf[0x05]);
+		gbs_free(gbs);
+		return NULL;
+	}
+	if (buf[0x07] < 1 || buf[0x07] > 3) {
+		fprintf(stderr, _("Unsupported timerflag value: %d\n"), buf[0x07]);
+		gbs_free(gbs);
+		return NULL;
+	}
+	gbs->version = 0;
+	gbs->songs = 255;
+	gbs->defaultsong = 1;
+	gbs->defaultbank = buf[0x06];
+	gbs->load  = 0;
+	gbs->init  = readint(&buf[0x08], 2);
+	if (buf[0x07] == 1) {
+		gbs->play = vsync_addr = readint(&buf[0x0a], 2);
+	} else {
+		gbs->play = timer_addr = readint(&buf[0x0c], 2);
+	}
+	gbs->tma = buf[0x0e];
+	gbs->tac = buf[0x0f];
+	gbs->stack = 0xfffe;
+
+	/* Test if this looks like a valid rom header title */
+	for (i=0x0154; i<0x0163; i++) {
+		if (!(isalnum(buf[i]) || isspace(buf[i])))
+			break;
+	}
+	if (buf[i] == 0) {
+		/* Title looks valid and is zero-terminated. */
+		gbs->title = &buf[0x0154];
+	} else {
+		gbs->title = na_str;
+	}
+	gbs->author = na_str;
+	gbs->copyright = na_str;
+	gbs->code = &buf[0x20];
+	gbs->filesize = st.st_size;
+
+	gbs->subsong_info = malloc(gbs->songs * sizeof(struct gbs_subsong_info));
+	memset(gbs->subsong_info, 0, gbs->songs * sizeof(struct gbs_subsong_info));
+	gbs->codelen = st.st_size - 0x20;
+	gbs->crcnow = gbs_crc32(0, buf, gbs->filesize);
+	gbs->romsize = (gbs->codelen + 0x3fff) & ~0x3fff;
+
+	gbs->rom = calloc(1, gbs->romsize);
+	memcpy(gbs->rom, &buf[0x20], gbs->codelen);
+
+	gbs->rom[0x40] = 0xc9; /* reti */
+	gbs->rom[0x50] = 0xc9; /* reti */
+	if (buf[0x07] & 1) {
+		/* V-Blank */
+		gbs->rom[0x40] = 0xc3; /* jp imm16 */
+		gbs->rom[0x41] = vsync_addr & 0xff;
+		gbs->rom[0x42] = vsync_addr >> 8;
+	}
+	if (buf[0x07] & 2) {
+		/* Timer */
+		gbs->rom[0x50] = 0xc3; /* jp imm16 */
+		gbs->rom[0x51] = timer_addr & 0xff;
+		gbs->rom[0x52] = timer_addr >> 8;
+	}
+	close(fd);
+
+	return gbs;
+}
+
+regparm struct gbs *gbs_open(char *name)
+{
+	long fd, i;
+	struct stat st;
+	struct gbs *gbs = malloc(sizeof(struct gbs));
+	char *buf;
+	char *buf2 = NULL;
+	long have_ehdr = 0;
+
+	memset(gbs, 0, sizeof(struct gbs));
+	gbs->silence_timeout = 2;
+	gbs->subsong_timeout = 2*60;
+	gbs->gap = 2;
+	gbs->fadeout = 3;
+	gbs->defaultbank = 1;
+	if ((fd = open(name, O_RDONLY)) == -1) {
+		fprintf(stderr, _("Could not open %s: %s\n"), name, strerror(errno));
+		gbs_free(gbs);
+		return NULL;
+	}
+	fstat(fd, &st);
+	gbs->buf = buf = malloc(st.st_size);
+	if (read(fd, buf, st.st_size) != st.st_size) {
+		fprintf(stderr, _("Could not read %s: %s\n"), name, strerror(errno));
+		gbs_free(gbs);
+		return NULL;
+	}
+	if (strncmp(buf, GBR_MAGIC, 4) == 0) {
+		gbs_free(gbs);
+		return gbr_open(name);
 	}
 	if (strncmp(buf, GBS_MAGIC, 3) != 0) {
 		fprintf(stderr, _("Not a GBS-File: %s\n"), name);
