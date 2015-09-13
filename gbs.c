@@ -468,7 +468,7 @@ regparm struct gbs *gbs_open(char *name)
 		gbs->rom[0x52] = gbs->play >> 8;
 	} else {
 		/* V-Blank */
-		gbs->rom[0x40] = 0xcd; /* jp imm16 */
+		gbs->rom[0x40] = 0xc3; /* jp imm16 */
 		gbs->rom[0x41] = gbs->play & 0xff;
 		gbs->rom[0x42] = gbs->play >> 8;
 		/* Timer */
