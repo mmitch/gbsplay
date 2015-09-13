@@ -697,6 +697,13 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 	base_impulse = gen_impulsetab(impulse_w_shift, impulse_n_shift, impulse_cutoff);
 }
 
+/* internal for gbs.c, not exported from libgbs */
+regparm void gbhw_io_put(uint16_t addr, uint8_t val) {
+	if (addr != 0xffff && (addr < 0xff00 || addr > 0xff7f))
+		return;
+	io_put(addr, val);
+}
+
 regparm void gbhw_check_if(void)
 {
 	uint8_t mask = 0x01; /* lowest bit is highest priority irq */

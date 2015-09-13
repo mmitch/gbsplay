@@ -39,6 +39,7 @@ gbcpu_regs_u gbcpu_regs;
 long gbcpu_halted;
 long gbcpu_stopped;
 long gbcpu_if;
+long gbcpu_halt_at_pc;
 
 static regparm uint32_t none_get(/*@unused@*/ uint32_t addr)
 {
@@ -577,6 +578,11 @@ static inline regparm void mem_put(uint32_t addr, uint32_t val)
 {
 	gbcpu_put_fn fn = putlookup[(addr >> 8) & 0xff];
 	fn(addr, val);
+}
+
+regparm void gbcpu_mem_put(uint16_t addr, uint8_t val)
+{
+	mem_put(addr, val);
 }
 
 static regparm void push(uint32_t val)
@@ -1882,11 +1888,13 @@ regparm void gbcpu_init(void)
 	gbcpu_halted = 0;
 	gbcpu_stopped = 0;
 	gbcpu_if = 0;
+	gbcpu_halt_at_pc = -1;
 	DEB(dump_regs());
 }
 
 regparm void gbcpu_intr(long vec)
 {
+	DPRINTF("gbcpu_intr(%04lx)\n", vec);
 	gbcpu_halted = 0;
 	gbcpu_if = 0;
 	push(REGS16_R(gbcpu_regs, PC));
@@ -1928,6 +1936,12 @@ regparm long gbcpu_step(void)
 		ops[op].fn(op, &ops[op]);
 
 		DEB(show_reg_diffs());
+		if (gbcpu_halt_at_pc != -1 &&
+		    REGS16_R(gbcpu_regs, PC) == gbcpu_halt_at_pc) {
+			DPRINTF("halted at PC %04lx\n", gbcpu_halt_at_pc);
+			gbcpu_halted = 1;
+			gbcpu_if = 1;
+		}
 		return 1;
 	}
 	if (gbcpu_halted == 1 && gbcpu_if == 0) {

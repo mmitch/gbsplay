@@ -102,6 +102,7 @@ typedef regparm void (*gbcpu_put_fn)(uint32_t addr, uint8_t val);
 typedef regparm uint32_t (*gbcpu_get_fn)(uint32_t addr);
 
 extern gbcpu_regs_u gbcpu_regs;
+extern long gbcpu_halt_at_pc;
 extern long gbcpu_halted;
 extern long gbcpu_if;
 
@@ -109,5 +110,6 @@ regparm void gbcpu_addmem(uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcp
 regparm void gbcpu_init(void);
 regparm long gbcpu_step(void);
 regparm void gbcpu_intr(long vec);
+regparm void gbcpu_mem_put(uint16_t addr, uint8_t val);
 
 #endif

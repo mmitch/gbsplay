@@ -34,13 +34,27 @@ regparm long gbs_init(struct gbs *gbs, long subsong)
 		return 0;
 	}
 
-	gbs->subsong = subsong;
-	REGS16_W(gbcpu_regs, PC, 0x0070); /* playercode entry point */
+	gbhw_io_put(0xff06, gbs->tma);
+	gbhw_io_put(0xff07, gbs->tac);
+	gbhw_io_put(0xffff, 0x05);
+
 	REGS16_W(gbcpu_regs, SP, gbs->stack);
-	REGS16_W(gbcpu_regs, HL, gbs->load - 0x70);
+
+	/* put halt breakpoint PC on stack */
+	gbcpu_halt_at_pc = 0xffff;
+	REGS16_W(gbcpu_regs, PC, 0xff80);
+	REGS16_W(gbcpu_regs, HL, gbcpu_halt_at_pc);
+	gbcpu_mem_put(0xff80, 0xe5); /* push hl */
+	gbcpu_step();
+	/* clear regs/memory touched by stack etup */
+	REGS16_W(gbcpu_regs, HL, 0x0000);
+	gbcpu_mem_put(0xff80, 0x00);
+
+	REGS16_W(gbcpu_regs, PC, gbs->init);
 	gbcpu_regs.rn.a = subsong;
 
 	gbs->ticks = 0;
+	gbs->subsong = subsong;
 
 	return 1;
 }
@@ -355,8 +369,8 @@ regparm struct gbs *gbs_open(char *name)
 	gbs->init  = readint(&buf[0x08], 2);
 	gbs->play  = readint(&buf[0x0a], 2);
 	gbs->stack = readint(&buf[0x0c], 2);
-	gbs->tma = buf[0x0e]; /* Will be programmed by playercode */
-	gbs->tac = buf[0x0f]; /* Will be programmed by playercode */
+	gbs->tma = buf[0x0e];
+	gbs->tac = buf[0x0f];
 
 	memcpy(gbs->v1strings, &buf[0x10], 32);
 	memcpy(gbs->v1strings+33, &buf[0x30], 32);
@@ -434,29 +448,6 @@ regparm struct gbs *gbs_open(char *name)
 
 	gbs->rom = calloc(1, gbs->romsize);
 	memcpy(&gbs->rom[gbs->load - 0x70], buf, 0x70 + gbs->codelen);
-
-	/* patch player setup into rom */
-	gbs->rom[0x70] = 0xf5; /* push af */
-	gbs->rom[0x71] = 0x3e; /* ld a, gbs->tma */
-	gbs->rom[0x72] = gbs->tma;
-	gbs->rom[0x73] = 0xe0; /* ldh [ff06], a */
-	gbs->rom[0x74] = 0x06;
-	gbs->rom[0x75] = 0x3e; /* ld a, gbs->tac */
-	gbs->rom[0x76] = gbs->tac & ~0x40;
-	gbs->rom[0x77] = 0xe0; /* ldh [ff07], a */
-	gbs->rom[0x78] = 0x07;
-	gbs->rom[0x79] = 0x3e; /* ld a, #0x05 */
-	gbs->rom[0x7a] = 0x05;
-	gbs->rom[0x7b] = 0xe0; /* ldh [ffff], a */
-	gbs->rom[0x7c] = 0xff;
-	gbs->rom[0x7d] = 0xf1; /* pop af */
-	gbs->rom[0x7e] = 0xcd; /* call */
-	gbs->rom[0x7f] = gbs->init & 0xff;
-	gbs->rom[0x80] = gbs->init >> 8;
-	gbs->rom[0x81] = 0xfb; /* ei */
-	gbs->rom[0x82] = 0x76; /* halt */
-	gbs->rom[0x83] = 0x18; /* jr -4 */
-	gbs->rom[0x84] = 0xfc;
 
 	for (i=0; i<8; i++) {
 		long addr = gbs->load + 8*i; /* jump address */
