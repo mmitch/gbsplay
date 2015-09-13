@@ -168,10 +168,18 @@ regparm void gbs_printinfo(struct gbs *gbs, long verbose)
 	}
 }
 
+static regparm void gbs_free(struct gbs *gbs)
+{
+	if (gbs->buf)
+		free(gbs->buf);
+	if (gbs->subsong_info)
+		free(gbs->subsong_info);
+	free(gbs);
+}
+
 regparm void gbs_close(struct gbs *gbs)
 {
-	free(gbs->subsong_info);
-	free(gbs);
+	gbs_free(gbs);
 }
 
 static regparm void writeint(char *buf, uint32_t val, long bytes)
@@ -307,33 +315,39 @@ regparm struct gbs *gbs_open(char *name)
 	gbs->fadeout = 3;
 	if ((fd = open(name, O_RDONLY)) == -1) {
 		fprintf(stderr, _("Could not open %s: %s\n"), name, strerror(errno));
+		gbs_free(gbs);
 		return NULL;
 	}
 	fstat(fd, &st);
 	gbs->buf = buf = malloc(st.st_size);
 	if (read(fd, buf, st.st_size) != st.st_size) {
 		fprintf(stderr, _("Could not read %s: %s\n"), name, strerror(errno));
+		gbs_free(gbs);
 		return NULL;
 	}
 	if (strncmp(buf, GBS_MAGIC, 3) != 0) {
 		fprintf(stderr, _("Not a GBS-File: %s\n"), name);
+		gbs_free(gbs);
 		return NULL;
 	}
 	gbs->version = buf[0x03];
 	if (gbs->version != 1) {
 		fprintf(stderr, _("GBS Version %d unsupported.\n"), gbs->version);
+		gbs_free(gbs);
 		return NULL;
 	}
 
 	gbs->songs = buf[0x04];
 	if (gbs->songs < 1) {
 		fprintf(stderr, _("Number of subsongs = %d is unreasonable.\n"), gbs->songs);
+		gbs_free(gbs);
 		return NULL;
 	}
 
 	gbs->defaultsong = buf[0x05];
 	if (gbs->defaultsong < 1 || gbs->defaultsong > gbs->songs) {
 		fprintf(stderr, _("Default subsong %d is out of range [1..%d].\n"), gbs->defaultsong, gbs->songs);
+		gbs_free(gbs);
 		return NULL;
 	}
 
