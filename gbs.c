@@ -372,10 +372,13 @@ static regparm struct gbs *gbr_open(char *name)
 	gbs->defaultbank = buf[0x06];
 	gbs->load  = 0;
 	gbs->init  = readint(&buf[0x08], 2);
+	vsync_addr = readint(&buf[0x0a], 2);
+	timer_addr = readint(&buf[0x0c], 2);
+
 	if (buf[0x07] == 1) {
-		gbs->play = vsync_addr = readint(&buf[0x0a], 2);
+		gbs->play = vsync_addr;
 	} else {
-		gbs->play = timer_addr = readint(&buf[0x0c], 2);
+		gbs->play = timer_addr;
 	}
 	gbs->tma = buf[0x0e];
 	gbs->tac = buf[0x0f];
