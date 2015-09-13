@@ -173,7 +173,8 @@ static regparm void rom_put(uint32_t addr, uint8_t val)
 static regparm void io_put(uint32_t addr, uint8_t val)
 {
 	long chn = (addr - 0xff10)/5;
-	iocallback(sum_cycles, addr, val, iocallback_priv);
+	if (iocallback)
+		iocallback(sum_cycles, addr, val, iocallback_priv);
 
 	if (addr >= 0xff80 && addr <= 0xfffe) {
 		hiram[addr & 0x7f] = val;
@@ -428,6 +429,9 @@ static regparm void gb_flush_buffer(void)
 	long overlap;
 	long l_smpl, r_smpl;
 
+	if (!callback)
+		return;
+
 	assert(soundbuf != NULL);
 	assert(impbuf != NULL);
 
@@ -469,6 +473,9 @@ static regparm void gb_change_level(long l_ofs, long r_ofs)
 	long imp_r = IMPULSE_WIDTH/2;
 	long i;
 	short *ptr = base_impulse;
+
+	if (!callback)
+		return;
 
 	assert(impbuf != NULL);
 	pos = (long)(impbuf->cycles * SOUND_DIV_MULT / sound_div_tc);

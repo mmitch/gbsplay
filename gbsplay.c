@@ -186,8 +186,7 @@ static regparm void swap_endian(struct gbhw_buffer *buf)
 
 static regparm void iocallback(long cycles, uint32_t addr, uint8_t val, void *priv)
 {
-	if (sound_io)
-		sound_io(cycles, addr, val);
+	sound_io(cycles, addr, val);
 }
 
 static regparm void callback(struct gbhw_buffer *buf, void *priv)
@@ -676,8 +675,10 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	gbhw_setiocallback(iocallback, NULL);
-	gbhw_setcallback(callback, NULL);
+	if (sound_io)
+		gbhw_setiocallback(iocallback, NULL);
+	if (sound_write)
+		gbhw_setcallback(callback, NULL);
 	gbhw_setrate(rate);
 
 	if (argc >= 2) {

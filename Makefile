@@ -121,6 +121,9 @@ ifeq ($(plugout_dsound),yes)
 objs_gbsplay += plugout_dsound.o
 GBSPLAYLDFLAGS += -ldsound $(libdsound_flags)
 endif
+ifeq ($(plugout_iodumper),yes)
+objs_gbsplay += plugout_iodumper.o
+endif
 
 # install contrib files?
 ifeq ($(build_contrib),yes)

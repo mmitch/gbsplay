@@ -14,11 +14,20 @@
 
 #include "plugout.h"
 
+#ifdef PLUGOUT_ALSA
+extern const struct output_plugin plugout_alsa;
+#endif
 #ifdef PLUGOUT_DEVDSP
 extern const struct output_plugin plugout_devdsp;
 #endif
-#ifdef PLUGOUT_ALSA
-extern const struct output_plugin plugout_alsa;
+#ifdef PLUGOUT_DSOUND
+extern const struct output_plugin plugout_dsound;
+#endif
+#ifdef PLUGOUT_IODUMPER
+extern const struct output_plugin plugout_iodumper;
+#endif
+#ifdef PLUGOUT_MIDI
+extern const struct output_plugin plugout_midi;
 #endif
 #ifdef PLUGOUT_NAS
 extern const struct output_plugin plugout_nas;
@@ -29,36 +38,34 @@ extern const struct output_plugin plugout_pulse;
 #ifdef PLUGOUT_STDOUT
 extern const struct output_plugin plugout_stdout;
 #endif
-#ifdef PLUGOUT_MIDI
-extern const struct output_plugin plugout_midi;
-#endif
-#ifdef PLUGOUT_DSOUND
-extern const struct output_plugin plugout_dsound;
-#endif
 
 typedef /*@null@*/ const struct output_plugin* output_plugin_const_t;
 
+/* in order of preference, see also PLUGOUT_DEFAULT in plugout.h */
 static output_plugin_const_t plugouts[] = {
-#ifdef PLUGOUT_NAS
-	&plugout_nas,
-#endif
-#ifdef PLUGOUT_DEVDSP
-	&plugout_devdsp,
-#endif
-#ifdef PLUGOUT_ALSA
-	&plugout_alsa,
-#endif
-#ifdef PLUGOUT_STDOUT
-	&plugout_stdout,
+#ifdef PLUGOUT_DSOUND
+	&plugout_dsound,
 #endif
 #ifdef PLUGOUT_PULSE
 	&plugout_pulse,
 #endif
+#ifdef PLUGOUT_ALSA
+	&plugout_alsa,
+#endif
+#ifdef PLUGOUT_DEVDSP
+	&plugout_devdsp,
+#endif
+#ifdef PLUGOUT_STDOUT
+	&plugout_stdout,
+#endif
+#ifdef PLUGOUT_NAS
+	&plugout_nas,
+#endif
 #ifdef PLUGOUT_MIDI
 	&plugout_midi,
 #endif
-#ifdef PLUGOUT_DSOUND
-	&plugout_dsound,
+#ifdef PLUGOUT_IODUMPER
+	&plugout_iodumper,
 #endif
 	NULL
 };

@@ -533,18 +533,35 @@ Optional Modules:
   --without-test         don't test gbsplay output during build
 
 Output Plugins:
-  --disable-devdsp       omit /dev/dsp sound output plugin
   --disable-alsa         omit ALSA sound output plugin
+  --disable-devdsp       omit /dev/dsp sound output plugin
+  --disable-dsound       omit Direct Sound output plugin
+  --disable-iodumper     omit iodumper plugin
   --disable-midi         omit MIDI file writer plugin
   --disable-nas          omit NAS sound output plugin
   --disable-pulse        omit PulseAudio sound output plugin
-  --disable-dsound       omit Direct Sound output plugin
   --disable-stdout       omit stdout file writer plugin
 EOF
     exit $1
 }
 
-OPTS="build_contrib build_test build_xmmsplugin use_i18n use_sharedlibgbs use_regparm use_hardening use_debug use_stdout use_devdsp use_alsa use_nas use_pulse use_midi use_dsound"
+OPTS=""
+OPTS="${OPTS} build_contrib"
+OPTS="${OPTS} build_test"
+OPTS="${OPTS} build_xmmsplugin"
+OPTS="${OPTS} use_alsa"
+OPTS="${OPTS} use_debug"
+OPTS="${OPTS} use_devdsp"
+OPTS="${OPTS} use_dsound"
+OPTS="${OPTS} use_hardening"
+OPTS="${OPTS} use_i18n"
+OPTS="${OPTS} use_iodumper"
+OPTS="${OPTS} use_midi"
+OPTS="${OPTS} use_nas"
+OPTS="${OPTS} use_pulse"
+OPTS="${OPTS} use_regparm"
+OPTS="${OPTS} use_sharedlibgbs"
+OPTS="${OPTS} use_stdout"
 for OPT in $OPTS; do
     eval "${OPT}="
 done
@@ -917,6 +934,7 @@ setdefault use_debug no
 
 setdefault use_midi yes
 setdefault use_stdout yes
+setdefault use_iodumper yes
 
 printoptional modules build
 printoptional features use
@@ -970,9 +988,10 @@ use_sharedlibgbs
 cygwin_build
 libaudio_flags
 __EOF__
-    echo plugout_dsound := $use_dsound
-    echo plugout_devdsp := $use_devdsp
     echo plugout_alsa := $use_alsa
+    echo plugout_devdsp := $use_devdsp
+    echo plugout_dsound := $use_dsound
+    echo plugout_iodumper := $use_iodumper
     echo plugout_midi := $use_midi
     echo plugout_nas := $use_nas
     echo plugout_pulse := $use_pulse
@@ -985,9 +1004,10 @@ __EOF__
     echo "#define GBS_VERSION \"$VERSION\""
     echo "#define LOCALE_PREFIX \"$localedir\""
     echo "#define SYSCONF_PREFIX \"$sysconfdir\""
-    plugout_x DSOUND
-    plugout_x DEVDSP
     plugout_x ALSA
+    plugout_x DEVDSP
+    plugout_x DSOUND
+    plugout_x IODUMPER
     plugout_x MIDI
     plugout_x NAS
     plugout_x PULSE
