@@ -34,7 +34,7 @@ struct gbs {
 	uint16_t play;
 	uint16_t stack;
 	uint8_t tma;
-	uint8_t tmc;
+	uint8_t tac;
 	char *title;
 	char *author;
 	char *copyright;
