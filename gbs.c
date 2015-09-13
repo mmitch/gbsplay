@@ -167,9 +167,12 @@ regparm void gbs_printinfo(struct gbs *gbs, long verbose)
 		printf(_("Bank @0x4000:     %d\n"), gbs->defaultbank);
 	}
 	if (gbs->version == 2) {
-		printf(_("CRC32:		0x%08lx/0x%08lx (%s)\n"),
+		printf(_("CRC32:            0x%08lx/0x%08lx (%s)\n"),
 		       (unsigned long)gbs->crc, (unsigned long)gbs->crcnow,
 		       gbs->crc == gbs->crcnow ? _("OK") : _("Failed"));
+	} else {
+		printf(_("CRC32:            0x%08lx\n"),
+		       (unsigned long)gbs->crcnow);
 	}
 	if (verbose && gbs->version == 2) {
 		long i;
