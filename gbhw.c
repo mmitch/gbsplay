@@ -687,6 +687,10 @@ regparm void gbhw_check_if(void)
 {
 	uint8_t mask = 0x01; /* lowest bit is highest priority irq */
 	uint8_t vec = 0x40;
+	if (!gbcpu_if) {
+		/* interrupts disabled */
+		return;
+	}
 	while (mask <= 0x10) {
 		if (ioregs[REG_IF] & ioregs[REG_IE] & mask) {
 			ioregs[REG_IF] &= ~mask;
@@ -731,12 +735,12 @@ regparm long gbhw_step(long time_to_work)
 		}
 
 		if (vblankctr > 0) vblankctr -= cycles;
-		if (vblankctr <= 0 && gbcpu_if) {
+		if (vblankctr <= 0) {
 			vblankctr += vblanktc;
 			ioregs[REG_IF] |= 0x01;
 		}
 		if (timerctr > 0) timerctr -= cycles;
-		if (timerctr <= 0 && gbcpu_if && (ioregs[0x07] & 4)) {
+		if (timerctr <= 0 && (ioregs[0x07] & 4)) {
 			timerctr += timertc;
 			ioregs[REG_IF] |= 0x04;
 		}
