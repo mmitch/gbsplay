@@ -366,7 +366,7 @@ test: gbsplay $(tests) test_gbs
 	fi
 
 $(gen_impulse_h_bin): $(objs_gen_impulse_h)
-	$(BUILDCC) -o $(gen_impulse_h_bin) $(objs_gen_impulse_h) $(GBSLDFLAGS) -lm
+	$(BUILDCC) -o $(gen_impulse_h_bin) $(objs_gen_impulse_h) -lm
 impulse.h: gen_impulse_h
 	$(Q)./$(gen_impulse_h_bin) > $@
 gbhw.o: impulse.h
