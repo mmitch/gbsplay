@@ -16,7 +16,11 @@ static double sinc(double x)
 {
 	double a = M_PI*x;
 
-	if (a == 0.0) return 1.0;
+	if (a == 0.0) {
+		/* Never reached. */
+		fprintf(stderr, "sinc(0), should not happen\n");
+		return 1.0;
+	}
 
 	return sin(a)/a;
 }
@@ -28,20 +32,26 @@ static double blackman(double n, double m)
 
 short *gen_impulsetab(long w_shift, long n_shift, double cutoff)
 {
-	long i;
-	double j;
+	long i, j_l;
 	long width = 1 << w_shift;
 	long n = 1 << n_shift;
 	long m = width/2;
 	long size = width*n*sizeof(short);
 	short *pulsetab = malloc(size);
-	short *ptr = pulsetab;
+	short *ptr;
 
 	if (!pulsetab)
 		return NULL;
 
-	for (j=0; j<1.0; j+=1.0/n) {
-		long sum=0;
+	memset(pulsetab, 0, size);
+
+	/* special-case for j_l == 0 to avoid sinc(0). */
+	pulsetab[m-1] = IMPULSE_HEIGHT;
+	ptr = &pulsetab[width];
+
+	for (j_l=1; j_l < n; j_l ++) {
+		double j = (double)j_l / n;
+		long sum=0.0;
 		long corr;
 		long n = 0;
 		double div = IMPULSE_HEIGHT;
