@@ -78,22 +78,23 @@ GBSPLAYLDFLAGS :=
 
 export Q VERBOSE CC HOSTCC BUILDCC GBSCFLAGS GBSLDFLAGS
 
-docs           := README HISTORY COPYRIGHT
-docs-dist      := INSTALL CODINGSTYLE TESTSUITE gbsformat.txt
-contribs       := contrib/gbs2ogg.sh contrib/gbsplay.bashcompletion
-examples       := examples/nightmode.gbs examples/gbsplayrc_sample
+docs               := README HISTORY COPYRIGHT
+docs-dist          := INSTALL CODINGSTYLE TESTSUITE gbsformat.txt
+contribs           := contrib/gbs2ogg.sh contrib/gbsplay.bashcompletion
+examples           := examples/nightmode.gbs examples/gbsplayrc_sample
 
-mans           := gbsplay.1    gbsinfo.1    gbsplayrc.5
-mans_src       := gbsplay.in.1 gbsinfo.in.1 gbsplayrc.in.5
+mans               := gbsplay.1    gbsinfo.1    gbsplayrc.5
+mans_src           := gbsplay.in.1 gbsinfo.in.1 gbsplayrc.in.5
 
-objs_libgbspic := gbcpu.lo gbhw.lo gbs.lo cfgparser.lo crc32.lo impulsegen.lo
-objs_libgbs    := gbcpu.o  gbhw.o  gbs.o  cfgparser.o  crc32.o  impulsegen.o
-objs_gbsplay   := gbsplay.o util.o plugout.o
-objs_gbsinfo   := gbsinfo.o
-objs_gbsxmms   := gbsxmms.lo
-objs_test_gbs  := test_gbs.o
+objs_libgbspic     := gbcpu.lo gbhw.lo gbs.lo cfgparser.lo crc32.lo
+objs_libgbs        := gbcpu.o  gbhw.o  gbs.o  cfgparser.o  crc32.o
+objs_gbsplay       := gbsplay.o util.o plugout.o
+objs_gbsinfo       := gbsinfo.o
+objs_gbsxmms       := gbsxmms.lo
+objs_test_gbs      := test_gbs.o
+objs_gen_impulse_h := gen_impulse_h.o impulsegen.o
 
-tests          := util.test impulsegen.test
+tests              := util.test impulsegen.test
 
 # gbsplay output plugins
 ifeq ($(plugout_devdsp),yes)
@@ -138,15 +139,17 @@ endif
 
 # Cygwin automatically adds .exe to binaries.
 # We should notice that or we can't rm the files later!
-gbsplaybin     := gbsplay
-gbsinfobin     := gbsinfo
-test_gbsbin    := test_gbs
-test_bin       := test
+gbsplaybin        := gbsplay
+gbsinfobin        := gbsinfo
+test_gbsbin       := test_gbs
+test_bin          := test
+gen_impulse_h_bin := gen_impulse_h
 ifeq ($(cygwin_build),yes)
-gbsplaybin     :=$(gbsplaybin).exe
-gbsinfobin     :=$(gbsinfobin).exe
-test_gbsbin    :=$(test_gbsbin).exe
-test_bin       :=$(test).exe
+gbsplaybin        :=$(gbsplaybin).exe
+gbsinfobin        :=$(gbsinfobin).exe
+test_gbsbin       :=$(test_gbsbin).exe
+test_bin          :=$(test).exe
+gen_impulse_h_bin :=$(gen_impulse_h_bin).exe
 endif
 
 ifeq ($(use_sharedlibgbs),yes)
@@ -361,6 +364,13 @@ test: gbsplay $(tests) test_gbs
 		echo "  Got:      $$MD5" ; \
 		exit 1; \
 	fi
+
+$(gen_impulse_h_bin): $(objs_gen_impulse_h)
+	$(BUILDCC) -o $(gen_impulse_h_bin) $(objs_gen_impulse_h) $(GBSLDFLAGS) -lm
+impulse.h: gen_impulse_h
+	$(Q)./$(gen_impulse_h_bin) > $@
+gbhw.o: impulse.h
+gbhw.lo: impulse.h
 
 libgbspic.a: $(objs_libgbspic)
 	$(AR) r $@ $+

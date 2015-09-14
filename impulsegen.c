@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 #include "impulsegen.h"
@@ -87,8 +88,6 @@ test void test_gen_impulsetab()
 	const long n_shift = 3;
 	const long w_shift = 5;
 	const double cutoff = 1.0;
-	const long width = 1 << w_shift;
-	const long n = 1 << n_shift;
 	const short reference[(1 << 3) * (1 << 5)] = {
 		0, 0, 0, 0,  0, 0,  0, 0,  0, 0,  0,  0,   0,  0,   0, 256,   0,   0,  0,   0,  0,  0, 0,  0, 0,  0, 0,  0, 0, 0, 0, 0,
 		0, 0, 0, 0,  0, 1, -1, 1, -2, 3, -4,  6,  -9, 14, -27, 249,  35, -16, 10,  -6,  4, -3, 2, -1, 1, -1, 0,  0, 0, 0, 0, 0,

@@ -15,7 +15,7 @@
 
 #include "gbcpu.h"
 #include "gbhw.h"
-#include "impulsegen.h"
+#include "impulse.h"
 
 #define REG_IF 0x0f
 #define REG_IE 0x7f /* Nominally 0xff, but we remap it to 0x7f internally. */
@@ -101,14 +101,8 @@ static long sweep_div;
 
 static long ch3pos;
 
-static long impulse_n_shift = 7;
-static long impulse_w_shift = 5;
-static double impulse_cutoff = 1.0;
-
-static short *base_impulse = NULL;
-
-#define IMPULSE_WIDTH (1 << impulse_w_shift)
-#define IMPULSE_N (1 << impulse_n_shift)
+#define IMPULSE_WIDTH (1 << IMPULSE_W_SHIFT)
+#define IMPULSE_N (1 << IMPULSE_N_SHIFT)
 #define IMPULSE_N_MASK (IMPULSE_N - 1)
 
 static regparm uint32_t rom_get(uint32_t addr)
@@ -472,14 +466,14 @@ static regparm void gb_change_level(long l_ofs, long r_ofs)
 	long imp_l = -IMPULSE_WIDTH/2;
 	long imp_r = IMPULSE_WIDTH/2;
 	long i;
-	short *ptr = base_impulse;
+	const short *ptr = base_impulse;
 
 	if (!callback)
 		return;
 
 	assert(impbuf != NULL);
 	pos = (long)(impbuf->cycles * SOUND_DIV_MULT / sound_div_tc);
-	imp_idx = (long)((impbuf->cycles << impulse_n_shift)*SOUND_DIV_MULT / sound_div_tc) & IMPULSE_N_MASK;
+	imp_idx = (long)((impbuf->cycles << IMPULSE_N_SHIFT)*SOUND_DIV_MULT / sound_div_tc) & IMPULSE_N_MASK;
 	assert(pos + imp_r < impbuf->samples);
 	assert(pos + imp_l >= 0);
 
@@ -698,10 +692,6 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 	gbcpu_addmem(0xa0, 0xbf, extram_put, extram_get);
 	gbcpu_addmem(0xc0, 0xfe, intram_put, intram_get);
 	gbcpu_addmem(0xff, 0xff, io_put, io_get);
-
-	if (base_impulse)
-		free(base_impulse);
-	base_impulse = gen_impulsetab(impulse_w_shift, impulse_n_shift, impulse_cutoff);
 }
 
 /* internal for gbs.c, not exported from libgbs */
