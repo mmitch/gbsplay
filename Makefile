@@ -93,7 +93,7 @@ objs_gbsinfo   := gbsinfo.o
 objs_gbsxmms   := gbsxmms.lo
 objs_test_gbs  := test_gbs.o
 
-tests          := util.test
+tests          := util.test impulsegen.test
 
 # gbsplay output plugins
 ifeq ($(plugout_devdsp),yes)
@@ -400,7 +400,7 @@ config.mk: configure
 
 %.test: %.c
 	@echo -n "TEST $< "
-	$(Q)$(HOSTCC) -DENABLE_TEST=1 -o $(test_bin) $<
+	$(Q)$(HOSTCC) -DENABLE_TEST=1 -o $(test_bin) $< -lm
 	$(Q)./$(test_bin)
 	$(Q)rm ./$(test_bin)
 

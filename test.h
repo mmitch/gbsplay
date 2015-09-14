@@ -11,14 +11,30 @@
 #include <stdio.h>
 
 #define ASSERT_EQUAL(fmt, a, b) do { \
-	typeof(a) aa; \
-	typeof(a) bb; \
-	aa = a; \
-	bb = b; \
-	if (aa != bb) { \
-		fprintf(stderr, "FAIL\nTest failed: "fmt"!="fmt" at %s:%d\n", aa, bb, __FILE__, __LINE__); \
+	if ((a) != (b)) { \
+		fprintf(stderr, "FAIL\nTest failed: "fmt"!="fmt" at %s:%d\n", (a), (b), __FILE__, __LINE__); \
 		exit(1); \
 	} \
+} while(0)
+
+#define ASSERT_ARRAY_EQUAL(fmt, a, b) do { \
+	int pass = 1; \
+	int i; \
+	for (i=0; i<sizeof(a)/sizeof(*(a)); i++) { \
+		if ((a)[i] == (b)[i]) \
+			continue; \
+		pass = 0; \
+		break; \
+	} \
+	if (pass) \
+		return; \
+	fprintf(stderr, "FAIL\nTest failed at %s:%d\n", __FILE__, __LINE__); \
+	for (i=0; i<sizeof(a)/sizeof(*(a)); i++) { \
+		/* if ((a)[i] == (b)[i]) \
+			continue; */ \
+		fprintf(stderr, "%d: "fmt" != "fmt"\n", i, (a)[i], (b)[i]); \
+	} \
+	exit(1); \
 } while(0)
 
 #ifdef ENABLE_TEST

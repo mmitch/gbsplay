@@ -10,6 +10,7 @@
 #include <math.h>
 
 #include "impulsegen.h"
+#include "test.h"
 
 static double sinc(double x)
 {
@@ -70,3 +71,27 @@ short *gen_impulsetab(long w_shift, long n_shift, double cutoff)
 
 	return pulsetab;
 }
+
+test void test_gen_impulsetab()
+{
+	const long n_shift = 3;
+	const long w_shift = 5;
+	const double cutoff = 1.0;
+	const long width = 1 << w_shift;
+	const long n = 1 << n_shift;
+	const short reference[(1 << 3) * (1 << 5)] = {
+		0, 0, 0, 0,  0, 0,  0, 0,  0, 0,  0,  0,   0,  0,   0, 256,   0,   0,  0,   0,  0,  0, 0,  0, 0,  0, 0,  0, 0, 0, 0, 0,
+		0, 0, 0, 0,  0, 1, -1, 1, -2, 3, -4,  6,  -9, 14, -27, 249,  35, -16, 10,  -6,  4, -3, 2, -1, 1, -1, 0,  0, 0, 0, 0, 0,
+		0, 0, 0, 0, -1, 1, -1, 2, -3, 5, -7, 10, -15, 24, -45, 229,  76, -31, 19, -12,  8, -6, 4, -3, 2, -1, 1,  0, 0, 0, 0, 0,
+		0, 0, 0, 0, -1, 1, -2, 3, -4, 6, -9, 13, -19, 29, -54, 202, 121, -45, 26, -17, 12, -8, 6, -4, 2, -2, 1, -1, 0, 0, 0, 0,
+		0, 0, 0, 0, -1, 1, -2, 3, -4, 6, -9, 13, -19, 30, -52, 162, 162, -52, 30, -19, 13, -9, 6, -4, 3, -2, 1, -1, 0, 0, 0, 0,
+		0, 0, 0, 0, -1, 1, -2, 2, -4, 6, -8, 12, -17, 26, -45, 121, 202, -54, 29, -19, 13, -9, 6, -4, 3, -2, 1, -1, 0, 0, 0, 0,
+		0, 0, 0, 0,  0, 1, -1, 2, -3, 4, -6,  8, -12, 19, -31,  76, 229, -45, 24, -15, 10, -7, 5, -3, 2, -1, 1, -1, 0, 0, 0, 0,
+		0, 0, 0, 0,  0, 0, -1, 1, -1, 2, -3,  4,  -6, 10, -16,  35, 249, -27, 14,  -9,  6, -4, 3, -2, 1, -1, 1,  0, 0, 0, 0, 0,
+	};
+	short *pulsetab = gen_impulsetab(w_shift, n_shift, cutoff);
+
+	ASSERT_ARRAY_EQUAL("%d", reference, pulsetab);
+}
+TEST(test_gen_impulsetab);
+TEST_EOF;
