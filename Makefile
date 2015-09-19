@@ -345,7 +345,7 @@ TESTOPTS := -r 44100 -t 30 -f 0 -g 0 -T 0
 test: gbsplay $(tests) test_gbs
 	@echo Verifying output correctness for examples/nightmode.gbs:
 	$(Q)MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH ./gbsplay -c examples/gbsplayrc_sample -E b -o stdout $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | (md5sum || md5 -r) | cut -f1 -d\ `; \
-	EXPECT="35bf42877fa9d3304e4275c503e27a84"; \
+	EXPECT="15ce5ec5a685d3549e508796a9b9bd76"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "Bigendian output ok"; \
 	else \
@@ -355,7 +355,7 @@ test: gbsplay $(tests) test_gbs
 		exit 1; \
 	fi
 	$(Q)MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH ./gbsplay -c examples/gbsplayrc_sample -E l -o stdout $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | (md5sum || md5 -r) | cut -f1 -d\ `; \
-	EXPECT="15d624d97c4cd407feeb8a6ed6353f74"; \
+	EXPECT="cfd66a6ec5f48b780342d87f336ce5ae"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "Littleendian output ok"; \
 	else \

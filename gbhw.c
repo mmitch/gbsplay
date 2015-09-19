@@ -508,7 +508,7 @@ static regparm void gb_sound(long cycles)
 			gbhw_ch[2].div_ctr--;
 			if (gbhw_ch[2].div_ctr <= 0) {
 				long pos = ch3pos++;
-				long val = GET_NIBBLE(&ioregs[0x30], pos);
+				long val = GET_NIBBLE(&ioregs[0x30], pos) - 8;
 				long old_l = gbhw_ch[2].l_lvl;
 				long old_r = gbhw_ch[2].r_lvl;
 				long l_diff, r_diff;
