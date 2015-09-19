@@ -508,7 +508,7 @@ static regparm void gb_sound(long cycles)
 			gbhw_ch[2].div_ctr--;
 			if (gbhw_ch[2].div_ctr <= 0) {
 				long pos = ch3pos++;
-				long val = GET_NIBBLE(&ioregs[0x30], pos) - 8;
+				long val = GET_NIBBLE(&ioregs[0x30], pos) * 2 - 15;
 				long old_l = gbhw_ch[2].l_lvl;
 				long old_r = gbhw_ch[2].r_lvl;
 				long l_diff, r_diff;
@@ -516,7 +516,6 @@ static regparm void gb_sound(long cycles)
 				if (gbhw_ch[2].volume) {
 					val = val >> (gbhw_ch[2].volume-1);
 				} else val = 0;
-				val = val*2;
 				if (gbhw_ch[2].volume && !gbhw_ch[2].mute) {
 					if (gbhw_ch[2].leftgate)
 						gbhw_ch[2].l_lvl = val;
