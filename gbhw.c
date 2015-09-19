@@ -270,10 +270,12 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 					tap1 = TAP1_15;
 					tap2 = TAP2_15;
 				}
-				lfsr |= 1; /* Make sure lfsr is not 0 */
 				if (rate) gbhw_ch[3].div_tc *= rate;
 				else gbhw_ch[3].div_tc /= 2;
 				if (addr == 0xff22) break;
+				if (val & 0x80) {  /* trigger */
+					lfsr = 0xffffffff;
+				}
 //				printf(" ch4: vol=%02d envd=%ld envspd=%ld duty_ctr=%ld len=%03d len_en=%ld key=%04d gate=%ld%ld\n", gbhw_ch[3].volume, gbhw_ch[3].env_dir, gbhw_ch[3].env_ctr, gbhw_ch[3].duty_ctr, gbhw_ch[3].len, gbhw_ch[3].len_enable, gbhw_ch[3].div_tc, gbhw_ch[3].leftgate, gbhw_ch[3].rightgate);
 			}
 			gbhw_ch[chn].len_enable = (ioregs[0x23] & 0x40) > 0;
