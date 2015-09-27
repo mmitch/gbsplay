@@ -497,6 +497,7 @@ static regparm void gb_sound(long cycles)
 	long i, j;
 	long l_lvl = 0, r_lvl = 0;
 	static long old_l = 0, old_r = 0;
+	static long next_nibble = 0;
 
 	assert(impbuf != NULL);
 
@@ -509,11 +510,12 @@ static regparm void gb_sound(long cycles)
 		if (gbhw_ch[2].master) {
 			gbhw_ch[2].div_ctr--;
 			if (gbhw_ch[2].div_ctr <= 0) {
-				long pos = ch3pos++;
-				long val = GET_NIBBLE(&ioregs[0x30], pos) * 2;
+				long val = next_nibble;
 				long old_l = gbhw_ch[2].l_lvl;
 				long old_r = gbhw_ch[2].r_lvl;
 				long l_diff, r_diff;
+				long pos = ch3pos++;
+				next_nibble = GET_NIBBLE(&ioregs[0x30], pos) * 2;
 				gbhw_ch[2].div_ctr = gbhw_ch[2].div_tc*2;
 				if (gbhw_ch[2].volume) {
 					val = val >> (gbhw_ch[2].volume-1);
@@ -539,7 +541,7 @@ static regparm void gb_sound(long cycles)
 				long l_diff, r_diff;
 				gbhw_ch[3].div_ctr = gbhw_ch[3].div_tc;
 				lfsr = (lfsr << 1) | (((lfsr & tap1) > 0) ^ ((lfsr & tap2) > 0));
-				val = (gbhw_ch[3].volume * (lfsr & 2));
+				val = gbhw_ch[3].volume * 2 * (!(lfsr & tap1));
 				if (!gbhw_ch[3].mute) {
 					if (gbhw_ch[3].leftgate)
 						gbhw_ch[3].l_lvl = val - 15;
