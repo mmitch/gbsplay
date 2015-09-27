@@ -40,6 +40,7 @@ long gbcpu_halted;
 long gbcpu_stopped;
 long gbcpu_if;
 long gbcpu_halt_at_pc;
+long gbcpu_cycles;
 
 static regparm uint32_t none_get(/*@unused@*/ uint32_t addr)
 {
@@ -571,12 +572,14 @@ static gbcpu_put_fn putlookup[256] = {
 static inline regparm uint32_t mem_get(uint32_t addr)
 {
 	gbcpu_get_fn fn = getlookup[(addr >> 8) & 0xff];
+	gbcpu_cycles += 4;
 	return fn(addr);
 }
 
 static inline regparm void mem_put(uint32_t addr, uint32_t val)
 {
 	gbcpu_put_fn fn = putlookup[(addr >> 8) & 0xff];
+	gbcpu_cycles += 4;
 	fn(addr, val);
 }
 
@@ -1836,7 +1839,6 @@ static regparm void show_reg_diffs(void)
 {
 	long i;
 
-
 	DPRINTF("\t\t; ");
 	for (i=0; i<3; i++) {
 		if (REGS16_R(gbcpu_regs, i) != REGS16_R(oldregs, i)) {
@@ -1868,6 +1870,7 @@ static regparm void show_reg_diffs(void)
 			REGS16_W(oldregs, i, REGS16_R(gbcpu_regs, i));
 		}
 	}
+	DPRINTF(" %ld cycles", gbcpu_cycles);
 	DPRINTF("\n");
 }
 #endif
@@ -1932,6 +1935,7 @@ regparm long gbcpu_step(void)
 
 	if (!gbcpu_halted) {
 		op = mem_get(gbcpu_regs.rn.pc++);
+		gbcpu_cycles = 4;
 		DPRINTF("%04x: %02x", gbcpu_regs.rn.pc - 1, op);
 		ops[op].fn(op, &ops[op]);
 
@@ -1942,7 +1946,7 @@ regparm long gbcpu_step(void)
 			gbcpu_halted = 1;
 			gbcpu_if = 1;
 		}
-		return 1;
+		return gbcpu_cycles;
 	}
 	if (gbcpu_halted == 1 && gbcpu_if == 0) {
 		fprintf(stderr, "CPU locked up (halt with interrupts disabled).\n");
