@@ -258,12 +258,12 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 		case 0xff22:
 		case 0xff23:
 			{
-				long div = ioregs[0x22];
-				long shift = div >> 4;
-				long rate = div & 7;
+				long reg = ioregs[0x22];
+				long shift = reg >> 4;
+				long rate = reg & 7;
 				gbhw_ch[3].div_ctr = 0;
-				gbhw_ch[3].div_tc = 1 << shift;
-				if (div & 8) {
+				gbhw_ch[3].div_tc = 16 << shift;
+				if (reg & 8) {
 					tap1 = TAP1_7;
 					tap2 = TAP2_7;
 				} else {
@@ -510,7 +510,7 @@ static regparm void gb_sound(long cycles)
 			gbhw_ch[2].div_ctr--;
 			if (gbhw_ch[2].div_ctr <= 0) {
 				long pos = ch3pos++;
-				long val = GET_NIBBLE(&ioregs[0x30], pos) * 2 - 15;
+				long val = GET_NIBBLE(&ioregs[0x30], pos) * 2;
 				long old_l = gbhw_ch[2].l_lvl;
 				long old_r = gbhw_ch[2].r_lvl;
 				long l_diff, r_diff;
@@ -520,12 +520,34 @@ static regparm void gb_sound(long cycles)
 				} else val = 0;
 				if (gbhw_ch[2].volume && !gbhw_ch[2].mute) {
 					if (gbhw_ch[2].leftgate)
-						gbhw_ch[2].l_lvl = val;
+						gbhw_ch[2].l_lvl = val - 15;
 					if (gbhw_ch[2].rightgate)
-						gbhw_ch[2].r_lvl = val;
+						gbhw_ch[2].r_lvl = val - 15;
 				}
 				l_diff = gbhw_ch[2].l_lvl - old_l;
 				r_diff = gbhw_ch[2].r_lvl - old_r;
+				gb_change_level(l_diff, r_diff);
+			}
+		}
+
+		if (gbhw_ch[3].master) {
+			static long val;
+			gbhw_ch[3].div_ctr--;
+			if (gbhw_ch[3].div_ctr <= 0) {
+				long old_l = gbhw_ch[3].l_lvl;
+				long old_r = gbhw_ch[3].r_lvl;
+				long l_diff, r_diff;
+				gbhw_ch[3].div_ctr = gbhw_ch[3].div_tc;
+				lfsr = (lfsr << 1) | (((lfsr & tap1) > 0) ^ ((lfsr & tap2) > 0));
+				val = (gbhw_ch[3].volume * (lfsr & 2));
+				if (!gbhw_ch[3].mute) {
+					if (gbhw_ch[3].leftgate)
+						gbhw_ch[3].l_lvl = val - 15;
+					if (gbhw_ch[3].rightgate)
+						gbhw_ch[3].r_lvl = val - 15;
+				}
+				l_diff = gbhw_ch[3].l_lvl - old_l;
+				r_diff = gbhw_ch[3].r_lvl - old_r;
 				gb_change_level(l_diff, r_diff);
 			}
 		}
@@ -534,15 +556,15 @@ static regparm void gb_sound(long cycles)
 			main_div -= main_div_tc;
 
 			for (i=0; i<2; i++) if (gbhw_ch[i].master) {
-				long val = gbhw_ch[i].volume;
+				long val = 2 * gbhw_ch[i].volume;
 				if (gbhw_ch[i].div_ctr > gbhw_ch[i].duty_tc) {
-					val = -val;
+					val = 0;
 				}
 				if (!gbhw_ch[i].mute) {
 					if (gbhw_ch[i].leftgate)
-						gbhw_ch[i].l_lvl = val;
+						gbhw_ch[i].l_lvl = val - 15;
 					if (gbhw_ch[i].rightgate)
-						gbhw_ch[i].r_lvl = val;
+						gbhw_ch[i].r_lvl = val - 15;
 				}
 				gbhw_ch[i].div_ctr--;
 				if (gbhw_ch[i].div_ctr <= 0) {
@@ -553,26 +575,6 @@ static regparm void gb_sound(long cycles)
 				l_lvl += gbhw_ch[i].l_lvl;
 				r_lvl += gbhw_ch[i].r_lvl;
 			}
-
-			if (gbhw_ch[3].master) {
-//				long val = gbhw_ch[3].volume * (((lfsr >> 13) & 2)-1);
-//				long val = gbhw_ch[3].volume * ((random() & 2)-1);
-				static long val;
-				if (!gbhw_ch[3].mute) {
-					if (gbhw_ch[3].leftgate)
-						gbhw_ch[3].l_lvl = val;
-					if (gbhw_ch[3].rightgate)
-						gbhw_ch[3].r_lvl = val;
-				}
-				gbhw_ch[3].div_ctr--;
-				if (gbhw_ch[3].div_ctr <= 0) {
-					gbhw_ch[3].div_ctr = gbhw_ch[3].div_tc;
-					lfsr = (lfsr << 1) | (((lfsr & tap1) > 0) ^ ((lfsr & tap2) > 0));
-					val = gbhw_ch[3].volume * ((lfsr & 2)-1);
-				}
-			}
-			l_lvl += gbhw_ch[3].l_lvl;
-			r_lvl += gbhw_ch[3].r_lvl;
 
 			if (l_lvl != old_l || r_lvl != old_r) {
 				gb_change_level(l_lvl - old_l, r_lvl - old_r);
