@@ -60,6 +60,7 @@ regparm void gbhw_pause(long new_pause);
 regparm void gbhw_master_fade(long speed, long dstvol);
 regparm void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax);
 regparm long gbhw_step(long time_to_work);
+regparm uint8_t gbhw_io_peek(uint16_t addr);  /* unmasked peek */
 regparm void gbhw_io_put(uint16_t addr, uint8_t val);
 
 #endif

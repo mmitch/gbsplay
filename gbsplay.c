@@ -533,6 +533,27 @@ static regparm char *volstring(long v)
 	return &vollookup[5*v];
 }
 
+static regparm void printregs(void)
+{
+	long i;
+	for (i=0; i<5*4; i++) {
+		if (i % 5 == 0)
+			printf("CH%ld:", i/5 + 1);
+		printf(" %02x", gbhw_io_peek(0xff10+i));
+		if (i % 5 == 4)
+			printf("\n");
+	}
+	printf("MISC:");
+	for (i+=0x10; i<0x27; i++) {
+		printf(" %02x", gbhw_io_peek(0xff00+i));
+	}
+	printf("\nWAVE: ");
+	for (i=0; i<16; i++) {
+		printf("%02x", gbhw_io_peek(0xff30+i));
+	}
+	printf("\n\033[A\033[A\033[A\033[A\033[A\033[A");
+}
+
 static regparm void printstatus(struct gbs *gbs)
 {
 	long time = gbs->ticks / GBHW_CLOCK;
@@ -567,6 +588,9 @@ static regparm void printstatus(struct gbs *gbs)
 		       volstring(gbs->rvol/1024));
 	} else {
 		puts("");
+	}
+	if (verbosity>3) {
+		printregs();
 	}
 	fflush(stdout);
 }

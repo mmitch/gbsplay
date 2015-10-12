@@ -706,6 +706,16 @@ regparm void gbhw_io_put(uint16_t addr, uint8_t val) {
 	io_put(addr, val);
 }
 
+/* unmasked peek used by gbsplay.c to print regs */
+regparm uint8_t gbhw_io_peek(uint16_t addr)
+{
+	if (addr >= 0xff10 && addr <= 0xff3e) {
+		return ioregs[addr & 0x7f];
+	}
+	return 0xff;
+}
+
+
 regparm void gbhw_check_if(void)
 {
 	uint8_t mask = 0x01; /* lowest bit is highest priority irq */

@@ -8,6 +8,7 @@ gbhw_setbuffer
 gbhw_setcallback
 gbhw_setiocallback
 gbhw_setrate
+gbhw_io_peek
 gbs_close
 gbs_init
 gbs_open
