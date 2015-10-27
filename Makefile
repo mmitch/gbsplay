@@ -262,6 +262,7 @@ clean:
 	rm -f $(mans)
 	rm -f $(gbsplaybin) $(gbsinfobin)
 	rm -f $(test_gbsbin) $(test_bin)
+	rm -f $(gen_impulse_h_bin) impulse.h
 
 install: all install-default $(EXTRA_INSTALL)
 
