@@ -92,7 +92,7 @@ objs_gbsplay       := gbsplay.o util.o plugout.o
 objs_gbsinfo       := gbsinfo.o
 objs_gbsxmms       := gbsxmms.lo
 objs_test_gbs      := test_gbs.o
-objs_gen_impulse_h := gen_impulse_h.o impulsegen.o
+objs_gen_impulse_h := gen_impulse_h.ho impulsegen.ho
 
 tests              := util.test impulsegen.test
 
@@ -256,7 +256,7 @@ distclean: clean
 	rm -f ./config.mk ./config.h ./config.err ./config.sed
 
 clean:
-	find . -regex ".*\.\([aos]\|lo\|mo\|pot\|so\(\.[0-9]\)?\)" -exec rm -f "{}" \;
+	find . -regex ".*\.\([aos]\|ho\|lo\|mo\|pot\|so\(\.[0-9]\)?\)" -exec rm -f "{}" \;
 	find . -name "*~" -exec rm -f "{}" \;
 	rm -f libgbs libgbspic libgbs.def libgbs.so.1.ver
 	rm -f $(mans)
@@ -367,7 +367,7 @@ test: gbsplay $(tests) test_gbs
 	fi
 
 $(gen_impulse_h_bin): $(objs_gen_impulse_h)
-	$(BUILDCC) -o $(gen_impulse_h_bin) $(objs_gen_impulse_h) -lm
+	$(HOSTCC) -o $(gen_impulse_h_bin) $(objs_gen_impulse_h) -lm
 impulse.h: $(gen_impulse_h_bin)
 	$(Q)./$(gen_impulse_h_bin) > $@
 gbhw.o: impulse.h
@@ -389,7 +389,7 @@ gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 
 # rules for suffixes
 
-.SUFFIXES: .i .s .lo
+.SUFFIXES: .i .s .lo .ho
 
 .c.lo:
 	@echo CC $< -o $@
@@ -398,6 +398,9 @@ gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 	@echo CC $< -o $@
 	$(Q)(test -x "`which $(SPLINT)`" && $(SPLINT) $(SPLINTFLAGS) $<) || true
 	$(Q)$(BUILDCC) $(GBSCFLAGS) -fpie -c -o $@ $<
+.c.ho:
+	@echo HOSTCC $< -o $@
+	$(Q)$(HOSTCC) $(GBSCFLAGS) -fpie -c -o $@ $<
 
 .c.i:
 	$(BUILDCC) -E $(GBSCFLAGS) -o $@ $<
