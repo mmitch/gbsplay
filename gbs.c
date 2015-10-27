@@ -161,7 +161,8 @@ regparm void gbs_printinfo(struct gbs *gbs, long verbose)
 		       GBHW_CLOCK / (float)timertc,
 		       (gbs->tac & 0x78) == 0x40 ? _(" + VBlank (ugetab)") : "");
 	} else {
-		printf(_("Timing:           59.7Hz vblank\n"));
+		printf(_("Timing:           %s\n"),
+		       _("59.7Hz VBlank\n"));
 	}
 	if (gbs->defaultbank != 1) {
 		printf(_("Bank @0x4000:     %d\n"), gbs->defaultbank);
