@@ -238,6 +238,9 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 
 	long chan = (addr - 0xff10) / 5;
 
+	if (!file)
+		return 1;
+
 	switch (addr) {
 	case 0xff12:
 	case 0xff17:
