@@ -774,5 +774,9 @@ int main(int argc, char **argv)
 
 	sound_close();
 
+	if (verbosity>3) {
+		printf("\n\n\n\n\n\n");
+	}
+
 	return 0;
 }
