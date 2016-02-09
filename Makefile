@@ -410,7 +410,7 @@ config.mk: configure
 	./configure
 
 %.test: %.c
-	@echo -n "TEST $< "
+	@echo TEST $<
 	$(Q)$(HOSTCC) -DENABLE_TEST=1 -o $@$(binsuffix) $< -lm
 	$(Q)./$@$(binsuffix)
 	$(Q)rm ./$@$(binsuffix)
