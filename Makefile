@@ -139,18 +139,15 @@ endif
 
 # Cygwin automatically adds .exe to binaries.
 # We should notice that or we can't rm the files later!
-gbsplaybin        := gbsplay
-gbsinfobin        := gbsinfo
-test_gbsbin       := test_gbs
-test_bin          := test
-gen_impulse_h_bin := gen_impulse_h
 ifeq ($(cygwin_build),yes)
-gbsplaybin        :=$(gbsplaybin).exe
-gbsinfobin        :=$(gbsinfobin).exe
-test_gbsbin       :=$(test_gbsbin).exe
-test_bin          :=$(test).exe
-gen_impulse_h_bin :=$(gen_impulse_h_bin).exe
+binsuffix         := .exe
+else
+binsuffix         :=
 endif
+gbsplaybin        := gbsplay$(binsuffix)
+gbsinfobin        := gbsinfo$(binsuffix)
+test_gbsbin       := test_gbs$(binsuffix)
+gen_impulse_h_bin := gen_impulse_h$(binsuffix)
 
 ifeq ($(use_sharedlibgbs),yes)
 GBSLDFLAGS += -L. -lgbs
