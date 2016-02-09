@@ -253,12 +253,12 @@ distclean: clean
 	rm -f ./config.mk ./config.h ./config.err ./config.sed
 
 clean:
-	find . -regex ".*\.\([aos]\|ho\|lo\|mo\|pot\|so\(\.[0-9]\)?\)" -exec rm -f "{}" \;
+	find . -regex ".*\.\([aos]\|ho\|lo\|mo\|pot\|test\(\.exe\)?\|so\(\.[0-9]\)?\)" -exec rm -f "{}" \;
 	find . -name "*~" -exec rm -f "{}" \;
 	rm -f libgbs libgbspic libgbs.def libgbs.so.1.ver
 	rm -f $(mans)
 	rm -f $(gbsplaybin) $(gbsinfobin)
-	rm -f $(test_gbsbin) $(test_bin)
+	rm -f $(test_gbsbin)
 	rm -f $(gen_impulse_h_bin) impulse.h
 
 install: all install-default $(EXTRA_INSTALL)
@@ -411,9 +411,9 @@ config.mk: configure
 
 %.test: %.c
 	@echo -n "TEST $< "
-	$(Q)$(HOSTCC) -DENABLE_TEST=1 -o $(test_bin) $< -lm
-	$(Q)./$(test_bin)
-	$(Q)rm ./$(test_bin)
+	$(Q)$(HOSTCC) -DENABLE_TEST=1 -o $@$(binsuffix) $< -lm
+	$(Q)./$@$(binsuffix)
+	$(Q)rm ./$@$(binsuffix)
 
 %.d: %.c config.mk
 	@echo DEP $< -o $@
