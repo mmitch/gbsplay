@@ -83,8 +83,7 @@ pass index  content
 
 ***  5      other
 [ ]  5.1      check HISTORY
-[ ]  5.2      check version number in configure
-[ ]  5.3      check for CVS tag
+[ ]  5.2      check for git tag
 
 ---------------------------------------------------------------
 
@@ -100,4 +99,4 @@ error details:
 ---------------------------------------------------------------
 
 Run a (partial) test and send this form with a subject like
-"gbsplay testsuite: ..." to <gbsplay-dev@lists.berlios.de>.
+"gbsplay testsuite: ..." to <gbsplay-dev@lists.uguu.de>.
