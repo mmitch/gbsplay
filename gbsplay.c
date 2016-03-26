@@ -511,7 +511,9 @@ static regparm char *notestring(long ch)
 	if (gbhw_ch[ch].mute) return "-M-";
 
 	if (gbhw_ch[ch].volume == 0 ||
-	    gbhw_ch[ch].master == 0) return "---";
+	    gbhw_ch[ch].master == 0 ||
+	    (gbhw_ch[ch].leftgate == 0 &&
+	     gbhw_ch[ch].rightgate == 0)) return "---";
 
 	n = getnote(gbhw_ch[ch].div_tc);
 	if (ch != 3) return &notelookup[4*n];
@@ -523,7 +525,9 @@ static regparm long chvol(long ch)
 	long v;
 
 	if (gbhw_ch[ch].mute ||
-	    gbhw_ch[ch].master == 0) return 0;
+	    gbhw_ch[ch].master == 0 ||
+	    (gbhw_ch[ch].leftgate == 0 &&
+	     gbhw_ch[ch].rightgate == 0)) return 0;
 
 	if (ch == 2)
 		v = (3-((gbhw_ch[2].volume+3)&3)) << 2;
