@@ -14,12 +14,12 @@
 #define GBHW_CLOCK 4194304
 
 #define GBHW_CFG_FILTER_OFF "off"
-#define GBHW_CFG_FILTER_GBC "gbc"
+#define GBHW_CFG_FILTER_DMG "dmg"
 #define GBHW_CFG_FILTER_CGB "cgb"
 
 #define GBHW_FILTER_CONST_OFF 1.0
 /* From blargg's "Game Boy Sound Operation" doc */
-#define GBHW_FILTER_CONST_GBC 0.999958
+#define GBHW_FILTER_CONST_DMG 0.999958
 #define GBHW_FILTER_CONST_CGB 0.998943
 
 struct gbhw_buffer {

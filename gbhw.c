@@ -57,7 +57,7 @@ static const char dutylookup[4] = {
 struct gbhw_channel gbhw_ch[4];
 
 static long lminval, lmaxval, rminval, rmaxval;
-static double filter_constant = GBHW_FILTER_CONST_OFF;
+static double filter_constant = GBHW_FILTER_CONST_DMG;
 static int filter_enabled = 1;
 static long cap_factor = 0x10000;
 
@@ -133,7 +133,7 @@ static regparm uint32_t io_get(uint32_t addr)
 	}
 	if (addr == 0xff00) return 0;
 	if (addr == 0xff70) {
-		/* GBC ram bank switch */
+		/* CGB ram bank switch */
 		WARN_ONCE("ioread from SVBK (CGB mode) ignored.\n");
 		return 0xff;
 	}
@@ -671,9 +671,9 @@ regparm long gbhw_setfilter(const char *type)
 	if (strcasecmp(type, GBHW_CFG_FILTER_OFF) == 0) {
 		filter_enabled = 0;
 		filter_constant = GBHW_FILTER_CONST_OFF;
-	} else if (strcasecmp(type, GBHW_CFG_FILTER_GBC) == 0) {
+	} else if (strcasecmp(type, GBHW_CFG_FILTER_DMG) == 0) {
 		filter_enabled = 1;
-		filter_constant = GBHW_FILTER_CONST_GBC;
+		filter_constant = GBHW_FILTER_CONST_DMG;
 	} else if (strcasecmp(type, GBHW_CFG_FILTER_CGB) == 0) {
 		filter_enabled = 1;
 		filter_constant = GBHW_FILTER_CONST_CGB;

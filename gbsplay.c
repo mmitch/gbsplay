@@ -76,7 +76,7 @@ static long redraw = false;
 static const char cfgfile[] = ".gbsplayrc";
 
 static char *sound_name = PLUGOUT_DEFAULT;
-static char *filter_type = GBHW_CFG_FILTER_GBC;
+static char *filter_type = GBHW_CFG_FILTER_DMG;
 static char *sound_description;
 static plugout_open_fn  sound_open;
 static plugout_skip_fn  sound_skip;
