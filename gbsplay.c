@@ -76,6 +76,7 @@ static long redraw = false;
 static const char cfgfile[] = ".gbsplayrc";
 
 static char *sound_name = PLUGOUT_DEFAULT;
+static char *filter_type = GBHW_CFG_FILTER_GBC;
 static char *sound_description;
 static plugout_open_fn  sound_open;
 static plugout_skip_fn  sound_skip;
@@ -95,6 +96,7 @@ static struct gbhw_buffer buf = {
 static const struct cfg_option options[] = {
 	{ "endian", &endian, cfg_endian },
 	{ "fadeout", &fadeout, cfg_long },
+	{ "filter_type", &filter_type, cfg_string },
 	{ "loop", &loopmode, cfg_long },
 	{ "output_plugin", &sound_name, cfg_string },
 	{ "rate", &rate, cfg_long },
@@ -347,6 +349,7 @@ static regparm void usage(long exitcode)
 		  "  -f        set fadeout (%ld seconds)\n"
 		  "  -g        set subsong gap (%ld seconds)\n"
 		  "  -h        display this help and exit\n"
+		  "  -H        set output high-pass type (%s)\n"
 		  "  -l        loop mode\n"
 		  "  -o        select output plugin (%s)\n"
 		  "            'list' shows available plugins\n"
@@ -364,6 +367,7 @@ static regparm void usage(long exitcode)
 		endian_str(endian),
 		fadeout,
 		subsong_gap,
+		_(filter_type),
 		sound_name,
 		rate,
 		refresh_delay,
@@ -382,7 +386,7 @@ static regparm void parseopts(int *argc, char ***argv)
 {
 	long res;
 	myname = *argv[0];
-	while ((res = getopt(*argc, *argv, "1234c:E:f:g:hlo:qr:R:t:T:vVzZ")) != -1) {
+	while ((res = getopt(*argc, *argv, "1234c:E:f:g:hH:lo:qr:R:t:T:vVzZ")) != -1) {
 		switch (res) {
 		default:
 			usage(1);
@@ -416,6 +420,9 @@ static regparm void parseopts(int *argc, char ***argv)
 			break;
 		case 'h':
 			usage(0);
+			break;
+		case 'H':
+			filter_type = optarg;
 			break;
 		case 'l':
 			loopmode = 1;
@@ -704,6 +711,10 @@ int main(int argc, char **argv)
 	if (sound_write)
 		gbhw_setcallback(callback, NULL);
 	gbhw_setrate(rate);
+	if (!gbhw_setfilter(filter_type)) {
+		fprintf(stderr, _("Invalid filter type \"%s\"\n"), filter_type);
+		exit(1);
+	}
 
 	if (argc >= 2) {
 		sscanf(argv[1], "%ld", &subsong_start);

@@ -338,7 +338,7 @@ dist:	distclean
 	tar -cvzf ../$(DISTDIR).tar.gz $(DISTDIR)/ 
 	rm -rf ./$(DISTDIR)
 
-TESTOPTS := -r 44100 -t 30 -f 0 -g 0 -T 0
+TESTOPTS := -r 44100 -t 30 -f 0 -g 0 -T 0 -H off
 
 test: gbsplay $(tests) test_gbs
 	@echo Verifying output correctness for examples/nightmode.gbs:

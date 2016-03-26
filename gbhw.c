@@ -12,6 +12,7 @@
 #include <string.h>
 #include <limits.h>
 #include <assert.h>
+#include <math.h>
 
 #include "gbcpu.h"
 #include "gbhw.h"
@@ -56,12 +57,16 @@ static const char dutylookup[4] = {
 struct gbhw_channel gbhw_ch[4];
 
 static long lminval, lmaxval, rminval, rmaxval;
+static double filter_constant = GBHW_FILTER_CONST_OFF;
+static int filter_enabled = 1;
+static long cap_factor = 0x10000;
 
 #define MASTER_VOL_MIN	0
 #define MASTER_VOL_MAX	(256*256)
 static long master_volume;
 static long master_fade;
 static long master_dstvol;
+static long sample_rate;
 
 static const long vblanktc = 70256; /* ~59.7 Hz (vblankctr)*/
 static long vblankctr = 70256;
@@ -424,6 +429,7 @@ static regparm void gb_flush_buffer(void)
 	long i;
 	long overlap;
 	long l_smpl, r_smpl;
+	long l_cap, r_cap;
 
 	if (!callback)
 		return;
@@ -434,19 +440,41 @@ static regparm void gb_flush_buffer(void)
 	/* integrate buffer */
 	l_smpl = soundbuf->l_lvl;
 	r_smpl = soundbuf->r_lvl;
+	l_cap = soundbuf->l_cap;
+	r_cap = soundbuf->r_cap;
 	for (i=0; i<soundbuf->samples; i++) {
+		long l_out, r_out;
 		l_smpl = l_smpl + impbuf->data[i*2  ];
 		r_smpl = r_smpl + impbuf->data[i*2+1];
-		soundbuf->data[i*2  ] = l_smpl * master_volume / MASTER_VOL_MAX;
-		soundbuf->data[i*2+1] = r_smpl * master_volume / MASTER_VOL_MAX;
-		if (l_smpl > lmaxval) lmaxval = l_smpl;
-		if (l_smpl < lminval) lminval = l_smpl;
-		if (r_smpl > rmaxval) rmaxval = r_smpl;
-		if (r_smpl < rminval) rminval = r_smpl;
+		if (filter_enabled && cap_factor <= 0x10000) {
+			/*
+			 * RC High-pass & DC decoupling filter. Gameboy
+			 * Classic uses 1uF and 510 Ohms in series,
+			 * followed by 10K Ohms pot to ground between
+			 * CPU output and amplifier input, which gives a
+			 * cutoff frequency of 15.14Hz.
+			 */
+			l_out = l_smpl - (l_cap >> 16);
+			r_out = r_smpl - (r_cap >> 16);
+			/* cap factor is 0x10000 for a factor of 1.0 */
+			l_cap = (l_smpl << 16) - l_out * cap_factor;
+			r_cap = (r_smpl << 16) - r_out * cap_factor;
+		} else {
+			l_out = l_smpl;
+			r_out = r_smpl;
+		}
+		soundbuf->data[i*2  ] = l_out * master_volume / MASTER_VOL_MAX;
+		soundbuf->data[i*2+1] = r_out * master_volume / MASTER_VOL_MAX;
+		if (l_out > lmaxval) lmaxval = l_out;
+		if (l_out < lminval) lminval = l_out;
+		if (r_out > rmaxval) rmaxval = r_out;
+		if (r_out < rminval) rminval = r_out;
 	}
 	soundbuf->pos = soundbuf->samples;
 	soundbuf->l_lvl = l_smpl;
 	soundbuf->r_lvl = r_smpl;
+	soundbuf->l_cap = l_cap;
+	soundbuf->r_cap = r_cap;
 
 	if (callback != NULL) callback(soundbuf, callbackpriv);
 
@@ -632,9 +660,37 @@ regparm void gbhw_setbuffer(struct gbhw_buffer *buffer)
 	gbhw_impbuf_reset(impbuf);
 }
 
+static void gbhw_update_filter()
+{
+	double cap_constant = pow(filter_constant, (double)GBHW_CLOCK / sample_rate);
+	cap_factor = round(65536.0 * cap_constant);
+}
+
+regparm long gbhw_setfilter(const char *type)
+{
+	if (strcasecmp(type, GBHW_CFG_FILTER_OFF) == 0) {
+		filter_enabled = 0;
+		filter_constant = GBHW_FILTER_CONST_OFF;
+	} else if (strcasecmp(type, GBHW_CFG_FILTER_GBC) == 0) {
+		filter_enabled = 1;
+		filter_constant = GBHW_FILTER_CONST_GBC;
+	} else if (strcasecmp(type, GBHW_CFG_FILTER_CGB) == 0) {
+		filter_enabled = 1;
+		filter_constant = GBHW_FILTER_CONST_CGB;
+	} else {
+		return 0;
+	}
+
+	gbhw_update_filter();
+
+	return 1;
+}
+
 regparm void gbhw_setrate(long rate)
 {
+	sample_rate = rate;
 	sound_div_tc = GBHW_CLOCK*SOUND_DIV_MULT/rate;
+	gbhw_update_filter();
 }
 
 regparm void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax)

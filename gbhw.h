@@ -13,11 +13,22 @@
 
 #define GBHW_CLOCK 4194304
 
+#define GBHW_CFG_FILTER_OFF "off"
+#define GBHW_CFG_FILTER_GBC "gbc"
+#define GBHW_CFG_FILTER_CGB "cgb"
+
+#define GBHW_FILTER_CONST_OFF 1.0
+/* From blargg's "Game Boy Sound Operation" doc */
+#define GBHW_FILTER_CONST_GBC 0.999958
+#define GBHW_FILTER_CONST_CGB 0.998943
+
 struct gbhw_buffer {
 	/*@dependent@*/ int16_t *data;
 	long pos;
 	long l_lvl;
 	long r_lvl;
+	long l_cap;
+	long r_cap;
 	long bytes;
 	long samples;
 	long cycles;
@@ -53,6 +64,7 @@ typedef regparm void (*gbhw_iocallback_fn)(long cycles, uint32_t addr, uint8_t v
 
 regparm void gbhw_setcallback(/*@dependent@*/ gbhw_callback_fn fn, /*@dependent@*/ void *priv);
 regparm void gbhw_setiocallback(/*@dependent@*/ gbhw_iocallback_fn fn, /*@dependent@*/ void *priv);
+regparm long gbhw_setfilter(const char *type);
 regparm void gbhw_setrate(long rate);
 regparm void gbhw_setbuffer(/*@dependent@*/ struct gbhw_buffer *buffer);
 regparm void gbhw_init(uint8_t *rombuf, uint32_t size);
