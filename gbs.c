@@ -325,6 +325,72 @@ regparm long gbs_write(struct gbs *gbs, char *name, long version)
 	return 1;
 }
 
+static regparm struct gbs *gb_open(char *name)
+{
+	long fd, i;
+	struct stat st;
+	struct gbs *gbs = malloc(sizeof(struct gbs));
+	char *buf;
+	char *na_str = _("gb / not available");
+	uint16_t vsync_addr;
+	uint16_t timer_addr;
+
+	memset(gbs, 0, sizeof(struct gbs));
+	gbs->silence_timeout = 2*60;
+	gbs->subsong_timeout = 2*60;
+	gbs->gap = 2;
+	gbs->fadeout = 3;
+	if ((fd = open(name, O_RDONLY)) == -1) {
+		fprintf(stderr, _("Could not open %s: %s\n"), name, strerror(errno));
+		gbs_free(gbs);
+		return NULL;
+	}
+	fstat(fd, &st);
+	gbs->buf = buf = malloc(st.st_size);
+	if (read(fd, buf, st.st_size) != st.st_size) {
+		fprintf(stderr, _("Could not read %s: %s\n"), name, strerror(errno));
+		gbs_free(gbs);
+		return NULL;
+	}
+	gbs->version = 0;
+	gbs->songs = 1;
+	gbs->defaultsong = 1;
+	gbs->defaultbank = 1;
+	gbs->load  = 0;
+	gbs->init  = 0x100;
+	gbs->play = gbs->init;
+	gbs->stack = 0xfffe;
+
+	/* Test if this looks like a valid rom header title */
+	for (i=0x0134; i<0x0143; i++) {
+		if (!(isalnum(buf[i]) || isspace(buf[i])))
+			break;
+	}
+	if (buf[i] == 0) {
+		/* Title looks valid and is zero-terminated. */
+		gbs->title = &buf[0x0134];
+	} else {
+		gbs->title = na_str;
+	}
+	gbs->author = na_str;
+	gbs->copyright = na_str;
+	gbs->code = buf;
+	gbs->filesize = st.st_size;
+
+	gbs->subsong_info = malloc(gbs->songs * sizeof(struct gbs_subsong_info));
+	memset(gbs->subsong_info, 0, gbs->songs * sizeof(struct gbs_subsong_info));
+	gbs->codelen = st.st_size - 0x20;
+	gbs->crcnow = gbs_crc32(0, buf, gbs->filesize);
+	gbs->romsize = (gbs->codelen + 0x3fff) & ~0x3fff;
+
+	gbs->rom = calloc(1, gbs->romsize);
+	memcpy(gbs->rom, buf, gbs->codelen);
+
+	close(fd);
+
+	return gbs;
+}
+
 static regparm struct gbs *gbr_open(char *name)
 {
 	long fd, i;
@@ -459,6 +525,10 @@ regparm struct gbs *gbs_open(char *name)
 	if (strncmp(buf, GBR_MAGIC, 4) == 0) {
 		gbs_free(gbs);
 		return gbr_open(name);
+	}
+	if (gbs_crc32(0, &buf[0x104], 48) == 0x46195417) {
+		gbs_free(gbs);
+		return gb_open(name);
 	}
 	if (strncmp(buf, GBS_MAGIC, 3) != 0) {
 		fprintf(stderr, _("Not a GBS-File: %s\n"), name);
