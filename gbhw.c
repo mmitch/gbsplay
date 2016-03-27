@@ -110,6 +110,8 @@ static const long sweep_div_tc = 256;
 static long sweep_div;
 
 static long ch3pos;
+static long last_l_value = 0, last_r_value = 0;
+static long ch3_next_nibble = 0;
 
 #define IMPULSE_WIDTH (1 << IMPULSE_W_SHIFT)
 #define IMPULSE_N (1 << IMPULSE_N_SHIFT)
@@ -579,8 +581,6 @@ static regparm void gb_sound(long cycles)
 {
 	long i, j;
 	long l_lvl = 0, r_lvl = 0;
-	static long old_l = 0, old_r = 0;
-	static long next_nibble = 0;
 
 	assert(impbuf != NULL);
 
@@ -593,9 +593,9 @@ static regparm void gb_sound(long cycles)
 		if (gbhw_ch[2].running && gbhw_ch[2].master) {
 			gbhw_ch[2].div_ctr--;
 			if (gbhw_ch[2].div_ctr <= 0) {
-				long val = next_nibble;
+				long val = ch3_next_nibble;
 				long pos = ch3pos++;
-				next_nibble = GET_NIBBLE(&ioregs[0x30], pos) * 2;
+				ch3_next_nibble = GET_NIBBLE(&ioregs[0x30], pos) * 2;
 				gbhw_ch[2].div_ctr = gbhw_ch[2].div_tc*2;
 				if (gbhw_ch[2].volume) {
 					val = val >> (gbhw_ch[2].volume-1);
@@ -606,9 +606,9 @@ static regparm void gb_sound(long cycles)
 		}
 
 		if (gbhw_ch[3].running) {
-			static long val;
 			gbhw_ch[3].div_ctr--;
 			if (gbhw_ch[3].div_ctr <= 0) {
+				long val;
 				gbhw_ch[3].div_ctr = gbhw_ch[3].div_tc;
 				lfsr = (lfsr << 1) | (((lfsr & tap1) > 0) ^ ((lfsr & tap2) > 0));
 				val = gbhw_ch[3].volume * 2 * (!(lfsr & tap1));
@@ -653,10 +653,10 @@ static regparm void gb_sound(long cycles)
 					r_lvl += gbhw_ch[i].lvl;
 			}
 
-			if (l_lvl != old_l || r_lvl != old_r) {
-				gb_change_level(l_lvl - old_l, r_lvl - old_r);
-				old_l = l_lvl;
-				old_r = r_lvl;
+			if (l_lvl != last_l_value || r_lvl != last_r_value) {
+				gb_change_level(l_lvl - last_l_value, r_lvl - last_r_value);
+				last_l_value = l_lvl;
+				last_r_value = r_lvl;
 			}
 		}
 	}
@@ -765,10 +765,13 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 	rombank = 1;
 	master_volume = MASTER_VOL_MAX;
 	master_fade = 0;
+	apu_on = 1;
 	if (soundbuf) {
 		soundbuf->pos = 0;
 		soundbuf->l_lvl = 0;
 		soundbuf->r_lvl = 0;
+		soundbuf->l_cap = 0;
+		soundbuf->r_cap = 0;
 	}
 	lminval = rminval = INT_MAX;
 	lmaxval = rmaxval = INT_MIN;
@@ -785,6 +788,10 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 	}
 
 	sum_cycles = 0;
+	ch3pos = 0;
+	ch3_next_nibble = 0;
+	last_l_value = 0;
+	last_r_value = 0;
 
 	gbcpu_init();
 	gbcpu_addmem(0x00, 0x3f, rom_put, rom_get);
