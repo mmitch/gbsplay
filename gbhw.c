@@ -215,6 +215,41 @@ static regparm void apu_reset(void)
 	sequence_ctr = 0;
 }
 
+static void linkport_atexit(void);
+
+static regparm void linkport_write(long c)
+{
+	static char buf[256];
+	static long idx = 0;
+	static long exit_handler_set = 0;
+	static long enabled = 1;
+
+	if (!enabled) {
+		return;
+	}
+	if (!(c == -1 || c == '\r' || c == '\n' || (c >= 0x20 && c <= 0x7f))) {
+		enabled = 0;
+		fprintf(stderr, "Link port output %02lx ignored.\n", c);
+		return;
+	}
+	if (c != -1 && idx < (sizeof(buf) - 1)) {
+		buf[idx++] = c;
+		buf[idx] = 0;
+	}
+	if (c == '\n' || (c == -1 && idx > 0)) {
+		fprintf(stderr, "Link port text: %s", buf);
+		idx = 0;
+		if (!exit_handler_set) {
+			atexit(linkport_atexit);
+		}
+	}
+}
+
+static void linkport_atexit(void)
+{
+	linkport_write(-1);
+}
+
 static regparm void io_put(uint32_t addr, uint8_t val)
 {
 	long chn = (addr - 0xff10)/5;
@@ -234,6 +269,11 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 	ioregs[addr & 0x7f] = val;
 	DPRINTF(" ([0x%04x]=%02x) ", addr, val);
 	switch (addr) {
+		case 0xff02:
+			if (val & 0x80) {
+				linkport_write(ioregs[1]);
+			}
+			break;
 		case 0xff05:  // TIMA
 		case 0xff06:  // TMA
 			break;
