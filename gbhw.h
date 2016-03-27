@@ -36,6 +36,7 @@ struct gbhw_buffer {
 
 struct gbhw_channel {
 	long mute;
+	long running;
 	long master;
 	long leftgate;
 	long rightgate;

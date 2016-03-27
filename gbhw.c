@@ -134,7 +134,19 @@ static regparm uint32_t io_get(uint32_t addr)
 	}
 	if (addr >= 0xff10 &&
 	           addr <= 0xff3f) {
-		return ioregs[addr & 0x7f] | ioregs_ormask[addr & 0x7f];
+		uint8_t val = ioregs[addr & 0x7f];
+		if (addr == 0xff26) {
+			long i;
+			val &= 0xf0;
+			for (i=0; i<4; i++) {
+				if (gbhw_ch[i].running && gbhw_ch[i].master) {
+					val |= (1 << i);
+				}
+			}
+		}
+		val |= ioregs_ormask[addr & 0x7f];
+		DPRINTF("io_get(%04x): %02x\n", addr, val);
+		return val;
 	}
 	switch (addr) {
 	case 0xff00:  // P1
@@ -179,6 +191,23 @@ static regparm void rom_put(uint32_t addr, uint8_t val)
 		}
 	} else {
 		WARN_ONCE("rom write of %02x to %04x ignored\n", val, addr);
+	}
+}
+
+static regparm void apu_reset(void)
+{
+	long i;
+	memset(gbhw_ch, 0, sizeof(gbhw_ch));
+	for (i = 0xff10; i < 0xff26; i++) {
+		ioregs[i & 0x7f] = 0;
+	}
+	for (i = 0; i < 4; i++) {
+		gbhw_ch[i].len = 0;
+		gbhw_ch[i].volume = 0;
+		gbhw_ch[i].duty_ctr = 4;
+		gbhw_ch[i].div_tc = 1;
+		gbhw_ch[i].master = 1;
+		gbhw_ch[i].running = 0;
 	}
 }
 
@@ -261,6 +290,10 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 				if (addr == 0xff13 ||
 				    addr == 0xff18 ||
 				    addr == 0xff1d) break;
+				if ((addr == 0xff14 ||
+				     addr == 0xff19 ||
+				     addr == 0xff1e) && (val & 0x80) == 0x80)
+					gbhw_ch[chn].running = 1;
 			}
 			gbhw_ch[chn].len_enable = (ioregs[0x14 + 5*chn] & 0x40) > 0;
 
@@ -302,6 +335,7 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 				if (addr == 0xff22) break;
 				if (val & 0x80) {  /* trigger */
 					lfsr = 0xffffffff;
+					gbhw_ch[3].running = 1;
 				}
 //				printf(" ch4: vol=%02d envd=%ld envspd=%ld duty_ctr=%ld len=%03d len_en=%ld key=%04d gate=%ld%ld\n", gbhw_ch[3].volume, gbhw_ch[3].env_dir, gbhw_ch[3].env_ctr, gbhw_ch[3].duty_ctr, gbhw_ch[3].len, gbhw_ch[3].len_enable, gbhw_ch[3].div_tc, gbhw_ch[3].leftgate, gbhw_ch[3].rightgate);
 			}
@@ -323,10 +357,7 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 				ioregs[0x26] = 0x80;
 				apu_on = 1;
 			} else {
-				long i;
-				for (i = 0xff10; i < 0xff26; i++) {
-					io_put(i, 0);
-				}
+				apu_reset();
 				apu_on = 0;
 			}
 			break;
@@ -403,6 +434,7 @@ static regparm void gb_sound_sweep(void)
 			if (gbhw_ch[i].len == 0) {
 				gbhw_ch[i].volume = 0;
 				gbhw_ch[i].env_tc = 0;
+				gbhw_ch[i].running = 0;
 			}
 		}
 		if (gbhw_ch[i].env_tc) {
@@ -558,7 +590,7 @@ static regparm void gb_sound(long cycles)
 		if (impbuf->cycles*SOUND_DIV_MULT >= sound_div_tc*(impbuf->samples - IMPULSE_WIDTH/2))
 			gb_flush_buffer();
 
-		if (gbhw_ch[2].master) {
+		if (gbhw_ch[2].running && gbhw_ch[2].master) {
 			gbhw_ch[2].div_ctr--;
 			if (gbhw_ch[2].div_ctr <= 0) {
 				long val = next_nibble;
@@ -573,7 +605,7 @@ static regparm void gb_sound(long cycles)
 			}
 		}
 
-		if (gbhw_ch[3].master) {
+		if (gbhw_ch[3].running) {
 			static long val;
 			gbhw_ch[3].div_ctr--;
 			if (gbhw_ch[3].div_ctr <= 0) {
@@ -588,7 +620,7 @@ static regparm void gb_sound(long cycles)
 		if (main_div > main_div_tc) {
 			main_div -= main_div_tc;
 
-			for (i=0; i<2; i++) if (gbhw_ch[i].master) {
+			for (i=0; i<2; i++) if (gbhw_ch[i].running) {
 				long val = 2 * gbhw_ch[i].volume;
 				if (gbhw_ch[i].div_ctr > gbhw_ch[i].duty_tc) {
 					val = 0;
@@ -740,10 +772,8 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 	}
 	lminval = rminval = INT_MAX;
 	lmaxval = rmaxval = INT_MIN;
+	apu_reset();
 	for (i=0; i<4; i++) {
-		gbhw_ch[i].duty_ctr = 4;
-		gbhw_ch[i].div_tc = 1;
-		gbhw_ch[i].master = 1;
 		gbhw_ch[i].mute = mute_tmp[i];
 	}
 	memset(extram, 0, sizeof(extram));
