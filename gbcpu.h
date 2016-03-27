@@ -110,6 +110,7 @@ regparm void gbcpu_addmem(uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcp
 regparm void gbcpu_init(void);
 regparm long gbcpu_step(void);
 regparm void gbcpu_intr(long vec);
+regparm uint8_t gbcpu_mem_get(uint16_t addr);
 regparm void gbcpu_mem_put(uint16_t addr, uint8_t val);
 
 #endif

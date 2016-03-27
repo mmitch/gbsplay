@@ -583,6 +583,11 @@ static inline regparm void mem_put(uint32_t addr, uint32_t val)
 	fn(addr, val);
 }
 
+regparm uint8_t gbcpu_mem_get(uint16_t addr)
+{
+	return mem_get(addr);
+}
+
 regparm void gbcpu_mem_put(uint16_t addr, uint8_t val)
 {
 	mem_put(addr, val);
