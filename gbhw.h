@@ -39,8 +39,7 @@ struct gbhw_channel {
 	long master;
 	long leftgate;
 	long rightgate;
-	long l_lvl;
-	long r_lvl;
+	long lvl;
 	long volume;
 	long env_dir;
 	long env_tc;

@@ -67,6 +67,7 @@ static long master_volume;
 static long master_fade;
 static long master_dstvol;
 static long sample_rate;
+static long update_level = 0;
 
 static const long vblanktc = 70256; /* ~59.7 Hz (vblankctr)*/
 static long vblankctr = 70256;
@@ -294,6 +295,7 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 			gbhw_ch[2].rightgate = (val & 0x04) > 0;
 			gbhw_ch[3].leftgate = (val & 0x80) > 0;
 			gbhw_ch[3].rightgate = (val & 0x08) > 0;
+			update_level = 1;
 			break;
 		case 0xff26:
 			if (val & 0x80) {
@@ -539,24 +541,14 @@ static regparm void gb_sound(long cycles)
 			gbhw_ch[2].div_ctr--;
 			if (gbhw_ch[2].div_ctr <= 0) {
 				long val = next_nibble;
-				long old_l = gbhw_ch[2].l_lvl;
-				long old_r = gbhw_ch[2].r_lvl;
-				long l_diff, r_diff;
 				long pos = ch3pos++;
 				next_nibble = GET_NIBBLE(&ioregs[0x30], pos) * 2;
 				gbhw_ch[2].div_ctr = gbhw_ch[2].div_tc*2;
 				if (gbhw_ch[2].volume) {
 					val = val >> (gbhw_ch[2].volume-1);
 				} else val = 0;
-				if (gbhw_ch[2].volume && !gbhw_ch[2].mute) {
-					if (gbhw_ch[2].leftgate)
-						gbhw_ch[2].l_lvl = val - 15;
-					if (gbhw_ch[2].rightgate)
-						gbhw_ch[2].r_lvl = val - 15;
-				}
-				l_diff = gbhw_ch[2].l_lvl - old_l;
-				r_diff = gbhw_ch[2].r_lvl - old_r;
-				gb_change_level(l_diff, r_diff);
+				gbhw_ch[2].lvl = val - 15;
+				update_level = 1;
 			}
 		}
 
@@ -564,21 +556,11 @@ static regparm void gb_sound(long cycles)
 			static long val;
 			gbhw_ch[3].div_ctr--;
 			if (gbhw_ch[3].div_ctr <= 0) {
-				long old_l = gbhw_ch[3].l_lvl;
-				long old_r = gbhw_ch[3].r_lvl;
-				long l_diff, r_diff;
 				gbhw_ch[3].div_ctr = gbhw_ch[3].div_tc;
 				lfsr = (lfsr << 1) | (((lfsr & tap1) > 0) ^ ((lfsr & tap2) > 0));
 				val = gbhw_ch[3].volume * 2 * (!(lfsr & tap1));
-				if (!gbhw_ch[3].mute) {
-					if (gbhw_ch[3].leftgate)
-						gbhw_ch[3].l_lvl = val - 15;
-					if (gbhw_ch[3].rightgate)
-						gbhw_ch[3].r_lvl = val - 15;
-				}
-				l_diff = gbhw_ch[3].l_lvl - old_l;
-				r_diff = gbhw_ch[3].r_lvl - old_r;
-				gb_change_level(l_diff, r_diff);
+				gbhw_ch[3].lvl = val - 15;
+				update_level = 1;
 			}
 		}
 
@@ -590,32 +572,38 @@ static regparm void gb_sound(long cycles)
 				if (gbhw_ch[i].div_ctr > gbhw_ch[i].duty_tc) {
 					val = 0;
 				}
-				if (!gbhw_ch[i].mute) {
-					if (gbhw_ch[i].leftgate)
-						gbhw_ch[i].l_lvl = val - 15;
-					if (gbhw_ch[i].rightgate)
-						gbhw_ch[i].r_lvl = val - 15;
-				}
+				gbhw_ch[i].lvl = val - 15;
 				gbhw_ch[i].div_ctr--;
 				if (gbhw_ch[i].div_ctr <= 0) {
 					gbhw_ch[i].div_ctr = gbhw_ch[i].div_tc;
 				}
-			}
-			for (i=0; i<2; i++) {
-				l_lvl += gbhw_ch[i].l_lvl;
-				r_lvl += gbhw_ch[i].r_lvl;
-			}
-
-			if (l_lvl != old_l || r_lvl != old_r) {
-				gb_change_level(l_lvl - old_l, r_lvl - old_r);
-				old_l = l_lvl;
-				old_r = r_lvl;
 			}
 
 			sweep_div += 1;
 			if (sweep_div >= sweep_div_tc) {
 				sweep_div = 0;
 				gb_sound_sweep();
+			}
+			update_level = 1;
+		}
+
+		if (update_level) {
+			update_level = 0;
+			l_lvl = 0;
+			r_lvl = 0;
+			for (i=0; i<4; i++) {
+				if (gbhw_ch[i].mute)
+					continue;
+				if (gbhw_ch[i].leftgate)
+					l_lvl += gbhw_ch[i].lvl;
+				if (gbhw_ch[i].rightgate)
+					r_lvl += gbhw_ch[i].lvl;
+			}
+
+			if (l_lvl != old_l || r_lvl != old_r) {
+				gb_change_level(l_lvl - old_l, r_lvl - old_r);
+				old_l = l_lvl;
+				old_r = r_lvl;
 			}
 		}
 	}
