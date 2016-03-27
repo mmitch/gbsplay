@@ -1401,6 +1401,8 @@ static regparm void op_call_cond(uint32_t op, const struct opinfo *oi)
 		case 2: if ((gbcpu_regs.rn.f & CF) != 0) return; break;
 		case 3: if ((gbcpu_regs.rn.f & CF) == 0) return; break;
 	}
+	// A taken jump is 4 extra cycles.
+	gbcpu_cycles += 4;
 	push(REGS16_R(gbcpu_regs, PC));
 	REGS16_W(gbcpu_regs, PC, ofs);
 }
@@ -1429,6 +1431,8 @@ static regparm void op_ret_cond(uint32_t op, const struct opinfo *oi)
 		case 2: if ((gbcpu_regs.rn.f & CF) != 0) return; break;
 		case 3: if ((gbcpu_regs.rn.f & CF) == 0) return; break;
 	}
+	// A taken return is 8 extra cycles.
+	gbcpu_cycles += 8;
 	REGS16_W(gbcpu_regs, PC, pop());
 }
 
@@ -1481,6 +1485,8 @@ static regparm void op_jr_cond(uint32_t op, const struct opinfo *oi)
 		case 2: if ((gbcpu_regs.rn.f & CF) != 0) return; break;
 		case 3: if ((gbcpu_regs.rn.f & CF) == 0) return; break;
 	}
+	// A taken jump is 4 extra cycles.
+	gbcpu_cycles += 4;
 	REGS16_W(gbcpu_regs, PC, REGS16_R(gbcpu_regs, PC) + ofs);
 }
 
@@ -1510,6 +1516,8 @@ static regparm void op_jp_cond(uint32_t op, const struct opinfo *oi)
 		case 2: if ((gbcpu_regs.rn.f & CF) != 0) return; break;
 		case 3: if ((gbcpu_regs.rn.f & CF) == 0) return; break;
 	}
+	// A taken jump is 4 extra cycles.
+	gbcpu_cycles += 4;
 	REGS16_W(gbcpu_regs, PC, ofs);
 }
 
