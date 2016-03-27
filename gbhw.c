@@ -201,14 +201,17 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 	ioregs[addr & 0x7f] = val;
 	DPRINTF(" ([0x%04x]=%02x) ", addr, val);
 	switch (addr) {
-		case 0xff06:  // REG_TMA
+		case 0xff05:  // TIMA
+		case 0xff06:  // TMA
 			break;
-		case 0xff07:  // REG_TAC
+		case 0xff07:  // TAC
 			timertc = 16 << (((val+3) & 3) << 1);
 			if ((val & 0xf0) == 0x80) timertc /= 2;
 			if (timerctr > timertc) {
 				timerctr = 0;
 			}
+			break;
+		case 0xff0f:  // IF
 			break;
 		case 0xff10:
 			gbhw_ch[0].sweep_ctr = gbhw_ch[0].sweep_tc = ((val >> 4) & 7);
