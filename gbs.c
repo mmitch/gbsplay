@@ -332,8 +332,6 @@ static regparm struct gbs *gb_open(char *name)
 	struct gbs *gbs = malloc(sizeof(struct gbs));
 	char *buf;
 	char *na_str = _("gb / not available");
-	uint16_t vsync_addr;
-	uint16_t timer_addr;
 
 	memset(gbs, 0, sizeof(struct gbs));
 	gbs->silence_timeout = 2*60;
