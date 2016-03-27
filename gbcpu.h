@@ -29,7 +29,11 @@
 
 #define DPRINTF(...) printf(__VA_ARGS__)
 #define DEB(x) x
-#define OPINFO(name, fn) {name, fn}
+#define OPINFO(name, fn, cycles_1, cycles_2) {name, fn, cycles_1, cycles_2}
+#define CYCLES1(op) (op->cycles_1)
+#define CYCLES2(op) (op->cycles_2)
+#define CYCLES_OK(op, cycles) \
+	(op->cycles_1 == 0 || cycles == op->cycles_1 || cycles == op->cycles_2)
 
 #else
 
@@ -44,7 +48,10 @@ static inline void foo(void)
 */
 #define DPRINTF(...) do { } while (0)
 #define DEB(x)
-#define OPINFO(name, fn) {fn}
+#define OPINFO(name, fn, cycles_1, cycles_2) {fn}
+#define CYCLES1(op) 0
+#define CYCLES2(op) 0
+#define CYCLES_OK(op, cycles) 1
 
 #endif
 
