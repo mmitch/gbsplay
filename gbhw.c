@@ -18,8 +18,11 @@
 #include "gbhw.h"
 #include "impulse.h"
 
-#define REG_IF 0x0f
-#define REG_IE 0x7f /* Nominally 0xff, but we remap it to 0x7f internally. */
+#define REG_TIMA 0x05
+#define REG_TMA  0x06
+#define REG_TAC  0x07
+#define REG_IF   0x0f
+#define REG_IE   0x7f /* Nominally 0xff, but we remap it to 0x7f internally. */
 
 static uint8_t *rom;
 static uint8_t intram[0x2000];
@@ -71,8 +74,8 @@ static long update_level = 0;
 
 static const long vblanktc = 70256; /* ~59.7 Hz (vblankctr)*/
 static long vblankctr = 70256;
-static long timertc = 70256;
-static long timerctr = 70256;
+static long timertc = 16;
+static long timerctr = 0;
 
 static const long msec_cycles = GBHW_CLOCK/1000;
 
@@ -132,16 +135,24 @@ static regparm uint32_t io_get(uint32_t addr)
 	           addr <= 0xff3f) {
 		return ioregs[addr & 0x7f] | ioregs_ormask[addr & 0x7f];
 	}
-	if (addr == 0xff00) return 0;
-	if (addr == 0xff70) {
-		/* CGB ram bank switch */
+	switch (addr) {
+	case 0xff00:  // P1
+		return 0;
+	case 0xff05:  // TIMA
+	case 0xff06:  // TMA
+	case 0xff07:  // TAC
+	case 0xff0f:  // IF
+		return ioregs[addr & 0x7f];
+	case 0xff70:  // CGB ram bank switch
 		WARN_ONCE("ioread from SVBK (CGB mode) ignored.\n");
 		return 0xff;
+	case 0xffff:
+		return ioregs[0x7f];
+	default:
+		WARN_ONCE("ioread from 0x%04x unimplemented.\n", (unsigned int)addr);
+		DPRINTF("io_get(%04x)\n", addr);
+		return 0xff;
 	}
-	if (addr == 0xffff) return ioregs[0x7f];
-	WARN_ONCE("ioread from 0x%04x unimplemented.\n", (unsigned int)addr);
-	DPRINTF("io_get(%04x)\n", addr);
-	return 0xff;
 }
 
 static regparm uint32_t intram_get(uint32_t addr)
@@ -186,11 +197,14 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 	ioregs[addr & 0x7f] = val;
 	DPRINTF(" ([0x%04x]=%02x) ", addr, val);
 	switch (addr) {
-		case 0xff06:
-		case 0xff07:
-			timertc = (256-ioregs[0x06]) * (16 << (((ioregs[0x07]+3) & 3) << 1));
-			if ((ioregs[0x07] & 0xf0) == 0x80) timertc /= 2;
-//			printf("Callback rate set to %2.2fHz.\n", GBHW_CLOCK/(float)timertc);
+		case 0xff06:  // REG_TMA
+			break;
+		case 0xff07:  // REG_TAC
+			timertc = 16 << (((val+3) & 3) << 1);
+			if ((val & 0xf0) == 0x80) timertc /= 2;
+			if (timerctr > timertc) {
+				timerctr = 0;
+			}
 			break;
 		case 0xff10:
 			gbhw_ch[0].sweep_ctr = gbhw_ch[0].sweep_tc = ((val >> 4) & 7);
@@ -815,11 +829,20 @@ regparm long gbhw_step(long time_to_work)
 		if (vblankctr <= 0) {
 			vblankctr += vblanktc;
 			ioregs[REG_IF] |= 0x01;
+			DPRINTF("vblank_interrupt\n");
 		}
-		if (timerctr > 0) timerctr -= cycles;
-		if (timerctr <= 0 && (ioregs[0x07] & 4)) {
-			timerctr += timertc;
-			ioregs[REG_IF] |= 0x04;
+		if (ioregs[REG_TAC] & 4) {
+			if (timerctr > 0) timerctr -= cycles;
+			while (timerctr <= 0) {
+				timerctr += timertc;
+				ioregs[REG_TIMA]++;
+				//DPRINTF("TIMA=%02x\n", ioregs[REG_TIMA]);
+				if (ioregs[REG_TIMA] == 0) {
+					ioregs[REG_TIMA] = ioregs[REG_TMA];
+					ioregs[REG_IF] |= 0x04;
+					DPRINTF("timer_interrupt\n");
+				}
+			}
 		}
 		cycles_total += cycles;
 	}
