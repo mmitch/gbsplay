@@ -72,6 +72,7 @@ static long master_fade;
 static long master_dstvol;
 static long sample_rate;
 static long update_level = 0;
+static long sequence_ctr = 0;
 
 static const long vblanktc = 70256; /* ~59.7 Hz (vblankctr)*/
 static long vblankctr = 70256;
@@ -211,6 +212,7 @@ static regparm void apu_reset(void)
 		gbhw_ch[i].master = 1;
 		gbhw_ch[i].running = 0;
 	}
+	sequence_ctr = 0;
 }
 
 static regparm void io_put(uint32_t addr, uint8_t val)
@@ -259,7 +261,7 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 
 				gbhw_ch[chn].duty_ctr = dutylookup[duty_ctr];
 				gbhw_ch[chn].duty_tc = gbhw_ch[chn].div_tc*gbhw_ch[chn].duty_ctr/8;
-				gbhw_ch[chn].len = (64 - len)*2;
+				gbhw_ch[chn].len = 64 - len;
 
 				break;
 			}
@@ -273,7 +275,7 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 
 				gbhw_ch[chn].volume = vol;
 				gbhw_ch[chn].env_dir = envdir;
-				gbhw_ch[chn].env_ctr = gbhw_ch[chn].env_tc = envspd*8;
+				gbhw_ch[chn].env_ctr = gbhw_ch[chn].env_tc = envspd;
 			}
 			break;
 		case 0xff13:
@@ -307,7 +309,7 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 			gbhw_ch[2].master = (ioregs[0x1a] & 0x80) > 0;
 			break;
 		case 0xff1b:
-			gbhw_ch[2].len = (256 - val)*2;
+			gbhw_ch[2].len = 256 - val;
 			break;
 		case 0xff1c:
 			{
@@ -412,11 +414,27 @@ static regparm void extram_put(uint32_t addr, uint8_t val)
 	extram[addr & 0x1fff] = val;
 }
 
-static regparm void gb_sound_sweep(void)
+static regparm void sequencer_step(void)
 {
 	long i;
+	long clock_len = 0;
+	long clock_env = 0;
+	long clock_sweep = 0;
 
-	if (gbhw_ch[0].sweep_tc) {
+	switch (sequence_ctr & 7) {
+	case 0: clock_len = 1; break;
+	case 1: break;
+	case 2: clock_len = 1; clock_sweep = 1; break;
+	case 3: break;
+	case 4: clock_len = 1; break;
+	case 5: break;
+	case 6: clock_len = 1; clock_sweep = 1; break;
+	case 7: clock_env = 1; break;
+	}
+
+	sequence_ctr++;
+
+	if (clock_sweep && gbhw_ch[0].sweep_tc) {
 		gbhw_ch[0].sweep_ctr--;
 		if (gbhw_ch[0].sweep_ctr < 0) {
 			long val = gbhw_ch[0].div_tc >> gbhw_ch[0].sweep_shift;
@@ -430,7 +448,7 @@ static regparm void gb_sound_sweep(void)
 			gbhw_ch[0].duty_tc = gbhw_ch[0].div_tc*gbhw_ch[0].duty_ctr/8;
 		}
 	}
-	for (i=0; i<4; i++) {
+	for (i=0; clock_len && i<4; i++) {
 		if (gbhw_ch[i].len > 0 && gbhw_ch[i].len_enable) {
 			gbhw_ch[i].len--;
 			if (gbhw_ch[i].len == 0) {
@@ -439,9 +457,11 @@ static regparm void gb_sound_sweep(void)
 				gbhw_ch[i].running = 0;
 			}
 		}
+	}
+	for (i=0; clock_env && i<4; i++) {
 		if (gbhw_ch[i].env_tc) {
 			gbhw_ch[i].env_ctr--;
-			if (gbhw_ch[i].env_ctr <=0) {
+			if (gbhw_ch[i].env_ctr <=0 ) {
 				gbhw_ch[i].env_ctr = gbhw_ch[i].env_tc;
 				if (!gbhw_ch[i].env_dir) {
 					if (gbhw_ch[i].volume > 0)
@@ -463,7 +483,6 @@ static regparm void gb_sound_sweep(void)
 			master_volume = master_dstvol;
 		}
 	}
-
 }
 
 regparm void gbhw_master_fade(long speed, long dstvol)
@@ -635,7 +654,7 @@ static regparm void gb_sound(long cycles)
 			sweep_div += 1;
 			if (sweep_div >= sweep_div_tc) {
 				sweep_div = 0;
-				gb_sound_sweep();
+				sequencer_step();
 			}
 			update_level = 1;
 		}
