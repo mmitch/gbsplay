@@ -32,6 +32,7 @@ static uint8_t hiram[0x80];
 static long rombank = 1;
 static long lastbank;
 static long apu_on = 1;
+static long io_written = 0;
 
 static const uint8_t ioregs_ormask[sizeof(ioregs)] = {
 	/* 0x00 */ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -184,6 +185,9 @@ static regparm void rom_put(uint32_t addr, uint8_t val)
 static regparm void io_put(uint32_t addr, uint8_t val)
 {
 	long chn = (addr - 0xff10)/5;
+
+	io_written = 1;
+
 	if (iocallback)
 		iocallback(sum_cycles, addr, val, iocallback_priv);
 
@@ -815,7 +819,8 @@ regparm long gbhw_step(long time_to_work)
 		if (vblankctr > 0 && vblankctr < maxcycles) maxcycles = vblankctr;
 		if (timerctr > 0 && timerctr < maxcycles) maxcycles = timerctr;
 
-		while (cycles < maxcycles) {
+		io_written = 0;
+		while (cycles < maxcycles && !io_written) {
 			long step;
 			gbhw_check_if();
 			step = gbcpu_step();
