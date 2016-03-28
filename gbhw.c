@@ -142,7 +142,7 @@ static regparm uint32_t io_get(uint32_t addr)
 			long i;
 			val &= 0xf0;
 			for (i=0; i<4; i++) {
-				if (gbhw_ch[i].running && gbhw_ch[i].master) {
+				if (gbhw_ch[i].running) {
 					val |= (1 << i);
 				}
 			}
@@ -316,6 +316,11 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 				gbhw_ch[chn].volume = vol;
 				gbhw_ch[chn].env_dir = envdir;
 				gbhw_ch[chn].env_ctr = gbhw_ch[chn].env_tc = envspd;
+
+				gbhw_ch[chn].master = (val & 0xf8) != 0;
+				if (!gbhw_ch[chn].master) {
+					gbhw_ch[chn].running = 0;
+				}
 			}
 			break;
 		case 0xff13:
@@ -334,10 +339,21 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 				if (addr == 0xff13 ||
 				    addr == 0xff18 ||
 				    addr == 0xff1d) break;
+
 				if ((addr == 0xff14 ||
 				     addr == 0xff19 ||
-				     addr == 0xff1e) && (val & 0x80) == 0x80)
-					gbhw_ch[chn].running = 1;
+				     addr == 0xff1e) && (val & 0x80) == 0x80) {
+					if (gbhw_ch[chn].len == 0) {
+						if (chn == 2) {
+							gbhw_ch[chn].len = 256;
+						} else {
+							gbhw_ch[chn].len = 64;
+						}
+					}
+					if (gbhw_ch[chn].master) {
+						gbhw_ch[chn].running = 1;
+					}
+				}
 			}
 			gbhw_ch[chn].len_enable = (ioregs[0x14 + 5*chn] & 0x40) > 0;
 
@@ -347,6 +363,9 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 			break;
 		case 0xff1a:
 			gbhw_ch[2].master = (ioregs[0x1a] & 0x80) > 0;
+			if (!gbhw_ch[2].master) {
+				gbhw_ch[chn].running = 0;
+			}
 			break;
 		case 0xff1b:
 			gbhw_ch[2].len = 256 - val;
@@ -377,9 +396,15 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 				if (rate) gbhw_ch[3].div_tc *= rate;
 				else gbhw_ch[3].div_tc /= 2;
 				if (addr == 0xff22) break;
+
 				if (val & 0x80) {  /* trigger */
 					lfsr = 0xffffffff;
-					gbhw_ch[3].running = 1;
+					if (gbhw_ch[3].len == 0) {
+						gbhw_ch[3].len = 64;
+					}
+					if (gbhw_ch[3].master) {
+						gbhw_ch[3].running = 1;
+					}
 				}
 //				printf(" ch4: vol=%02d envd=%ld envspd=%ld duty_ctr=%ld len=%03d len_en=%ld key=%04d gate=%ld%ld\n", gbhw_ch[3].volume, gbhw_ch[3].env_dir, gbhw_ch[3].env_ctr, gbhw_ch[3].duty_ctr, gbhw_ch[3].len, gbhw_ch[3].len_enable, gbhw_ch[3].div_tc, gbhw_ch[3].leftgate, gbhw_ch[3].rightgate);
 			}
@@ -649,7 +674,7 @@ static regparm void gb_sound(long cycles)
 		if (impbuf->cycles*SOUND_DIV_MULT >= sound_div_tc*(impbuf->samples - IMPULSE_WIDTH/2))
 			gb_flush_buffer();
 
-		if (gbhw_ch[2].running && gbhw_ch[2].master) {
+		if (gbhw_ch[2].running) {
 			gbhw_ch[2].div_ctr--;
 			if (gbhw_ch[2].div_ctr <= 0) {
 				long val = ch3_next_nibble;
