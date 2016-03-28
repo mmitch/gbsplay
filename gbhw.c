@@ -57,6 +57,9 @@ static const uint8_t ioregs_initdata[sizeof(ioregs)] = {
 static const char dutylookup[4] = {
 	1, 2, 4, 6
 };
+static const long len_mask[4] = {
+	0x3f, 0x3f, 0xff, 0x3f
+};
 
 struct gbhw_channel gbhw_ch[4];
 
@@ -206,6 +209,7 @@ static regparm void apu_reset(void)
 	}
 	for (i = 0; i < 4; i++) {
 		gbhw_ch[i].len = 0;
+		gbhw_ch[i].len_gate = 0;
 		gbhw_ch[i].volume = 0;
 		gbhw_ch[i].duty_ctr = 4;
 		gbhw_ch[i].div_tc = 1;
@@ -248,6 +252,20 @@ static regparm void linkport_write(long c)
 static void linkport_atexit(void)
 {
 	linkport_write(-1);
+}
+
+static regparm void sequencer_update_len(long chn)
+{
+	if (gbhw_ch[chn].len_enable && gbhw_ch[chn].len_gate) {
+		gbhw_ch[chn].len++;
+		gbhw_ch[chn].len &= len_mask[chn];
+		if (gbhw_ch[chn].len == 0) {
+			gbhw_ch[chn].volume = 0;
+			gbhw_ch[chn].env_tc = 0;
+			gbhw_ch[chn].running = 0;
+			gbhw_ch[chn].len_gate = 0;
+		}
+	}
 }
 
 static regparm void io_put(uint32_t addr, uint8_t val)
@@ -301,7 +319,8 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 
 				gbhw_ch[chn].duty_ctr = dutylookup[duty_ctr];
 				gbhw_ch[chn].duty_tc = gbhw_ch[chn].div_tc*gbhw_ch[chn].duty_ctr/8;
-				gbhw_ch[chn].len = 64 - len;
+				gbhw_ch[chn].len = len;
+				gbhw_ch[chn].len_gate = 1;
 
 				break;
 			}
@@ -331,6 +350,7 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 		case 0xff1e:
 			{
 				long div = ioregs[0x13 + 5*chn];
+				long old_len_enable = gbhw_ch[chn].len_enable;
 
 				div |= ((long)ioregs[0x14 + 5*chn] & 7) << 8;
 				gbhw_ch[chn].div_tc = 2048 - div;
@@ -340,14 +360,15 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 				    addr == 0xff18 ||
 				    addr == 0xff1d) break;
 
-				if ((addr == 0xff14 ||
-				     addr == 0xff19 ||
-				     addr == 0xff1e) && (val & 0x80) == 0x80) {
-					if (gbhw_ch[chn].len == 0) {
-						if (chn == 2) {
-							gbhw_ch[chn].len = 256;
-						} else {
-							gbhw_ch[chn].len = 64;
+				gbhw_ch[chn].len_enable = (ioregs[0x14 + 5*chn] & 0x40) > 0;
+				if ((val & 0x80) == 0x80) {
+					if (!gbhw_ch[chn].len_gate) {
+						gbhw_ch[chn].len_gate = 1;
+						if (old_len_enable == 1 &&
+						    gbhw_ch[chn].len_enable == 1 &&
+						    (sequence_ctr & 1) == 1) {
+							// Trigger that un-freezes enabled length should clock it
+							sequencer_update_len(chn);
 						}
 					}
 					if (gbhw_ch[chn].master) {
@@ -357,8 +378,13 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 						ch3pos = 0;
 					}
 				}
+				if (old_len_enable == 0 &&
+				    gbhw_ch[chn].len_enable == 1 &&
+				    (sequence_ctr & 1) == 1) {
+					// Enabling in first half of length period should clock length
+					sequencer_update_len(chn);
+				}
 			}
-			gbhw_ch[chn].len_enable = (ioregs[0x14 + 5*chn] & 0x40) > 0;
 
 //			printf(" ch%ld: vol=%02d envd=%ld envspd=%ld duty_ctr=%ld len=%03d len_en=%ld key=%04d gate=%ld%ld\n", chn, gbhw_ch[chn].volume, gbhw_ch[chn].env_dir, gbhw_ch[chn].env_tc, gbhw_ch[chn].duty_ctr, gbhw_ch[chn].len, gbhw_ch[chn].len_enable, gbhw_ch[chn].div_tc, gbhw_ch[chn].leftgate, gbhw_ch[chn].rightgate);
 			break;
@@ -371,7 +397,8 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 			}
 			break;
 		case 0xff1b:
-			gbhw_ch[2].len = 256 - val;
+			gbhw_ch[2].len = val;
+			gbhw_ch[2].len_gate = 1;
 			break;
 		case 0xff1c:
 			{
@@ -387,6 +414,7 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 				long reg = ioregs[0x22];
 				long shift = reg >> 4;
 				long rate = reg & 7;
+				long old_len_enable = gbhw_ch[chn].len_enable;
 				gbhw_ch[3].div_ctr = 0;
 				gbhw_ch[3].div_tc = 16 << shift;
 				if (reg & 8) {
@@ -398,20 +426,32 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 				}
 				if (rate) gbhw_ch[3].div_tc *= rate;
 				else gbhw_ch[3].div_tc /= 2;
+				gbhw_ch[chn].len_enable = (ioregs[0x23] & 0x40) > 0;
 				if (addr == 0xff22) break;
 
 				if (val & 0x80) {  /* trigger */
 					lfsr = 0xffffffff;
-					if (gbhw_ch[3].len == 0) {
-						gbhw_ch[3].len = 64;
+					if (!gbhw_ch[chn].len_gate) {
+						gbhw_ch[chn].len_gate = 1;
+						if (old_len_enable == 1 &&
+						    gbhw_ch[chn].len_enable == 1 &&
+						    (sequence_ctr & 1) == 1) {
+							// Trigger that un-freezes enabled length should clock it
+							sequencer_update_len(chn);
+						}
 					}
 					if (gbhw_ch[3].master) {
 						gbhw_ch[3].running = 1;
 					}
 				}
+				if (old_len_enable == 0 &&
+				    gbhw_ch[chn].len_enable == 1 &&
+				    (sequence_ctr & 1) == 1) {
+					// Enabling in first half of length period should clock length
+					sequencer_update_len(chn);
+				}
 //				printf(" ch4: vol=%02d envd=%ld envspd=%ld duty_ctr=%ld len=%03d len_en=%ld key=%04d gate=%ld%ld\n", gbhw_ch[3].volume, gbhw_ch[3].env_dir, gbhw_ch[3].env_ctr, gbhw_ch[3].duty_ctr, gbhw_ch[3].len, gbhw_ch[3].len_enable, gbhw_ch[3].div_tc, gbhw_ch[3].leftgate, gbhw_ch[3].rightgate);
 			}
-			gbhw_ch[chn].len_enable = (ioregs[0x23] & 0x40) > 0;
 			break;
 		case 0xff25:
 			gbhw_ch[0].leftgate = (val & 0x10) > 0;
@@ -517,14 +557,7 @@ static regparm void sequencer_step(void)
 		}
 	}
 	for (i=0; clock_len && i<4; i++) {
-		if (gbhw_ch[i].len > 0 && gbhw_ch[i].len_enable) {
-			gbhw_ch[i].len--;
-			if (gbhw_ch[i].len == 0) {
-				gbhw_ch[i].volume = 0;
-				gbhw_ch[i].env_tc = 0;
-				gbhw_ch[i].running = 0;
-			}
-		}
+		sequencer_update_len(i);
 	}
 	for (i=0; clock_env && i<4; i++) {
 		if (gbhw_ch[i].env_tc) {

@@ -51,6 +51,7 @@ struct gbhw_channel {
 	long sweep_shift;
 	long len;
 	long len_enable;
+	long len_gate;
 	long div_tc;
 	long div_ctr;
 	long duty_tc;
