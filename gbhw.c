@@ -353,6 +353,9 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 					if (gbhw_ch[chn].master) {
 						gbhw_ch[chn].running = 1;
 					}
+					if (addr == 0xff1e) {
+						ch3pos = 0;
+					}
 				}
 			}
 			gbhw_ch[chn].len_enable = (ioregs[0x14 + 5*chn] & 0x40) > 0;
