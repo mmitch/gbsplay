@@ -53,6 +53,7 @@ struct gbhw_channel {
 	long len_enable;
 	long len_gate;
 	long div_tc;
+	long div_tc_shadow;
 	long div_ctr;
 	long duty_tc;
 	long duty_ctr;

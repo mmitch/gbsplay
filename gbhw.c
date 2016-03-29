@@ -268,6 +268,23 @@ static regparm void sequencer_update_len(long chn)
 	}
 }
 
+static regparm long sweep_check_overflow(void)
+{
+	long val = (2048 - gbhw_ch[0].div_tc_shadow) >> gbhw_ch[0].sweep_shift;
+
+	if (gbhw_ch[0].sweep_shift == 0) {
+		return 1;
+	}
+
+	if (!gbhw_ch[0].sweep_dir) {
+		if (gbhw_ch[0].div_tc_shadow <= val) {
+			gbhw_ch[0].running = 0;
+			return 0;
+		}
+	}
+	return 1;
+}
+
 static regparm void io_put(uint32_t addr, uint8_t val)
 {
 	long chn = (addr - 0xff10)/5;
@@ -376,6 +393,10 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 					}
 					if (addr == 0xff1e) {
 						ch3pos = 0;
+					}
+					if (addr == 0xff14) {
+						gbhw_ch[0].div_tc_shadow = gbhw_ch[0].div_tc;
+						sweep_check_overflow();
 					}
 				}
 				if (old_len_enable == 0 &&
@@ -545,13 +566,16 @@ static regparm void sequencer_step(void)
 	if (clock_sweep && gbhw_ch[0].sweep_tc) {
 		gbhw_ch[0].sweep_ctr--;
 		if (gbhw_ch[0].sweep_ctr < 0) {
-			long val = gbhw_ch[0].div_tc >> gbhw_ch[0].sweep_shift;
+			long val = (2048 - gbhw_ch[0].div_tc_shadow) >> gbhw_ch[0].sweep_shift;
 
 			gbhw_ch[0].sweep_ctr = gbhw_ch[0].sweep_tc;
-			if (gbhw_ch[0].sweep_dir) {
-				if (gbhw_ch[0].div_tc < 2048 - val) gbhw_ch[0].div_tc += val;
-			} else {
-				if (gbhw_ch[0].div_tc > val) gbhw_ch[0].div_tc -= val;
+			if (sweep_check_overflow()) {
+				if (gbhw_ch[0].sweep_dir) {
+					gbhw_ch[0].div_tc_shadow += val;
+				} else {
+					gbhw_ch[0].div_tc_shadow -= val;
+				}
+				gbhw_ch[0].div_tc = gbhw_ch[0].div_tc_shadow;
 			}
 			gbhw_ch[0].duty_tc = gbhw_ch[0].div_tc*gbhw_ch[0].duty_ctr/8;
 		}
