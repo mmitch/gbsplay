@@ -168,6 +168,8 @@ static regparm uint32_t io_get(uint32_t addr)
 	case 0xff07:  // TAC
 	case 0xff0f:  // IF
 		return ioregs[addr & 0x7f];
+	case 0xff44: /* LCD Y-coordinate */
+		return (sum_cycles / 456) % 154;
 	case 0xff70:  // CGB ram bank switch
 		WARN_ONCE("ioread from SVBK (CGB mode) ignored.\n");
 		return 0xff;
@@ -598,12 +600,14 @@ static regparm void sequencer_step(void)
 			gbhw_ch[i].env_ctr--;
 			if (gbhw_ch[i].env_ctr <=0 ) {
 				gbhw_ch[i].env_ctr = gbhw_ch[i].env_tc;
-				if (!gbhw_ch[i].env_dir) {
-					if (gbhw_ch[i].volume > 0)
-						gbhw_ch[i].volume--;
-				} else {
-					if (gbhw_ch[i].volume < 15)
-					gbhw_ch[i].volume++;
+				if (gbhw_ch[i].running) {
+					if (!gbhw_ch[i].env_dir) {
+						if (gbhw_ch[i].volume > 0)
+							gbhw_ch[i].volume--;
+					} else {
+						if (gbhw_ch[i].volume < 15)
+						gbhw_ch[i].volume++;
+					}
 				}
 			}
 		}
