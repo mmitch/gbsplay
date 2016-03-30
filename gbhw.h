@@ -70,6 +70,7 @@ regparm long gbhw_setfilter(const char *type);
 regparm void gbhw_setrate(long rate);
 regparm void gbhw_setbuffer(/*@dependent@*/ struct gbhw_buffer *buffer);
 regparm void gbhw_init(uint8_t *rombuf, uint32_t size);
+regparm void gbhw_enable_bootrom(const uint8_t *rombuf);
 regparm void gbhw_pause(long new_pause);
 regparm void gbhw_master_fade(long speed, long dstvol);
 regparm void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax);

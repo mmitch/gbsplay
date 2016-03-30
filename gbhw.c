@@ -54,6 +54,8 @@ static const uint8_t ioregs_initdata[sizeof(ioregs)] = {
 	/* 0x30 */ 0xac, 0xdd, 0xda, 0x48, 0x36, 0x02, 0xcf, 0x16, 0x2c, 0x04, 0xe5, 0x2c, 0xac, 0xdd, 0xda, 0x48,
 };
 
+static uint8_t boot_rom[256];
+
 static const char dutylookup[4] = {
 	1, 2, 4, 6
 };
@@ -87,6 +89,7 @@ static const long msec_cycles = GBHW_CLOCK/1000;
 static long sum_cycles;
 
 static long pause_output = 0;
+static long rom_lockout = 1;
 
 static gbhw_callback_fn callback;
 static /*@null@*/ /*@dependent@*/ void *callbackpriv;
@@ -123,6 +126,9 @@ static long ch3_next_nibble = 0;
 
 static regparm uint32_t rom_get(uint32_t addr)
 {
+	if ((addr >> 8) == 0 && rom_lockout == 0) {
+		return boot_rom[addr & 0xff];
+	}
 //	DPRINTF("rom_get(%04x)\n", addr);
 	return rom[addr & 0x3fff];
 }
@@ -525,6 +531,10 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 		case 0xff3e:
 		case 0xff3f:
 		case 0xff50: /* bootrom lockout reg */
+			if (val == 0x01) {
+				rom_lockout = 1;
+			}
+			break;
 		case 0xffff:
 			break;
 		default:
@@ -943,6 +953,12 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 	gbcpu_addmem(0xa0, 0xbf, extram_put, extram_get);
 	gbcpu_addmem(0xc0, 0xfe, intram_put, intram_get);
 	gbcpu_addmem(0xff, 0xff, io_put, io_get);
+}
+
+regparm void gbhw_enable_bootrom(const uint8_t *rombuf)
+{
+	memcpy(boot_rom, rombuf, sizeof(boot_rom));
+	rom_lockout = 0;
 }
 
 /* internal for gbs.c, not exported from libgbs */

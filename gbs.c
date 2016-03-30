@@ -26,6 +26,8 @@
 #define GBS_EXTHDR_MAGIC	"GBSX"
 #define GBR_MAGIC		"GBRF"
 
+const char *boot_rom_file = ".dmg_rom.bin";
+
 regparm long gbs_init(struct gbs *gbs, long subsong)
 {
 	gbhw_init(gbs->rom, gbs->romsize);
@@ -327,10 +329,11 @@ regparm long gbs_write(struct gbs *gbs, char *name, long version)
 
 static regparm struct gbs *gb_open(char *name)
 {
-	long fd, i;
+	long fd, i, name_len;
 	struct stat st;
 	struct gbs *gbs = malloc(sizeof(struct gbs));
-	char *buf;
+	char *buf, *bootname;
+	uint8_t bootrom[256];
 	char *na_str = _("gb / not available");
 
 	memset(gbs, 0, sizeof(struct gbs));
@@ -358,6 +361,18 @@ static regparm struct gbs *gb_open(char *name)
 	gbs->init  = 0x100;
 	gbs->play = gbs->init;
 	gbs->stack = 0xfffe;
+
+	/* For accuracy testing purposes, support boot rom. */
+	name_len = strlen(getenv("HOME")) + strlen(boot_rom_file) + 2;
+	bootname = malloc(name_len);
+	snprintf(bootname, name_len, "%s/%s", getenv("HOME"), boot_rom_file);
+	if ((fd = open(bootname, O_RDONLY)) != -1) {
+		if (read(fd, bootrom, sizeof(bootrom)) == sizeof(bootrom)) {
+			gbhw_enable_bootrom(bootrom);
+			gbs->init = 0;
+		}
+	}
+	free(bootname);
 
 	/* Test if this looks like a valid rom header title */
 	for (i=0x0134; i<0x0143; i++) {
