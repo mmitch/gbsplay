@@ -1955,31 +1955,6 @@ regparm void gbcpu_intr(long vec)
 	REGS16_W(gbcpu_regs, PC, vec);
 }
 
-static regparm void blargg_debug(void)
-{
-	long i;
-
-	/* Blargg GB debug output signature. */
-	if (mem_get(0xa001) != 0xde ||
-	    mem_get(0xa002) != 0xb0 ||
-	    mem_get(0xa003) != 0x61) {
-		return;
-	}
-
-	fprintf(stderr, "\nBlargg debug output:\n");
-
-	for (i = 0xa004; i < 0xb000; i++) {
-		uint8_t c = mem_get(i);
-		if (c == 0 || c >= 128) {
-			return;
-		}
-		if (c < 32 && c != 10 && c != 13) {
-			return;
-		}
-		fputc(c, stderr);
-	}
-}
-
 regparm long gbcpu_step(void)
 {
 	uint8_t op;
@@ -1999,11 +1974,6 @@ regparm long gbcpu_step(void)
 			gbcpu_if = 1;
 		}
 		return gbcpu_cycles;
-	}
-	if (gbcpu_halted == 1 && gbcpu_if == 0) {
-		fprintf(stderr, "CPU locked up (halt with interrupts disabled).\n");
-		gbcpu_stopped = 1;
-		blargg_debug();
 	}
 	if (gbcpu_stopped) return -1;
 	return 16;

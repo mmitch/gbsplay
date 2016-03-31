@@ -78,6 +78,7 @@ static long master_dstvol;
 static long sample_rate;
 static long update_level = 0;
 static long sequence_ctr = 0;
+static long halted_noirq_cycles = 0;
 
 static const long vblanktc = 70256; /* ~59.7 Hz (vblankctr)*/
 static long vblankctr = 70256;
@@ -946,6 +947,7 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 	}
 
 	sum_cycles = 0;
+	halted_noirq_cycles = 0;
 	ch3pos = 0;
 	ch3_next_nibble = 0;
 	last_l_value = 0;
@@ -988,16 +990,46 @@ regparm void gbhw_check_if(void)
 	uint8_t vec = 0x40;
 	if (!gbcpu_if) {
 		/* interrupts disabled */
+		if (ioregs[REG_IF] & ioregs[REG_IE]) {
+			/* but will still exit halt */
+			gbcpu_halted = 0;
+		}
 		return;
 	}
 	while (mask <= 0x10) {
 		if (ioregs[REG_IF] & ioregs[REG_IE] & mask) {
 			ioregs[REG_IF] &= ~mask;
+			gbcpu_halted = 0;
 			gbcpu_intr(vec);
 			break;
 		}
 		vec += 0x08;
 		mask <<= 1;
+	}
+}
+
+static regparm void blargg_debug(void)
+{
+	long i;
+
+	/* Blargg GB debug output signature. */
+	if (gbcpu_mem_get(0xa001) != 0xde ||
+	    gbcpu_mem_get(0xa002) != 0xb0 ||
+	    gbcpu_mem_get(0xa003) != 0x61) {
+		return;
+	}
+
+	fprintf(stderr, "\nBlargg debug output:\n");
+
+	for (i = 0xa004; i < 0xb000; i++) {
+		uint8_t c = gbcpu_mem_get(i);
+		if (c == 0 || c >= 128) {
+			return;
+		}
+		if (c < 32 && c != 10 && c != 13) {
+			return;
+		}
+		fputc(c, stderr);
 	}
 }
 
@@ -1028,6 +1060,18 @@ regparm long gbhw_step(long time_to_work)
 			long step;
 			gbhw_check_if();
 			step = gbcpu_step();
+			if (gbcpu_halted) {
+				halted_noirq_cycles += step;
+				if (gbcpu_if == 0 &&
+				    (ioregs[REG_IE] == 0 ||
+				     halted_noirq_cycles > GBHW_CLOCK/10)) {
+					fprintf(stderr, "CPU locked up (halt with interrupts disabled).\n");
+					blargg_debug();
+					return -1;
+				}
+			} else {
+				halted_noirq_cycles = 0;
+			}
 			if (step < 0) return step;
 			cycles += step;
 			sum_cycles += step;
