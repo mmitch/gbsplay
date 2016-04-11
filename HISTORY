@@ -2,6 +2,53 @@
 gbsplay HISTORY
 
 
+2016/xx/xx  -  unreleased
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Bugfixes:
+
+- gbsplay:
+  - cpu emulation fixes:
+    - RLCA/RLA/RRCA/RRA did not set ZF
+    - fix botched SBC zero flag handling
+    - fix slight bug in ADC/SBC
+    - fix INC/DEC SP, CP A and half-carry flag in DEC
+    - fix PUSH/POP AF
+  - fix trigger handling on noise channel
+  - fix error on midi plugout where a write to the file could occur
+    before the file was opened
+  - fix garbled screen on exit in verbose mode (gbsplay -v)
+  - fix status display: respect channel in left/right total volume
+  - fix impulse generator: generate a header file at compile-time
+
+- build process:
+  - fix test target during parallel builds (make -j)
+
+Removals:
+
+- ditz bug tracker issues removed, use the issue tracker on the github
+  project page instead: https://github.com/mmitch/gbsplay/issues
+
+Enhancements:
+
+- gbsplay:
+  - more accurate sound:
+    - calculate LFSR correctly
+    - play first nibble on DAC-channel from fresh buffer
+    - correct noise channel speed
+    - use more DMG-like DC-offsets
+    - more accurate cpu cycle accounting
+    - remove DC offset from DAC-channel
+  - show register contents in verbose mode (gbsplay -v)
+  - add basic GBR file support
+  - support ugetab int vector extension (gbs spec 1.04u)
+  - add 'iodumper' plugout for testing
+  - add support for blargg-gb-tests debug output
+
+- build process:
+  - add V=1 make option for verbose compiling ("make V=1")
+
+
 2015/08/23  -  0.0.93
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -42,7 +89,7 @@ Enhancements:
   - add PulseAudio plugout
   - add DirectSound plugout
   - plugout_midi: output voices to different channels
-  - plugout_also: support suspend/resume
+  - plugout_alsa: support suspend/resume
 
 - gbsinfo:
   - also display default subsong
