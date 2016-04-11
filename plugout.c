@@ -82,7 +82,7 @@ regparm void plugout_list_plugins(void)
 	}
 
 	for (idx = 0; plugouts[idx] != NULL; idx++) {
-		printf("%s\t- %s\n", plugouts[idx]->name, plugouts[idx]->description);
+		printf("%-8s - %s\n", plugouts[idx]->name, plugouts[idx]->description);
 	}
 	(void)puts("");
 }
