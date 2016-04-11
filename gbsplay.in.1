@@ -1,4 +1,4 @@
-.\" This manpage 2003-2005,2008 (C) by Christian Garbs <mitch@cgarbs.de>
+.\" This manpage 2003-2005,2008,2016 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
 .TH "gbsplay" "1" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
 .SH "NAME"
@@ -23,6 +23,9 @@ Set subsong gap to \fIsubsong\-gap\fR seconds.  Before playing the next subsong 
 .TP
 \fI\-h\fR
 Display short help and exit.
+.TP
+\fI\-H filter\fR
+Set output high-pass type to \fIfilter\fR.  Valid values are \fIdmg\fR (Gameboy Classic), \fIcgb\fR (Gameboy Color) and \fIoff\fR (no filter).  Default value is dmg.
 .TP
 \fI\-l\fR
 Enable loop mode.  When the last subsong is played, playback starts again with the first subsong.  Default is no loop.
