@@ -214,13 +214,10 @@ static regparm void apu_reset(void)
 	long i;
 	int mute_tmp[4];
 
-	for (i=0; i<4; i++) {
+	for (i = 0; i < 4; i++) {
 		mute_tmp[i] = gbhw_ch[i].mute;
 	}
 	memset(gbhw_ch, 0, sizeof(gbhw_ch));
-	for (i=0; i<4; i++) {
-		gbhw_ch[i].mute = mute_tmp[i];
-	}
 	for (i = 0xff10; i < 0xff26; i++) {
 		ioregs[i & 0x7f] = 0;
 	}
@@ -232,6 +229,7 @@ static regparm void apu_reset(void)
 		gbhw_ch[i].div_tc = 1;
 		gbhw_ch[i].master = 1;
 		gbhw_ch[i].running = 0;
+		gbhw_ch[i].mute = mute_tmp[i];
 	}
 	sequence_ctr = 0;
 }
