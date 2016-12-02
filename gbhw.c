@@ -212,7 +212,15 @@ static regparm void rom_put(uint32_t addr, uint8_t val)
 static regparm void apu_reset(void)
 {
 	long i;
+	int mute_tmp[4];
+
+	for (i=0; i<4; i++) {
+		mute_tmp[i] = gbhw_ch[i].mute;
+	}
 	memset(gbhw_ch, 0, sizeof(gbhw_ch));
+	for (i=0; i<4; i++) {
+		gbhw_ch[i].mute = mute_tmp[i];
+	}
 	for (i = 0xff10; i < 0xff26; i++) {
 		ioregs[i & 0x7f] = 0;
 	}
@@ -913,10 +921,7 @@ regparm void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t
 regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 {
 	long i;
-	int mute_tmp[4];
 
-	for (i=0; i<4; i++)
-		mute_tmp[i] = gbhw_ch[i].mute;
 	if (impbuf)
 		gbhw_impbuf_reset(impbuf);
 	rom = rombuf;
@@ -935,9 +940,6 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 	lminval = rminval = INT_MAX;
 	lmaxval = rmaxval = INT_MIN;
 	apu_reset();
-	for (i=0; i<4; i++) {
-		gbhw_ch[i].mute = mute_tmp[i];
-	}
 	memset(extram, 0, sizeof(extram));
 	memset(intram, 0, sizeof(intram));
 	memset(hiram, 0, sizeof(hiram));
