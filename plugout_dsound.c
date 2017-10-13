@@ -1,8 +1,8 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2005 (C) by Christian Garbs <mitch@cgarbs.de>
- *                  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2005,2017 (C) by Christian Garbs <mitch@cgarbs.de>
+ *                       Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  * Licensed under GNU GPL.
  *
  * header file for DirectSound output under Windows, aquanight <aquanight@gmail.com>
@@ -179,7 +179,7 @@ static int regparm dsound_skip(int subsound)
 	return 0;
 }
 
-static int regparm dsound_pause(int pause_mode)
+static void regparm dsound_pause(int pause_mode)
 {
 	if (pause_mode && dsound_buffer)
 		IDirectSoundBuffer8_Stop(dsound_buffer);

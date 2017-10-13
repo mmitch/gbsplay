@@ -23,7 +23,7 @@ enum plugout_endian {
 
 typedef long    regparm (*plugout_open_fn )(enum plugout_endian endian, long rate);
 typedef int     regparm (*plugout_skip_fn )(int subsong);
-typedef int     regparm (*plugout_pause_fn)(int pause);
+typedef void    regparm (*plugout_pause_fn)(int pause);
 typedef int     regparm (*plugout_io_fn   )(long cycles, uint32_t addr, uint8_t val);
 typedef ssize_t regparm (*plugout_write_fn)(const void *buf, size_t count);
 typedef void    regparm (*plugout_close_fn)(void);
