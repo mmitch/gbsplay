@@ -4,8 +4,8 @@
 #
 # generate config.mk for gbsplay Makefile
 #
-# 2003-2006,2008,2010,2015 (C) by Christian Garbs <mitch@cgarbs.de>
-#                                 Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+# 2003-2006,2008,2010,2015,2017 (C) by Christian Garbs <mitch@cgarbs.de>
+#                                      Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
 # Licensed under GNU GPL.
 #
 
@@ -687,7 +687,7 @@ EOF
     recheck_use alsa
 fi
 
-if [ "$cygwin_build" = yes -a "$use_dsound" != no ]; then
+if [ "$use_dsound" != no ]; then
     remember_use dsound
     check_include dsound.h
     retval1=$?
