@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=gbsplay
+Comment=Gameboy sound player
+Exec=gbsplay %f
+Icon=gbsplay
+Terminal=true
+Type=Application
+Categories=AudioVideo;AudioVideoEditing
+Keywords=gameboy;
+MimeTypes=audio/gbs;
