@@ -308,7 +308,7 @@ static void regparm midi_close(void)
 
 const struct output_plugin plugout_midi = {
 	.name = "midi",
-	.description = "MIDI sound driver",
+	.description = "MIDI file writer",
 	.open = midi_open,
 	.skip = midi_skip,
 	.io = midi_io,
