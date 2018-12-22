@@ -107,6 +107,36 @@ Mute/unmute channel 3.
 .TP
 \fI4\fR
 Mute/unmute channel 4.
+.SH "OUTPUT PLUGINS"
+Output plugins are sometimes called \fIplugouts\fR because that's shorter, so don't be confused.  Not all of the plugins listed here may be available, see `\fIgbsplay -o list\fR'.
+.TP
+\fIalsa\fR
+Use the ALSA sound driver for sound output.
+.TP
+\fIdevdsp\fR
+Use the OSS sound driver for sound output via \fI/dev/dsp\fR.
+.TP
+\fIdsound\fR
+Use the DirectSound sound driver for sound output on Microsoft Windows.
+.TP
+\fIiodumper\fR
+Dump IO calls to the Gameboy sound hardware to stdout.  This reduces the verbosity to 0 (see \fI-q\fR) because stdout is used for the dumped data.
+.TP
+\fImidi\fR
+Write a simple MIDI conversion of the song into a seperate file per subsong.  The files are called \fIgbsplay-%d.mid\fR, where \fI%d\fR is replaced with the number of the subsong.  The files are created in the current working directory and existing files are silently overwritten.
+Only channels 1 to 3 are converted to MIDI, track 4 contains noise data which can't be converted into notes.
+Every GBS channel is exported to a seperate MIDI channel.  When multiple voices share a channel, they will not be separated in the output.
+The conversion is rather basic and more complicated GBS files using tricks and hacks will not be converted properly.
+.TP
+\fInas\fR
+Use the NAS sound driver for sound output to a Network Audio Server.
+.TP
+\fIpulse\fR
+Use the Pulseaudio sound driver for sound output.
+.TP
+\fIstdout\fR
+Dump the raw audio stream to stdout.  This reduces the verbosity to 0 (see \fI-q\fR) because stdout is used for the dumped data.
+The raw audio is always stereo (2 channels), 16 bit signed PCM.  Sample rate and endianess can be set via \fI-E\fR and \fI-r\fR.
 .SH "FILES"
 .TP
 \fI/etc/gbsplayrc\fR
