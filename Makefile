@@ -419,8 +419,8 @@ config.mk: configure
 	@echo DEP $< -o $@
 	$(Q)./depend.sh $< config.mk > $@ || rm -f $@
 
-%.1: %.in.1
+%.1: %.in.1 config.sed
 	sed -f config.sed $< > $@
 
-%.5: %.in.5
+%.5: %.in.5 config.sed
 	sed -f config.sed $< > $@
