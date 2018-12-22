@@ -19,7 +19,7 @@ long rand_long(long max)
 }
 
 void shuffle_long(long *array, long elements)
-/* shuffle an int array in place
+/* shuffle a long array in place
  * Fisher-Yates algorithm, see `perldoc -q shuffle` :-)  */
 {
 	long i, j, temp;
