@@ -87,8 +87,8 @@ docs-dist          := INSTALL CODINGSTYLE TESTSUITE gbsformat.txt
 contribs           := contrib/gbs2ogg.sh contrib/gbsplay.bashcompletion
 examples           := examples/nightmode.gbs examples/gbsplayrc_sample
 
-mans               := gbsplay.1    gbsinfo.1    gbsplayrc.5
-mans_src           := gbsplay.in.1 gbsinfo.in.1 gbsplayrc.in.5
+mans               := man/gbsplay.1    man/gbsinfo.1    man/gbsplayrc.5
+mans_src           := man/gbsplay.in.1 man/gbsinfo.in.1 man/gbsplayrc.in.5
 
 objs_libgbspic     := gbcpu.lo gbhw.lo gbs.lo cfgparser.lo crc32.lo
 objs_libgbs        := gbcpu.o  gbhw.o  gbs.o  cfgparser.o  crc32.o
@@ -276,8 +276,8 @@ install-default:
 	install -d $(mimedir)/packages
 	install -d $(appdir)
 	install -m 755 $(gbsplaybin) $(gbsinfobin) $(bindir)
-	install -m 644 gbsplay.1 gbsinfo.1 $(man1dir)
-	install -m 644 gbsplayrc.5 $(man5dir)
+	install -m 644 man/gbsplay.1 man/gbsinfo.1 $(man1dir)
+	install -m 644 man/gbsplayrc.5 $(man5dir)
 	install -m 644 mime/gbsplay.xml $(mimedir)/packages
 	-update-mime-database $(mimedir)
 	install -m 644 desktop/gbsplay.desktop $(appdir)
@@ -341,7 +341,8 @@ dist:	distclean
 	install -m 644 *.c ./$(DISTDIR)/
 	install -m 644 *.h ./$(DISTDIR)/
 	install -m 644 *.ver ./$(DISTDIR)/
-	install -m 644 $(mans_src) ./$(DISTDIR)/
+	install -d ./$(DISTDIR)/man
+	install -m 644 $(mans_src) ./$(DISTDIR)/man
 	install -m 644 $(docs) $(docs-dist) ./$(DISTDIR)/
 	install -d ./$(DISTDIR)/examples
 	install -m 644 $(examples) ./$(DISTDIR)/examples
