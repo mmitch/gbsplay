@@ -25,6 +25,7 @@ mandir      := $(prefix)/man
 docdir      := $(prefix)/share/doc/gbsplay
 localedir   := $(prefix)/share/locale
 mimedir     := $(prefix)/share/mime
+appdir      := $(prefix)/share/applications
 
 SPLINT := splint
 
@@ -63,6 +64,7 @@ mandir      := $(DESTDIR)$(mandir)
 docdir      := $(DESTDIR)$(docdir)
 localedir   := $(DESTDIR)$(localedir)
 mimedir     := $(DESTDIR)$(mimedir)
+appdir      := $(DESTDIR)$(appdir)
 
 xmmsdir     := $(DESTDIR)$(XMMSPREFIX)$(XMMS_INPUT_PLUGIN_DIR)
 
@@ -272,11 +274,14 @@ install-default:
 	install -d $(docdir)
 	install -d $(exampledir)
 	install -d $(mimedir)/packages
+	install -d $(appdir)
 	install -m 755 $(gbsplaybin) $(gbsinfobin) $(bindir)
 	install -m 644 gbsplay.1 gbsinfo.1 $(man1dir)
 	install -m 644 gbsplayrc.5 $(man5dir)
 	install -m 644 mime/gbsplay.xml $(mimedir)/packages
 	-update-mime-database $(mimedir)
+	install -m 644 desktop/gbsplay.desktop $(appdir)
+	-update-desktop-database $(appdir)
 	install -m 644 $(docs) $(docdir)
 	install -m 644 $(examples) $(exampledir)
 	for i in $(mos); do \
@@ -305,6 +310,9 @@ uninstall-default:
 	rm -f $(mimedir)/packages/gbsplay.xml
 	-update-mime-database $(mimedir)
 	-rmdir -p $(mimedir)/packages
+	rm -f $(appdir)/gbsplay.desktop
+	-update-desktop-database $(appdir)
+	-rmdir -p $(appdir)
 	rm -rf $(exampledir)
 	-rmdir -p $(exampledir)
 	rm -rf $(docdir)
@@ -345,6 +353,8 @@ dist:	distclean
 	install -m 644 .gitignore ./$(DISTDIR)/
 	install -d ./$(DISTDIR)/mime
 	install -m 644 mime/* ./$(DISTDIR)/mime
+	install -d ./$(DISTDIR)/desktop
+	install -m 644 desktop/* ./$(DISTDIR)/desktop
 	tar -cvzf ../$(DISTDIR).tar.gz $(DISTDIR)/ 
 	rm -rf ./$(DISTDIR)
 
