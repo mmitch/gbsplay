@@ -931,7 +931,7 @@ setdefault libdir      "$exec_prefix/lib"
 setdefault mandir      "$prefix/man"
 setdefault docdir      "$prefix/share/doc/$package"
 setdefault localedir   "$prefix/share/locale"
-setdefault mimedir     "$prefix/share/mime/packages"
+setdefault mimedir     "$prefix/share/mime"
 setdefault sysconfdir  "/etc"
 
 setdefault use_sharedlibgbs no

@@ -24,7 +24,7 @@ libdir      := $(exec_prefix)/lib
 mandir      := $(prefix)/man
 docdir      := $(prefix)/share/doc/gbsplay
 localedir   := $(prefix)/share/locale
-mimedir     := $(prefix)/share/mime/packages
+mimedir     := $(prefix)/share/mime
 
 SPLINT := splint
 
@@ -271,11 +271,12 @@ install-default:
 	install -d $(man5dir)
 	install -d $(docdir)
 	install -d $(exampledir)
-	install -d $(mimedir)
+	install -d $(mimedir)/packages
 	install -m 755 $(gbsplaybin) $(gbsinfobin) $(bindir)
 	install -m 644 gbsplay.1 gbsinfo.1 $(man1dir)
 	install -m 644 gbsplayrc.5 $(man5dir)
-	install -m 644 mime/gbsplay.xml $(mimedir)
+	install -m 644 mime/gbsplay.xml $(mimedir)/packages
+	-update-mime-database $(mimedir)
 	install -m 644 $(docs) $(docdir)
 	install -m 644 $(examples) $(exampledir)
 	for i in $(mos); do \
@@ -301,8 +302,9 @@ uninstall-default:
 	-rmdir -p $(man1dir)
 	rm -f $(man5dir)/gbsplayrc.5
 	-rmdir -p $(man5dir)
-	rm -f $(mimedir)/gbsplay.xml
-	-rmdir -p $(mimedir)
+	rm -f $(mimedir)/packages/gbsplay.xml
+	-update-mime-database $(mimedir)
+	-rmdir -p $(mimedir)/packages
 	rm -rf $(exampledir)
 	-rmdir -p $(exampledir)
 	rm -rf $(docdir)
