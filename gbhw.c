@@ -429,7 +429,7 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 		case 0xff1a:
 			gbhw_ch[2].master = (ioregs[0x1a] & 0x80) > 0;
 			if (!gbhw_ch[2].master) {
-				gbhw_ch[chn].running = 0;
+				gbhw_ch[2].running = 0;
 			}
 			break;
 		case 0xff1b:
