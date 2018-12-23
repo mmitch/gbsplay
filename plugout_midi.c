@@ -244,7 +244,6 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 	switch (addr) {
 	case 0xff12:
 	case 0xff17:
-	case 0xff21:
 		volume[chan] = 8 * (val >> 4);
 		break;
 	case 0xff13:
