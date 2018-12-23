@@ -7,4 +7,4 @@ Terminal=true
 Type=Application
 Categories=AudioVideo;AudioVideoEditing
 Keywords=gameboy;
-MimeTypes=audio/gbs;
+MimeTypes=audio/prs.gbs;
