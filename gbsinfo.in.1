@@ -1,29 +1,34 @@
-.\" This manpage 2003-2005 (C) by Christian Garbs <mitch@cgarbs.de>
+.\" This manpage 2003-2005,2018 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
-.TH "gbsinfo" "1" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
+.TH "GBSINFO" "1" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
 .SH "NAME"
-.LP
-\fBgbsinfo\fR \- display Gameboy sound file information
+gbsinfo \- display Gameboy sound file information
 .SH "SYNOPSIS"
-\fBgbsinfo\fR [\fI-h\fR|\fI-V\fR] \fIgbs\-file\fR
+.B gbsinfo
+.RB [ -h | -V ]
+.I gbs\-file
 .SH "DESCRIPTION"
-gbsinfo displays information about a Gameboy module dump (.GBS format).
+gbsinfo displays information about a Gameboy module dump
+(.GBS format).
 .SH "OPTIONS"
 .TP
-\fI\-h\fR
+.B \-h
 Display short help and exit.
 .TP
-\fI\-V\fR
+.B \-V
 Display version number and exit.
-.SH "PARAMETERS"
 .TP
-\fIgbs\-file\fR
-The sound file to read.  Must be in uncompressed .GBS format.
-.SH "SEE ALSO"
-\fIgbsplay\fR(1)
-.SH "BUG REPORTS"
-If you encounter bugs, please report them via \fIhttps://github.com/mmitch/gbsplay/issues\fR or write to <\fIgbsplay-dev@lists.uguu.de\fR>.
-.SH "AUTHOR"
-gbsinfo was written by Tobias Diedrich <\fIranma+gbsplay@tdiedrich.de\fR> (with contributions from others, see README).
+.I gbs\-file
+The sound file to read.
+Must be in uncompressed .GBS format.
+.SH "BUGS"
+If you encounter bugs, please report them via
+.I https://github.com/mmitch/gbsplay/issues
+or write to <\fIgbsplay\-dev@lists.uguu.de\fP>.
+.SH "AUTHORS"
+gbsinfo was written by Tobias Diedrich <\fIranma+gbsplay@tdiedrich.de\fP>
+(with contributions from others, see README).
 .SH "COPYRIGHT"
 gbsinfo is licensed under GNU GPL.
+.SH "SEE ALSO"
+.BR gbsplay (1)

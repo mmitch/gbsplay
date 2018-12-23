@@ -1,57 +1,120 @@
-.\" This manpage 2003-2005 (C) by Christian Garbs <mitch@cgarbs.de>
+.\" This manpage 2003-2005,2018 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
-.TH "gbsplayrc" "5" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
+.TH "GBSPLAYRC" "5" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
 .SH "NAME"
-.LP
-\fBgbsplayrc\fR \- Gameboy sound player configuration file
+gbsplayrc \- Gameboy sound player configuration file
 .SH "DESCRIPTION"
-\fI/etc/gbsplayrc\fR and \fI~/\.gbsplayrc\fR are used by gbsplay(1).
+This manpage describes the configuration file format of
+.BR gbsplay (1).
 .SH "SYNTAX"
-Comments are introduced by hash marks.  A comment continues to the end of the line.  Whitespace, including empty lines, is ignored.  Option values follow the option name and an equal sign.  Valid option value types are:
-.IP Boolean
-An integer number in decimal. 0 is considered \fIfalse\fR, everything else is \fItrue\fR.
-.IP Endian
-A single character denoting the endianness. n == native endian, l == little endian and b == big endian.
-.IP Integer
+A configuration file is a text file that may contain options for
+.BR gbsplay (1)
+as well as comments.
+.PP
+Comments are introduced by a hash mark ("\fB#\fP").
+A comment continues to the end of the line.
+.PP
+Whitespace, including empty lines, is ignored.
+.PP
+An option is set by giving the option name,
+followed by an equal sign ("\fB=\fP") and the option value.
+.SS "Option value types"
+Option values can be of these types:
+.TP
+.B Boolean
 An integer number in decimal.
-.IP Plugin
-The name of an output plugin.  Run \fIgbsplay \-o list\fR to get a list of all available output plugins.
+\fB0\fP is considered \fIfalse\fP, everything else is \fItrue\fP.
+.TP
+.B Endian
+A single character denoting the endianness:
+.RS
+.IP \fBn\fP
+native endian
+.IP \fBl\fP
+little endian
+.IP \fBb\fP
+big endian
+.RE
+.TP
+.B Integer
+An integer number in decimal.
+.TP
+.B Plugin
+The name of an output plugin.
+Run `\fIgbsplay\ \-o\ list\fP' to get a list of all available output plugins.
 .SH "OPTIONS"
-.IP "endian = \fIEndian\fR"
-The output endianness.
-.IP "fadeout = \fIInteger\fR"
-The fadeout time in seconds.  Instead of cutting of the subsong hard, do a soft fadeout.
-.IP "loop = \fIBoolean\fR"
-In loop mode the playback will restart from the beginning after the last subsong.
-.IP "output_plugin = \fIPlugin\fR"
-The sound output plugin to be used.
-.IP "rate = \fIInteger\fR"
-The samplerate to be used.
-.IP "refresh_delay = \fIInteger\fR"
-Set the refresh delay in milliseconds.  Larger values will lower CPU usage, but things as subsong changes, fadeouts, reactions to keypresses and the on\-screen display will be delayed.
-.IP "silence_timeout = \fIInteger\fR"
-The silence timeout in seconds.  When a subsong contains silence for the given
-time, the player will skip to the next subsong.
-.IP "subsong_gap = \fIInteger\fR"
-The subsong gap in seconds.  Before playing the next subsong after the subsong timeout, play \fIsubsong_gap\fR seconds of silence.
-.IP "subsong_timeout = \fIInteger\fR"
-The subsong timeout in seconds.  When a subsong has been played for the given
-time, the player will skip to the next subsong.  A timeout of 0 seconds disables automatic subsong changes.
-.IP "verbosity = \fIInteger\fR"
-Sets the verbosity level (default: 3). A value of 0 means no messages on stdout.
+.TP
+.BR endian " = " \fIEndian\fP
+Set the output endianness.
+.TP
+.BR fadeout " = " \fIInteger\fP
+Set the fadeout time in seconds.
+Instead of cutting the subsong off hard, do a soft fadeout.
+.TP
+.BR loop " = " \fIBoolean\fP
+Enable or disable loop mode.
+In loop mode the playback will restart from the beginning
+after the last subsong has been played.
+.TP
+.BR output_plugin " = " \fIPlugin\fP
+Set the sound output plugin.
+.TP
+.BR rate " = " \fIInteger\fP
+Set the samplerate in Hz.
+.TP
+.BR refresh_delay " = " \fIInteger\fP
+Set the refresh delay in milliseconds.
+Larger values will lower CPU usage, but things as subsong changes,
+fadeouts, reactions to keypresses and the on\-screen display
+will be delayed.
+.TP
+.BR silence_timeout " = " \fIInteger\fP
+Set the silence timeout in seconds.
+When a subsong contains silence for the given time,
+the player will skip to the next subsong.
+.TP
+.BR subsong_gap " = " \fIInteger\fP
+Set the subsong gap in seconds.
+Before playing the next subsong after the subsong timeout,
+\fIsubsong\-gap\fP seconds of silence will be played.
+.TP
+.BR subsong_timeout " = " \fIInteger\fP
+Set the subsong timeout in seconds.
+When a subsong has been played for the given time,
+the player will skip to the next subsong.
+A timeout of 0 seconds disables automatic subsong changes.
+.TP
+.BR verbosity " = " \fIInteger\fP
+Set the verbosity level (default: 3).
+A value of 0 means no messages on stdout.
 .SH "FILES"
 .TP
-\fI/etc/gbsplayrc\fR
+.I /etc/gbsplayrc
 Default location of the global configuration file.
 .TP
-\fI~/\.gbsplayrc\fR
+.I ~/.gbsplayrc
 User configuration file.
-.SH "SEE ALSO"
-\fIgbsplay\fR(1),
-\fIgbsinfo\fR(1)
-.SH "BUG REPORTS"
-If you encounter bugs, please report them via \fIhttps://github.com/mmitch/gbsplay/issues\fR or write to <\fIgbsplay-dev@lists.uguu.de\fR>.
-.SH "AUTHOR"
-gbsplay was written by Tobias Diedrich <\fIranma+gbsplay@tdiedrich.de\fR> (with contributions from others, see README).
+.SH "BUGS"
+If you encounter bugs, please report them via
+.I https://github.com/mmitch/gbsplay/issues
+or write to <\fIgbsplay\-dev@lists.uguu.de\fP>.
+.SH "EXAMPLE"
+A simple configuration file might look like this:
+.PP
+.nf
+.RS
+# select NAS output plugin and play subsongs for at most 5 minutes
+output_plugin = nas
+subsong_timeout = 300
+.RE
+.fi
+.SH "AUTHORS"
+.B gbsplay
+was written by Tobias Diedrich <\fIranma+gbsplay@tdiedrich.de\fP>
+(with contributions from others, see README).
 .SH "COPYRIGHT"
-gbsplay is licensed under GNU GPL.
+.B gbsplay
+is licensed under GNU GPL.
+.SH "SEE ALSO"
+.BR gbsplay (1),
+.BR gbsinfo (1)
