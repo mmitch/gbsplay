@@ -383,8 +383,16 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 
 static void regparm midi_close(void)
 {
-	if (file)
-		midi_close_track();
+	int chan;
+	
+	if (!file)
+		return;
+
+	for (chan = 0; chan < 4; chan++)
+		if (note_off(cycles_prev + 1, chan))
+			return;
+	
+	midi_close_track();
 }
 
 const struct output_plugin plugout_midi = {
