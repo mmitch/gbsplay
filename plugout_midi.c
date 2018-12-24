@@ -234,6 +234,8 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 	static long div[4] = {0, 0, 0, 0};
 	static long note[4] = {0, 0, 0, 0};
 	static int volume[4] = {0, 0, 0, 0};
+	static int running[4] = {0, 0, 0, 0};
+	static int master[4] = {0, 0, 0, 0};
 	int new_note;
 
 	long chan = (addr - 0xff10) / 5;
@@ -245,6 +247,14 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 	case 0xff12:
 	case 0xff17:
 		volume[chan] = 8 * (val >> 4);
+		master[chan] = (val & 0xf8) != 0;
+		if (!master[chan] && running[chan]) {
+			/* DAC turned off, disable channel */
+			if (running[chan] && note[chan])
+				if (note_off(cycles, chan, note[chan]))
+					return 1;
+			running[chan] = 0;
+		}
 		break;
 	case 0xff13:
 	case 0xff18:
@@ -261,8 +271,8 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 		new_note = NOTE(2048 - div[chan]) + 21;
 
 		/* Channel start trigger */
-		if (val & 0x80) {
-			if (note[chan]) {
+		if ((val & 0x80) == 0x80) {
+			if (running[chan] && note[chan]) {
 				if (note_off(cycles, chan, note[chan]))
 					return 1;
 			}
@@ -270,26 +280,30 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 			if (new_note < 0 || new_note >= 0x80)
 				break;
 
-			if (note_on(cycles, chan, new_note, volume[chan]))
-				return 1;
+			if (master[chan]) {
+				if (note_on(cycles, chan, new_note, volume[chan]))
+					return 1;
+				running[chan] = 1;
+			}
 			note[chan] = new_note;
 		} else {
-			if (note_off(cycles, chan, note[chan]))
-				return 1;
-			note[chan] = 0;
+			if (running[chan]) {
+				if (note_off(cycles, chan, note[chan]))
+					return 1;
+				running[chan] = 0;
+			}
 		}
 
 		break;
 	case 0xff1a:
-#if 0
-		if (val) {
-			if (note_on(cycles, 2, note[2], volume[2]))
-				return 1;
-		} else {
-			if (note_off(cycles, 2, note[2]))
-				return 1;
+		master[2] = (val & 0x80) == 0x80;
+		if (!master[2] && running[2]) {
+			/* DAC turned off, disable channel */
+			if (running[2] && note[chan])
+				if (note_off(cycles, 2, note[2]))
+					return 1;
+			running[2] = 0;
 		}
-#endif
 		break;
 	case 0xff1c:
 		volume[2] = 32 * ((4 - (val >> 5)) & 3);
