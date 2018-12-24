@@ -290,12 +290,6 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 					return 1;
 				running[chan] = 1;
 			}
-		} else {
-			if (running[chan]) {
-				if (note_off(cycles, chan))
-					return 1;
-				running[chan] = 0;
-			}
 		}
 
 		break;
