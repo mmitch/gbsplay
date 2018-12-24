@@ -364,6 +364,18 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 				return 1;
 		}
 		break;
+	case 0xff26:
+		if ((val & 0x80) == 0) {
+			for (chan = 0; chan < 4; chan++) {
+				div[chan] = 0;
+				volume[chan] = 0;
+				running[chan] = 0;
+				master[chan] = 1;
+				if (note_off(cycles, 2))
+					return 1;
+			}
+		}
+		break;
 	}
 
 	return 0;
