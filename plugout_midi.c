@@ -282,6 +282,23 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 	case 0xff1d:
 		div[chan] &= 0xff00;
 		div[chan] |= val;
+
+		if (running[chan]) {
+			new_note = NOTE(2048 - div[chan]) + 21;
+
+			if (new_note != note[chan]) {
+				/* portamento: retrigger with new note */
+				if (note_off(cycles, chan))
+					return 1;
+
+				if (new_note < 0 || new_note >= 0x80)
+					break;
+
+				if (note_on(cycles, chan, new_note, volume[chan]))
+					return 1;
+			}
+		}
+
 		break;
 	case 0xff14:
 	case 0xff19:
@@ -303,6 +320,20 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 				if (note_on(cycles, chan, new_note, volume[chan]))
 					return 1;
 				running[chan] = 1;
+			}
+		} else {
+			if (running[chan]) {
+				if (new_note != note[chan]) {
+					/* portamento: retrigger with new note */
+					if (note_off(cycles, chan))
+						return 1;
+
+					if (new_note < 0 || new_note >= 0x80)
+						break;
+
+					if (note_on(cycles, chan, new_note, volume[chan]))
+						return 1;
+				}
 			}
 		}
 
