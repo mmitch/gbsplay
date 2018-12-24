@@ -39,6 +39,8 @@ static long track_length_offset;
 
 static long cycles_prev = 0;
 
+static int note[4] = {0, 0, 0, 0};
+
 static int midi_write_u32(uint32_t x)
 {
 	uint8_t s[4];
@@ -201,38 +203,44 @@ static int regparm midi_skip(int subsong)
 	return midi_open_track(subsong);
 }
 
-static int note_on(long cycles, int channel, int note, int velocity)
+static int note_on(long cycles, int channel, int new_note, int velocity)
 {
 	uint8_t event[3];
 
 	event[0] = 0x90 | channel;
-	event[1] = note;
+	event[1] = new_note;
 	event[2] = velocity;
 
 	if (midi_write_event(cycles, event, 3))
 		return 1;
 
+	note[channel] = new_note;
+
 	return 0;
 }
 
-static int note_off(long cycles, int channel, int note)
+static int note_off(long cycles, int channel)
 {
 	uint8_t event[3];
 
+	if (!note[channel])
+		return 0;
+
 	event[0] = 0x80 | channel;
-	event[1] = note;
+	event[1] = note[channel];
 	event[2] = 0;
 
 	if (midi_write_event(cycles, event, 3))
 		return 1;
 
+	note[channel] = 0;
+	
 	return 0;
 }
 
 static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 {
 	static long div[4] = {0, 0, 0, 0};
-	static long note[4] = {0, 0, 0, 0};
 	static int volume[4] = {0, 0, 0, 0};
 	static int running[4] = {0, 0, 0, 0};
 	static int master[4] = {0, 0, 0, 0};
@@ -250,9 +258,8 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 		master[chan] = (val & 0xf8) != 0;
 		if (!master[chan] && running[chan]) {
 			/* DAC turned off, disable channel */
-			if (running[chan] && note[chan])
-				if (note_off(cycles, chan, note[chan]))
-					return 1;
+			if (note_off(cycles, chan))
+				return 1;
 			running[chan] = 0;
 		}
 		break;
@@ -272,10 +279,8 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 
 		/* Channel start trigger */
 		if ((val & 0x80) == 0x80) {
-			if (running[chan] && note[chan]) {
-				if (note_off(cycles, chan, note[chan]))
-					return 1;
-			}
+			if (note_off(cycles, chan))
+				return 1;
 
 			if (new_note < 0 || new_note >= 0x80)
 				break;
@@ -285,10 +290,9 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 					return 1;
 				running[chan] = 1;
 			}
-			note[chan] = new_note;
 		} else {
 			if (running[chan]) {
-				if (note_off(cycles, chan, note[chan]))
+				if (note_off(cycles, chan))
 					return 1;
 				running[chan] = 0;
 			}
@@ -299,9 +303,8 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 		master[2] = (val & 0x80) == 0x80;
 		if (!master[2] && running[2]) {
 			/* DAC turned off, disable channel */
-			if (running[2] && note[chan])
-				if (note_off(cycles, 2, note[2]))
-					return 1;
+			if (note_off(cycles, 2))
+				return 1;
 			running[2] = 0;
 		}
 		break;
