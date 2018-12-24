@@ -262,6 +262,20 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 				return 1;
 			running[chan] = 0;
 		}
+		if (volume[chan]) {
+			/* volume set to >0, restart current note */
+			if (running[chan] && !note[chan]) {
+				new_note = NOTE(2048 - div[chan]) + 21;
+				if (new_note < 0 || new_note >= 0x80)
+					break;
+				if (note_on(cycles, chan, new_note, volume[chan]))
+					return 1;
+			}
+		} else {
+			/* volume set to 0, stop note (if any) */
+			if (note_off(cycles, chan))
+				return 1;
+		}
 		break;
 	case 0xff13:
 	case 0xff18:
@@ -304,6 +318,20 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 		break;
 	case 0xff1c:
 		volume[2] = 32 * ((4 - (val >> 5)) & 3);
+		if (volume[2]) {
+			/* volume set to >0, restart current note */
+			if (running[2] && !note[2]) {
+				new_note = NOTE(2048 - div[chan]) + 21;
+				if (new_note < 0 || new_note >= 0x80)
+					break;
+				if (note_on(cycles, 2, new_note, volume[2]))
+					return 1;
+			}
+		} else {
+			/* volume set to 0, stop note (if any) */
+			if (note_off(cycles, 2))
+				return 1;
+		}
 		break;
 	}
 
