@@ -5,7 +5,8 @@
  *
  * MIDI output plugin
  *
- * 2008 (C) by Vegard Nossum
+ * 2008,2018 (C) by Vegard Nossum
+ *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL.
  */
@@ -238,6 +239,20 @@ static int note_off(long cycles, int channel)
 	return 0;
 }
 
+static int pan(long cycles, int channel, int pan)
+{
+	uint8_t event[3];
+
+	event[0] = 0xb0 | channel;
+	event[1] = 0x0a;
+	event[2] = pan;
+
+	if (midi_write_event(cycles, event, 3))
+		return 1;
+
+	return 0;
+}
+
 static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 {
 	static long div[4] = {0, 0, 0, 0};
@@ -363,6 +378,19 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 			if (note_off(cycles, 2))
 				return 1;
 		}
+		break;
+	case 0xff25:
+		for (chan = 0; chan < 4; chan++)
+			switch ((val >> chan) & 0x11) {
+			case 0x10:
+				pan(cycles, chan, 0);
+				break;
+			case 0x01:
+				pan(cycles, chan, 127);
+				break;
+			default:
+				pan(cycles, chan, 64);
+			}
 		break;
 	case 0xff26:
 		if ((val & 0x80) == 0) {
