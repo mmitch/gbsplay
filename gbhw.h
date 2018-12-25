@@ -1,7 +1,7 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2005 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2005,2018 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  * Licensed under GNU GPL.
  */
 
@@ -63,9 +63,11 @@ extern struct gbhw_channel gbhw_ch[4];
 
 typedef regparm void (*gbhw_callback_fn)(/*@temp@*/ struct gbhw_buffer *buf, /*@temp@*/ void *priv);
 typedef regparm void (*gbhw_iocallback_fn)(long cycles, uint32_t addr, uint8_t valu, /*@temp@*/ void *priv);
+typedef regparm void (*gbhw_stepcallback_fn)(const long cycles, const struct gbhw_channel[], /*@temp@*/ void *priv);
 
 regparm void gbhw_setcallback(/*@dependent@*/ gbhw_callback_fn fn, /*@dependent@*/ void *priv);
 regparm void gbhw_setiocallback(/*@dependent@*/ gbhw_iocallback_fn fn, /*@dependent@*/ void *priv);
+regparm void gbhw_setstepcallback(/*@dependent@*/ gbhw_stepcallback_fn fn, /*@dependent@*/ void *priv);
 regparm long gbhw_setfilter(const char *type);
 regparm void gbhw_setrate(long rate);
 regparm void gbhw_setbuffer(/*@dependent@*/ struct gbhw_buffer *buffer);

@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "config.h"
+#include "gbhw.h"
 
 #if PLUGOUT_DSOUND == 1
 #  define PLUGOUT_DEFAULT "dsound"
@@ -25,6 +26,7 @@ typedef long    regparm (*plugout_open_fn )(enum plugout_endian endian, long rat
 typedef int     regparm (*plugout_skip_fn )(int subsong);
 typedef void    regparm (*plugout_pause_fn)(int pause);
 typedef int     regparm (*plugout_io_fn   )(long cycles, uint32_t addr, uint8_t val);
+typedef int     regparm (*plugout_step_fn )(const long cycles, const struct gbhw_channel[]);
 typedef ssize_t regparm (*plugout_write_fn)(const void *buf, size_t count);
 typedef void    regparm (*plugout_close_fn)(void);
 
@@ -38,6 +40,7 @@ struct output_plugin {
 	plugout_skip_fn  skip;
 	plugout_pause_fn pause;
 	plugout_io_fn    io;
+	plugout_step_fn  step;
 	plugout_write_fn write;
 	plugout_close_fn close;
 };

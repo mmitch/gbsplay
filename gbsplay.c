@@ -1,8 +1,8 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2005,2008 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
- *                       Christian Garbs <mitch@cgarbs.de>
+ * 2003-2005,2008,2018 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ *                            Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL.
  */
 
@@ -82,6 +82,7 @@ static plugout_open_fn  sound_open;
 static plugout_skip_fn  sound_skip;
 static plugout_pause_fn sound_pause;
 static plugout_io_fn    sound_io;
+static plugout_step_fn  sound_step;
 static plugout_write_fn sound_write;
 static plugout_close_fn sound_close;
 
@@ -189,6 +190,11 @@ static regparm void swap_endian(struct gbhw_buffer *buf)
 static regparm void iocallback(long cycles, uint32_t addr, uint8_t val, void *priv)
 {
 	sound_io(cycles, addr, val);
+}
+
+static regparm void stepcallback(long cycles, const struct gbhw_channel chan[], void *priv)
+{
+	sound_step(cycles, chan);
 }
 
 static regparm void callback(struct gbhw_buffer *buf, void *priv)
@@ -667,6 +673,7 @@ static regparm void select_plugin(void)
 	sound_open = plugout->open;
 	sound_skip = plugout->skip;
 	sound_io = plugout->io;
+	sound_step = plugout->step;
 	sound_write = plugout->write;
 	sound_close = plugout->close;
 	sound_pause = plugout->pause;
@@ -712,6 +719,8 @@ int main(int argc, char **argv)
 
 	if (sound_io)
 		gbhw_setiocallback(iocallback, NULL);
+	if (sound_step)
+		gbhw_setstepcallback(stepcallback, NULL);
 	if (sound_write)
 		gbhw_setcallback(callback, NULL);
 	gbhw_setrate(rate);
