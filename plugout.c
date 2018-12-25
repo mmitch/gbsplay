@@ -1,8 +1,8 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2005,2013 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
- *                       Christian Garbs <mitch@cgarbs.de>
+ * 2003-2005,2013,2018 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ *                            Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL.
  */
 
@@ -28,6 +28,9 @@ extern const struct output_plugin plugout_iodumper;
 #endif
 #ifdef PLUGOUT_MIDI
 extern const struct output_plugin plugout_midi;
+#endif
+#ifdef PLUGOUT_ALTMIDI
+extern const struct output_plugin plugout_altmidi;
 #endif
 #ifdef PLUGOUT_NAS
 extern const struct output_plugin plugout_nas;
@@ -63,6 +66,9 @@ static output_plugin_const_t plugouts[] = {
 #endif
 #ifdef PLUGOUT_MIDI
 	&plugout_midi,
+#endif
+#ifdef PLUGOUT_ALTMIDI
+	&plugout_altmidi,
 #endif
 #ifdef PLUGOUT_IODUMPER
 	&plugout_iodumper,
