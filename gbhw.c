@@ -1,8 +1,8 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2006,2008 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
- *                       Christian Garbs <mitch@cgarbs.de>
+ * 2003-2006,2008,2018 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ *                            Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL.
  */
 
@@ -99,6 +99,9 @@ static /*@null@*/ /*@only@*/ struct gbhw_buffer *impbuf = NULL;   /* internal im
 
 static gbhw_iocallback_fn iocallback;
 static /*@null@*/ /*@dependent@*/ void *iocallback_priv;
+
+static gbhw_stepcallback_fn stepcallback;
+static /*@null@*/ /*@dependent@*/ void *stepcallback_priv;
 
 #define TAP1_15		0x4000;
 #define TAP2_15		0x2000;
@@ -833,6 +836,12 @@ regparm void gbhw_setiocallback(gbhw_iocallback_fn fn, void *priv)
 	iocallback_priv = priv;
 }
 
+regparm void gbhw_setstepcallback(gbhw_stepcallback_fn fn, void *priv)
+{
+	stepcallback = fn;
+	stepcallback_priv = priv;
+}
+
 static regparm void gbhw_impbuf_reset(struct gbhw_buffer *impbuf)
 {
 	assert(sound_div_tc != 0);
@@ -1070,6 +1079,8 @@ regparm long gbhw_step(long time_to_work)
 			cycles += step;
 			sum_cycles += step;
 			gb_sound(step);
+			if (stepcallback)
+			   stepcallback(sum_cycles, gbhw_ch, stepcallback_priv);
 		}
 
 		if (vblankctr > 0) vblankctr -= cycles;

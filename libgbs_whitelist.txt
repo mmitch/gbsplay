@@ -7,6 +7,7 @@ gbhw_pause
 gbhw_setbuffer
 gbhw_setcallback
 gbhw_setiocallback
+gbhw_setstepcallback
 gbhw_setfilter
 gbhw_setrate
 gbhw_io_peek
