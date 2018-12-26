@@ -165,6 +165,14 @@ see `\fIgbsplay\ -o\ list\fP'.
 .B alsa
 Use the ALSA sound driver for sound output.
 .TP
+.B altmidi
+Alternative implementation of the MIDI output plugin
+(see \fImidi\fP below).
+Should export more accurate note off events
+(the length register is taken into account),
+but generated MIDI files will be more complicated and fine grained
+and probably not suitable for editing or printing a score.
+.TP
 .B devdsp
 Use the OSS sound driver for sound output via \fI/dev/dsp\fP.
 .TP
