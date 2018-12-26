@@ -1,3 +1,4 @@
+k
 .\" This manpage 2003-2005,2008,2016,2018 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL.
 .TH "GBSPLAY" "1" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
@@ -61,8 +62,7 @@ Default value is 44100Hz.
 .BI -R " refresh\-delay"
 Set the refresh delay to \fIrefresh\-delay\fP milliseconds.
 Larger values will lower CPU usage, but things as subsong changes,
-fadeouts, reactions to keypresses and the on\-screen display
-will be delayed.
+fadeouts and reactions to XEvents will be delayed.
 Default value is 33 milliseconds.
 .TP
 .BI -t " subsong\-timeout"
@@ -118,34 +118,6 @@ If not specified or out\-of\-bounds,
 .B gbsplay
 will exit after playing the last subsong,
 unless in loop mode (\fI-l\fP).
-.SH "KEYBOARD CONTROL"
-.B gbsplay
-supports basic keyboard control.
-The following commands are recognized:
-.TP
-.B p
-Skip to the previous subsong.
-.TP
-.B n
-Skip to the next subsong.
-.TP
-.BR q " or " Esc
-Quit \fBgbsplay\fP.
-.TP
-.B Space
-Toggle play/pause.
-.TP
-.B 1
-Mute/unmute channel 1.
-.TP
-.B 2
-Mute/unmute channel 2.
-.TP
-.B 3
-Mute/unmute channel 3.
-.TP
-.B 4
-Mute/unmute channel 4.
 .SH "OUTPUT PLUGINS"
 Output plugins are sometimes called \fIplugouts\fP because that's shorter,
 so don't be confused.
@@ -217,5 +189,6 @@ was written by Tobias Diedrich <\fIranma+gbsplay@tdiedrich.de\fP>
 .B gbsplay
 is licensed under GNU GPL.
 .SH "SEE ALSO"
+.BR gbsplay (1),
 .BR gbsinfo (1),
 .BR gbsplayrc (5)

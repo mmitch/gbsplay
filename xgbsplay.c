@@ -435,47 +435,6 @@ static regparm void parseopts(int *argc, char ***argv)
 	*argv += optind;
 }
 
-static regparm void handleuserinput(struct gbs *gbs)
-{
-	char c;
-
-	if (read(STDIN_FILENO, &c, 1) != -1) {
-		switch (c) {
-		case 'p':
-			gbs->subsong = get_prev_subsong(gbs);
-			while (gbs->subsong < 0) {
-				gbs->subsong += gbs->songs;
-			}
-			gbs_init(gbs, gbs->subsong);
-			if (sound_skip)
-				sound_skip(gbs->subsong);
-			break;
-		case 'n':
-			gbs->subsong = get_next_subsong(gbs);
-			gbs->subsong %= gbs->songs;
-			gbs_init(gbs, gbs->subsong);
-			if (sound_skip)
-				sound_skip(gbs->subsong);
-			break;
-		case 'q':
-		case 27:
-			quit = 1;
-			break;
-		case ' ':
-			pause_mode = !pause_mode;
-			gbhw_pause(pause_mode);
-			if (sound_pause) sound_pause(pause_mode);
-			break;
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-			gbhw_ch[c-'1'].mute ^= 1;
-			break;
-		}
-	}
-}
-
 static regparm void updatetitle(struct gbs *gbs)
 {
 	long time = gbs->ticks / GBHW_CLOCK;
@@ -626,6 +585,44 @@ static void drawbuttons()
 	XFillPolygon(display, window, gc, triangle, 3, Convex, CoordModeOrigin);
 }
 
+static regparm int handlebutton(XButtonEvent *xev, struct gbs *gbs)
+{
+	XWindowAttributes attrs;
+
+	XGetWindowAttributes(display, window, &attrs);
+
+	switch (xev->x * 4 / attrs.width) {
+	case 0: /* prev */
+		gbs->subsong = get_prev_subsong(gbs);
+		while (gbs->subsong < 0) {
+			gbs->subsong += gbs->songs;
+		}
+		gbs_init(gbs, gbs->subsong);
+		if (sound_skip)
+			sound_skip(gbs->subsong);
+		break;
+
+	case 1: /* pause */
+		pause_mode = !pause_mode;
+		gbhw_pause(pause_mode);
+		if (sound_pause) sound_pause(pause_mode);
+		break;
+
+	case 2: /* stop */
+		return 1;
+
+	case 3: /* next */
+		gbs->subsong = get_next_subsong(gbs);
+		gbs->subsong %= gbs->songs;
+		gbs_init(gbs, gbs->subsong);
+		if (sound_skip)
+			sound_skip(gbs->subsong);
+		break;
+	}
+
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	XEvent xev;
@@ -764,6 +761,10 @@ int main(int argc, char **argv)
 				break;
 
 			case ButtonPress:
+				if (handlebutton((XButtonEvent *)&xev, gbs))
+					quit = 1;
+				break;
+
 			case ClientMessage:
 				quit = 1;
 				break;
@@ -771,7 +772,6 @@ int main(int argc, char **argv)
 		}
 
 		updatetitle(gbs);
-		handleuserinput(gbs);
 	}
 
 	XFreeGC(display, gc);
