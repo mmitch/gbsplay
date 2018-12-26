@@ -67,6 +67,8 @@ static char oldstatustext[STATUSTEXT_LENGTH];
 
 static Display *display;
 static Window window;
+static int screen;
+static GC gc;
 
 /* default values */
 static long playmode = PLAYMODE_LINEAR;
@@ -558,9 +560,74 @@ static regparm void select_plugin(void)
 	sound_description = plugout->description;
 }
 
+#define GRID(s,t,i) ((t * i / s))
+
+static void drawbuttons()
+{
+	XWindowAttributes attrs;
+	XSegment line[7];
+	XPoint triangle[3];
+	int i;
+
+	XGetWindowAttributes(display, window, &attrs);
+
+	/* erase */
+	XFillRectangle(display, window, DefaultGC(display, screen),
+		       0, 0, attrs.width, attrs.height);
+
+	/* button boxes */
+	line[0].x1 = 0;
+	line[0].y1 = 0;
+	line[0].x2 = line[0].x2;
+	line[0].y2 = attrs.height - 1;
+
+	for (i = 1; i<5; i++) {
+		line[i].x1 = attrs.width * i / 4 - 1;
+		line[i].y1 = 0;
+		line[i].x2 = line[i].x1;
+		line[i].y2 = attrs.height - 1;
+	}
+
+	line[5].x1 = 0;
+	line[5].y1 = 0;
+	line[5].x2 = attrs.width - 1;
+	line[5].y2 = line[5].y1;
+
+	line[6].x1 = 0;
+	line[6].y1 = attrs.height - 1;
+	line[6].x2 = attrs.width - 1;
+	line[6].y2 = line[6].y1;
+
+	XDrawSegments(display, window, gc, line, 7);
+
+	/* prev */
+	triangle[0].x = GRID(20, 4, attrs.width); triangle[0].y = GRID(5, 1, attrs.height);
+	triangle[1].x = GRID(20, 4, attrs.width); triangle[1].y = GRID(5, 4, attrs.height);
+	triangle[2].x = GRID(20, 1, attrs.width); triangle[2].y = GRID(2, 1, attrs.height);
+	XFillPolygon(display, window, gc, triangle, 3, Convex, CoordModeOrigin);
+
+	/* pause */
+	XFillRectangle(display, window, gc,
+		       GRID(20, 6, attrs.width), GRID(5, 1, attrs.height),
+		       GRID(20, 1, attrs.width), GRID(5, 3, attrs.height));
+	XFillRectangle(display, window, gc,
+		       GRID(20, 8, attrs.width), GRID(5, 1, attrs.height),
+		       GRID(20, 1, attrs.width), GRID(5, 3, attrs.height));
+
+	/* stop */
+	XFillRectangle(display, window, gc,
+		       GRID(20, 11, attrs.width), GRID(5, 1, attrs.height),
+		       GRID(20, 3, attrs.width),  GRID(5, 3, attrs.height));
+
+	/* next */
+	triangle[0].x = GRID(20, 16, attrs.width); triangle[0].y = GRID(5, 1, attrs.height);
+	triangle[1].x = GRID(20, 16, attrs.width); triangle[1].y = GRID(5, 4, attrs.height);
+	triangle[2].x = GRID(20, 19, attrs.width); triangle[2].y = GRID(2, 1, attrs.height);
+	XFillPolygon(display, window, gc, triangle, 3, Convex, CoordModeOrigin);
+}
+
 int main(int argc, char **argv)
 {
-	int screen;
 	XEvent xev;
 	Atom delWindow;
 
@@ -667,9 +734,12 @@ int main(int argc, char **argv)
 	}
 	screen = DefaultScreen(display);
 	window = XCreateSimpleWindow(display, RootWindow(display, screen),
-				     10, 10, 50, 50, 1,
+				     10, 10, 200, 50, 0,
 				     BlackPixel(display, screen),
-				     WhitePixel(display, screen));
+				     BlackPixel(display, screen));
+
+	gc = XCreateGC(display, window, 0, 0);
+	XSetForeground(display, gc, WhitePixel(display, screen));
 
 	delWindow = XInternAtom(display, "WM_DELETE_WINDOW", 0);
 	XSetWMProtocols(display, window, &delWindow, 1);
@@ -684,26 +754,27 @@ int main(int argc, char **argv)
 			break;
 		}
 
-		while (XPending(display))
+		while (XPending(display)) {
 			XNextEvent(display, &xev);
 
-		switch (xev.type) {
+			switch (xev.type) {
 
-		case Expose:
-			XFillRectangle(display, window, DefaultGC(display, screen),
-				       20, 20, 10, 10);
-			break;
+			case Expose:
+				drawbuttons();
+				break;
 
-		case ButtonPress:
-		case ClientMessage:
-			quit = 1;
-			break;
+			case ButtonPress:
+			case ClientMessage:
+				quit = 1;
+				break;
+			}
 		}
 
 		updatetitle(gbs);
 		handleuserinput(gbs);
 	}
 
+	XFreeGC(display, gc);
 	XDestroyWindow(display, window);
 	XCloseDisplay(display);
 
