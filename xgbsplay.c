@@ -16,7 +16,6 @@
 #include <errno.h>
 #include <string.h>
 #include <math.h>
-#include <termios.h>
 #include <signal.h>
 #include <time.h>
 
@@ -50,7 +49,6 @@ static const char vols[5] = " -=#%";
 /* global variables */
 static char *myname;
 static long quit = 0;
-static struct termios ots;
 static long *subsong_playlist;
 static long subsong_playlist_idx = 0;
 static long pause_mode = 0;
@@ -474,24 +472,7 @@ static regparm void updatetitle(struct gbs *gbs)
 void exit_handler(int signum)
 {
 	printf(_("\nCaught signal %d, exiting...\n"), signum);
-	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
 	exit(1);
-}
-
-void stop_handler(int signum)
-{
-	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
-}
-
-void cont_handler(int signum)
-{
-	struct termios ts;
-
-	tcgetattr(STDIN_FILENO, &ts);
-	ots = ts;
-	ts.c_lflag &= ~(ICANON | ECHO | ECHONL);
-	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ts);
-	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
 }
 
 static regparm void select_plugin(void)
@@ -630,7 +611,6 @@ int main(int argc, char **argv)
 
 	struct gbs *gbs;
 	char *usercfg;
-	struct termios ts;
 	struct sigaction sa;
 
 	i18n_init();
@@ -707,20 +687,12 @@ int main(int argc, char **argv)
 	gbs_init(gbs, gbs->subsong);
 	if (sound_skip)
 		sound_skip(gbs->subsong);
-	tcgetattr(STDIN_FILENO, &ts);
-	ots = ts;
-	ts.c_lflag &= ~(ICANON | ECHO | ECHONL);
-	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ts);
 
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = exit_handler;
 	sigaction(SIGTERM, &sa, NULL);
 	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGSEGV, &sa, NULL);
-	sa.sa_handler = stop_handler;
-	sigaction(SIGSTOP, &sa, NULL);
-	sa.sa_handler = cont_handler;
-	sigaction(SIGCONT, &sa, NULL);
 
 	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
 
@@ -777,8 +749,6 @@ int main(int argc, char **argv)
 	XFreeGC(display, gc);
 	XDestroyWindow(display, window);
 	XCloseDisplay(display);
-
-	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
 
 	sound_close();
 
