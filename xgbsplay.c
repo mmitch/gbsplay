@@ -63,6 +63,10 @@ static long refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
 
 #define STATUSTEXT_LENGTH 256
 static char statustext[STATUSTEXT_LENGTH];
+static char oldstatustext[STATUSTEXT_LENGTH];
+
+static Display *display;
+static Window window;
 
 /* default values */
 static long playmode = PLAYMODE_LINEAR;
@@ -470,7 +474,7 @@ static regparm void handleuserinput(struct gbs *gbs)
 	}
 }
 
-static regparm void updatestatus(struct gbs *gbs)
+static regparm void updatetitle(struct gbs *gbs)
 {
 	long time = gbs->ticks / GBHW_CLOCK;
 	long timem = time / 60;
@@ -490,11 +494,16 @@ static regparm void updatestatus(struct gbs *gbs)
 		songtitle=_("Untitled");
 	}
 	snprintf(statustext, STATUSTEXT_LENGTH, /* or use sizeof(statustext) ?? */
-		 "\r\033[A\033[A"
-		 "Song %3d/%3d (%s)\033[K\n"
-		 "%02ld:%02ld/%02ld:%02ld",
-		 gbs->subsong+1, gbs->songs, songtitle,
-		 timem, times, lenm, lens);
+		 "xgbsplay"
+		 " %02ld:%02ld/%02ld:%02ld"
+		 " Song %3d/%3d (%s)",
+		 timem, times, lenm, lens,
+		 gbs->subsong+1, gbs->songs, songtitle);
+
+	if (strncmp(statustext, oldstatustext, STATUSTEXT_LENGTH) != 0) {  /* or use sizeof(statustext) ?? or strcmp() ?? */
+		strncpy(oldstatustext, statustext, STATUSTEXT_LENGTH);
+		XStoreName(display, window, statustext);
+	}
 }
 
 /*
@@ -551,9 +560,7 @@ static regparm void select_plugin(void)
 
 int main(int argc, char **argv)
 {
-	Display *display;
 	int screen;
-	Window window;
 	XEvent xev;
 	Atom delWindow;
 
@@ -693,8 +700,7 @@ int main(int argc, char **argv)
 			break;
 		}
 
-		updatestatus(gbs);
-		puts(statustext);
+		updatetitle(gbs);
 		handleuserinput(gbs);
 	}
 
