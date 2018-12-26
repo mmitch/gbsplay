@@ -54,11 +54,6 @@ Select sound output plugin \fIplugin\fP.
 Select \fBlist\fP to view a list of all available output plugins.
 Default value depends on compilation options.
 .TP
-.B -q
-Be quieter, reduce verbosity.
-Can be applied multiple times.
-Default verbosity is 3.
-.TP
 .BI -r " samplerate"
 Set the samplerate to \fIsamplerate\fP Hz.
 Default value is 44100Hz.
@@ -82,11 +77,6 @@ Set silence timeout to \fIsilence\-timeout\fP seconds.
 When a subsong contains silence for the given time,
 the player will skip to the next subsong.
 Default value is 2 seconds.
-.TP
-.B -v
-Increase verbosity, print more information.
-Can be applied multiple times.
-Default verbosity is 3.
 .TP
 .B -V
 Display version number and exit.
@@ -181,8 +171,6 @@ Use the DirectSound sound driver for sound output on Microsoft Windows.
 .TP
 .B iodumper
 Dump IO calls to the Gameboy sound hardware to stdout.
-This reduces the verbosity to 0 (see \fI-q\fP)
-because stdout is used for the dumped data.
 .TP
 .B midi
 Write a simple MIDI conversion of the song
@@ -208,8 +196,6 @@ Use the Pulseaudio sound driver for sound output.
 .TP
 .B stdout
 Dump the raw audio stream to stdout.
-This reduces the verbosity to 0 (see \fI-q\fP)
-because stdout is used for the dumped data.
 The raw audio is always stereo (2 channels), 16 bit signed PCM.
 Sample rate and endianess can be set via \fI-E\fP and \fI-r\fP.
 .SH "FILES"

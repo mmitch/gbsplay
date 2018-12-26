@@ -59,11 +59,13 @@ unsigned long random_seed;
 
 static long refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
 
+#define STATUSTEXT_LENGTH 256
+static char statustext[STATUSTEXT_LENGTH];
+
 /* default values */
 static long playmode = PLAYMODE_LINEAR;
 static long loopmode = 0;
 static enum plugout_endian endian = PLUGOUT_ENDIAN_NATIVE;
-static long verbosity = 3;
 static long rate = 44100;
 static long silence_timeout = 2;
 static long fadeout = 3;
@@ -71,7 +73,6 @@ static long subsong_gap = 2;
 static long subsong_start = -1;
 static long subsong_stop = -1;
 static long subsong_timeout = 2*60;
-static long redraw = false;
 
 static const char cfgfile[] = ".gbsplayrc";
 
@@ -104,27 +105,9 @@ static const struct cfg_option options[] = {
 	{ "silence_timeout", &silence_timeout, cfg_long },
 	{ "subsong_gap", &subsong_gap, cfg_long },
 	{ "subsong_timeout", &subsong_timeout, cfg_long },
-	{ "verbosity", &verbosity, cfg_long },
 	/* playmode not implemented yet */
 	{ NULL, NULL, NULL }
 };
-
-static regparm long getnote(long div)
-{
-	long n = 0;
-
-	if (div>0) {
-		n = NOTE(div);
-	}
-
-	if (n < 0) {
-		n = 0;
-	} else if (n >= MAXOCTAVE*12) {
-		n = MAXOCTAVE-1;
-	}
-
-	return n;
-}
 
 static regparm void precalc_notes(void)
 {
@@ -142,19 +125,6 @@ static regparm void precalc_notes(void)
 			s[1] = '-';
 		}
 	}
-}
-
-static regparm char *reverse_vol(char *s)
-{
-	static char buf[5];
-	long i;
-
-	for (i=0; i<4; i++) {
-		buf[i] = s[3-i];
-	}
-	buf[4] = 0;
-
-	return buf;
 }
 
 static regparm void precalc_vols(void)
@@ -355,12 +325,10 @@ static regparm void usage(long exitcode)
 		  "  -l        loop mode\n"
 		  "  -o        select output plugin (%s)\n"
 		  "            'list' shows available plugins\n"
-		  "  -q        reduce verbosity\n"
 		  "  -r        set samplerate (%ldHz)\n"
 		  "  -R        set refresh delay (%ld milliseconds)\n"
 		  "  -t        set subsong timeout (%ld seconds)\n"
 		  "  -T        set silence timeout (%ld seconds)\n"
-		  "  -v        increase verbosity\n"
 		  "  -V        print version and exit\n"
 		  "  -z        play subsongs in shuffle mode\n"
 		  "  -Z        play subsongs in random mode (repetitions possible)\n"
@@ -388,7 +356,7 @@ static regparm void parseopts(int *argc, char ***argv)
 {
 	long res;
 	myname = *argv[0];
-	while ((res = getopt(*argc, *argv, "1234c:E:f:g:hH:lo:qr:R:t:T:vVzZ")) != -1) {
+	while ((res = getopt(*argc, *argv, "1234c:E:f:g:hH:lo:r:R:t:T:VzZ")) != -1) {
 		switch (res) {
 		default:
 			usage(1);
@@ -432,9 +400,6 @@ static regparm void parseopts(int *argc, char ***argv)
 		case 'o':
 			sound_name = optarg;
 			break;
-		case 'q':
-			verbosity -= 1;
-			break;
 		case 'r':
 			sscanf(optarg, "%ld", &rate);
 			break;
@@ -446,9 +411,6 @@ static regparm void parseopts(int *argc, char ***argv)
 			break;
 		case 'T':
 			sscanf(optarg, "%ld", &silence_timeout);
-			break;
-		case 'v':
-			verbosity += 1;
 			break;
 		case 'V':
 			version();
@@ -506,68 +468,7 @@ static regparm void handleuserinput(struct gbs *gbs)
 	}
 }
 
-static regparm char *notestring(long ch)
-{
-	long n;
-
-	if (gbhw_ch[ch].mute) return "-M-";
-
-	if (gbhw_ch[ch].volume == 0 ||
-	    gbhw_ch[ch].master == 0 ||
-	    (gbhw_ch[ch].leftgate == 0 &&
-	     gbhw_ch[ch].rightgate == 0)) return "---";
-
-	n = getnote(gbhw_ch[ch].div_tc);
-	if (ch != 3) return &notelookup[4*n];
-	else return "nse";
-}
-
-static regparm long chvol(long ch)
-{
-	long v;
-
-	if (gbhw_ch[ch].mute ||
-	    gbhw_ch[ch].master == 0 ||
-	    (gbhw_ch[ch].leftgate == 0 &&
-	     gbhw_ch[ch].rightgate == 0)) return 0;
-
-	if (ch == 2)
-		v = (3-((gbhw_ch[2].volume+3)&3)) << 2;
-	else v = gbhw_ch[ch].volume;
-
-	return v;
-}
-
-static regparm char *volstring(long v)
-{
-	if (v < 0) v = 0;
-	if (v > 15) v = 15;
-
-	return &vollookup[5*v];
-}
-
-static regparm void printregs(void)
-{
-	long i;
-	for (i=0; i<5*4; i++) {
-		if (i % 5 == 0)
-			printf("CH%ld:", i/5 + 1);
-		printf(" %02x", gbhw_io_peek(0xff10+i));
-		if (i % 5 == 4)
-			printf("\n");
-	}
-	printf("MISC:");
-	for (i+=0x10; i<0x27; i++) {
-		printf(" %02x", gbhw_io_peek(0xff00+i));
-	}
-	printf("\nWAVE: ");
-	for (i=0; i<16; i++) {
-		printf("%02x", gbhw_io_peek(0xff30+i));
-	}
-	printf("\n\033[A\033[A\033[A\033[A\033[A\033[A");
-}
-
-static regparm void printstatus(struct gbs *gbs)
+static regparm void updatestatus(struct gbs *gbs)
 {
 	long time = gbs->ticks / GBHW_CLOCK;
 	long timem = time / 60;
@@ -586,26 +487,12 @@ static regparm void printstatus(struct gbs *gbs)
 	if (!songtitle) {
 		songtitle=_("Untitled");
 	}
-	printf("\r\033[A\033[A"
-	       "Song %3d/%3d (%s)\033[K\n"
-	       "%02ld:%02ld/%02ld:%02ld",
-	       gbs->subsong+1, gbs->songs, songtitle,
-	       timem, times, lenm, lens);
-	if (verbosity>2) {
-		printf("  %s %s  %s %s  %s %s  %s %s  [%s|%s]\n",
-		       notestring(0), volstring(chvol(0)),
-		       notestring(1), volstring(chvol(1)),
-		       notestring(2), volstring(chvol(2)),
-		       notestring(3), volstring(chvol(3)),
-		       reverse_vol(volstring(gbs->lvol/1024)),
-		       volstring(gbs->rvol/1024));
-	} else {
-		puts("");
-	}
-	if (verbosity>3) {
-		printregs();
-	}
-	fflush(stdout);
+	snprintf(statustext, STATUSTEXT_LENGTH, /* or use sizeof(statustext) ?? */
+		 "\r\033[A\033[A"
+		 "Song %3d/%3d (%s)\033[K\n"
+		 "%02ld:%02ld/%02ld:%02ld",
+		 gbs->subsong+1, gbs->songs, songtitle,
+		 timem, times, lenm, lens);
 }
 
 /*
@@ -633,21 +520,6 @@ void cont_handler(int signum)
 	ts.c_lflag &= ~(ICANON | ECHO | ECHONL);
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ts);
 	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
-
-	redraw = true;
-}
-
-static regparm void printinfo(struct gbs *gbs)
-{
-	if (verbosity>0) {
-		gbs_printinfo(gbs, 0);
-		puts(_("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player\n" \
-		         "           [ ] pause/resume   [1-4] mute channel"));
-	}
-	if (verbosity>1) {
-		puts("\n\n"); /* additional newlines for the status display */
-	}
-	redraw = false;
 }
 
 static regparm void select_plugin(void)
@@ -673,10 +545,6 @@ static regparm void select_plugin(void)
 	sound_close = plugout->close;
 	sound_pause = plugout->pause;
 	sound_description = plugout->description;
-
-	if (plugout->flags & PLUGOUT_USES_STDOUT) {
-		verbosity = 0;
-	}
 }
 
 int main(int argc, char **argv)
@@ -760,7 +628,6 @@ int main(int argc, char **argv)
 	gbs_init(gbs, gbs->subsong);
 	if (sound_skip)
 		sound_skip(gbs->subsong);
-	printinfo(gbs);
 	tcgetattr(STDIN_FILENO, &ts);
 	ots = ts;
 	ts.c_lflag &= ~(ICANON | ECHO | ECHONL);
@@ -783,17 +650,13 @@ int main(int argc, char **argv)
 			break;
 		}
 
-		if (redraw) printinfo(gbs);
-		if (verbosity>1) printstatus(gbs);
+		updatestatus(gbs);
+		puts(statustext);
 		handleuserinput(gbs);
 	}
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
 
 	sound_close();
-
-	if (verbosity>3) {
-		printf("\n\n\n\n\n\n");
-	}
 
 	return 0;
 }
