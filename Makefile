@@ -70,6 +70,10 @@ comma := ,
 GBSLIBLDFLAGS := -lm $(subst -pie,,$(subst -Wl$(comma)-pie,,$(EXTRA_LDFLAGS)))
 # Additional ldflags for the gbsplay executable
 GBSPLAYLDFLAGS :=
+# Additional ldflags for the xgbsplay executable
+XGBSPLAYLDFLAGS := -lX11
+
+EXTRA_CLEAN :=
 
 export Q VERBOSE CC HOSTCC BUILDCC GBSCFLAGS GBSLDFLAGS
 
@@ -86,6 +90,7 @@ objs_libgbs        := gbcpu.o  gbhw.o  gbs.o  cfgparser.o  crc32.o
 objs_gbsplay       := gbsplay.o util.o plugout.o terminal.o
 objs_gbsinfo       := gbsinfo.o
 objs_gbsxmms       := gbsxmms.lo
+objs_xgbsplay      := xgbsplay.o util.o plugout.o
 objs_test_gbs      := test_gbs.o
 objs_gen_impulse_h := gen_impulse_h.ho impulsegen.ho
 
@@ -94,34 +99,47 @@ tests              := util.test impulsegen.test
 # gbsplay output plugins
 ifeq ($(plugout_devdsp),yes)
 objs_gbsplay += plugout_devdsp.o
+objs_xgbsplay += plugout_devdsp.o
 endif
 ifeq ($(plugout_alsa),yes)
 objs_gbsplay += plugout_alsa.o
+objs_xgbsplay += plugout_alsa.o
 GBSPLAYLDFLAGS += -lasound $(libaudio_flags)
+XGBSPLAYLDFLAGS += -lasound $(libaudio_flags)
 endif
 ifeq ($(plugout_nas),yes)
 objs_gbsplay += plugout_nas.o
+objs_xgbsplay += plugout_nas.o
 GBSPLAYLDFLAGS += -laudio $(libaudio_flags)
+XGBSPLAYLDFLAGS += -laudio $(libaudio_flags)
 endif
 ifeq ($(plugout_stdout),yes)
 objs_gbsplay += plugout_stdout.o
+objs_xgbsplay += plugout_stdout.o
 endif
 ifeq ($(plugout_midi),yes)
 objs_gbsplay += plugout_midi.o
+objs_xgbsplay += plugout_midi.o
 endif
 ifeq ($(plugout_altmidi),yes)
 objs_gbsplay += plugout_altmidi.o
+objs_xgbsplay += plugout_altmidi.o
 endif
 ifeq ($(plugout_pulse),yes)
 objs_gbsplay += plugout_pulse.o
+objs_xgbsplay += plugout_pulse.o
 GBSPLAYLDFLAGS += -lpulse-simple -lpulse
+XGBSPLAYLDFLAGS += -lpulse-simple -lpulse
 endif
 ifeq ($(plugout_dsound),yes)
 objs_gbsplay += plugout_dsound.o
+objs_xgbsplay += plugout_dsound.o
 GBSPLAYLDFLAGS += -ldsound $(libdsound_flags)
+XGBSPLAYLDFLAGS += -ldsound $(libdsound_flags)
 endif
 ifeq ($(plugout_iodumper),yes)
 objs_gbsplay += plugout_iodumper.o
+objs_xgbsplay += plugout_iodumper.o
 endif
 
 # install contrib files?
@@ -143,6 +161,7 @@ else
 binsuffix         :=
 endif
 gbsplaybin        := gbsplay$(binsuffix)
+xgbsplaybin       := xgbsplay$(binsuffix)
 gbsinfobin        := gbsinfo$(binsuffix)
 test_gbsbin       := test_gbs$(binsuffix)
 gen_impulse_h_bin := gen_impulse_h$(binsuffix)
@@ -217,6 +236,7 @@ ifeq ($(build_xmmsplugin),yes)
 objs += $(objs_libgbspic)
 objs_gbsxmms += libgbspic.a
 endif # build_xmmsplugin
+objs_xgbsplay += libgbs.a
 
 libgbs: libgbs.a
 	touch libgbs
@@ -231,6 +251,16 @@ dsts += gbsplay gbsinfo
 ifeq ($(build_xmmsplugin),yes)
 objs += $(objs_gbsxmms)
 dsts += gbsxmms.so
+endif
+
+ifeq ($(build_xgbsplay),yes)
+objs += $(objs_xgbsplay)
+dsts += xgbsplay
+mans += man/xgbsplay.1
+mans_src += man/xgbsplay.in.1
+EXTRA_INSTALL += install-xgbsplay
+EXTRA_UNINSTALL += uninstall-xgbsplay
+EXTRA_CLEAN += clean-xgbsplay
 endif
 
 # include the rules for each subdir
@@ -253,7 +283,9 @@ distclean: clean
 	find . -regex ".*\.d" -exec rm -f "{}" \;
 	rm -f ./config.mk ./config.h ./config.err ./config.sed
 
-clean:
+clean: clean-default $(EXTRA_CLEAN)
+
+clean-default:
 	find . -regex ".*\.\([aos]\|ho\|lo\|mo\|pot\|test\(\.exe\)?\|so\(\.[0-9]\)?\|gcda\|gcno\|gcov\)" -exec rm -f "{}" \;
 	find . -name "*~" -exec rm -f "{}" \;
 	rm -f libgbs libgbspic libgbs.def libgbs.so.1.ver
@@ -261,6 +293,9 @@ clean:
 	rm -f $(gbsplaybin) $(gbsinfobin)
 	rm -f $(test_gbsbin)
 	rm -f $(gen_impulse_h_bin) impulse.h
+
+clean-xgbsplay:
+	rm -f $(xgbsplaybin)
 
 install: all install-default $(EXTRA_INSTALL)
 
@@ -295,6 +330,14 @@ install-gbsxmms.so:
 	install -d $(xmmsdir)
 	install -m 644 gbsxmms.so $(xmmsdir)/gbsxmms.so
 
+install-xgbsplay:
+	install -d $(bindir)
+	install -d $(man1dir)
+	install -m 755 $(xgbsplaybin) $(bindir)
+	install -m 644 man/xgbsplay.1 $(man1dir)
+	install -m 644 desktop/xgbsplay.desktop $(appdir)
+	-update-desktop-database $(appdir)
+
 uninstall: uninstall-default $(EXTRA_UNINSTALL)
 
 uninstall-default:
@@ -328,6 +371,15 @@ uninstall-contrib:
 uninstall-gbsxmms.so:
 	rm -f $(xmmsdir)/gbsxmms.so
 	-rmdir -p $(xmmsdir)
+
+uninstall-xgbsplay:
+	rm -f $(bindir)/$(xgbsplaybin)
+	rm -f $(man1dir)/xgbsplay.1
+	rm -f $(appdir)/xgbsplay.desktop
+	-update-desktop-database $(appdir)
+	-rmdir -p $(bindir)
+	-rmdir -p $(man1dir)
+	-rmdir -p $(appdir)
 
 dist:	distclean
 	install -d ./$(DISTDIR)
@@ -400,6 +452,9 @@ test_gbs: $(objs_test_gbs) libgbs
 
 gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 	$(BUILDCC) -shared -fpic -Wl,--version-script,$@.ver -o $@ $(objs_gbsxmms) $(GBSLDFLAGS) $(PTHREAD)
+
+xgbsplay: $(objs_xgbsplay) libgbs
+	$(BUILDCC) -o $(xgbsplaybin) $(objs_xgbsplay) $(GBSLDFLAGS) $(XGBSPLAYLDFLAGS) -lm
 
 # rules for suffixes
 
