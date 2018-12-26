@@ -1,8 +1,8 @@
 /*
- * gbsplay is a Gameboy sound player
+ * xgbsplay is an X11 frontend for gbsplay, the Gameboy sound player
  *
- * 2003-2005,2008 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
- *                       Christian Garbs <mitch@cgarbs.de>
+ * 2003-2005,2008,2018 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ *                            Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL.
  */
 
@@ -19,6 +19,8 @@
 #include <termios.h>
 #include <signal.h>
 #include <time.h>
+
+#include <X11/Xlib.h>
 
 #include "gbhw.h"
 #include "gbcpu.h"
@@ -549,6 +551,12 @@ static regparm void select_plugin(void)
 
 int main(int argc, char **argv)
 {
+	Display *display;
+	int screen;
+	Window window;
+	XEvent xev;
+	Atom delWindow;
+
 	struct gbs *gbs;
 	char *usercfg;
 	struct termios ts;
@@ -644,8 +652,43 @@ int main(int argc, char **argv)
 	sigaction(SIGCONT, &sa, NULL);
 
 	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+
+	display = XOpenDisplay(NULL);
+	if (display == NULL) {
+		fprintf(stderr, "Cannot open display\n");
+		exit(1);
+	}
+	screen = DefaultScreen(display);
+	window = XCreateSimpleWindow(display, RootWindow(display, screen),
+				     10, 10, 50, 50, 1,
+				     BlackPixel(display, screen),
+				     WhitePixel(display, screen));
+
+	delWindow = XInternAtom(display, "WM_DELETE_WINDOW", 0);
+	XSetWMProtocols(display, window, &delWindow, 1);
+
+	XSelectInput(display, window, ExposureMask | ButtonPressMask | ButtonReleaseMask);
+
+	XMapWindow(display, window);
+
 	while (!quit) {
 		if (!gbs_step(gbs, refresh_delay)) {
+			quit = 1;
+			break;
+		}
+
+		while (XPending(display))
+			XNextEvent(display, &xev);
+
+		switch (xev.type) {
+
+		case Expose:
+			XFillRectangle(display, window, DefaultGC(display, screen),
+				       20, 20, 10, 10);
+			break;
+
+		case ButtonPress:
+		case ClientMessage:
 			quit = 1;
 			break;
 		}
@@ -654,6 +697,10 @@ int main(int argc, char **argv)
 		puts(statustext);
 		handleuserinput(gbs);
 	}
+
+	XDestroyWindow(display, window);
+	XCloseDisplay(display);
+
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
 
 	sound_close();
