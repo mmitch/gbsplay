@@ -18,6 +18,7 @@
 #include <math.h>
 #include <signal.h>
 #include <time.h>
+#include <libgen.h>
 
 #include <X11/Xlib.h>
 
@@ -62,6 +63,7 @@ static long refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
 #define STATUSTEXT_LENGTH 256
 static char statustext[STATUSTEXT_LENGTH];
 static char oldstatustext[STATUSTEXT_LENGTH];
+static char filename[48];
 
 static Display *display;
 static Window window;
@@ -438,7 +440,6 @@ static regparm void updatetitle(struct gbs *gbs)
 	long time = gbs->ticks / GBHW_CLOCK;
 	long timem = time / 60;
 	long times = time % 60;
-	char *songtitle;
 	long len = gbs->subsong_info[gbs->subsong].len / 1024;
 	long lenm, lens;
 
@@ -448,16 +449,11 @@ static regparm void updatetitle(struct gbs *gbs)
 	lenm = len / 60;
 	lens = len % 60;
 
-	songtitle = gbs->subsong_info[gbs->subsong].title;
-	if (!songtitle) {
-		songtitle=_("Untitled");
-	}
 	snprintf(statustext, STATUSTEXT_LENGTH, /* or use sizeof(statustext) ?? */
-		 "xgbsplay"
-		 " %02ld:%02ld/%02ld:%02ld"
-		 " Song %3d/%3d (%s)",
-		 timem, times, lenm, lens,
-		 gbs->subsong+1, gbs->songs, songtitle);
+		 "xgbsplay %s %d/%d "
+		 "%02ld:%02ld/%02ld:%02ld",
+		 filename, gbs->subsong+1, gbs->songs,
+		 timem, times, lenm, lens);
 
 	if (strncmp(statustext, oldstatustext, STATUSTEXT_LENGTH) != 0) {  /* or use sizeof(statustext) ?? or strcmp() ?? */
 		strncpy(oldstatustext, statustext, STATUSTEXT_LENGTH);
@@ -663,6 +659,8 @@ int main(int argc, char **argv)
 	if (gbs == NULL) {
 		exit(1);
 	}
+	strncpy(filename, basename(argv[0]), sizeof(filename));
+	filename[sizeof(filename) - 1] = '\0';
 
 	/* sanitize commandline values */
 	if (subsong_start < -1) {
