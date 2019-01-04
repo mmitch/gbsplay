@@ -653,9 +653,6 @@ static regparm void gb_flush_buffer(void)
 	long l_smpl, r_smpl;
 	long l_cap, r_cap;
 
-	if (!callback)
-		return;
-
 	assert(soundbuf != NULL);
 	assert(impbuf != NULL);
 
@@ -719,9 +716,6 @@ static regparm void gb_change_level(long l_ofs, long r_ofs)
 	long imp_r = IMPULSE_WIDTH/2;
 	long i;
 	const short *ptr = base_impulse;
-
-	if (!callback)
-		return;
 
 	assert(impbuf != NULL);
 	pos = (long)(impbuf->cycles * SOUND_DIV_MULT / sound_div_tc);
