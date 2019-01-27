@@ -890,6 +890,15 @@ fi
 if cc_has_flag "-Wdeclaration-after-statement"; then
     append_nodupe CFLAGS "-Wdeclaration-after-statement"
 fi
+if cc_has_flag "-Wvla"; then
+    append_nodupe CFLAGS "-Wvla"
+fi
+if cc_has_flag "-Wimplicit-fallthrough"; then
+    append_nodupe CFLAGS "-Wimplicit-fallthrough"
+fi
+if cc_has_flag "-Wswitch-unreachable"; then
+    append_nodupe CFLAGS "-Wswitch-unreachable"
+fi
 
 if [ "$use_hardening" != "no" ]; then
     if cc_has_flag "-Wl,-z,relro"; then
@@ -913,6 +922,10 @@ if [ "$use_hardening" != "no" ]; then
         append_nodupe CFLAGS "-fstack-protector"
         append_nodupe LDFLAGS "-fstack-protector"
         append_nodupe CFLAGS "--param=ssp-buffer-size=4"
+    fi
+    if cc_has_flag "-fstack-clash-protection"; then
+        append_nodupe CFLAGS "-fstack-clash-protection"
+        append_nodupe LDFLAGS "-fstack-clash-protection"
     fi
 fi
 

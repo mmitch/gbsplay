@@ -290,6 +290,7 @@ static regparm void setup_playmode(struct gbs *gbs)
 		if (gbs->subsong == -1) {
 			gbs->subsong = get_next_subsong(gbs);
 		}
+		break;
 
 	case PLAYMODE_SHUFFLE:
 		subsong_playlist = setup_playlist(gbs->songs);
@@ -305,6 +306,7 @@ static regparm void setup_playmode(struct gbs *gbs)
 				subsong_playlist = setup_playlist(gbs->songs);
 			}
 		}
+		break;
 
 	case PLAYMODE_LINEAR:
 		if (gbs->subsong == -1) {
