@@ -14,7 +14,7 @@ endif
 
 all: default
 
-noincludes  := $(patsubst clean,yes,$(patsubst distclean,yes,$(MAKECMDGOALS)))
+noincludes  := $(patsubst distclean,yes,$(MAKECMDGOALS))
 
 prefix      := /usr/local
 exec_prefix := $(prefix)
