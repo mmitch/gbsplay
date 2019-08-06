@@ -8,7 +8,7 @@
  * 2008,2018 (C) by Vegard Nossum
  *                  Christian Garbs <mitch@cgarbs.de>
  *
- * Licensed under GNU GPL.
+ * Licensed under GNU GPL v1.
  */
 
 #include "common.h"

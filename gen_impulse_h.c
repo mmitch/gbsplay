@@ -2,7 +2,7 @@
  * gbsplay is a Gameboy sound player
  *
  * 2003-2006 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
- * Licensed under GNU GPL.
+ * Licensed under GNU GPL v1.
  */
 
 #include <stdio.h>

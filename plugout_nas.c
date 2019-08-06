@@ -3,7 +3,7 @@
  *
  * 2004-2005 (C) by Christian Garbs <mitch@cgarbs.de>
  *                  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
- * Licensed under GNU GPL.
+ * Licensed under GNU GPL v1.
  *
  * NAS sound output plugin
  *
