@@ -3,7 +3,7 @@
  *
  * 2006 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *
- * Licensed under GNU GPL.
+ * Licensed under GNU GPL v1.
  */
 
 #include "common.h"

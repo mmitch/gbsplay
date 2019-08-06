@@ -3,7 +3,7 @@
  *
  * 2003-2005,2013 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                       Christian Garbs <mitch@cgarbs.de>
- * Licensed under GNU GPL.
+ * Licensed under GNU GPL v1.
  */
 
 #ifndef _GBS_H_
