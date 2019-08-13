@@ -1,4 +1,10 @@
 #!/bin/sh
+#
+# gbsplay is a Gameboy sound player
+#
+# 2015 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+# Licensed under GNU GPL v1.
+#
 
 set -eu
 
