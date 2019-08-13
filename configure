@@ -4,7 +4,7 @@
 #
 # generate config.mk for gbsplay Makefile
 #
-# 2003-2006,2008,2010,2015,2017,2018 (C) by Christian Garbs <mitch@cgarbs.de>
+# 2003-2006,2008,2010,2015,2017-2019 (C) by Christian Garbs <mitch@cgarbs.de>
 #                                           Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
 # Licensed under GNU GPL v1.
 #
@@ -27,8 +27,8 @@ CONFIGURE_FLAGS="${CONFIGURE_FLAGS- }"
 CFLAGS="${CFLAGS-}"
 LDFLAGS="${LDFLAGS-}"
 HOSTCC="$CC"
-HOSTOS=`uname`
-HOSTARCH=`uname -m`
+HOSTOS=$(uname)
+HOSTARCH=$(uname -m)
 BUILDCC="$HOSTCC"
 BUILDOS="$HOSTOS"
 BUILDARCH="$HOSTARCH"
@@ -86,7 +86,7 @@ check_include()
 {
     include="$1"
     includedirs="${2-} /usr/local/include /opt/local/include"
-    includename="`echo $include | sed -e 's@[/\.]@_@g'`"
+    includename="$(echo "$include" | sed -e 's@[/\.]@_@g')"
     eval "value=\${have_${includename}-}"
     test -z "$value" || return
 
@@ -95,13 +95,12 @@ check_include()
         msg="checking for $include"
         test -z "$dir" || msg="$msg in $dir"
         test -z "$dir" || flags="-I$dir"
-        cc_check "$msg" have_$includename "$flags" ok <<EOF
+        if cc_check "$msg" "have_$includename" "$flags" ok <<EOF; then
 #include <$include>
 int main(int argc, char **argv) {
     return 0;
 }
 EOF
-        if [ $? -eq 0 ]; then
             eval "include_${includename}_path=\"$dir \""
             return 0
         fi
@@ -124,10 +123,9 @@ find_lib()
             flags="-l$lib"
             test -z "$dir" || msg="$msg in $dir"
             test -z "$dir" || flags="$flags -L$dir"
-            cc_check "$msg" "" "$flags" ok <<EOF
+            if cc_check "$msg" "" "$flags" ok <<EOF; then
 int main(int argc, char **argv) { return 0; }
 EOF
-            if [ $? -eq 0 ]; then
                 eval "lib${lib}_path=\"$dir \""
                 return 0
             fi
@@ -147,7 +145,7 @@ remove_dupes()
             test "$i" = "$j" && dupe=1
         done
         if [ $dupe -eq 0 ]; then
-            newflags="`test -z "$newflags" || printf "$newflags "`$i"
+            newflags="$(test -z "$newflags" || printf "%s " "$newflags")$i"
         fi
     done
     echo "$newflags"
@@ -200,7 +198,7 @@ check_libs()
     test $? -eq 0 && return 0
 
     for extralib in $extralibs; do
-        find_lib $extralib "$extralibdirs"
+        find_lib "$extralib" "$extralibdirs"
         test $? -ne 0 && return 1
         eval "val=\"\$lib${extralib}_path\""
         if [ "$val" != " " ]; then
@@ -208,16 +206,16 @@ check_libs()
         fi
     done
 
-    minerrs=`$BUILDCC -o "$OUTFILE" "$INFILE" $cflags -l$checklib $extraflags 2>&1 | wc -l`
+    minerrs=$($BUILDCC -o "$OUTFILE" "$INFILE" $cflags "-l$checklib" $extraflags 2>&1 | wc -l)
     for extralib in $extralibs; do
-        errs=`$BUILDCC -o "$OUTFILE" "$INFILE" $cflags -l$checklib -l$extralib $extraflags 2>&1 | wc -l`
-        if [ $errs -lt $minerrs ]; then
+        errs=$($BUILDCC -o "$OUTFILE" "$INFILE" $cflags "-l$checklib" "-l$extralib" $extraflags 2>&1 | wc -l)
+        if [ "$errs" -lt "$minerrs" ]; then
             minerrs=$errs
             append_nodupe extraflags "-l$extralib"
         fi
     done
 
-    if [ $minerrs -ne 0 ]; then
+    if [ "$minerrs" -ne 0 ]; then
         return 1
     fi
 
@@ -236,12 +234,11 @@ cc_check()
     okmsg="${4-ok}"
     errmsg="${5-not found}"
 
-    test "$name" && printf "$name:  "
+    test "$name" && printf "%s:  " "$name"
 
     cat > "$INFILE"
-    $BUILDCC -o "$OUTFILE" "$INFILE" $flags
-    RESULT=$?
-    if [ $RESULT -eq 0 ]; then
+    
+    if "$BUILDCC" -o "$OUTFILE" "$INFILE" $flags; then
         test "$name" && echo "$okmsg"
         test "$varname" && eval "$varname=yes"
         return 0
@@ -261,15 +258,14 @@ EOF
 }
 
 need_include() {
-    check_include "$1"
-    if [ $? -ne 0 ]; then
+    if ! check_include "$1"; then
         die "Could not find $1, which is needed for compilation."
     fi
 }
 
 ## config.h helper
 have_x() {
-    localvar="have_`echo $1 | tr A-Z a-z`"
+    localvar="have_$(echo $1 | tr A-Z a-z)"
     eval "result=\$$localvar"
     if [ "$result" = "yes" ]; then
         echo "#define HAVE_$1 1"
@@ -279,7 +275,7 @@ have_x() {
 }
 
 plugout_x() {
-    localvar="use_`echo $1 | tr A-Z a-z`"
+    localvar="use_$(echo $1 | tr A-Z a-z)"
     eval "result=\$$localvar"
     if [ "$result" = "yes" ]; then
         echo "#define PLUGOUT_$1 1"
@@ -289,7 +285,7 @@ plugout_x() {
 }
 
 use_x() {
-    localvar="use_`echo $1 | tr A-Z a-z`"
+    localvar="use_$(echo $1 | tr A-Z a-z)"
     eval "result=\$$localvar"
     if [ "$result" = "yes" ]; then
         echo "#define USE_$1 1"
@@ -352,14 +348,14 @@ isknown()
 # of type $2 (build, use)
 printoptional()
 {
-    printf "${3-optional} $1:"
+    printf "%s %s:" "${3-optional}" "$1"
     for i in $OPTS; do
         eval "val=\$$i"
         if [ "${i#${2}_}" != "$i" ]; then
             if [ "$val" = "yes" ]; then
-                printf " +${i#${2}_}"
+                printf " +%s" "${i#${2}_}"
             elif [ "$val" = "no" ]; then
-                printf " -${i#${2}_}"
+                printf " -%s" "${i#${2}_}"
             fi
         fi
     done
@@ -377,7 +373,7 @@ remember_use()
 recheck_use()
 {
     eval "val=\$use_$1"
-    if [ "$remembered" = 'yes' -a "$val" != 'yes' ]; then
+    if [ "$remembered" = 'yes' ] && [ "$val" != 'yes' ]; then
         die "error: --enable-$1 was requested but is not available"
     fi
 }
@@ -432,27 +428,27 @@ parseoption()
         ;;
     --have-*)
         eval "have_${1#--have-}=yes"
-        isknown have_${1#--have-} $1 || usage 1
+        isknown "have_${1#--have-}" "$1" || usage 1
         ;;
     --donthave-*)
         eval "have_${1#--donthave-}=no"
-        isknown have_${1#--donthave-} $1 || usage 1
+        isknown "have_${1#--donthave-}" "$1" || usage 1
         ;;
     --enable-*)
         eval "use_${1#--enable-}=yes"
-        isknown use_${1#--enable-} || usage 1
+        isknown "use_${1#--enable-}" || usage 1
         ;;
     --disable-*)
         eval "use_${1#--disable-}=no"
-        isknown use_${1#--disable-} || usage 1
+        isknown "use_${1#--disable-}" || usage 1
         ;;
     --with-*)
         eval "build_${1#--with-}=yes"
-        isknown build_${1#--with-} || usage 1
+        isknown "build_${1#--with-}" || usage 1
         ;;
     --without-*)
         eval "build_${1#--without-}=no"
-        isknown build_${1#--without-} || usage 1
+        isknown "build_${1#--without-}" || usage 1
         ;;
     CFLAGS=*)
         CFLAGS="${1#CFLAGS=}"
@@ -490,14 +486,16 @@ fi
 
 ## generate tmp directory
 
-BASENAME="`basename $0`"
-if [ "`which mktemp`" != "" ]; then
-    TEMPDIR="`mktemp -d "$TMPPATH/$BASENAME.XXXXXXXXXX"`"
+BASENAME="$(basename "$0")"
+if [ "$(which mktemp)" != "" ]; then
+    TEMPDIR="$(mktemp -d "$TMPPATH/$BASENAME.XXXXXXXXXX")"
+    RESULT=$?
 else
     TEMPDIR="$TMPPATH/$BASENAME.$$"
     mkdir "$TEMPDIR"
+    RESULT=$?
 fi
-if [ $? -ne 0 ]; then
+if [ $RESULT -ne 0 ]; then
     echo "can't create temporary directory at <$TMPPATH>!"
     exit 1;
 fi
@@ -551,7 +549,7 @@ Output Plugins:
   --disable-pulse        omit PulseAudio sound output plugin
   --disable-stdout       omit stdout file writer plugin
 EOF
-    exit $1
+    exit "$1"
 }
 
 OPTS=""
@@ -579,31 +577,31 @@ done
 ## load user config
 if [ -f config.conf ]; then
     printf "loading config.conf... "
-    while read line; do
-        parseoption $line
+    while read -r line; do
+        parseoption "$line"
     done < config.conf
     echo ok
 fi
 
 ## flags from CONFIGURE_FLAGS env (for travis-ci)
 for flag in ${CONFIGURE_FLAGS}; do
-    parseoption $flag
+    parseoption "$flag"
 done
 
 ## commandline flags
-while [ ${1-} ]; do
-    parseoption $1
+while [ "${1-}" ]; do
+    parseoption "$1"
     shift
 done
 
 ## on Linux x86, regparm defaults to on
 
-if [ \( "$BUILDARCH" = "i386" -o    \
-        "$BUILDARCH" = "i486" -o    \
-        "$BUILDARCH" = "i586" -o    \
-        "$BUILDARCH" = "i686" -o    \
-        "$BUILDARCH" = "x86_64" \) -a \
-        "$BUILDOS" = "Linux" ]; then
+if (      [ "$BUILDARCH" = "i386"   ] \
+       || [ "$BUILDARCH" = "i486"   ] \
+       || [ "$BUILDARCH" = "i586"   ] \
+       || [ "$BUILDARCH" = "i686"   ] \
+       || [ "$BUILDARCH" = "x86_64" ] \
+   ) && [ "$BUILDOS" = "Linux" ]; then
     setdefault use_regparm yes
     setdefault build_test yes
 else
@@ -616,7 +614,7 @@ setdefault build_xmmsplugin no
 setdefault build_contrib yes
 setdefault use_hardening yes
 ## disable test when cross-compiling
-if [ -n "$buildalias" -a "$buildalias" != "$hostalias" ]; then
+if [ -n "$buildalias" ] && [ "$buildalias" != "$hostalias" ]; then
     build_test=no
 fi
 
@@ -634,19 +632,18 @@ EOF
 $BUILDCC -o "$OUTFILE" "$INFILE" $CFLAGS $LDFLAGS
 RESULT=$?
 if [ $RESULT -eq 0 ]; then
-    if [ "$buildalias" -a "$buildalias" != "$hostalias" ]; then
+    if [ "$buildalias" ] && [ "$buildalias" != "$hostalias" ]; then
         echo "cross-compiling, skipping execute check"
     else
-    if [ -s "$OUTFILE" ]; then
-        "$OUTFILE"
-        if [ $? -eq 0 ]; then
-            echo "ok"
-        else
-            die "can't execute generated code"
-        fi
-    else
-        die "no code generated"
-    fi
+	if [ -s "$OUTFILE" ]; then
+            if "$OUTFILE"; then
+		echo "ok"
+            else
+		die "can't execute generated code"
+            fi
+	else
+            die "no code generated"
+	fi
     fi
 else
     die "error executing '$BUILDCC'"
@@ -655,13 +652,13 @@ fi
 # Check git timestamp
 
 if [ -f .git/HEAD ]; then
-    VERSION=`git describe --tags`
+    VERSION=$(git describe --tags)
 fi
 
 ## check for cygwin environment
 
 printf "checking if OS is Cygwin:  "
-if [ "`uname -o`" = "Cygwin" ]; then
+if [ "$(uname -o)" = "Cygwin" ]; then
     cygwin_build=yes
     echo "yes"
 else
@@ -676,14 +673,14 @@ need_include inttypes.h
 if [ "$use_devdsp" != no ]; then
     remember_use devdsp
     check_include sys/soundcard.h
-    use_devdsp=$have_sys_soundcard_h
+    use_devdsp="$have_sys_soundcard_h"
     recheck_use devdsp
 fi
 
 if [ "$use_alsa" != no ]; then
     remember_use alsa
     check_include alsa/asoundlib.h
-    use_alsa=$have_alsa_asoundlib_h
+    use_alsa="$have_alsa_asoundlib_h"
     cc_check "checking for ESTRPIPE support" have_estrpipe <<EOF
 #include <errno.h>
 #include <alsa/asoundlib.h>
@@ -716,8 +713,8 @@ EOF
         retval2=$?
     fi
     use_dsound=no
-    if [ $retval1 -eq 0 -a $retval2 -eq 0 ]; then
-        use_dsound=$have_dsound_h
+    if [ "$retval1" -eq 0 ] && [ "$retval2" -eq 0 ]; then
+        use_dsound="$have_dsound_h"
     fi
     recheck_use dsound
 fi
@@ -725,7 +722,7 @@ fi
 if [ "$use_pulse" != no ]; then
     remember_use pulse
     check_include pulse/simple.h
-    use_pulse=$have_pulse_simple_h
+    use_pulse="$have_pulse_simple_h"
     recheck_use pulse
 fi
 
@@ -741,7 +738,7 @@ EOF
         retval2=$?
     fi
     use_nas=no
-    if [ $retval1 -eq 0 -a $retval2 -eq 0 ]; then
+    if [ "$retval1" -eq 0 ] && [ "$retval2" -eq 0 ]; then
         if [ "$include_audio_audiolib_h_path" != " " ]; then
             append_nodupe CFLAGS "-I$include_audio_audiolib_h_path"
         fi
@@ -760,7 +757,7 @@ if [ "$use_i18n" != no ]; then
     printf "checking for gettext tools:  "
     have_xgettext=yes
     for i in xgettext msgmerge msgfmt msgen; do
-        if [ "`which $i`" = "" ]; then
+        if [ "$(which $i)" = "" ]; then
             test "$have_xgettext" = "yes" && echo "not ok"
             have_xgettext=no
             echo "$i is missing"
@@ -769,7 +766,7 @@ if [ "$use_i18n" != no ]; then
     test "$have_xgettext" = "yes" && echo "ok"
 
     use_i18n=no
-    if [ "$have_locale_h" = "yes" -a "$have_libintl_h" = "yes" ]; then
+    if [ "$have_locale_h" = "yes" ] && [ "$have_libintl_h" = "yes" ]; then
         if [ "$include_locale_h_path" != " " ]; then
             append_nodupe CFLAGS "-I$include_locale_h_path"
             EXTRA_I18NFLAGS="$EXTRA_I18NFLAGS -I$include_locale_h_path"
@@ -794,7 +791,7 @@ int main(int argc, char **argv)
     return 0;
 }
 EOF
-    if [ $? -eq 0 -a "$libc_flags" != "" ]; then
+    if [ $? -eq 0 ] && [ "$libc_flags" != "" ]; then
         append_nodupe LDFLAGS "$libc_flags"
     fi
 fi
@@ -835,11 +832,9 @@ EOF
     ## check for glib development files
 
     printf "checking for glib-dev:  "
-    CONFIG=`which glib-config`
     GLIB_CFLAGS=
-    if [ $? -eq 0 ]; then
-        GLIB_CFLAGS=`glib-config --cflags`
-        if [ $? -eq 0 ]; then
+    if CONFIG=$(which glib-config); then
+        if GLIB_CFLAGS=$(glib-config --cflags); then
             echo "ok"
         else
             echo "error running glib-config --cflags!"
@@ -851,19 +846,16 @@ EOF
     ## check for xmms development files
 
     printf "checking for xmms-dev:  "
-    CONFIG=`which xmms-config`
     XMMS_CFLAGS=
-    if [ $? -eq 0 ]; then
-        XMMS_CFLAGS=`xmms-config --cflags` 
-        if [ $? -eq 0 ]; then
-            XMMS_INPUT_PLUGIN_DIR=`xmms-config --input-plugin-dir`
-            if [ $? -eq 0 ]; then
+    if CONFIG=$(which xmms-config); then
+        if XMMS_CFLAGS=$(xmms-config --cflags); then
+            if XMMS_INPUT_PLUGIN_DIR=$(xmms-config --input-plugin-dir); then
                 echo "ok"
             else
                 echo "error running xmms-config --input-plugin-dir!"
             fi
         else
-        echo "error running xmms-config --cflags!"
+            echo "error running xmms-config --cflags!"
         fi
     else
         echo "xmms-config not found!"
@@ -876,7 +868,7 @@ fi
 
 ## can XMMS be built?
 
-if [ "$build_xmmsplugin" != "no" -a "$GLIB_CFLAGS" -a "$XMMS_CFLAGS" -a "XMMS_INPUT_PLUGIN_DIR" -a "$PTHREAD" ]; then
+if [ "$build_xmmsplugin" != "no" ] && [ "$GLIB_CFLAGS" ] && [ "$XMMS_CFLAGS" ] && [ "XMMS_INPUT_PLUGIN_DIR" ] && [ "$PTHREAD" ]; then
     append_nodupe CFLAGS $GLIB_CFLAGS $XMMS_CFLAGS
     EXTRA_INSTALL="$EXTRA_INSTALL install-gbsxmms.so"
     EXTRA_UNINSTALL="$EXTRA_UNINSTALL uninstall-gbsxmms.so"
@@ -982,7 +974,7 @@ echo "EXTRA_LDFLAGS=$EXTRA_LDFLAGS"
 
 (
     set +u  # Allow uninitialised vars here
-    while read var; do
+    while read -r var; do
         eval "echo \"$var := \$$var\""
     done << __EOF__
 EXTRA_ALL
