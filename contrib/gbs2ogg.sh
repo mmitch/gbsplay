@@ -9,6 +9,7 @@
 
 FILENAME=$1
 
+QUALITY=6
 RATE=44100
 PLAY=150
 FADE=6
@@ -45,7 +46,7 @@ gbsinfo "$FILENAME" | cut -d : -f 2- | sed -e 's/^ *//' -e 's/^"//' -e 's/"$//' 
 	OGGFILE="$(printf "%s-%02d.ogg" "$FILEBASE" "$SUBSONG")"
 	printf "== converting song %02d/%02d:\n" "$SUBSONG" "$SUBSONGS"
 	gbsplay -o stdout -E l -r "$RATE" -g "$GAP" -f "$FADE" -t "$PLAY" "$FILENAME" "$SUBSONG" "$SUBSONG" </dev/null \
-	    | oggenc -q6 -r --raw-endianness 0 -B 16 -C 2 -R "$RATE" \
+	    | oggenc -q"$QUALITY" -r --raw-endianness 0 -B 16 -C 2 -R "$RATE" \
 		     -N "$SUBSONG" -t "$TITLE" -a "$AUTHOR" -c "copyright=$COPYRIGHT" -c "COMMENT=Subsong $SUBSONG" -G "Gameboy music" \
 		     -o "$OGGFILE" -
     done
