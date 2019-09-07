@@ -29,17 +29,17 @@ FILEBASE=`echo "$FILEBASE"|sed 's/.gbs$//'`
 # get subsong count
 # get song info
     gbsinfo "$FILENAME" | cut -c 17- | sed -e 's/^"//' -e 's/"$//' | (
-    read _ #GBSVERSION
-    read TITLE
-    read AUTHOR
-    read COPYRIGHT
-    read _ #LOAD_ADDR
-    read _ #INIT_ADDR
-    read _ #PLAY_ADDR
-    read _ #STACK_PTR
-    read _ #FILE_SIZE
-    read _ #ROM_SIZE
-    read SUBSONGS
+    read -r _ #GBSVERSION
+    read -r TITLE
+    read -r AUTHOR
+    read -r COPYRIGHT
+    read -r _ #LOAD_ADDR
+    read -r _ #INIT_ADDR
+    read -r _ #PLAY_ADDR
+    read -r _ #STACK_PTR
+    read -r _ #FILE_SIZE
+    read -r _ #ROM_SIZE
+    read -r SUBSONGS
 
     for SUBSONG in `seq 1 $SUBSONGS`; do
 	printf "== converting song %02d/%02d:\n" $SUBSONG $SUBSONGS
