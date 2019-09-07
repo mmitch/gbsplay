@@ -2,7 +2,7 @@
 #
 # Automatically convert all subsongs from .gbs file to .ogg files.
 # 
-# 2003-2005,2008 (C) by Christian Garbs <mitch@cgarbs.de>
+# 2003-2005,2008,2019 (C) by Christian Garbs <mitch@cgarbs.de>
 #
 # Licensed under GNU GPL v1
 #
@@ -29,16 +29,16 @@ FILEBASE=`echo "$FILEBASE"|sed 's/.gbs$//'`
 # get subsong count
 # get song info
     gbsinfo "$FILENAME" | cut -c 17- | sed -e 's/^"//' -e 's/"$//' | (
-    read GBSVERSION
+    read _ #GBSVERSION
     read TITLE
     read AUTHOR
     read COPYRIGHT
-    read LOAD_ADDR
-    read INIT_ADDR
-    read PLAY_ADDR
-    read STACK_PTR
-    read FILE_SIZE
-    read ROM_SIZE
+    read _ #LOAD_ADDR
+    read _ #INIT_ADDR
+    read _ #PLAY_ADDR
+    read _ #STACK_PTR
+    read _ #FILE_SIZE
+    read _ #ROM_SIZE
     read SUBSONGS
 
     for SUBSONG in `seq 1 $SUBSONGS`; do
