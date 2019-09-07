@@ -28,7 +28,7 @@ FILEBASE=$(echo "$FILEBASE"|sed 's/.gbs$//')
 
 # get subsong count
 # get song info
-    gbsinfo "$FILENAME" | cut -c 17- | sed -e 's/^"//' -e 's/"$//' | (
+gbsinfo "$FILENAME" | cut -c 17- | sed -e 's/^"//' -e 's/"$//' | (
     read -r _ #GBSVERSION
     read -r TITLE
     read -r AUTHOR
