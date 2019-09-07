@@ -42,9 +42,9 @@ FILEBASE=$(echo "$FILEBASE"|sed 's/.gbs$//')
     read -r SUBSONGS
 
     for SUBSONG in $(seq 1 "$SUBSONGS"); do
+	OGGFILE="$(printf "%s-%02d.ogg" "$FILEBASE" "$SUBSONG")"
 	printf "== converting song %02d/%02d:\n" "$SUBSONG" "$SUBSONGS"
 	gbsplay -o stdout -E l -r "$RATE" -g "$GAP" -f "$FADE" -t "$PLAY" "$FILENAME" "$SUBSONG" "$SUBSONG" \
-	    | oggenc -q6 -r --raw-endianness 0 -B 16 -C 2 -R "$RATE" -N "$SUBSONG" -t "$TITLE" -a "$AUTHOR" -c "copyright=$COPYRIGHT" -c "COMMENT=Subsong $SUBSONG" -G "Gameboy music" - \
-	    > "$(printf "%s-%02d.ogg" "$FILEBASE" "$SUBSONG")"
+	    | oggenc -q6 -r --raw-endianness 0 -B 16 -C 2 -R "$RATE" -N "$SUBSONG" -t "$TITLE" -a "$AUTHOR" -c "copyright=$COPYRIGHT" -c "COMMENT=Subsong $SUBSONG" -G "Gameboy music" -o "$OGGFILE" -
     done
 )
