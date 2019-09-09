@@ -4,7 +4,7 @@
 # 
 # 2003-2005,2008,2019 (C) by Christian Garbs <mitch@cgarbs.de>
 #
-# Licensed under GNU GPL v1
+# Licensed under GNU GPL v1 or, at your option, any later version
 #
 
 FILENAME=$1

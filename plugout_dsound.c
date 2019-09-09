@@ -3,7 +3,7 @@
  *
  * 2003-2005,2017 (C) by Christian Garbs <mitch@cgarbs.de>
  *                       Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
- * Licensed under GNU GPL v1.
+ * Licensed under GNU GPL v1 or, at your option, any later version.
  *
  * header file for DirectSound output under Windows, aquanight <aquanight@gmail.com>
  * This is C++ because COM is a pain in pure C

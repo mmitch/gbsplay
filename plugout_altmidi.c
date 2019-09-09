@@ -11,7 +11,7 @@
 
  * 2008 (C) by Vegard Nossum
  *
- * Licensed under GNU GPL v1.
+ * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
 #include "common.h"

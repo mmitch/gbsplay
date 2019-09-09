@@ -1,6 +1,6 @@
 # English translations for gbsplay.
 # Copyright (C) 2003-2006 Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
-# This file is distributed under GNU GPL v1.
+# This file is distributed under GNU GPL v1 or, at your option, any later version.
 #
 msgid ""
 msgstr ""

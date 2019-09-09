@@ -3,7 +3,7 @@
  *
  * 2003-2005 (C) by Christian Garbs <mitch@cgarbs.de>
  *                  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
- * Licensed under GNU GPL v1.
+ * Licensed under GNU GPL v1 or, at your option, any later version.
  *
  * header file for /dev/dsp sound output plugin
  */

@@ -3,7 +3,7 @@
 # iodump-decoder.pl - decode plugout_iodumper output to plain text
 #
 # 2018 (C) by Christian Garbs <mitch@cgarbs.de>
-# Licensed under GNU GPL v1
+# Licensed under GNU GPL v1 or, at your option, any later version
 #
 # basic usage:
 #
