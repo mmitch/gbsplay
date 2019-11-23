@@ -651,7 +651,7 @@ regparm struct gbs *gbs_open(char *name)
 	gbs->romsize = (gbs->codelen + gbs->load + 0x3fff) & ~0x3fff;
 
 	gbs->rom = calloc(1, gbs->romsize);
-	memcpy(&gbs->rom[gbs->load - 0x70], buf, 0x70 + gbs->codelen);
+	memcpy(&gbs->rom[gbs->load], gbs->code, gbs->codelen);
 
 	for (i=0; i<8; i++) {
 		long addr = gbs->load + 8*i; /* jump address */
