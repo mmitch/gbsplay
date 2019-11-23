@@ -307,15 +307,16 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 {
 	long chn = (addr - 0xff10)/5;
 
+	if (addr >= 0xff80 && addr <= 0xfffe) {
+		hiram[addr & 0x7f] = val;
+		return;
+	}
+
 	io_written = 1;
 
 	if (iocallback)
 		iocallback(sum_cycles, addr, val, iocallback_priv);
 
-	if (addr >= 0xff80 && addr <= 0xfffe) {
-		hiram[addr & 0x7f] = val;
-		return;
-	}
 	if (apu_on == 0 && addr >= 0xff10 && addr < 0xff26) {
 		return;
 	}
