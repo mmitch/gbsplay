@@ -80,8 +80,8 @@ static long update_level = 0;
 static long sequence_ctr = 0;
 static long halted_noirq_cycles = 0;
 
-static const long vblanktc = 70256; /* ~59.7 Hz (vblankctr)*/
-static long vblankctr = 70256;
+static const long vblanktc = 70224; /* ~59.73 Hz (vblankctr)*/
+static long vblankctr = vblanktc;
 static long timertc = 16;
 static long timerctr = 0;
 
