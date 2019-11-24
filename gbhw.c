@@ -1095,17 +1095,17 @@ regparm long gbhw_step(long time_to_work)
 			if (step < 0) return step;
 			cycles += step;
 			sum_cycles += step;
+			vblankctr -= step;
+			if (vblankctr <= 0) {
+				vblankctr += vblanktc;
+				ioregs[REG_IF] |= 0x01;
+				DPRINTF("vblank_interrupt\n");
+			}
 			gb_sound(step);
 			if (stepcallback)
 			   stepcallback(sum_cycles, gbhw_ch, stepcallback_priv);
 		}
 
-		if (vblankctr > 0) vblankctr -= cycles;
-		if (vblankctr <= 0) {
-			vblankctr += vblanktc;
-			ioregs[REG_IF] |= 0x01;
-			DPRINTF("vblank_interrupt\n");
-		}
 		if (ioregs[REG_TAC] & 4) {
 			if (timerctr > 0) timerctr -= cycles;
 			while (timerctr <= 0) {
