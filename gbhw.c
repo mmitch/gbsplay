@@ -81,6 +81,7 @@ static long sequence_ctr = 0;
 static long halted_noirq_cycles = 0;
 
 static const long vblanktc = 70224; /* ~59.73 Hz (vblankctr)*/
+static const long vblankclocks = 4560;
 static long vblankctr = vblanktc;
 static long timertc = 16;
 static long timerctr = 0;
@@ -172,8 +173,23 @@ static regparm uint32_t io_get(uint32_t addr)
 	case 0xff07:  // TAC
 	case 0xff0f:  // IF
 		return ioregs[addr & 0x7f];
+	case 0xff41: /* LCDC Status */
+		if (vblankctr > vblanktc - vblankclocks) {
+			return 0x01;  /* vblank */
+		} else {
+			/* ~108.7uS per line */
+			long t = (2 * vblanktc - vblankctr) % 456;
+			if (t < 204) {
+				/* 48.6uS in hblank (201-207 clks) */
+				return 0x00;
+			} else if (t < 284) {
+				/* 19uS in OAM scan (77-83 clks) */
+				return 0x02;
+			}
+		}
+		return 0x03;  /* both OAM and display RAM busy */
 	case 0xff44: /* LCD Y-coordinate */
-		return (sum_cycles / 456) % 154;
+		return ((2 * vblanktc - vblankclocks - vblankctr) / 456) % 154;
 	case 0xff70:  // CGB ram bank switch
 		WARN_ONCE("ioread from SVBK (CGB mode) ignored.\n");
 		return 0xff;
