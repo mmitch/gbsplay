@@ -268,7 +268,7 @@ regparm long gbs_write(struct gbs *gbs, char *name, long version)
 		writeint(gbs->buf + 0x6e, codelen, 2);
 		memset(&gbs->code[gbs->codelen], 0x00, codelen*16 - gbs->codelen);
 		memset(gbs->exthdr, 0x00, ehdrlen + 65536);
-		strncpy(gbs->exthdr, GBS_EXTHDR_MAGIC, 4);
+		memcpy(gbs->exthdr, GBS_EXTHDR_MAGIC, strlen(GBS_EXTHDR_MAGIC));
 		gbs->exthdr[0x1c] = gbs->songs;
 		if ((len = strlen(gbs->title)) > 32) {
 			memcpy(strings+stringofs, gbs->title, len+1);
