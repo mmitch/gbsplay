@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-03-26 22:28+0100\n"
+"POT-Creation-Date: 2019-11-24 21:04+0100\n"
 "PO-Revision-Date: 2015-07-18 22:22+0200\n"
 "Last-Translator: Christian Garbs <mitch@cgarbs.de>\n"
 "Language-Team: none\n"
@@ -221,7 +221,7 @@ msgstr ""
 
 #, c-format
 msgid "Not a GBR-File: %s\n"
-msgstr "Not a GBR-File: %s\n"
+msgstr "Keine GBR-Datei: %s\n"
 
 #, c-format
 msgid "Not a GBS-File: %s\n"
@@ -272,17 +272,14 @@ msgstr "Unbekannte Option %s in %s Zeile %ld.\n"
 
 #, c-format
 msgid "Unsupported default bank @0x0000: %d\n"
-msgstr "Unsupported default bank @0x0000: %d\n"
+msgstr "Nicht unterstützte Standardbank @0x0000: %d\n"
 
 #, c-format
 msgid "Unsupported timerflag value: %d\n"
-msgstr "Unsupported timerflag value: %d\n"
+msgstr "Nicht unterstützter wert für timerflag: %d\n"
 
 msgid "Untitled"
 msgstr "Unbenannt"
-
-msgid "off"
-msgstr "Aus"
 
 #, c-format
 msgid ""
@@ -360,8 +357,11 @@ msgstr "fcntl(F_GETFL) fehlgeschlagen: %s\n"
 msgid "fcntl(F_SETFL, flags&~O_NONBLOCK) failed: %s\n"
 msgstr "fcntl(F_SETFL, flags&~O_NONBLOCK) fehlgeschlagen: %s\n"
 
+msgid "gb / not available"
+msgstr "gb / nicht verfügbar"
+
 msgid "gbr / not available"
-msgstr "gbr / not available"
+msgstr "gbr / nicht verfügbar"
 
 #, c-format
 msgid "ioctl(fd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"
