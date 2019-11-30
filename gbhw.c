@@ -82,9 +82,9 @@ static long halted_noirq_cycles = 0;
 
 static const long vblanktc = 70224; /* ~59.73 Hz (vblankctr)*/
 static const long vblankclocks = 4560;
-static long vblankctr = vblanktc;
+static long vblankctr;
 static long timertc = 16;
-static long timerctr = 0;
+static long timerctr;
 
 static const long msec_cycles = GBHW_CLOCK/1000;
 
@@ -939,6 +939,9 @@ regparm void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t
 regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 {
 	long i;
+
+	vblankctr = vblanktc;
+	timerctr = 0;
 
 	if (impbuf)
 		gbhw_impbuf_reset(impbuf);
