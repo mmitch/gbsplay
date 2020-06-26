@@ -489,8 +489,8 @@ static regparm struct gbs *gbr_open(char *name)
 	gbs->rom = calloc(1, gbs->romsize);
 	memcpy(gbs->rom, &buf[0x20], gbs->codelen);
 
-	gbs->rom[0x40] = 0xc9; /* reti */
-	gbs->rom[0x50] = 0xc9; /* reti */
+	gbs->rom[0x40] = 0xd9; /* reti */
+	gbs->rom[0x50] = 0xd9; /* reti */
 	if (buf[0x07] & 1) {
 		/* V-Blank */
 		gbs->rom[0x40] = 0xc3; /* jp imm16 */
@@ -670,7 +670,7 @@ regparm struct gbs *gbs_open(char *name)
 		gbs->rom[0x52] = (gbs->load + 0x48) >> 8;
 	} else if (gbs->tac & 0x04) { /* timer enabled */
 		/* V-Blank */
-		gbs->rom[0x40] = 0xc9; /* reti */
+		gbs->rom[0x40] = 0xd9; /* reti */
 		/* Timer */
 		gbs->rom[0x50] = 0xc3; /* jp imm16 */
 		gbs->rom[0x51] = gbs->play & 0xff;
@@ -681,11 +681,11 @@ regparm struct gbs *gbs_open(char *name)
 		gbs->rom[0x41] = gbs->play & 0xff;
 		gbs->rom[0x42] = gbs->play >> 8;
 		/* Timer */
-		gbs->rom[0x50] = 0xc9; /* reti */
+		gbs->rom[0x50] = 0xd9; /* reti */
 	}
-	gbs->rom[0x48] = 0xc9; /* reti (LCD Stat) */
-	gbs->rom[0x58] = 0xc9; /* reti (Serial) */
-	gbs->rom[0x60] = 0xc9; /* reti (Joypad) */
+	gbs->rom[0x48] = 0xd9; /* reti (LCD Stat) */
+	gbs->rom[0x58] = 0xd9; /* reti (Serial) */
+	gbs->rom[0x60] = 0xd9; /* reti (Joypad) */
 
 	close(fd);
 
