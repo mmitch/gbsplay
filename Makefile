@@ -77,6 +77,8 @@ DISTDIR := gbsplay-$(VERSION)
 
 GBSCFLAGS  := $(EXTRA_CFLAGS)
 GBSLDFLAGS := $(EXTRA_LDFLAGS)
+comma := ,
+GBSLIBLDFLAGS := -lm $(subst -Wl$(comma)-pie,,$(EXTRA_LDFLAGS))
 # Additional ldflags for the gbsplay executable
 GBSPLAYLDFLAGS :=
 
@@ -207,7 +209,7 @@ uninstall-libgbs.so.1:
 
 
 libgbs.so.1: $(objs_libgbspic) libgbs.so.1.ver
-	$(BUILDCC) -fpic -shared -Wl,-soname=$@ -Wl,--version-script,$@.ver -o $@ $(objs_libgbspic) -lm
+	$(BUILDCC) -fpic -shared -Wl,-soname=$@ -Wl,--version-script,$@.ver -o $@ $(objs_libgbspic) $(GBSLIBLDFLAGS)
 	ln -fs $@ libgbs.so
 
 libgbs: libgbs.so.1
