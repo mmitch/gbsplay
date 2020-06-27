@@ -9,6 +9,7 @@ Enhancements:
 
 - gbsplay:
   - transparent decompression of gzip-compressed files
+  - basic VGM file support
 
 2020/06/26  -  0.0.94
 ~~~~~~~~~~~~~~~~~~~~~~~~~

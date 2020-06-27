@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-27 21:28+0200\n"
+"POT-Creation-Date: 2020-06-27 22:20+0200\n"
 "PO-Revision-Date: 2015-07-18 22:22+0200\n"
 "Last-Translator: Christian Garbs <mitch@cgarbs.de>\n"
 "Language-Team: none\n"
@@ -93,6 +93,18 @@ msgid ""
 msgstr ""
 "Verfügbare Ausgabemöglichkeiten:\n"
 "\n"
+
+#, c-format
+msgid "Bad GD3 offset: %08x\n"
+msgstr "Unzulässiger GD3 offset: %08x\n"
+
+#, c-format
+msgid "Bad data length: %d\n"
+msgstr "Unzulässige Datenlänge: %d\n"
+
+#, c-format
+msgid "Bad file size in header: %d\n"
+msgstr "Unzulässige Dateigröße im Header: %d\n"
 
 #, c-format
 msgid "Bank @0x4000:     %d\n"
@@ -238,6 +250,10 @@ msgstr "Keine GBR-Datei: %s\n"
 msgid "Not a GBS-File: %s\n"
 msgstr "Keine GBS-Datei: %s\n"
 
+#, c-format
+msgid "Not a VGM-File: %s\n"
+msgstr "Keine VGM-Datei: %s\n"
+
 msgid "Not compiled with zlib support"
 msgstr "Unterstützung für zlib nicht aktiviert"
 
@@ -283,6 +299,18 @@ msgstr "Titel"
 #, c-format
 msgid "Unknown option %s at %s line %ld.\n"
 msgstr "Unbekannte Option %s in %s Zeile %ld.\n"
+
+#, c-format
+msgid "Unsupported DMG clock: %dHz\n"
+msgstr "Nicht unterstützter DMG-Takt: %dHz\n"
+
+#, c-format
+msgid "Unsupported VGM opcode: 0x%02x\n"
+msgstr "Nicht unterstützter VGM-Opcode: 0x%02x\n"
+
+#, c-format
+msgid "Unsupported VGM version: %d.%02x\n"
+msgstr "Nicht unterstützte VGM-Version: %d.%02x\n"
 
 #, c-format
 msgid "Unsupported default bank @0x0000: %d\n"
@@ -434,3 +462,6 @@ msgstr "snd_pcm_writei fehlgeschlagen: %s\n"
 
 msgid "untitled"
 msgstr "Unbenannt"
+
+msgid "vgm / not available"
+msgstr "vgm / nicht verfügbar"

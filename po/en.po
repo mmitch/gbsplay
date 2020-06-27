@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-27 21:28+0200\n"
+"POT-Creation-Date: 2020-06-27 22:20+0200\n"
 "PO-Revision-Date: 2015-07-18 22:22+0200\n"
 "Last-Translator: Tobias Diedrich <ranma+gbsplay@tdiedrich.de>\n"
 "Language-Team: none\n"
@@ -92,6 +92,18 @@ msgid ""
 msgstr ""
 "Available output plugins:\n"
 "\n"
+
+#, c-format
+msgid "Bad GD3 offset: %08x\n"
+msgstr "Bad GD3 offset: %08x\n"
+
+#, c-format
+msgid "Bad data length: %d\n"
+msgstr "Bad data length: %d\n"
+
+#, c-format
+msgid "Bad file size in header: %d\n"
+msgstr "Bad file size in header: %d\n"
 
 #, c-format
 msgid "Bank @0x4000:     %d\n"
@@ -237,6 +249,10 @@ msgstr "Not a GBR-File: %s\n"
 msgid "Not a GBS-File: %s\n"
 msgstr "Not a GBS-File: %s\n"
 
+#, c-format
+msgid "Not a VGM-File: %s\n"
+msgstr "Not a VGM-File: %s\n"
+
 msgid "Not compiled with zlib support"
 msgstr "Not compiled with zlib support"
 
@@ -282,6 +298,18 @@ msgstr "Title"
 #, c-format
 msgid "Unknown option %s at %s line %ld.\n"
 msgstr "Unknown option %s at %s line %ld.\n"
+
+#, c-format
+msgid "Unsupported DMG clock: %dHz\n"
+msgstr "Unsupported DMG clock: %dHz\n"
+
+#, c-format
+msgid "Unsupported VGM opcode: 0x%02x\n"
+msgstr "Unsupported VGM opcode: 0x%02x\n"
+
+#, c-format
+msgid "Unsupported VGM version: %d.%02x\n"
+msgstr "Unsupported VGM version: %d.%02x\n"
 
 #, c-format
 msgid "Unsupported default bank @0x0000: %d\n"
@@ -433,3 +461,6 @@ msgstr "snd_pcm_writei failed: %s\n"
 
 msgid "untitled"
 msgstr "untitled"
+
+msgid "vgm / not available"
+msgstr "vgm / not available"

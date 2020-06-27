@@ -33,10 +33,13 @@
 #define HDR_LEN_GBR	0x20
 #define HDR_LEN_GB	0x150
 #define HDR_LEN_GZIP	10
+#define HDR_LEN_VGM	0x100
 
 #define GBS_MAGIC		"GBS"
 #define GBS_EXTHDR_MAGIC	"GBSX"
 #define GBR_MAGIC		"GBRF"
+#define GD3_MAGIC		"Gd3 "
+#define VGM_MAGIC		"Vgm "
 #define GZIP_MAGIC		"\037\213\010"
 
 const char *boot_rom_file = ".dmg_rom.bin";
@@ -494,6 +497,303 @@ static regparm struct gbs *gbr_open(const char *name, char *buf, size_t size)
 	return gbs;
 }
 
+static uint32_t le32(const char *buf)
+{
+	const uint8_t *b = (const uint8_t*)buf;
+	return b[0] | (b[1] << 8) | (b[2] << 16) | (b[3] << 24);
+}
+
+static uint16_t le16(const char *buf)
+{
+	const uint8_t *b = (const uint8_t*)buf;
+	return b[0] | (b[1] << 8);
+}
+
+static void emit(struct gbs *gbs, long *code_used, uint8_t data, long reserve)
+{
+	long remain = gbs->codelen - *code_used;
+	uint8_t *code = (uint8_t*) &gbs->code[*code_used];
+	if (reserve + 1 > remain) {
+		while (remain-- > 0) {
+			*(code++) = 0xc9;  /* RET */
+			(*code_used)++;
+		}
+		gbs->code = realloc(gbs->code, gbs->codelen + 0x4000);
+		gbs->codelen += 0x4000;
+		code = (uint8_t*) &gbs->code[*code_used];
+	}
+	*(code++) = data;
+	(*code_used)++;
+}
+
+static regparm void gd3_parse(struct gbs **gbs, const char *gd3, long gd3_len)
+{
+	char *buf;
+	char *s;
+	long ofs = 12;
+	long idx = 0;
+	if (gd3_len < 12 || gd3_len > 4096) {
+		return;
+	}
+	if (strncmp(gd3, GD3_MAGIC, 4) != 0) {
+		return;
+	}
+	if (le32(&gd3[4]) != 0x00000100) {
+		return;
+	}
+	if (le32(&gd3[8]) != gd3_len - ofs) {
+		return;
+	}
+	*gbs = realloc(*gbs, sizeof(struct gbs) + gd3_len);
+	s = buf = (char *)&(*gbs)[1];
+	while (ofs < gd3_len) {
+		uint16_t val = le16(&gd3[ofs]);
+		if (val == 0) {
+			*(buf++) = 0;
+			switch (idx) {
+			case 0: (*gbs)->subsong_info[0].title = s; break;
+			case 2: (*gbs)->title = s; break;
+			case 6: (*gbs)->author = s; break;
+			default: break;
+			}
+			s = buf;
+			idx++;
+		} else if (val < 256) {
+			*(buf++) = val;
+		} else {
+			*(buf++) = '?';
+		}
+		ofs += 2;
+	}
+}
+
+static regparm struct gbs *vgm_open(const char *name, char *buf, size_t size)
+{
+	struct gbs *gbs = malloc(sizeof(struct gbs));
+	char *na_str = _("vgm / not available");
+	char *gd3 = NULL;
+	char *data;
+	long dmg_clock;
+	long eof_ofs;
+	long gd3_ofs;
+	long gd3_len;
+	long data_ofs;
+	long data_len;
+	long vgm_parsed = false;
+	long total_wait;
+	long total_clocks;
+	long code_used;
+	long addr;
+	long jpaddr;
+
+	memset(gbs, 0, sizeof(struct gbs));
+	gbs->silence_timeout = 2;
+	gbs->subsong_timeout = 2*60;
+	gbs->gap = 2;
+	gbs->fadeout = 3;
+	gbs->buf = buf;
+	if (strncmp(buf, VGM_MAGIC, 4) != 0) {
+		fprintf(stderr, _("Not a VGM-File: %s\n"), name);
+		gbs_free(gbs);
+		return NULL;
+	}
+	if (buf[0x09] != 1 || buf[0x08] < 0x61) {
+		fprintf(stderr, _("Unsupported VGM version: %d.%02x\n"), buf[0x09], buf[0x08]);
+		gbs_free(gbs);
+		return NULL;
+	}
+	dmg_clock = le32(&buf[0x80]);
+	if (dmg_clock != 4194304) {
+		fprintf(stderr, _("Unsupported DMG clock: %dHz\n"), dmg_clock);
+		gbs_free(gbs);
+		return NULL;
+	}
+	eof_ofs = le32(&buf[0x4]) + 0x4;
+	if (eof_ofs > size) {
+		fprintf(stderr, _("Bad file size in header: %d\n"), eof_ofs);
+		gbs_free(gbs);
+		return NULL;
+	}
+	gd3_ofs = le32(&buf[0x14]) + 0x14;
+	if (gd3_ofs == 0x14) {
+		gd3_ofs = eof_ofs;
+		gd3_len = 0;
+	} else {
+		gd3_len = eof_ofs - gd3_ofs;
+		gd3 = &buf[gd3_ofs];
+		if (gd3_len < 4 || strncmp(gd3, GD3_MAGIC, 4) != 0) {
+			fprintf(stderr, _("Bad GD3 offset: %08x\n"), gd3_ofs);
+			gbs_free(gbs);
+			return NULL;
+		}
+	}
+	data_ofs = le32(&buf[0x34]) + 0x34;
+	data_len = gd3_ofs - data_ofs;
+	data = &buf[data_ofs];
+	if (data_len < 0) {
+		fprintf(stderr, _("Bad data length: %d\n"), data_len);
+		gbs_free(gbs);
+		return NULL;
+	}
+
+	gbs->codelen = 0x4000;
+	gbs->code = calloc(1, gbs->codelen);
+	code_used = 0;
+
+	total_wait = total_clocks = 0;
+	while (!vgm_parsed) {
+		switch ((uint8_t)*data) {
+		default:
+			fprintf(stderr, _("Unsupported VGM opcode: 0x%02x\n"), *data);
+			gbs_free(gbs);
+			return NULL;
+		case 0x61:  /* Wait n samples */
+			total_wait += le16(&data[1]);
+			data += 2;
+			break;
+		case 0x62:  /* Wait 735 (1/60s) */
+			total_wait += 735;
+			break;
+		case 0x63:  /* Wait 882 (1/50s) */
+			total_wait += 882;
+			break;
+		case 0x66:  /* End of sound data */
+			vgm_parsed = true;
+			break;
+		case 0x70:
+		case 0x71:
+		case 0x72:
+		case 0x73:
+		case 0x74:
+		case 0x75:
+		case 0x76:
+		case 0x77:
+		case 0x78:
+		case 0x79:
+		case 0x7a:
+		case 0x7b:
+		case 0x7c:
+		case 0x7d:
+		case 0x7e:
+		case 0x7f:
+			/* Wait n+1 samples */
+			total_wait += (*data & 0xf) + 1;
+			break;
+		case 0xb3:  /* DMG write */
+			{
+				long delay = (total_wait * 41943L / 441L) - total_clocks;
+				long units = (delay + 31) / 64;
+				uint8_t reg = 0x10 + ((uint8_t)data[1] & 0x7f);
+				uint8_t val = (uint8_t)data[2];
+
+				while (units > 0) {
+					long d = units > 0x10000 ?  0x10000 : units;
+					emit(gbs, &code_used, 0xcf, 3); // RST 0x08
+					emit(gbs, &code_used, (d - 1) & 0xff, 0);
+					emit(gbs, &code_used, (d - 1) >> 8, 0);
+					units -= d;
+					total_clocks += d * 64;
+				}
+				/* LD a, imm8 */
+				emit(gbs, &code_used, 0x3e, 4);
+				emit(gbs, &code_used, val, 0);
+				/* LDH (a8), A */
+				emit(gbs, &code_used, 0xe0, 0);
+				emit(gbs, &code_used, reg, 0);
+			}
+			data += 2;
+			break;
+		}
+		data++;
+	}
+	/* RST 0x38 */
+	emit(gbs, &code_used, 0xff, 1);
+
+	gbs->version = 0;
+	gbs->songs = 1;
+	gbs->defaultsong = 1;
+	gbs->defaultbank = 1;
+	gbs->load = 0x0400;
+	gbs->init = 0x0440;
+	gbs->play = 0x0404;
+	gbs->tma = 0;
+	gbs->tac = 0;
+	gbs->stack = 0xfffe;
+	gbs->title = na_str;
+	gbs->author = na_str;
+	gbs->copyright = na_str;
+	gbs->filesize = size;
+	gbs->crcnow = gbs_crc32(0, buf, gbs->filesize);
+
+	gbs->subsong_info = malloc(gbs->songs * sizeof(struct gbs_subsong_info));
+	memset(gbs->subsong_info, 0, gbs->songs * sizeof(struct gbs_subsong_info));
+	gbs->subsong_info[0].len = total_clocks / 4096;
+
+	if (gd3_len > 0) {
+		gd3_parse(&gbs, gd3, gd3_len);
+	}
+
+	gbs->romsize = gbs->codelen + 0x4000;
+	gbs->rom = calloc(1, gbs->romsize);
+	memcpy(&gbs->rom[0x4000], gbs->code, gbs->codelen);
+
+	/* 16 + 52 for RST + setup */
+	addr = 0x8;
+	gbs->rom[addr++] = 0xe1; /* 12: pop hl */
+	gbs->rom[addr++] = 0x2a; /*  8: ld a, (hl+) */
+	gbs->rom[addr++] = 0x5f; /*  4: ld e, a */
+	gbs->rom[addr++] = 0x2a; /*  8: ld a, (hl+) */
+	gbs->rom[addr++] = 0x57; /*  4: ld d, a */
+	gbs->rom[addr++] = 0xe5; /* 16: push hl */
+
+	/* 64 cycles for loop */
+	jpaddr = addr;
+	gbs->rom[addr++] = 0x7a; /*  4: ld a, d */
+	gbs->rom[addr++] = 0xb3; /*  4: or e */
+	gbs->rom[addr++] = 0xc8; /*  8: ret z */
+	gbs->rom[addr++] = 0x1b; /*  8: dec de */
+	gbs->rom[addr++] = 0x23; /*  8: inc hl */
+	gbs->rom[addr++] = 0x23; /*  8: inc hl */
+	gbs->rom[addr++] = 0x23; /*  8: inc hl */
+	gbs->rom[addr++] = 0xc3; /* 16: jp @loop */
+	gbs->rom[addr++] = jpaddr & 0xff;
+	gbs->rom[addr++] = jpaddr >> 8;
+
+	/* Trap opcode 0xff (rst 0x38) execution */
+	jpaddr = addr = 0x38;
+	gbs->rom[addr++] = 0xf3; /* di */
+	gbs->rom[addr++] = 0x76; /* halt */
+	gbs->rom[addr++] = 0xc3; /* jp $ */
+	gbs->rom[addr++] = jpaddr & 0xff;
+	gbs->rom[addr++] = jpaddr >> 8;
+
+	gbs->rom[0x0040] = 0xd9; /* reti */
+	gbs->rom[0x0050] = 0xd9; /* reti */
+
+	addr = 0x440;
+	gbs->rom[addr++] = 0xf3; /* di */
+	gbs->rom[addr++] = 0x3e; /* ld a, 1 */
+	gbs->rom[addr++] = 0x01;
+	jpaddr = addr;
+	gbs->rom[addr++] = 0xe0; /* ldh (0x80), a */
+	gbs->rom[addr++] = 0x80;
+	gbs->rom[addr++] = 0x21; /* ld hl, 0x2000 */
+	gbs->rom[addr++] = 0x00;
+	gbs->rom[addr++] = 0x20;
+	gbs->rom[addr++] = 0x77; /* ld (hl), a */
+	gbs->rom[addr++] = 0xcd; /* call 0x4000 */
+	gbs->rom[addr++] = 0x00;
+	gbs->rom[addr++] = 0x40;
+	gbs->rom[addr++] = 0xf0; /* ldh a, (0x80) */
+	gbs->rom[addr++] = 0x80;
+	gbs->rom[addr++] = 0x3c; /* inc a */
+	gbs->rom[addr++] = 0xc3; /* jp @loop */
+	gbs->rom[addr++] = jpaddr & 0xff;
+	gbs->rom[addr++] = jpaddr >> 8;
+
+	return gbs;
+}
+
 static regparm struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 {
 	struct gbs *gbs = malloc(sizeof(struct gbs));
@@ -700,6 +1000,9 @@ regparm struct gbs *gbs_open_mem(const char *name, char *buf, size_t size)
 	}
 	if (size > HDR_LEN_GBR && strncmp(buf, GBR_MAGIC, 4) == 0) {
 		return gbr_open(name, buf, size);
+	}
+	if (size > HDR_LEN_VGM && strncmp(buf, VGM_MAGIC, 4) == 0) {
+		return vgm_open(name, buf, size);
 	}
 	if (size > HDR_LEN_GBS && strncmp(buf, GBS_MAGIC, 3) == 0) {
 		return gbs_open_internal(name, buf, size);
