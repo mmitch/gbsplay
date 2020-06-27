@@ -365,6 +365,7 @@ static regparm struct gbs *gb_open(const char *name, char *buf, size_t size)
 	gbs->init  = 0x100;
 	gbs->play = gbs->init;
 	gbs->stack = 0xfffe;
+	gbs->buf = buf;
 
 	/* For accuracy testing purposes, support boot rom. */
 	name_len = strlen(getenv("HOME")) + strlen(boot_rom_file) + 2;
