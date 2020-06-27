@@ -5,6 +5,11 @@ gbsplay HISTORY
 2020/xx/xx  -  unreleased
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Enhancements:
+
+- gbsplay:
+  - transparent decompression of gzip-compressed files
+
 2020/06/26  -  0.0.94
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 

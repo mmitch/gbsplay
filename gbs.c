@@ -22,9 +22,22 @@
 #include "gbs.h"
 #include "crc32.h"
 
+#ifdef USE_ZLIB
+#include <zlib.h>
+#endif
+
+/* Max GB rom size is 4MiB (mapper with 256 banks) */
+#define GB_MAX_ROM_SIZE (256 * 0x4000)
+
+#define HDR_LEN_GBS	0x70
+#define HDR_LEN_GBR	0x20
+#define HDR_LEN_GB	0x20
+#define HDR_LEN_GZIP	10
+
 #define GBS_MAGIC		"GBS"
 #define GBS_EXTHDR_MAGIC	"GBSX"
 #define GBR_MAGIC		"GBRF"
+#define GZIP_MAGIC		"\037\213\010"
 
 const char *boot_rom_file = ".dmg_rom.bin";
 
@@ -327,12 +340,12 @@ regparm long gbs_write(struct gbs *gbs, char *name, long version)
 	return 1;
 }
 
-static regparm struct gbs *gb_open(char *name)
+static regparm struct gbs *gb_open(const char *name, char *buf, size_t size)
 {
-	long fd, i, name_len;
-	struct stat st;
+	int fd;
+	long i, name_len;
 	struct gbs *gbs = malloc(sizeof(struct gbs));
-	char *buf, *bootname;
+	char *bootname;
 	uint8_t bootrom[256];
 	char *na_str = _("gb / not available");
 
@@ -341,18 +354,6 @@ static regparm struct gbs *gb_open(char *name)
 	gbs->subsong_timeout = 2*60;
 	gbs->gap = 2;
 	gbs->fadeout = 3;
-	if ((fd = open(name, O_RDONLY)) == -1) {
-		fprintf(stderr, _("Could not open %s: %s\n"), name, strerror(errno));
-		gbs_free(gbs);
-		return NULL;
-	}
-	fstat(fd, &st);
-	gbs->buf = buf = malloc(st.st_size);
-	if (read(fd, buf, st.st_size) != st.st_size) {
-		fprintf(stderr, _("Could not read %s: %s\n"), name, strerror(errno));
-		gbs_free(gbs);
-		return NULL;
-	}
 	gbs->version = 0;
 	gbs->songs = 1;
 	gbs->defaultsong = 1;
@@ -388,11 +389,11 @@ static regparm struct gbs *gb_open(char *name)
 	gbs->author = na_str;
 	gbs->copyright = na_str;
 	gbs->code = buf;
-	gbs->filesize = st.st_size;
+	gbs->filesize = size;
 
 	gbs->subsong_info = malloc(gbs->songs * sizeof(struct gbs_subsong_info));
 	memset(gbs->subsong_info, 0, gbs->songs * sizeof(struct gbs_subsong_info));
-	gbs->codelen = st.st_size - 0x20;
+	gbs->codelen = size - 0x20;
 	gbs->crcnow = gbs_crc32(0, buf, gbs->filesize);
 	gbs->romsize = (gbs->codelen + 0x3fff) & ~0x3fff;
 
@@ -404,12 +405,10 @@ static regparm struct gbs *gb_open(char *name)
 	return gbs;
 }
 
-static regparm struct gbs *gbr_open(char *name)
+static regparm struct gbs *gbr_open(const char *name, char *buf, size_t size)
 {
-	long fd, i;
-	struct stat st;
+	long i;
 	struct gbs *gbs = malloc(sizeof(struct gbs));
-	char *buf;
 	char *na_str = _("gbr / not available");
 	uint16_t vsync_addr;
 	uint16_t timer_addr;
@@ -419,18 +418,6 @@ static regparm struct gbs *gbr_open(char *name)
 	gbs->subsong_timeout = 2*60;
 	gbs->gap = 2;
 	gbs->fadeout = 3;
-	if ((fd = open(name, O_RDONLY)) == -1) {
-		fprintf(stderr, _("Could not open %s: %s\n"), name, strerror(errno));
-		gbs_free(gbs);
-		return NULL;
-	}
-	fstat(fd, &st);
-	gbs->buf = buf = malloc(st.st_size);
-	if (read(fd, buf, st.st_size) != st.st_size) {
-		fprintf(stderr, _("Could not read %s: %s\n"), name, strerror(errno));
-		gbs_free(gbs);
-		return NULL;
-	}
 	if (strncmp(buf, GBR_MAGIC, 4) != 0) {
 		fprintf(stderr, _("Not a GBR-File: %s\n"), name);
 		gbs_free(gbs);
@@ -478,11 +465,11 @@ static regparm struct gbs *gbr_open(char *name)
 	gbs->author = na_str;
 	gbs->copyright = na_str;
 	gbs->code = &buf[0x20];
-	gbs->filesize = st.st_size;
+	gbs->filesize = size;
 
 	gbs->subsong_info = malloc(gbs->songs * sizeof(struct gbs_subsong_info));
 	memset(gbs->subsong_info, 0, gbs->songs * sizeof(struct gbs_subsong_info));
-	gbs->codelen = st.st_size - 0x20;
+	gbs->codelen = size - 0x20;
 	gbs->crcnow = gbs_crc32(0, buf, gbs->filesize);
 	gbs->romsize = (gbs->codelen + 0x3fff) & ~0x3fff;
 
@@ -503,19 +490,16 @@ static regparm struct gbs *gbr_open(char *name)
 		gbs->rom[0x51] = timer_addr & 0xff;
 		gbs->rom[0x52] = timer_addr >> 8;
 	}
-	close(fd);
 
 	return gbs;
 }
 
-regparm struct gbs *gbs_open(char *name)
+static regparm struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 {
-	long fd, i;
-	struct stat st;
 	struct gbs *gbs = malloc(sizeof(struct gbs));
-	char *buf;
-	char *buf2 = NULL;
+	long i;
 	long have_ehdr = 0;
+	char *buf2;
 
 	memset(gbs, 0, sizeof(struct gbs));
 	gbs->silence_timeout = 2;
@@ -523,31 +507,6 @@ regparm struct gbs *gbs_open(char *name)
 	gbs->gap = 2;
 	gbs->fadeout = 3;
 	gbs->defaultbank = 1;
-	if ((fd = open(name, O_RDONLY)) == -1) {
-		fprintf(stderr, _("Could not open %s: %s\n"), name, strerror(errno));
-		gbs_free(gbs);
-		return NULL;
-	}
-	fstat(fd, &st);
-	gbs->buf = buf = malloc(st.st_size);
-	if (read(fd, buf, st.st_size) != st.st_size) {
-		fprintf(stderr, _("Could not read %s: %s\n"), name, strerror(errno));
-		gbs_free(gbs);
-		return NULL;
-	}
-	if (strncmp(buf, GBR_MAGIC, 4) == 0) {
-		gbs_free(gbs);
-		return gbr_open(name);
-	}
-	if (gbs_crc32(0, &buf[0x104], 48) == 0x46195417) {
-		gbs_free(gbs);
-		return gb_open(name);
-	}
-	if (strncmp(buf, GBS_MAGIC, 3) != 0) {
-		fprintf(stderr, _("Not a GBS-File: %s\n"), name);
-		gbs_free(gbs);
-		return NULL;
-	}
 	gbs->version = buf[0x03];
 	if (gbs->version != 1) {
 		fprintf(stderr, _("GBS Version %d unsupported.\n"), gbs->version);
@@ -583,7 +542,7 @@ regparm struct gbs *gbs_open(char *name)
 	gbs->author = gbs->v1strings+33;
 	gbs->copyright = gbs->v1strings+66;
 	gbs->code = &buf[0x70];
-	gbs->filesize = st.st_size;
+	gbs->filesize = size;
 
 	gbs->subsong_info = malloc(gbs->songs * sizeof(struct gbs_subsong_info));
 	memset(gbs->subsong_info, 0, gbs->songs * sizeof(struct gbs_subsong_info));
@@ -611,7 +570,7 @@ regparm struct gbs *gbs_open(char *name)
 		writeint(&buf2[0x10], 0, 4);
 	} else {
 		memcpy(gbs->v1strings+66, &buf[0x50], 32);
-		gbs->codelen = st.st_size - 0x70;
+		gbs->codelen = size - 0x70;
 	}
 	gbs->crcnow = gbs_crc32(0, buf, gbs->filesize);
 	if (have_ehdr) {
@@ -687,7 +646,98 @@ regparm struct gbs *gbs_open(char *name)
 	gbs->rom[0x58] = 0xd9; /* reti (Serial) */
 	gbs->rom[0x60] = 0xd9; /* reti (Joypad) */
 
-	close(fd);
+	return gbs;
+}
 
+#ifdef USE_ZLIB
+static regparm struct gbs *gzip_open(const char *name, char *buf, size_t size)
+{
+	struct gbs *gbs;
+	int ret;
+	char *out = malloc(GB_MAX_ROM_SIZE);
+	z_stream strm;
+
+	strm.zalloc = Z_NULL;
+	strm.zfree = Z_NULL;
+	strm.opaque = Z_NULL;
+	strm.next_in = (Bytef*)buf;
+	strm.avail_in = size;
+	strm.next_out = (Bytef*)out;
+	strm.avail_out = GB_MAX_ROM_SIZE;
+
+	/* inflate with gzip auto-detect */
+	ret = inflateInit2(&strm, 15|32);
+	if (ret != Z_OK) {
+		fprintf(stderr, _("Could not open %s: inflateInit2: %d\n"), name, ret);
+		return NULL;
+	}
+
+	ret = inflate(&strm, Z_FINISH);
+	if (ret != Z_STREAM_END) {
+		fprintf(stderr, _("Could not open %s: inflate: %d\n"), name, ret);
+		return NULL;
+	}
+	inflateEnd(&strm);
+	gbs = gbs_open_mem(name, out, GB_MAX_ROM_SIZE - strm.avail_out);
+	if (gbs == NULL) {
+		free(out);
+	}
+
+	return gbs;
+}
+#else
+static regparm struct gbs *gzip_open(char *name)
+{
+	fprintf(stderr, _("Could not open %s: %s\n"), name, _("Not compiled with zlib support"));
+	return NULL;
+}
+#endif
+
+regparm struct gbs *gbs_open_mem(const char *name, char *buf, size_t size)
+{
+	if (size > HDR_LEN_GZIP && strncmp(buf, GZIP_MAGIC, 3) == 0) {
+		return gzip_open(name, buf, size);
+	}
+	if (size > HDR_LEN_GBR && strncmp(buf, GBR_MAGIC, 4) == 0) {
+		return gbr_open(name, buf, size);
+	}
+	if (size > HDR_LEN_GBS && strncmp(buf, GBS_MAGIC, 3) == 0) {
+		return gbs_open_internal(name, buf, size);
+	}
+	if (size > HDR_LEN_GB && gbs_crc32(0, &buf[0x104], 48) == 0x46195417) {
+		return gb_open(name, buf, size);
+	}
+	fprintf(stderr, _("Not a GBS-File: %s\n"), name);
+	return NULL;
+}
+
+regparm struct gbs *gbs_open(const char *name)
+{
+	struct gbs *gbs = NULL;
+	long fd;
+	struct stat st;
+	char *buf;
+
+	if ((fd = open(name, O_RDONLY)) == -1) {
+		fprintf(stderr, _("Could not open %s: %s\n"), name, strerror(errno));
+		return NULL;
+	}
+	fstat(fd, &st);
+	buf = malloc(st.st_size);
+	if (read(fd, buf, st.st_size) != st.st_size) {
+		fprintf(stderr, _("Could not read %s: %s\n"), name, strerror(errno));
+		goto exit_free;
+	}
+	if (st.st_size > GB_MAX_ROM_SIZE) {
+		fprintf(stderr, _("Could not read %s: %s\n"), name, _("Bigger than allowed maximum (4MiB)"));
+		goto exit_free;
+	}
+
+	gbs = gbs_open_mem(name, buf, st.st_size);
+
+exit_free:
+	if (gbs == NULL || gbs->buf != buf)
+		free(buf);
+	close(fd);
 	return gbs;
 }

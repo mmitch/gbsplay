@@ -528,6 +528,7 @@ Optional Features:
   --disable-i18n         omit libintl support
   --disable-regparm      do not use register arguments on x86
   --disable-hardening    disable hardening flags
+  --disable-zlib         disable transparent gzip decompression
   --enable-debug         build with debug code
   --enable-sharedlibgbs  build libgbs as a shared library
   --enable-regparm       build with explicit regparm support
@@ -570,6 +571,7 @@ OPTS="${OPTS} use_pulse"
 OPTS="${OPTS} use_regparm"
 OPTS="${OPTS} use_sharedlibgbs"
 OPTS="${OPTS} use_stdout"
+OPTS="${OPTS} use_zlib"
 for OPT in $OPTS; do
     eval "${OPT}="
 done
@@ -669,6 +671,30 @@ fi
 ## check for various headers
 
 need_include inttypes.h
+
+if [ "$use_zlib" != no ]; then
+    remember_use zlib
+    check_include zlib.h
+    retval1=$?
+    retval2=1
+    if [ $retval1 -eq 0 ]; then
+        check_libs "z" <<EOF
+#include <zlib.h>
+int main(int argc, char** argv) {
+    z_stream strm = {0};
+    inflateInit(&strm);
+    return 0;
+}
+EOF
+        retval2=$?
+    fi
+    use_zlib=no
+    if [ "$retval1" -eq 0 ] && [ "$retval2" -eq 0 ]; then
+        use_zlib="$have_zlib_h"
+        append_nodupe LDFLAGS "-lz"
+    fi
+    recheck_use zlib
+fi
 
 if [ "$use_devdsp" != no ]; then
     remember_use devdsp
@@ -1036,6 +1062,7 @@ __EOF__
     plugout_x STDOUT
     use_x I18N
     use_x REGPARM
+    use_x ZLIB
     have_x ESTRPIPE
     echo "#endif"
 ) > config.h
