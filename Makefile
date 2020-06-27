@@ -78,7 +78,7 @@ DISTDIR := gbsplay-$(VERSION)
 GBSCFLAGS  := $(EXTRA_CFLAGS)
 GBSLDFLAGS := $(EXTRA_LDFLAGS)
 comma := ,
-GBSLIBLDFLAGS := -lm $(subst -Wl$(comma)-pie,,$(EXTRA_LDFLAGS))
+GBSLIBLDFLAGS := -lm $(subst -pie,,$(subst -Wl$(comma)-pie,,$(EXTRA_LDFLAGS)))
 # Additional ldflags for the gbsplay executable
 GBSPLAYLDFLAGS :=
 
