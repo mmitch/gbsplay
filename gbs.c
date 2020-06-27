@@ -31,7 +31,7 @@
 
 #define HDR_LEN_GBS	0x70
 #define HDR_LEN_GBR	0x20
-#define HDR_LEN_GB	0x20
+#define HDR_LEN_GB	0x150
 #define HDR_LEN_GZIP	10
 
 #define GBS_MAGIC		"GBS"
