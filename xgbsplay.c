@@ -3,58 +3,23 @@
  *
  * 2003-2005,2008,2018,2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                                 Christian Garbs <mitch@cgarbs.de>
- * Licensed under GNU GPL.
+ * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
-#include "common.h"
+#include "player.h"
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <string.h>
-#include <math.h>
-#include <signal.h>
 #include <time.h>
 #include <libgen.h>
 
 #include <X11/Xlib.h>
 
-#include "gbhw.h"
-#include "gbcpu.h"
-#include "gbs.h"
 #include "cfgparser.h"
-#include "util.h"
-#include "plugout.h"
 
-#define LN2 .69314718055994530941
-#define MAGIC 5.78135971352465960412
-#define FREQ(x) (262144 / x)
-/* #define NOTE(x) ((log(FREQ(x))/LN2 - log(55)/LN2)*12 + .2) */
-#define NOTE(x) ((long)((log(FREQ(x))/LN2 - MAGIC)*12 + .2))
-
-#define MAXOCTAVE 9
-
-/* player modes */
-#define PLAYMODE_LINEAR  1
-#define PLAYMODE_RANDOM  2
-#define PLAYMODE_SHUFFLE 3
+#define GRID(s,t,i) ((t * i / s))
 
 /* global variables */
-static char *myname;
-static long quit = 0;
-static long *subsong_playlist;
-static long subsong_playlist_idx = 0;
-static long pause_mode = 0;
-
-unsigned long random_seed;
-
-#define DEFAULT_REFRESH_DELAY 33
-
-static long refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
-
 #define STATUSTEXT_LENGTH 256
 static char statustext[STATUSTEXT_LENGTH];
 static char oldstatustext[STATUSTEXT_LENGTH];
@@ -64,37 +29,6 @@ static Display *display;
 static Window window;
 static int screen;
 static GC gc;
-
-/* default values */
-static long playmode = PLAYMODE_LINEAR;
-static long loopmode = 0;
-static enum plugout_endian endian = PLUGOUT_ENDIAN_NATIVE;
-static long rate = 44100;
-static long silence_timeout = 2;
-static long fadeout = 3;
-static long subsong_gap = 2;
-static long subsong_start = -1;
-static long subsong_stop = -1;
-static long subsong_timeout = 2*60;
-
-static const char cfgfile[] = ".gbsplayrc";
-
-static char *sound_name = PLUGOUT_DEFAULT;
-static char *filter_type = GBHW_CFG_FILTER_DMG;
-static char *sound_description;
-static plugout_open_fn  sound_open;
-static plugout_skip_fn  sound_skip;
-static plugout_pause_fn sound_pause;
-static plugout_io_fn    sound_io;
-static plugout_write_fn sound_write;
-static plugout_close_fn sound_close;
-
-static int16_t samples[4096];
-static struct gbhw_buffer buf = {
-.data = samples,
-.pos  = 0,
-.bytes = sizeof(samples),
-};
 
 /* configuration directives */
 static const struct cfg_option options[] = {
@@ -111,170 +45,6 @@ static const struct cfg_option options[] = {
 	/* playmode not implemented yet */
 	{ NULL, NULL, NULL }
 };
-
-static regparm void swap_endian(struct gbhw_buffer *buf)
-{
-	long i;
-
-	for (i=0; i<buf->bytes/sizeof(short); i++) {
-		short x = buf->data[i];
-		buf->data[i] = ((x & 0xff) << 8) | (x >> 8);
-	}
-}
-
-static regparm void iocallback(long cycles, uint32_t addr, uint8_t val, void *priv)
-{
-	sound_io(cycles, addr, val);
-}
-
-static regparm void callback(struct gbhw_buffer *buf, void *priv)
-{
-	if ((is_le_machine() && endian == PLUGOUT_ENDIAN_BIG) ||
-	    (is_be_machine() && endian == PLUGOUT_ENDIAN_LITTLE)) {
-		swap_endian(buf);
-	}
-	sound_write(buf->data, buf->pos*2*sizeof(int16_t));
-	buf->pos = 0;
-}
-
-static regparm long *setup_playlist(long songs)
-/* setup a playlist in shuffle mode */
-{
-	long i;
-	long *playlist;
-	
-	playlist = (long*) calloc( songs, sizeof(long) );
-	for (i=0; i<songs; i++) {
-		playlist[i] = i;
-	}
-
-	/* reinit RNG with current seed - playlists shall be reproducible! */
-	srand(random_seed);
-	shuffle_long(playlist, songs);
-
-	return playlist;
-}
-
-static regparm long get_next_subsong(struct gbs *gbs)
-/* returns the number of the subsong that is to be played next */
-{
-	long next = -1;
-	switch (playmode) {
-
-	case PLAYMODE_RANDOM:
-		next = rand_long(gbs->songs);
-		break;
-
-	case PLAYMODE_SHUFFLE:
-		subsong_playlist_idx++;
-		if (subsong_playlist_idx == gbs->songs) {
-			free(subsong_playlist);
-			random_seed++;
-			subsong_playlist = setup_playlist(gbs->songs);
-			subsong_playlist_idx = 0;
-		}
-		next = subsong_playlist[subsong_playlist_idx];
-		break;
-
-	case PLAYMODE_LINEAR:
-		next = gbs->subsong + 1;
-		break;
-	}
-	return next;
-}
-
-static regparm int get_prev_subsong(struct gbs *gbs)
-/* returns the number of the subsong that has been played previously */
-{
-	int prev = -1;
-	switch (playmode) {
-
-	case PLAYMODE_RANDOM:
-		prev = rand_long(gbs->songs);
-		break;
-
-	case PLAYMODE_SHUFFLE:
-		subsong_playlist_idx--;
-		if (subsong_playlist_idx == -1) {
-			free(subsong_playlist);
-			random_seed--;
-			subsong_playlist = setup_playlist(gbs->songs);
-			subsong_playlist_idx = gbs->songs-1;
-		}
-		prev = subsong_playlist[subsong_playlist_idx];
-		break;
-
-	case PLAYMODE_LINEAR:
-		prev = gbs->subsong - 1;
-		break;
-	}
-	return prev;
-}
-
-static regparm void setup_playmode(struct gbs *gbs)
-/* initializes the chosen playmode (set start subsong etc.) */
-{
-	switch (playmode) {
-
-	case PLAYMODE_RANDOM:
-		if (gbs->subsong == -1) {
-			gbs->subsong = get_next_subsong(gbs);
-		}
-		break;
-
-	case PLAYMODE_SHUFFLE:
-		subsong_playlist = setup_playlist(gbs->songs);
-		subsong_playlist_idx = 0;
-		if (gbs->subsong == -1) {
-			gbs->subsong = subsong_playlist[0];
-		} else {
-			/* randomize playlist until desired start song is first */
-			/* (rotation does not work because this must be reproducible */
-			/* by setting random_seed to the old value */
-			while (subsong_playlist[0] != gbs->subsong) {
-				random_seed++;
-				subsong_playlist = setup_playlist(gbs->songs);
-			}
-		}
-		break;
-
-	case PLAYMODE_LINEAR:
-		if (gbs->subsong == -1) {
-			gbs->subsong = gbs->defaultsong - 1;
-		}
-		break;
-	}
-}
-
-static regparm long nextsubsong_cb(struct gbs *gbs, void *priv)
-{
-	long subsong = get_next_subsong(gbs);
-
-	if (gbs->subsong == subsong_stop ||
-	    subsong >= gbs->songs) {
-		if (loopmode) {
-			subsong = subsong_start;
-			setup_playmode(gbs);
-		} else {
-			return false;
-		}
-	}
-
-	gbs_init(gbs, subsong);
-	if (sound_skip)
-		sound_skip(subsong);
-	return true;
-}
-
-char *endian_str(long endian)
-{
-	switch (endian) {
-	case PLUGOUT_ENDIAN_BIG: return "big";
-	case PLUGOUT_ENDIAN_LITTLE: return "little";
-	case PLUGOUT_ENDIAN_NATIVE: return "native";
-	default: return "invalid";
-	}
-}
 
 static regparm void usage(long exitcode)
 {
@@ -314,7 +84,7 @@ static regparm void usage(long exitcode)
 
 static regparm void version(void)
 {
-	puts("gbsplay " GBS_VERSION);
+	puts("xgbsplay " GBS_VERSION);
 	exit(0);
 }
 
@@ -453,8 +223,6 @@ static regparm void select_plugin(void)
 	sound_pause = plugout->pause;
 	sound_description = plugout->description;
 }
-
-#define GRID(s,t,i) ((t * i / s))
 
 static void drawbuttons()
 {
@@ -646,8 +414,6 @@ int main(int argc, char **argv)
 	sigaction(SIGTERM, &sa, NULL);
 	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGSEGV, &sa, NULL);
-
-	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
 
 	display = XOpenDisplay(NULL);
 	if (display == NULL) {
