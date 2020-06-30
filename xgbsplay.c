@@ -514,7 +514,7 @@ static void drawbuttons()
 	/* button boxes */
 	line[0].x1 = 0;
 	line[0].y1 = 0;
-	line[0].x2 = line[0].x2;
+	line[0].x2 = line[0].x1;
 	line[0].y2 = attrs.height - 1;
 
 	for (i = 1; i<5; i++) {
