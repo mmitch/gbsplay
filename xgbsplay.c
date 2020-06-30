@@ -9,7 +9,6 @@
 #include "player.h"
 
 #include <stdlib.h>
-#include <libgen.h>
 #include <X11/Xlib.h>
 
 #define GRID(s,t,i) ((t * i / s))
@@ -18,7 +17,6 @@
 #define STATUSTEXT_LENGTH 256
 static char statustext[STATUSTEXT_LENGTH];
 static char oldstatustext[STATUSTEXT_LENGTH];
-static char filename[48];
 
 static Display *display;
 static Window window;
@@ -172,17 +170,13 @@ int main(int argc, char **argv)
 	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGSEGV, &sa, NULL);
 
-	/* prepare filename for display */
-	strncpy(filename, basename(argv[0]), sizeof(filename));
-	filename[sizeof(filename) - 1] = '\0';
-
+	/* init X11 */
 	display = XOpenDisplay(NULL);
 	if (display == NULL) {
 		fprintf(stderr, "Cannot open display\n");
 		exit(1);
 	}
 
-	/* init X11 */
 	screen = DefaultScreen(display);
 	window = XCreateSimpleWindow(display, RootWindow(display, screen),
 				     10, 10, 200, 50, 0,

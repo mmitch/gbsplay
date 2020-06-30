@@ -20,6 +20,7 @@
 
 /* global variables */
 char *myname;
+char *filename;
 long quit = 0;
 static long *subsong_playlist;
 static long subsong_playlist_idx = 0;
@@ -260,6 +261,21 @@ static regparm char *endian_str(long endian)
 	}
 }
 
+static regparm char *filename_only(char *with_pathname)
+/* this creates an additional reference the original string, so don't free it */
+{
+	char *ret = with_pathname;
+	char *p   = with_pathname;
+
+	/* we could strlen() and then iterate backwards,
+           but we'd have to iterate over the string twice */
+	while (*p != 0) {
+		if (*p++ == '/')
+			ret = p;
+	}
+	return ret;
+}
+
 static regparm void version(void)
 {
 	printf("%s %s\n", myname, GBS_VERSION);
@@ -307,7 +323,7 @@ static regparm void usage(long exitcode)
 static regparm void parseopts(int *argc, char ***argv)
 {
 	long res;
-	myname = *argv[0];
+	myname = filename_only(*argv[0]);
 	while ((res = getopt(*argc, *argv, "1234c:E:f:g:hH:lo:qr:R:t:T:vVzZ")) != -1) {
 		switch (res) {
 		default:
@@ -452,6 +468,9 @@ regparm struct gbs *common_init(int argc, char **argv)
 		fprintf(stderr, _("Invalid filter type \"%s\"\n"), filter_type);
 		exit(1);
 	}
+
+	/* options have been parsed, argv[0] is our filename */
+	filename = filename_only(argv[0]);
 
 	if (argc >= 2) {
 		sscanf(argv[1], "%ld", &subsong_start);

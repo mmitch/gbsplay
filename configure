@@ -945,18 +945,16 @@ fi
 if [ "$build_xgbsplay" != "no" ]; then
     ## check for Xlib
 
-    check_include libgen.h
-    retval1=$?
     check_include X11/Xlib.h "/usr/X11R6/include"
-    retval2=$?
-    retval3=1
+    retval1=$?
+    retval2=1
     if [ $retval1 -eq 0 ]; then
         check_libs X11 "" "/usr/X11R6/lib /usr/X11/lib /usr/lib/X11" <<EOF
 int main(int argc, char **argv) { return 0; }
 EOF
-        retval3=$?
+        retval2=$?
     fi
-    if [ $retval1 -eq 0 ] && [ $retval2 -eq 0 ] && [ $retval3 -eq 0 ]; then
+    if [ $retval1 -eq 0 ] && [ $retval2 -eq 0 ]; then
         if [ "$include_X11_Xlib_h_path" != " " ]; then
             append_nodupe CFLAGS "-I$include_X11_Xlib_h_path"
         fi

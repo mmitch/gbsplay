@@ -31,6 +31,7 @@
 
 /* global variables */
 extern char *myname;
+extern char *filename;
 extern long quit;
 extern long pause_mode;
 
