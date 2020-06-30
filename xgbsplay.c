@@ -18,6 +18,9 @@
 static char statustext[STATUSTEXT_LENGTH];
 static char oldstatustext[STATUSTEXT_LENGTH];
 
+static long quit = 0;
+static long pause_mode = 0;
+
 static Display *display;
 static Window window;
 static int screen;

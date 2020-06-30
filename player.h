@@ -32,31 +32,12 @@
 /* global variables */
 extern char *myname;
 extern char *filename;
-extern long quit;
-extern long pause_mode;
-
-extern unsigned long random_seed;
 
 extern long refresh_delay;
 
 /* default values */
-extern long playmode;
-extern long loopmode;
-extern enum plugout_endian endian;
 extern long verbosity;
-extern long rate;
-extern long silence_timeout;
-extern long fadeout;
-extern long subsong_gap;
-extern long subsong_start;
-extern long subsong_stop;
-extern long subsong_timeout;
 
-extern const char cfgfile[];
-
-extern char *sound_name;
-extern char *filter_type;
-extern char *sound_description;
 extern plugout_open_fn  sound_open;
 extern plugout_skip_fn  sound_skip;
 extern plugout_pause_fn sound_pause;
@@ -64,10 +45,6 @@ extern plugout_io_fn    sound_io;
 extern plugout_step_fn  sound_step;
 extern plugout_write_fn sound_write;
 extern plugout_close_fn sound_close;
-
-extern struct gbhw_buffer buf;
-
-extern const struct cfg_option options[];
 
 struct displaytime {
 	long played_min, played_sec, total_min, total_sec;

@@ -22,6 +22,9 @@ static const char vols[5] = " -=#%";
 
 /* global variables */
 
+static long quit = 0;
+static long pause_mode = 0;
+
 /* default values */
 long redraw = false;
 

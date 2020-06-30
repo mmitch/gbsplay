@@ -21,35 +21,19 @@
 /* global variables */
 char *myname;
 char *filename;
-long quit = 0;
-static long *subsong_playlist;
-static long subsong_playlist_idx = 0;
-long pause_mode = 0;
-
-unsigned long random_seed;
 
 #define DEFAULT_REFRESH_DELAY 33
 
 long refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
 
+static long *subsong_playlist;
+static long subsong_playlist_idx = 0;
+
+static unsigned long random_seed;
+
 /* default values */
-long playmode = PLAYMODE_LINEAR;
-long loopmode = 0;
-enum plugout_endian endian = PLUGOUT_ENDIAN_NATIVE;
 long verbosity = 3;
-long rate = 44100;
-long silence_timeout = 2;
-long fadeout = 3;
-long subsong_gap = 2;
-long subsong_start = -1;
-long subsong_stop = -1;
-long subsong_timeout = 2*60;
 
-const char cfgfile[] = ".gbsplayrc";
-
-char *sound_name = PLUGOUT_DEFAULT;
-char *filter_type = GBHW_CFG_FILTER_DMG;
-char *sound_description;
 plugout_open_fn  sound_open;
 plugout_skip_fn  sound_skip;
 plugout_pause_fn sound_pause;
@@ -57,6 +41,23 @@ plugout_io_fn    sound_io;
 plugout_step_fn  sound_step;
 plugout_write_fn sound_write;
 plugout_close_fn sound_close;
+
+static long playmode = PLAYMODE_LINEAR;
+static long loopmode = 0;
+static enum plugout_endian endian = PLUGOUT_ENDIAN_NATIVE;
+static long rate = 44100;
+static long silence_timeout = 2;
+static long fadeout = 3;
+static long subsong_gap = 2;
+static long subsong_start = -1;
+static long subsong_stop = -1;
+static long subsong_timeout = 2*60;
+
+static const char cfgfile[] = ".gbsplayrc";
+
+static char *sound_name = PLUGOUT_DEFAULT;
+static char *filter_type = GBHW_CFG_FILTER_DMG;
+static char *sound_description;
 
 static int16_t samples[4096];
 struct gbhw_buffer buf = {
