@@ -82,12 +82,6 @@ static regparm void usage(long exitcode)
 	exit(exitcode);
 }
 
-static regparm void version(void)
-{
-	puts("xgbsplay " GBS_VERSION);
-	exit(0);
-}
-
 static regparm void parseopts(int *argc, char ***argv)
 {
 	long res;

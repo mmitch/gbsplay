@@ -72,5 +72,6 @@ regparm int get_prev_subsong(struct gbs *gbs);
 regparm void setup_playmode(struct gbs *gbs);
 regparm long nextsubsong_cb(struct gbs *gbs, void *priv);
 char *endian_str(long endian);
+regparm void version(void);
 
 #endif

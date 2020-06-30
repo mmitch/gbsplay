@@ -54,9 +54,9 @@ plugout_close_fn sound_close;
 
 static int16_t samples[4096];
 struct gbhw_buffer buf = {
-   .data = samples,
-   .pos  = 0,
-   .bytes = sizeof(samples),
+	.data = samples,
+	.pos  = 0,
+	.bytes = sizeof(samples),
 };
 
 regparm void swap_endian(struct gbhw_buffer *buf)
@@ -221,4 +221,10 @@ char *endian_str(long endian)
 	case PLUGOUT_ENDIAN_NATIVE: return "native";
 	default: return "invalid";
 	}
+}
+
+regparm void version(void)
+{
+	printf("%s %s\n", myname, GBS_VERSION);
+	exit(0);
 }
