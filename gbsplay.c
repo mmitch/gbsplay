@@ -12,9 +12,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <math.h>
-#include <time.h>
 
-#include "cfgparser.h"
 #include "terminal.h"
 
 /* lookup tables */
@@ -257,87 +255,22 @@ static regparm void printinfo()
 int main(int argc, char **argv)
 {
 	struct gbs *gbs;
-	char *usercfg;
 
-	i18n_init();
+	gbs = common_init(argc, argv);
 
-	/* initialize RNG */
-	random_seed = time(0)+getpid();
-	srand(random_seed);
+	/* set up terminal */
+	printinfo();
+	setup_terminal();
 
-	usercfg = get_userconfig(cfgfile);
-	cfg_parse(SYSCONF_PREFIX "/gbsplayrc", options);
-	cfg_parse((const char*)usercfg, options);
-	free(usercfg);
-	parseopts(&argc, &argv);
-	select_plugin();
+	/* init additional callbacks */
+	if (sound_step)
+		gbhw_setstepcallback(stepcallback, NULL);
 
-	if (argc < 1) {
-		usage(1);
-	}
-
+	/* precalculate lookup tables */
 	precalc_notes();
 	precalc_vols();
 
-	if (sound_open(endian, rate) != 0) {
-		fprintf(stderr, _("Could not open output plugin \"%s\"\n"),
-		        sound_name);
-		exit(1);
-	}
-
-	if (sound_io)
-		gbhw_setiocallback(iocallback, NULL);
-	if (sound_step)
-		gbhw_setstepcallback(stepcallback, NULL);
-	if (sound_write)
-		gbhw_setcallback(callback, NULL);
-	gbhw_setrate(rate);
-	if (!gbhw_setfilter(filter_type)) {
-		fprintf(stderr, _("Invalid filter type \"%s\"\n"), filter_type);
-		exit(1);
-	}
-
-	if (argc >= 2) {
-		sscanf(argv[1], "%ld", &subsong_start);
-		subsong_start--;
-	}
-
-	if (argc >= 3) {
-		sscanf(argv[2], "%ld", &subsong_stop);
-		subsong_stop--;
-	}
-
-	gbs = gbs_open(argv[0]);
-	if (gbs == NULL) {
-		exit(1);
-	}
-
-	/* sanitize commandline values */
-	if (subsong_start < -1) {
-		subsong_start = 0;
-	} else if (subsong_start >= gbs->songs) {
-		subsong_start = gbs->songs-1;
-	}
-	if (subsong_stop <  0) {
-		subsong_stop = -1;
-	} else if (subsong_stop >= gbs->songs) {
-		subsong_stop = -1;
-	}
-	
-	gbs->subsong = subsong_start;
-	gbs->subsong_timeout = subsong_timeout;
-	gbs->silence_timeout = silence_timeout;
-	gbs->gap = subsong_gap;
-	gbs->fadeout = fadeout;
-	setup_playmode(gbs);
-	gbhw_setbuffer(&buf);
-	gbs_set_nextsubsong_cb(gbs, nextsubsong_cb, NULL);
-	gbs_init(gbs, gbs->subsong);
-	if (sound_skip)
-		sound_skip(gbs->subsong);
-	printinfo();
-
-	setup_terminal();
+	/* main loop */
 	while (!quit) {
 		if (!gbs_step(gbs, refresh_delay)) {
 			quit = 1;
@@ -348,10 +281,12 @@ int main(int argc, char **argv)
 		if (verbosity>1) printstatus(gbs);
 		handleuserinput(gbs);
 	}
-	restore_terminal();
 
+	/* stop sound */
 	sound_close();
 
+	/* clean up terminal */
+	restore_terminal();
 	if (verbosity>3) {
 		printf("\n\n\n\n\n\n");
 	}

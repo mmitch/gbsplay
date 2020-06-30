@@ -11,6 +11,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "util.h"
 #include "cfgparser.h"
@@ -80,7 +81,7 @@ const struct cfg_option options[] = {
 	{ NULL, NULL, NULL }
 };
 
-regparm void swap_endian(struct gbhw_buffer *buf)
+static regparm void swap_endian(struct gbhw_buffer *buf)
 {
 	long i;
 
@@ -90,12 +91,12 @@ regparm void swap_endian(struct gbhw_buffer *buf)
 	}
 }
 
-regparm void iocallback(long cycles, uint32_t addr, uint8_t val, void *priv)
+static regparm void iocallback(long cycles, uint32_t addr, uint8_t val, void *priv)
 {
 	sound_io(cycles, addr, val);
 }
 
-regparm void callback(struct gbhw_buffer *buf, void *priv)
+static regparm void callback(struct gbhw_buffer *buf, void *priv)
 {
 	if ((is_le_machine() && endian == PLUGOUT_ENDIAN_BIG) ||
 	    (is_be_machine() && endian == PLUGOUT_ENDIAN_LITTLE)) {
@@ -179,7 +180,7 @@ regparm int get_prev_subsong(struct gbs *gbs)
 	return prev;
 }
 
-regparm void setup_playmode(struct gbs *gbs)
+static regparm void setup_playmode(struct gbs *gbs)
 /* initializes the chosen playmode (set start subsong etc.) */
 {
 	switch (playmode) {
@@ -234,7 +235,7 @@ regparm long nextsubsong_cb(struct gbs *gbs, void *priv)
 	return true;
 }
 
-char *endian_str(long endian)
+static regparm char *endian_str(long endian)
 {
 	switch (endian) {
 	case PLUGOUT_ENDIAN_BIG: return "big";
@@ -244,13 +245,13 @@ char *endian_str(long endian)
 	}
 }
 
-regparm void version(void)
+static regparm void version(void)
 {
 	printf("%s %s\n", myname, GBS_VERSION);
 	exit(0);
 }
 
-regparm void usage(long exitcode)
+static regparm void usage(long exitcode)
 {
 	FILE *out = exitcode ? stderr : stdout;
 	fprintf(out,
@@ -288,7 +289,7 @@ regparm void usage(long exitcode)
 	exit(exitcode);
 }
 
-regparm void parseopts(int *argc, char ***argv)
+static regparm void parseopts(int *argc, char ***argv)
 {
 	long res;
 	myname = *argv[0];
@@ -369,7 +370,7 @@ regparm void parseopts(int *argc, char ***argv)
 	*argv += optind;
 }
 
-regparm void select_plugin(void)
+static regparm void select_plugin(void)
 {
 	const struct output_plugin *plugout;
 
@@ -397,4 +398,87 @@ regparm void select_plugin(void)
 	if (plugout->flags & PLUGOUT_USES_STDOUT) {
 		verbosity = 0;
 	}
+}
+
+regparm struct gbs *common_init(int argc, char **argv)
+{
+	char *usercfg;
+	struct gbs *gbs;
+
+	i18n_init();
+
+	/* initialize RNG */
+	random_seed = time(0)+getpid();
+	srand(random_seed);
+
+	usercfg = get_userconfig(cfgfile);
+	cfg_parse(SYSCONF_PREFIX "/gbsplayrc", options);
+	cfg_parse((const char*)usercfg, options);
+	free(usercfg);
+	parseopts(&argc, &argv);
+	select_plugin();
+
+	if (argc < 1) {
+		usage(1);
+	}
+
+	if (sound_open(endian, rate) != 0) {
+		fprintf(stderr, _("Could not open output plugin \"%s\"\n"),
+		        sound_name);
+		exit(1);
+	}
+
+	if (sound_io)
+		gbhw_setiocallback(iocallback, NULL);
+	if (sound_write)
+		gbhw_setcallback(callback, NULL);
+	gbhw_setrate(rate);
+	if (!gbhw_setfilter(filter_type)) {
+		fprintf(stderr, _("Invalid filter type \"%s\"\n"), filter_type);
+		exit(1);
+	}
+
+	if (argc >= 2) {
+		sscanf(argv[1], "%ld", &subsong_start);
+		subsong_start--;
+	}
+
+	if (argc >= 3) {
+		sscanf(argv[2], "%ld", &subsong_stop);
+		subsong_stop--;
+	}
+
+	gbs = gbs_open(argv[0]);
+	if (gbs == NULL) {
+		exit(1);
+	}
+
+	/* sanitize commandline values */
+	if (subsong_start < -1) {
+		subsong_start = 0;
+	} else if (subsong_start >= gbs->songs) {
+		subsong_start = gbs->songs-1;
+	}
+	if (subsong_stop <  0) {
+		subsong_stop = -1;
+	} else if (subsong_stop >= gbs->songs) {
+		subsong_stop = -1;
+	}
+
+	gbs->subsong = subsong_start;
+	gbs->subsong_timeout = subsong_timeout;
+	gbs->silence_timeout = silence_timeout;
+	gbs->gap = subsong_gap;
+	gbs->fadeout = fadeout;
+	setup_playmode(gbs);
+	gbhw_setbuffer(&buf);
+	gbs_set_nextsubsong_cb(gbs, nextsubsong_cb, NULL);
+	gbs_init(gbs, gbs->subsong);
+	if (sound_skip)
+		sound_skip(gbs->subsong);
+	if (verbosity>0) {
+		gbs_printinfo(gbs, 0);
+	}
+
+	return gbs;
 }

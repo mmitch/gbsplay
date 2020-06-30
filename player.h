@@ -68,18 +68,9 @@ extern struct gbhw_buffer buf;
 
 extern const struct cfg_option options[];
 
-regparm void swap_endian(struct gbhw_buffer *buf);
-regparm void iocallback(long cycles, uint32_t addr, uint8_t val, void *priv);
-regparm void callback(struct gbhw_buffer *buf, void *priv);
-regparm long *setup_playlist(long songs);
 regparm long get_next_subsong(struct gbs *gbs);
 regparm int get_prev_subsong(struct gbs *gbs);
-regparm void setup_playmode(struct gbs *gbs);
 regparm long nextsubsong_cb(struct gbs *gbs, void *priv);
-char *endian_str(long endian);
-regparm void version(void);
-regparm void usage(long exitcode);
-regparm void parseopts(int *argc, char ***argv);
-regparm void select_plugin(void);
+regparm struct gbs *common_init(int argc, char **argv);
 
 #endif

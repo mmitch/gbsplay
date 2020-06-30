@@ -9,13 +9,8 @@
 #include "player.h"
 
 #include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
 #include <libgen.h>
-
 #include <X11/Xlib.h>
-
-#include "cfgparser.h"
 
 #define GRID(s,t,i) ((t * i / s))
 
@@ -174,97 +169,28 @@ int main(int argc, char **argv)
 	Atom delWindow;
 
 	struct gbs *gbs;
-	char *usercfg;
 	struct sigaction sa;
 
-	i18n_init();
+	gbs = common_init(argc, argv);
 
-	/* initialize RNG */
-	random_seed = time(0)+getpid();
-	srand(random_seed);
-
-	usercfg = get_userconfig(cfgfile);
-	cfg_parse(SYSCONF_PREFIX "/gbsplayrc", options);
-	cfg_parse((const char*)usercfg, options);
-	free(usercfg);
-	parseopts(&argc, &argv);
-	select_plugin();
-
-	if (argc < 1) {
-		usage(1);
-	}
-
-	if (sound_open(endian, rate) != 0) {
-		fprintf(stderr, _("Could not open output plugin \"%s\"\n"),
-		        sound_name);
-		exit(1);
-	}
-
-	if (sound_io)
-		gbhw_setiocallback(iocallback, NULL);
-	if (sound_write)
-		gbhw_setcallback(callback, NULL);
-	gbhw_setrate(rate);
-	if (!gbhw_setfilter(filter_type)) {
-		fprintf(stderr, _("Invalid filter type \"%s\"\n"), filter_type);
-		exit(1);
-	}
-
-	if (argc >= 2) {
-		sscanf(argv[1], "%ld", &subsong_start);
-		subsong_start--;
-	}
-
-	if (argc >= 3) {
-		sscanf(argv[2], "%ld", &subsong_stop);
-		subsong_stop--;
-	}
-
-	gbs = gbs_open(argv[0]);
-	if (gbs == NULL) {
-		exit(1);
-	}
-	strncpy(filename, basename(argv[0]), sizeof(filename));
-	filename[sizeof(filename) - 1] = '\0';
-
-	/* sanitize commandline values */
-	if (subsong_start < -1) {
-		subsong_start = 0;
-	} else if (subsong_start >= gbs->songs) {
-		subsong_start = gbs->songs-1;
-	}
-	if (subsong_stop <  0) {
-		subsong_stop = -1;
-	} else if (subsong_stop >= gbs->songs) {
-		subsong_stop = -1;
-	}
-	
-	gbs->subsong = subsong_start;
-	gbs->subsong_timeout = subsong_timeout;
-	gbs->silence_timeout = silence_timeout;
-	gbs->gap = subsong_gap;
-	gbs->fadeout = fadeout;
-	setup_playmode(gbs);
-	gbhw_setbuffer(&buf);
-	gbs_set_nextsubsong_cb(gbs, nextsubsong_cb, NULL);
-	gbs_init(gbs, gbs->subsong);
-	if (sound_skip)
-		sound_skip(gbs->subsong);
-	if (verbosity>0) {
-		gbs_printinfo(gbs, 0);
-	}
-
+	/* init signal handlers */
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = exit_handler;
 	sigaction(SIGTERM, &sa, NULL);
 	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGSEGV, &sa, NULL);
 
+	/* prepare filename for display */
+	strncpy(filename, basename(argv[0]), sizeof(filename));
+	filename[sizeof(filename) - 1] = '\0';
+
 	display = XOpenDisplay(NULL);
 	if (display == NULL) {
 		fprintf(stderr, "Cannot open display\n");
 		exit(1);
 	}
+
+	/* init X11 */
 	screen = DefaultScreen(display);
 	window = XCreateSimpleWindow(display, RootWindow(display, screen),
 				     10, 10, 200, 50, 0,
@@ -281,6 +207,7 @@ int main(int argc, char **argv)
 
 	XMapWindow(display, window);
 
+	/* main loop */
 	while (!quit) {
 		if (!gbs_step(gbs, refresh_delay)) {
 			quit = 1;
@@ -310,11 +237,13 @@ int main(int argc, char **argv)
 		updatetitle(gbs);
 	}
 
+	/* stop sound */
+	sound_close();
+
+	/* clean up X11 stuff */
 	XFreeGC(display, gc);
 	XDestroyWindow(display, window);
 	XCloseDisplay(display);
-
-	sound_close();
 
 	return 0;
 }
