@@ -30,133 +30,6 @@ static Window window;
 static int screen;
 static GC gc;
 
-/* configuration directives */
-static const struct cfg_option options[] = {
-	{ "endian", &endian, cfg_endian },
-	{ "fadeout", &fadeout, cfg_long },
-	{ "filter_type", &filter_type, cfg_string },
-	{ "loop", &loopmode, cfg_long },
-	{ "output_plugin", &sound_name, cfg_string },
-	{ "rate", &rate, cfg_long },
-	{ "refresh_delay", &refresh_delay, cfg_long },
-	{ "silence_timeout", &silence_timeout, cfg_long },
-	{ "subsong_gap", &subsong_gap, cfg_long },
-	{ "subsong_timeout", &subsong_timeout, cfg_long },
-	/* playmode not implemented yet */
-	{ NULL, NULL, NULL }
-};
-
-static regparm void usage(long exitcode)
-{
-	FILE *out = exitcode ? stderr : stdout;
-	fprintf(out,
-		_("Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
-		  "\n"
-		  "Available options are:\n"
-		  "  -E        endian, b == big, l == little, n == native (%s)\n"
-		  "  -f        set fadeout (%ld seconds)\n"
-		  "  -g        set subsong gap (%ld seconds)\n"
-		  "  -h        display this help and exit\n"
-		  "  -H        set output high-pass type (%s)\n"
-		  "  -l        loop mode\n"
-		  "  -o        select output plugin (%s)\n"
-		  "            'list' shows available plugins\n"
-		  "  -r        set samplerate (%ldHz)\n"
-		  "  -R        set refresh delay (%ld milliseconds)\n"
-		  "  -t        set subsong timeout (%ld seconds)\n"
-		  "  -T        set silence timeout (%ld seconds)\n"
-		  "  -V        print version and exit\n"
-		  "  -z        play subsongs in shuffle mode\n"
-		  "  -Z        play subsongs in random mode (repetitions possible)\n"
-		  "  -1 to -4  mute a channel on startup\n"),
-		myname,
-		endian_str(endian),
-		fadeout,
-		subsong_gap,
-		_(filter_type),
-		sound_name,
-		rate,
-		refresh_delay,
-		subsong_timeout,
-		silence_timeout);
-	exit(exitcode);
-}
-
-static regparm void parseopts(int *argc, char ***argv)
-{
-	long res;
-	myname = *argv[0];
-	while ((res = getopt(*argc, *argv, "1234c:E:f:g:hH:lo:r:R:t:T:VzZ")) != -1) {
-		switch (res) {
-		default:
-			usage(1);
-			break;
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-			gbhw_ch[res-'1'].mute ^= 1;
-			break;
-		case 'c':
-			cfg_parse(optarg, options);
-			break;
-		case 'E':
-			if (strcasecmp(optarg, "b") == 0) {
-				endian = PLUGOUT_ENDIAN_BIG;
-			} else if (strcasecmp(optarg, "l") == 0) {
-				endian = PLUGOUT_ENDIAN_LITTLE;
-			} else if (strcasecmp(optarg, "n") == 0) {
-				endian = PLUGOUT_ENDIAN_NATIVE;
-			} else {
-				printf(_("\"%s\" is not a valid endian.\n\n"), optarg);
-				usage(1);
-			}
-			break;
-		case 'f':
-			sscanf(optarg, "%ld", &fadeout);
-			break;
-		case 'g':
-			sscanf(optarg, "%ld", &subsong_gap);
-			break;
-		case 'h':
-			usage(0);
-			break;
-		case 'H':
-			filter_type = optarg;
-			break;
-		case 'l':
-			loopmode = 1;
-			break;
-		case 'o':
-			sound_name = optarg;
-			break;
-		case 'r':
-			sscanf(optarg, "%ld", &rate);
-			break;
-		case 'R':
-			sscanf(optarg, "%ld", &refresh_delay);
-			break;
-		case 't':
-			sscanf(optarg, "%ld", &subsong_timeout);
-			break;
-		case 'T':
-			sscanf(optarg, "%ld", &silence_timeout);
-			break;
-		case 'V':
-			version();
-			break;
-		case 'z':
-			playmode = PLAYMODE_SHUFFLE;
-			break;
-		case 'Z':
-			playmode = PLAYMODE_RANDOM;
-			break;
-		}
-	}
-	*argc -= optind;
-	*argv += optind;
-}
-
 static regparm void updatetitle(struct gbs *gbs)
 {
 	long time = gbs->ticks / GBHW_CLOCK;
@@ -191,31 +64,6 @@ void exit_handler(int signum)
 {
 	printf(_("\nCaught signal %d, exiting...\n"), signum);
 	exit(1);
-}
-
-static regparm void select_plugin(void)
-{
-	const struct output_plugin *plugout;
-
-	if (strcmp(sound_name, "list") == 0) {
-		plugout_list_plugins();
-		exit(0);
-	}
-
-	plugout = plugout_select_by_name(sound_name);
-	if (plugout == NULL) {
-		fprintf(stderr, _("\"%s\" is not a known output plugin.\n\n"),
-		        sound_name);
-		exit(1);
-	}
-
-	sound_open = plugout->open;
-	sound_skip = plugout->skip;
-	sound_io = plugout->io;
-	sound_write = plugout->write;
-	sound_close = plugout->close;
-	sound_pause = plugout->pause;
-	sound_description = plugout->description;
 }
 
 static void drawbuttons()
@@ -402,6 +250,9 @@ int main(int argc, char **argv)
 	gbs_init(gbs, gbs->subsong);
 	if (sound_skip)
 		sound_skip(gbs->subsong);
+	if (verbosity>0) {
+		gbs_printinfo(gbs, 0);
+	}
 
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = exit_handler;

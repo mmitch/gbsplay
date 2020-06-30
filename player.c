@@ -10,8 +10,10 @@
 #include "common.h"
 
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "util.h"
+#include "cfgparser.h"
 
 #include "player.h"
 
@@ -32,6 +34,7 @@ long refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
 long playmode = PLAYMODE_LINEAR;
 long loopmode = 0;
 enum plugout_endian endian = PLUGOUT_ENDIAN_NATIVE;
+long verbosity = 3;
 long rate = 44100;
 long silence_timeout = 2;
 long fadeout = 3;
@@ -49,6 +52,7 @@ plugout_open_fn  sound_open;
 plugout_skip_fn  sound_skip;
 plugout_pause_fn sound_pause;
 plugout_io_fn    sound_io;
+plugout_step_fn  sound_step;
 plugout_write_fn sound_write;
 plugout_close_fn sound_close;
 
@@ -57,6 +61,23 @@ struct gbhw_buffer buf = {
 	.data = samples,
 	.pos  = 0,
 	.bytes = sizeof(samples),
+};
+
+/* configuration directives */
+const struct cfg_option options[] = {
+	{ "endian", &endian, cfg_endian },
+	{ "fadeout", &fadeout, cfg_long },
+	{ "filter_type", &filter_type, cfg_string },
+	{ "loop", &loopmode, cfg_long },
+	{ "output_plugin", &sound_name, cfg_string },
+	{ "rate", &rate, cfg_long },
+	{ "refresh_delay", &refresh_delay, cfg_long },
+	{ "silence_timeout", &silence_timeout, cfg_long },
+	{ "subsong_gap", &subsong_gap, cfg_long },
+	{ "subsong_timeout", &subsong_timeout, cfg_long },
+	{ "verbosity", &verbosity, cfg_long },
+	/* playmode not implemented yet */
+	{ NULL, NULL, NULL }
 };
 
 regparm void swap_endian(struct gbhw_buffer *buf)
@@ -227,4 +248,153 @@ regparm void version(void)
 {
 	printf("%s %s\n", myname, GBS_VERSION);
 	exit(0);
+}
+
+regparm void usage(long exitcode)
+{
+	FILE *out = exitcode ? stderr : stdout;
+	fprintf(out,
+		_("Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
+		  "\n"
+		  "Available options are:\n"
+		  "  -E        endian, b == big, l == little, n == native (%s)\n"
+		  "  -f        set fadeout (%ld seconds)\n"
+		  "  -g        set subsong gap (%ld seconds)\n"
+		  "  -h        display this help and exit\n"
+		  "  -H        set output high-pass type (%s)\n"
+		  "  -l        loop mode\n"
+		  "  -o        select output plugin (%s)\n"
+		  "            'list' shows available plugins\n"
+		  "  -q        reduce verbosity\n"
+		  "  -r        set samplerate (%ldHz)\n"
+		  "  -R        set refresh delay (%ld milliseconds)\n"
+		  "  -t        set subsong timeout (%ld seconds)\n"
+		  "  -T        set silence timeout (%ld seconds)\n"
+		  "  -v        increase verbosity\n"
+		  "  -V        print version and exit\n"
+		  "  -z        play subsongs in shuffle mode\n"
+		  "  -Z        play subsongs in random mode (repetitions possible)\n"
+		  "  -1 to -4  mute a channel on startup\n"),
+		myname,
+		endian_str(endian),
+		fadeout,
+		subsong_gap,
+		_(filter_type),
+		sound_name,
+		rate,
+		refresh_delay,
+		subsong_timeout,
+		silence_timeout);
+	exit(exitcode);
+}
+
+regparm void parseopts(int *argc, char ***argv)
+{
+	long res;
+	myname = *argv[0];
+	while ((res = getopt(*argc, *argv, "1234c:E:f:g:hH:lo:qr:R:t:T:vVzZ")) != -1) {
+		switch (res) {
+		default:
+			usage(1);
+			break;
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+			gbhw_ch[res-'1'].mute ^= 1;
+			break;
+		case 'c':
+			cfg_parse(optarg, options);
+			break;
+		case 'E':
+			if (strcasecmp(optarg, "b") == 0) {
+				endian = PLUGOUT_ENDIAN_BIG;
+			} else if (strcasecmp(optarg, "l") == 0) {
+				endian = PLUGOUT_ENDIAN_LITTLE;
+			} else if (strcasecmp(optarg, "n") == 0) {
+				endian = PLUGOUT_ENDIAN_NATIVE;
+			} else {
+				printf(_("\"%s\" is not a valid endian.\n\n"), optarg);
+				usage(1);
+			}
+			break;
+		case 'f':
+			sscanf(optarg, "%ld", &fadeout);
+			break;
+		case 'g':
+			sscanf(optarg, "%ld", &subsong_gap);
+			break;
+		case 'h':
+			usage(0);
+			break;
+		case 'H':
+			filter_type = optarg;
+			break;
+		case 'l':
+			loopmode = 1;
+			break;
+		case 'o':
+			sound_name = optarg;
+			break;
+		case 'q':
+			verbosity -= 1;
+			break;
+		case 'r':
+			sscanf(optarg, "%ld", &rate);
+			break;
+		case 'R':
+			sscanf(optarg, "%ld", &refresh_delay);
+			break;
+		case 't':
+			sscanf(optarg, "%ld", &subsong_timeout);
+			break;
+		case 'T':
+			sscanf(optarg, "%ld", &silence_timeout);
+			break;
+		case 'v':
+			verbosity += 1;
+			break;
+		case 'V':
+			version();
+			break;
+		case 'z':
+			playmode = PLAYMODE_SHUFFLE;
+			break;
+		case 'Z':
+			playmode = PLAYMODE_RANDOM;
+			break;
+		}
+	}
+	*argc -= optind;
+	*argv += optind;
+}
+
+regparm void select_plugin(void)
+{
+	const struct output_plugin *plugout;
+
+	if (strcmp(sound_name, "list") == 0) {
+		plugout_list_plugins();
+		exit(0);
+	}
+
+	plugout = plugout_select_by_name(sound_name);
+	if (plugout == NULL) {
+		fprintf(stderr, _("\"%s\" is not a known output plugin.\n\n"),
+		        sound_name);
+		exit(1);
+	}
+
+	sound_open = plugout->open;
+	sound_skip = plugout->skip;
+	sound_io = plugout->io;
+	sound_step = plugout->step;
+	sound_write = plugout->write;
+	sound_close = plugout->close;
+	sound_pause = plugout->pause;
+	sound_description = plugout->description;
+
+	if (plugout->flags & PLUGOUT_USES_STDOUT) {
+		verbosity = 0;
+	}
 }

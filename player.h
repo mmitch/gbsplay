@@ -14,6 +14,7 @@
 
 #include "gbs.h"
 #include "plugout.h"
+#include "cfgparser.h"
 
 #define LN2 .69314718055994530941
 #define MAGIC 5.78135971352465960412
@@ -41,6 +42,7 @@ extern long refresh_delay;
 extern long playmode;
 extern long loopmode;
 extern enum plugout_endian endian;
+extern long verbosity;
 extern long rate;
 extern long silence_timeout;
 extern long fadeout;
@@ -58,10 +60,13 @@ extern plugout_open_fn  sound_open;
 extern plugout_skip_fn  sound_skip;
 extern plugout_pause_fn sound_pause;
 extern plugout_io_fn    sound_io;
+extern plugout_step_fn  sound_step;
 extern plugout_write_fn sound_write;
 extern plugout_close_fn sound_close;
 
 extern struct gbhw_buffer buf;
+
+extern const struct cfg_option options[];
 
 regparm void swap_endian(struct gbhw_buffer *buf);
 regparm void iocallback(long cycles, uint32_t addr, uint8_t val, void *priv);
@@ -73,5 +78,8 @@ regparm void setup_playmode(struct gbs *gbs);
 regparm long nextsubsong_cb(struct gbs *gbs, void *priv);
 char *endian_str(long endian);
 regparm void version(void);
+regparm void usage(long exitcode);
+regparm void parseopts(int *argc, char ***argv);
+regparm void select_plugin(void);
 
 #endif
