@@ -1,8 +1,8 @@
 /*
  * xgbsplay is an X11 frontend for gbsplay, the Gameboy sound player
  *
- * 2003-2005,2008,2018 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
- *                            Christian Garbs <mitch@cgarbs.de>
+ * 2003-2005,2008,2018,2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ *                                 Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL.
  */
 
@@ -41,11 +41,6 @@
 #define PLAYMODE_LINEAR  1
 #define PLAYMODE_RANDOM  2
 #define PLAYMODE_SHUFFLE 3
-
-/* lookup tables */
-static char notelookup[4*MAXOCTAVE*12];
-static char vollookup[5*16];
-static const char vols[5] = " -=#%";
 
 /* global variables */
 static char *myname;
@@ -116,43 +111,6 @@ static const struct cfg_option options[] = {
 	/* playmode not implemented yet */
 	{ NULL, NULL, NULL }
 };
-
-static regparm void precalc_notes(void)
-{
-	long i;
-	for (i=0; i<MAXOCTAVE*12; i++) {
-		char *s = notelookup + 4*i;
-		long n = i % 12;
-
-		s[2] = '0' + i / 12;
-		n += (n > 2) + (n > 7);
-		s[0] = 'A' + (n >> 1);
-		if (n & 1) {
-			s[1] = '#';
-		} else {
-			s[1] = '-';
-		}
-	}
-}
-
-static regparm void precalc_vols(void)
-{
-	long i, k;
-	for (k=0; k<16; k++) {
-		long j;
-		char *s = vollookup + 5*k;
-		i = k;
-		for (j=0; j<4; j++) {
-			if (i>=4) {
-				s[j] = vols[4];
-				i -= 4;
-			} else {
-				s[j] = vols[i];
-				i = 0;
-			}
-		}
-	}
-}
 
 static regparm void swap_endian(struct gbhw_buffer *buf)
 {
@@ -625,9 +583,6 @@ int main(int argc, char **argv)
 	if (argc < 1) {
 		usage(1);
 	}
-
-	precalc_notes();
-	precalc_vols();
 
 	if (sound_open(endian, rate) != 0) {
 		fprintf(stderr, _("Could not open output plugin \"%s\"\n"),
