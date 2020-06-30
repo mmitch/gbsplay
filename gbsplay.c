@@ -201,18 +201,10 @@ static regparm void printregs(void)
 
 static regparm void printstatus(struct gbs *gbs)
 {
-	long time = gbs->ticks / GBHW_CLOCK;
-	long timem = time / 60;
-	long times = time % 60;
+	struct displaytime time;
 	char *songtitle;
-	long len = gbs->subsong_info[gbs->subsong].len / 1024;
-	long lenm, lens;
 
-	if (len == 0) {
-		len = subsong_timeout;
-	}
-	lenm = len / 60;
-	lens = len % 60;
+	update_displaytime(&time, gbs);
 
 	songtitle = gbs->subsong_info[gbs->subsong].title;
 	if (!songtitle) {
@@ -222,7 +214,7 @@ static regparm void printstatus(struct gbs *gbs)
 	       "Song %3d/%3d (%s)\033[K\n"
 	       "%02ld:%02ld/%02ld:%02ld",
 	       gbs->subsong+1, gbs->songs, songtitle,
-	       timem, times, lenm, lens);
+	       time.played_min, time.played_sec, time.total_min, time.total_sec);
 	if (verbosity>2) {
 		printf("  %s %s  %s %s  %s %s  %s %s  [%s|%s]\n",
 		       notestring(0), volstring(chvol(0)),

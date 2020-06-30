@@ -27,23 +27,15 @@ static GC gc;
 
 static regparm void updatetitle(struct gbs *gbs)
 {
-	long time = gbs->ticks / GBHW_CLOCK;
-	long timem = time / 60;
-	long times = time % 60;
-	long len = gbs->subsong_info[gbs->subsong].len / 1024;
-	long lenm, lens;
+	struct displaytime time;
 
-	if (len == 0) {
-		len = subsong_timeout;
-	}
-	lenm = len / 60;
-	lens = len % 60;
+	update_displaytime(&time, gbs);
 
 	snprintf(statustext, STATUSTEXT_LENGTH, /* or use sizeof(statustext) ?? */
 		 "xgbsplay %s %d/%d "
 		 "%02ld:%02ld/%02ld:%02ld",
 		 filename, gbs->subsong+1, gbs->songs,
-		 timem, times, lenm, lens);
+		 time.played_min, time.played_sec, time.total_min, time.total_sec);
 
 	if (strncmp(statustext, oldstatustext, STATUSTEXT_LENGTH) != 0) {  /* or use sizeof(statustext) ?? or strcmp() ?? */
 		strncpy(oldstatustext, statustext, STATUSTEXT_LENGTH);

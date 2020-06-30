@@ -235,6 +235,21 @@ regparm long nextsubsong_cb(struct gbs *gbs, void *priv)
 	return true;
 }
 
+regparm void update_displaytime(struct displaytime *time, struct gbs *gbs)
+{
+	long played = gbs->ticks / GBHW_CLOCK;
+	long total = gbs->subsong_info[gbs->subsong].len / 1024;
+
+	time->played_min = played / 60;
+	time->played_sec = played % 60;
+
+	if (total == 0) {
+		total = subsong_timeout;
+	}
+	time->total_min = total / 60;
+	time->total_sec = total % 60;
+}
+
 static regparm char *endian_str(long endian)
 {
 	switch (endian) {
