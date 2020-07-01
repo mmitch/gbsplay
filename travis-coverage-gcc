@@ -1,0 +1,32 @@
+#!/bin/bash
+set -x -e
+
+# only run once in the Travis CI build matrix
+if [[ "$CONFIGURE_FLAGS" =~ --enable-sharedlibgbs ]]; then
+    echo "shared lib build - skipping code coverage"
+    exit 0
+fi
+if [[ "$CC" =~ clang ]]; then
+    echo "clang build - skipping code coverage"
+    exit 0
+fi
+
+# clean up
+make distclean
+
+# this builds impulsegen without coverage - LDFLAGS are not honored during build, so it would fail otherwise :/
+./configure
+make impulse.h
+
+# this builds gbsplay with coverage enabled with GCC
+export CFLAGS="-O0 -coverage"
+export LDFLAGS="-lgcov -coverage"
+./configure 
+make gbsplay
+
+# run the test under coverage
+./gbsplay -c examples/gbsplayrc_sample -E b -o stdout examples/nightmode.gbs >/dev/null
+gcov *.o
+
+# upload to codecov.io
+bash <(curl -s https://codecov.io/bash)

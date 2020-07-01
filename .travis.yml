@@ -1,3 +1,4 @@
+---
 language: c
 os:
   - linux
@@ -25,4 +26,4 @@ compiler:
   - clang
   - gcc
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - ./travis-coverage-gcc
