@@ -1000,7 +1000,7 @@ regparm void gbhw_io_put(uint16_t addr, uint8_t val) {
 /* unmasked peek used by gbsplay.c to print regs */
 regparm uint8_t gbhw_io_peek(uint16_t addr)
 {
-	if (addr >= 0xff10 && addr <= 0xff3e) {
+	if (addr >= 0xff10 && addr <= 0xff3f) {
 		return ioregs[addr & 0x7f];
 	}
 	return 0xff;
