@@ -84,14 +84,14 @@ die()
 ## check for presense of include files
 check_include()
 {
-    include="$1"
-    includedirs="${2-} /usr/local/include /opt/local/include"
-    extraline="${3-}"
-    includename="$(echo "$include" | sed -e 's@[/\.]@_@g')"
+    local include="$1"
+    local includedirs="${2-} /usr/local/include /opt/local/include"
+    local extraline="${3-}"
+    local includename="$(echo "$include" | sed -e 's@[/\.]@_@g')"
     eval "value=\${have_${includename}-}"
     test -z "$value" || return
 
-    flags=""
+    local flags=""
     for dir in "" $includedirs; do
         msg="checking for $include"
         test -z "$dir" || msg="$msg in $dir"
@@ -113,8 +113,8 @@ EOF
 ## find library path needed for lib
 find_lib()
 {
-    lib="$1"
-    libdirs="${2-} /usr/local/lib /opt/local/lib"
+    local lib="$1"
+    local libdirs="${2-} /usr/local/lib /opt/local/lib"
 
     eval "val=\"\${lib${lib}_path-}\""
     if [ ! -z "$val" ]; then
@@ -139,10 +139,10 @@ EOF
 ## remove duplicate flags
 remove_dupes()
 {
-    flags="$1"
-    newflags=""
+    local flags="$1"
+    local newflags=""
     for i in $flags; do
-        dupe=0
+        local dupe=0
         for j in $newflags; do
             test "$i" = "$j" && dupe=1
         done
@@ -155,12 +155,12 @@ remove_dupes()
 
 append_nodupe()
 {
-    varname="$1"
-    dupe=0
+    local varname="$1"
+    local dupe=0
 
     while [ -n "${2-}" ]; do
         eval "flags=\"\$$varname\""
-        append="$2"
+        local append="$2"
 
         if [ -n "$flags" ]; then
             for i in $flags; do
@@ -182,15 +182,15 @@ append_nodupe()
 ## check for needed extra libraries and library paths for a lib
 check_libs()
 {
-    INFILE="$TEMPDIR/cl.c"
-    OUTFILE="$TEMPDIR/cl"
-    checklib="$1"
-    extralibs="${2-}"
-    extralibdirs="${3-}"
-    name="${4-}"
-    extraflags="${5-}"
-    msg="${6--l$checklib}"
-    cflags="$CFLAGS $LDFLAGS"
+    local INFILE="$TEMPDIR/cl.c"
+    local OUTFILE="$TEMPDIR/cl"
+    local checklib="$1"
+    local extralibs="${2-}"
+    local extralibdirs="${3-}"
+    local name="${4-}"
+    local extraflags="${5-}"
+    local msg="${6--l$checklib}"
+    local cflags="$CFLAGS $LDFLAGS"
 
     eval "lib${checklib}_flags="
 
@@ -208,9 +208,9 @@ check_libs()
         fi
     done
 
-    minerrs=$($BUILDCC -o "$OUTFILE" "$INFILE" $cflags "-l$checklib" $extraflags 2>&1 | wc -l)
+    local minerrs=$($BUILDCC -o "$OUTFILE" "$INFILE" $cflags "-l$checklib" $extraflags 2>&1 | wc -l)
     for extralib in $extralibs; do
-        errs=$($BUILDCC -o "$OUTFILE" "$INFILE" $cflags "-l$checklib" "-l$extralib" $extraflags 2>&1 | wc -l)
+        local errs=$($BUILDCC -o "$OUTFILE" "$INFILE" $cflags "-l$checklib" "-l$extralib" $extraflags 2>&1 | wc -l)
         if [ "$errs" -lt "$minerrs" ]; then
             minerrs=$errs
             append_nodupe extraflags "-l$extralib"
@@ -228,18 +228,18 @@ check_libs()
 ## generalized 'does it compile' check
 cc_check()
 {
-    INFILE="$TEMPDIR/cc.c"
-    OUTFILE="$TEMPDIR/cc"
-    name="$1"
-    varname="$2"
-    flags="$CFLAGS $LDFLAGS ${3-}"
-    okmsg="${4-ok}"
-    errmsg="${5-not found}"
+    local INFILE="$TEMPDIR/cc.c"
+    local OUTFILE="$TEMPDIR/cc"
+    local name="$1"
+    local varname="$2"
+    local flags="$CFLAGS $LDFLAGS ${3-}"
+    local okmsg="${4-ok}"
+    local errmsg="${5-not found}"
 
     test "$name" && printf "%s:  " "$name"
 
     cat > "$INFILE"
-    
+
     if "$BUILDCC" -o "$OUTFILE" "$INFILE" $flags; then
         test "$name" && echo "$okmsg"
         test "$varname" && eval "$varname=yes"
@@ -253,7 +253,7 @@ cc_check()
 
 cc_has_flag()
 {
-    flag="$1"
+    local flag="$1"
     cc_check "checking if cc supports ${flag}" "" "${flag} -Werror" yes no <<EOF
 int main(int argc, char **argv) { return 0; }
 EOF
@@ -267,7 +267,7 @@ need_include() {
 
 ## config.h helper
 have_x() {
-    localvar="have_$(echo $1 | tr A-Z a-z)"
+    local localvar="have_$(echo $1 | tr A-Z a-z)"
     eval "result=\$$localvar"
     if [ "$result" = "yes" ]; then
         echo "#define HAVE_$1 1"
@@ -277,7 +277,7 @@ have_x() {
 }
 
 plugout_x() {
-    localvar="use_$(echo $1 | tr A-Z a-z)"
+    local localvar="use_$(echo $1 | tr A-Z a-z)"
     eval "result=\$$localvar"
     if [ "$result" = "yes" ]; then
         echo "#define PLUGOUT_$1 1"
@@ -287,7 +287,7 @@ plugout_x() {
 }
 
 use_x() {
-    localvar="use_$(echo $1 | tr A-Z a-z)"
+    local localvar="use_$(echo $1 | tr A-Z a-z)"
     eval "result=\$$localvar"
     if [ "$result" = "yes" ]; then
         echo "#define USE_$1 1"
@@ -299,9 +299,9 @@ use_x() {
 ## external which is unreliable
 which()
 {
-    IFS_SAVE="$IFS"
+    local IFS_SAVE="$IFS"
     IFS=:
-    PROGRAM="$1"
+    local PROGRAM="$1"
     for ELEMENT in $PATH; do
         if [ -z "$ELEMENT" ]; then
             ELEMENT=.
