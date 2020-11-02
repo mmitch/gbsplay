@@ -987,7 +987,7 @@ static regparm struct gbs *gzip_open(const char *name, char *buf, size_t size)
 	return gbs;
 }
 #else
-static regparm struct gbs *gzip_open(char *name)
+static regparm struct gbs *gzip_open(const char *name, char *buf, size_t size)
 {
 	fprintf(stderr, _("Could not open %s: %s\n"), name, _("Not compiled with zlib support"));
 	return NULL;
