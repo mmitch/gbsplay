@@ -86,6 +86,7 @@ check_include()
 {
     include="$1"
     includedirs="${2-} /usr/local/include /opt/local/include"
+    extraline="${3-}"
     includename="$(echo "$include" | sed -e 's@[/\.]@_@g')"
     eval "value=\${have_${includename}-}"
     test -z "$value" || return
@@ -96,6 +97,7 @@ check_include()
         test -z "$dir" || msg="$msg in $dir"
         test -z "$dir" || flags="-I$dir"
         if cc_check "$msg" "have_$includename" "$flags" ok <<EOF; then
+$extraline
 #include <$include>
 int main(int argc, char **argv) {
     return 0;
@@ -722,7 +724,7 @@ fi
 
 if [ "$use_dsound" != no ]; then
     remember_use dsound
-    check_include dsound.h
+    check_include dsound.h /usr/include/w32api "#include <windows.h>"
     retval1=$?
     retval2=1
     if [ $retval1 -eq 0 ]; then
