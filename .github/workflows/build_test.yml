@@ -1,0 +1,26 @@
+# This workflow will build and test gbsplay in various configurations on various systems.
+
+name: Build and Test
+
+on:
+  push:
+  pull_request:
+    types: [opened]
+
+jobs:
+  build-linux-compiler:
+    name: Build and test in compiler matrix
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build and test
+      env:
+        CC: ${{ matrix.compiler }}
+      run: |
+        make
