@@ -639,15 +639,15 @@ if [ $RESULT -eq 0 ]; then
     if [ "$buildalias" ] && [ "$buildalias" != "$hostalias" ]; then
         echo "cross-compiling, skipping execute check"
     else
-	if [ -s "$OUTFILE" ]; then
+        if [ -s "$OUTFILE" ]; then
             if "$OUTFILE"; then
-		echo "ok"
+                echo "ok"
             else
-		die "can't execute generated code"
+                die "can't execute generated code"
             fi
-	else
+        else
             die "no code generated"
-	fi
+        fi
     fi
 else
     die "error executing '$BUILDCC'"
@@ -921,6 +921,7 @@ if cc_has_flag "-Wswitch-unreachable"; then
 fi
 
 if [ "$use_hardening" != "no" ]; then
+    append_nodupe CFLAGS -D_FORTIFY_SOURCE=2
     if cc_has_flag "-Wl,-z,relro"; then
         append_nodupe LDFLAGS "-Wl,-z,relro"
     fi
@@ -985,7 +986,7 @@ setdefault use_iodumper yes
 printoptional modules build
 printoptional features use
 
-append_nodupe CFLAGS -D_FORTIFY_SOURCE=2 -Wall -fsigned-char
+append_nodupe CFLAGS -Wall -fsigned-char
 
 if [ "$use_debug" = "yes" ]; then
     append_nodupe CFLAGS -g3
