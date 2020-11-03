@@ -20,6 +20,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        sudo apt-get install libasound2-dev libpulse-dev libaudio-dev
     - name: Build and test
       env:
         CC: ${{ matrix.compiler }}
