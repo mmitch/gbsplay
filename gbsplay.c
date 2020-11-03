@@ -16,8 +16,6 @@
 #include <errno.h>
 #include <string.h>
 #include <math.h>
-#include <termios.h>
-#include <signal.h>
 #include <time.h>
 
 #include "gbhw.h"
@@ -26,6 +24,7 @@
 #include "cfgparser.h"
 #include "util.h"
 #include "plugout.h"
+#include "terminal.h"
 
 #define LN2 .69314718055994530941
 #define MAGIC 5.78135971352465960412
@@ -48,7 +47,6 @@ static const char vols[5] = " -=#%";
 /* global variables */
 static char *myname;
 static long quit = 0;
-static struct termios ots;
 static long *subsong_playlist;
 static long subsong_playlist_idx = 0;
 static long pause_mode = 0;
@@ -71,7 +69,7 @@ static long subsong_gap = 2;
 static long subsong_start = -1;
 static long subsong_stop = -1;
 static long subsong_timeout = 2*60;
-static long redraw = false;
+long redraw = false;
 
 static const char cfgfile[] = ".gbsplayrc";
 
@@ -475,7 +473,7 @@ static regparm void handleuserinput(struct gbs *gbs)
 {
 	char c;
 
-	if (read(STDIN_FILENO, &c, 1) != -1) {
+	if (get_input(&c)) {
 		switch (c) {
 		case 'p':
 			gbs->subsong = get_prev_subsong(gbs);
@@ -614,35 +612,6 @@ static regparm void printstatus(struct gbs *gbs)
 	fflush(stdout);
 }
 
-/*
- * signal handlers and main may not use regparm
- * unless libc is using regparm too...
- */
-void exit_handler(int signum)
-{
-	printf(_("\nCaught signal %d, exiting...\n"), signum);
-	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
-	exit(1);
-}
-
-void stop_handler(int signum)
-{
-	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
-}
-
-void cont_handler(int signum)
-{
-	struct termios ts;
-
-	tcgetattr(STDIN_FILENO, &ts);
-	ots = ts;
-	ts.c_lflag &= ~(ICANON | ECHO | ECHONL);
-	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ts);
-	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
-
-	redraw = true;
-}
-
 static regparm void printinfo(struct gbs *gbs)
 {
 	if (verbosity>0) {
@@ -690,8 +659,6 @@ int main(int argc, char **argv)
 {
 	struct gbs *gbs;
 	char *usercfg;
-	struct termios ts;
-	struct sigaction sa;
 
 	i18n_init();
 
@@ -770,22 +737,8 @@ int main(int argc, char **argv)
 	if (sound_skip)
 		sound_skip(gbs->subsong);
 	printinfo(gbs);
-	tcgetattr(STDIN_FILENO, &ts);
-	ots = ts;
-	ts.c_lflag &= ~(ICANON | ECHO | ECHONL);
-	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ts);
 
-	memset(&sa, 0, sizeof(sa));
-	sa.sa_handler = exit_handler;
-	sigaction(SIGTERM, &sa, NULL);
-	sigaction(SIGINT, &sa, NULL);
-	sigaction(SIGSEGV, &sa, NULL);
-	sa.sa_handler = stop_handler;
-	sigaction(SIGSTOP, &sa, NULL);
-	sa.sa_handler = cont_handler;
-	sigaction(SIGCONT, &sa, NULL);
-
-	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+	setup_terminal();
 	while (!quit) {
 		if (!gbs_step(gbs, refresh_delay)) {
 			quit = 1;
@@ -796,7 +749,7 @@ int main(int argc, char **argv)
 		if (verbosity>1) printstatus(gbs);
 		handleuserinput(gbs);
 	}
-	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
+	restore_terminal();
 
 	sound_close();
 

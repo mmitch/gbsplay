@@ -14,6 +14,11 @@
 #include <errno.h>
 #include <string.h>
 
+/* mingw64 also defines __MINGW32__ in addition to __MINGW64__ */
+#ifdef __MINGW32__
+#define HAVE_MINGW 1
+#endif
+
 #ifndef true
 #define true (0==0)
 #define false (!true)
