@@ -1022,7 +1022,7 @@ regparm struct gbs *gbs_open(const char *name)
 	struct stat st;
 	char *buf;
 
-	if ((f = fopen(name, "rb")) == -1) {
+	if ((f = fopen(name, "rb")) == NULL) {
 		fprintf(stderr, _("Could not open %s: %s\n"), name, strerror(errno));
 		return NULL;
 	}
@@ -1032,7 +1032,7 @@ regparm struct gbs *gbs_open(const char *name)
 	}
 	if (st.st_size > GB_MAX_ROM_SIZE) {
 		fprintf(stderr, _("Could not read %s: %s\n"), name, _("Bigger than allowed maximum (4MiB)"));
-		goto exit_free;
+		return NULL;
 	}
 	buf = malloc(st.st_size);
 	if (fread(buf, 1, st.st_size, f) != st.st_size) {
