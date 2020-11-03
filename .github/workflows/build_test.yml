@@ -48,3 +48,32 @@ jobs:
         CONFIGURE_FLAGS: ${{ matrix.flags }}
       run: |
         make
+
+  build-windows:
+    name: Build and test under Windows
+
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        compiler: [gcc]
+        flags: ['', --disable-i18n, --disable-zlib, --enable-sharedlibgbs]
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MSYS
+        install: git base-devel ${{ matrix.compiler }}
+        release: false
+        update: false
+    - name: Build and test
+      env:
+        CONFIGURE_FLAGS: ${{ matrix.flags }}
+      run: |
+        make
