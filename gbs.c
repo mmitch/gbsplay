@@ -605,13 +605,13 @@ static regparm struct gbs *vgm_open(const char *name, char *buf, size_t size)
 	}
 	dmg_clock = le32(&buf[0x80]);
 	if (dmg_clock != 4194304) {
-		fprintf(stderr, _("Unsupported DMG clock: %dHz\n"), dmg_clock);
+		fprintf(stderr, _("Unsupported DMG clock: %ldHz\n"), dmg_clock);
 		gbs_free(gbs);
 		return NULL;
 	}
 	eof_ofs = le32(&buf[0x4]) + 0x4;
 	if (eof_ofs > size) {
-		fprintf(stderr, _("Bad file size in header: %d\n"), eof_ofs);
+		fprintf(stderr, _("Bad file size in header: %ld\n"), eof_ofs);
 		gbs_free(gbs);
 		return NULL;
 	}
@@ -623,7 +623,7 @@ static regparm struct gbs *vgm_open(const char *name, char *buf, size_t size)
 		gd3_len = eof_ofs - gd3_ofs;
 		gd3 = &buf[gd3_ofs];
 		if (gd3_len < 4 || strncmp(gd3, GD3_MAGIC, 4) != 0) {
-			fprintf(stderr, _("Bad GD3 offset: %08x\n"), gd3_ofs);
+			fprintf(stderr, _("Bad GD3 offset: %08lx\n"), gd3_ofs);
 			gbs_free(gbs);
 			return NULL;
 		}
@@ -632,7 +632,7 @@ static regparm struct gbs *vgm_open(const char *name, char *buf, size_t size)
 	data_len = gd3_ofs - data_ofs;
 	data = &buf[data_ofs];
 	if (data_len < 0) {
-		fprintf(stderr, _("Bad data length: %d\n"), data_len);
+		fprintf(stderr, _("Bad data length: %ld\n"), data_len);
 		gbs_free(gbs);
 		return NULL;
 	}

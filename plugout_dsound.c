@@ -72,6 +72,7 @@ static long regparm dsound_open(enum plugout_endian endian, long rate)
 			case DSERR_UNSUPPORTED:
 			case DSERR_UNINITIALIZED:
 				fprintf(stderr, "Wat. ");
+				break;
 			default:
 				fprintf(stderr, "SetCooperativeLevel failed: HRESULT = %lx\n", (unsigned long)hr);
 				break;

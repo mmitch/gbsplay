@@ -443,7 +443,7 @@ config.mk: configure
 
 %.d: %.c config.mk
 	@echo DEP $< -o $@
-	$(Q)./depend.sh $< config.mk > $@ || rm -f $@
+	$(Q)CC=$(BUILDCC) ./depend.sh $< config.mk > $@ || rm -f $@
 
 %.1: %.in.1 config.sed
 	sed -f config.sed $< > $@
