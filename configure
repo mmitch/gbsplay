@@ -1046,6 +1046,7 @@ __EOF__
     echo plugout_nas := $use_nas
     echo plugout_pulse := $use_pulse
     echo plugout_stdout := $use_stdout
+    echo configured := yes
 ) > config.mk
 
 (

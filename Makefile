@@ -50,6 +50,7 @@ SPLINTFLAGS := \
 	-shiftnegative \
 	-shiftimplementation
 
+configured := no
 ifneq ($(noincludes),yes)
 -include config.mk
 endif
@@ -247,14 +248,20 @@ endif
 # include the rules for each subdir
 include $(shell find . -type f -name "subdir.mk")
 
+ifeq ($(configured),yes)
 default: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL) $(TEST_TARGETS)
+else
+default: config.mk
+endif
 
 # include the dependency files
 
 ifneq ($(noincludes),yes)
+ifeq ($(configured),yes)
 deps := $(patsubst %.o,%.d,$(filter %.o,$(objs)))
 deps += $(patsubst %.lo,%.d,$(filter %.lo,$(objs)))
 -include $(deps)
+endif
 endif
 
 distclean: clean
@@ -443,7 +450,7 @@ config.mk: configure
 
 %.d: %.c config.mk
 	@echo DEP $< -o $@
-	$(Q)CC=$(BUILDCC) ./depend.sh $< config.mk > $@ || rm -f $@
+	$(Q)./depend.sh $< config.mk > $@ || rm -f $@
 
 %.1: %.in.1 config.sed
 	sed -f config.sed $< > $@
