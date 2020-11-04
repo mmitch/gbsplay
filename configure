@@ -968,10 +968,24 @@ if [ "$use_hardening" != "no" ]; then
         append_nodupe LDFLAGS "-pie"
     fi
 
-    if cc_has_flag "-fstack-protector-strong"; then
+    if cc_has_flag "-fstack-protector-strong" \
+       && cc_check "checking for working -fstack-protector-strong support" "" "-fstack-protector-strong" <<EOF; then
+int main(int argc, char **argv)
+{
+    char buf[65536];
+    return 0;
+}
+EOF
         append_nodupe CFLAGS "-fstack-protector-strong"
         append_nodupe LDFLAGS "-fstack-protector-strong"
-    elif cc_has_flag "-fstack-protector"; then
+    elif cc_has_flag "-fstack-protector" \
+       && cc_check "checking for working -fstack-protector support" "" "-fstack-protector" <<EOF; then
+int main(int argc, char **argv)
+{
+    char buf[65536];
+    return 0;
+}
+EOF
         append_nodupe CFLAGS "-fstack-protector"
         append_nodupe LDFLAGS "-fstack-protector"
         append_nodupe CFLAGS "--param=ssp-buffer-size=4"
