@@ -21,7 +21,7 @@ jobs:
       matrix:
         msystem: [MSYS, MINGW64, MINGW32]
         compiler: [gcc, mingw-w64-x86_64-toolchain, mingw-w64-i686-toolchain]
-        flags: ['', --disable-i18n, --disable-zlib, --enable-sharedlibgbs, --disable-hardening]
+        flags: ['', --disable-i18n, --disable-zlib, --enable-sharedlibgbs]
         exclude:
           # this exclusion scheme is bonkers!
           - msystem: MSYS
