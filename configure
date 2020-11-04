@@ -969,7 +969,7 @@ if [ "$use_hardening" != "no" ]; then
     fi
 
     if cc_has_flag "-fstack-protector-strong" \
-       && cc_check "checking for working -fstack-protector-strong support" "" "-fstack-protector-strong" <<EOF; then
+       && cc_check "checking if -fstack-protector-strong actually works" "" "-fstack-protector-strong" "yes" "no" <<EOF; then
 int main(int argc, char **argv)
 {
     char buf[65536];
@@ -979,7 +979,7 @@ EOF
         append_nodupe CFLAGS "-fstack-protector-strong"
         append_nodupe LDFLAGS "-fstack-protector-strong"
     elif cc_has_flag "-fstack-protector" \
-       && cc_check "checking for working -fstack-protector support" "" "-fstack-protector" <<EOF; then
+       && cc_check "checking if working -fstack-protector actually works" "" "-fstack-protector" "yes" "no" <<EOF; then
 int main(int argc, char **argv)
 {
     char buf[65536];
@@ -991,7 +991,7 @@ EOF
         append_nodupe CFLAGS "--param=ssp-buffer-size=4"
     fi
     if cc_has_flag "-fstack-clash-protection" \
-       && cc_check "checking for working -fstack-clash-protection support" "" "-fstack-clash-protection" <<EOF; then
+       && cc_check "checking if -fstack-clash-protection actually works" "" "-fstack-clash-protection" "yes" "no" <<EOF; then
 int main(int argc, char **argv)
 {
     char buf[65536];
