@@ -24,7 +24,7 @@ if [ -f "${DIR}subdir.mk" ]; then
 	SUBMK=" ${DIR}subdir.mk"
 fi
 
-exec "$BUILDCC" -M $GBSCFLAGS "$FILE" |
+exec "$CC" -M $GBSCFLAGS "$FILE" |
 	sed -n -e "
 		s@^\\(.*\\)\\.o:@$DIR\\1.d $DIR\\1.o $DIR\\1.lo: depend.sh Makefile$SUBMK$EXTRADEP@
 		s@/usr/[^	 ]*@@g

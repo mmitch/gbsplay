@@ -16,6 +16,7 @@ all: default
 
 noincludes  := $(patsubst distclean,yes,$(MAKECMDGOALS))
 
+# Defaults, overridden by config.mk below once configure has run
 prefix      := /usr/local
 exec_prefix := $(prefix)
 
@@ -55,9 +56,19 @@ ifneq ($(noincludes),yes)
 -include config.mk
 endif
 
+generatedeps := no
+ifneq ($(noincludes),yes)
+ifeq ($(configured),yes)
+ifeq ($(wildcard impulse.h),impulse.h)
+generatedeps := yes
+endif
+endif
+endif
+
 XMMSPREFIX  :=
 DESTDIR     :=
 
+# Update paths with user-provided DESTDIR
 prefix      := $(DESTDIR)$(prefix)
 exec_prefix := $(DESTDIR)$(exec_prefix)
 bindir      := $(DESTDIR)$(bindir)
@@ -248,20 +259,17 @@ endif
 # include the rules for each subdir
 include $(shell find . -type f -name "subdir.mk")
 
-ifeq ($(configured),yes)
-default: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL) $(TEST_TARGETS)
-else
-default: config.mk
-endif
+ifeq ($(generatedeps),yes)
+# Ready to build deps and everything else
+default: config.mk impulse.h $(objs) $(dsts) $(mans) $(EXTRA_ALL) $(TEST_TARGETS)
 
-# include the dependency files
-
-ifneq ($(noincludes),yes)
-ifeq ($(configured),yes)
+# Generate & include the dependency files
 deps := $(patsubst %.o,%.d,$(filter %.o,$(objs)))
 deps += $(patsubst %.lo,%.d,$(filter %.lo,$(objs)))
 -include $(deps)
-endif
+else
+# Configure still needs to be run and/or impulse.h is not generated yet
+default: config.mk impulse.h
 endif
 
 distclean: clean
@@ -400,8 +408,7 @@ $(gen_impulse_h_bin): $(objs_gen_impulse_h)
 	$(HOSTCC) -o $(gen_impulse_h_bin) $(objs_gen_impulse_h) -lm
 impulse.h: $(gen_impulse_h_bin)
 	$(Q)./$(gen_impulse_h_bin) > $@
-gbhw.o: impulse.h
-gbhw.lo: impulse.h
+	$(Q)$(MAKE)
 
 libgbspic.a: $(objs_libgbspic)
 	$(AR) r $@ $+
@@ -450,7 +457,7 @@ config.mk: configure
 
 %.d: %.c config.mk
 	@echo DEP $< -o $@
-	$(Q)./depend.sh $< config.mk > $@ || rm -f $@
+	$(Q)CC=$(BUILDCC) ./depend.sh $< config.mk > $@ || rm -f $@
 
 %.1: %.in.1 config.sed
 	sed -f config.sed $< > $@
