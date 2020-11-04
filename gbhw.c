@@ -94,15 +94,15 @@ static long pause_output = 0;
 static long rom_lockout = 1;
 
 static gbhw_callback_fn callback;
-static /*@null@*/ /*@dependent@*/ void *callbackpriv;
-static /*@null@*/ /*@dependent@*/ struct gbhw_buffer *soundbuf = NULL; /* externally visible output buffer */
-static /*@null@*/ /*@only@*/ struct gbhw_buffer *impbuf = NULL;   /* internal impulse output buffer */
+static void *callbackpriv;
+static struct gbhw_buffer *soundbuf = NULL; /* externally visible output buffer */
+static struct gbhw_buffer *impbuf = NULL;   /* internal impulse output buffer */
 
 static gbhw_iocallback_fn iocallback;
-static /*@null@*/ /*@dependent@*/ void *iocallback_priv;
+static void *iocallback_priv;
 
 static gbhw_stepcallback_fn stepcallback;
-static /*@null@*/ /*@dependent@*/ void *stepcallback_priv;
+static void *stepcallback_priv;
 
 #define TAP1_15		0x4000;
 #define TAP2_15		0x2000;

@@ -12,10 +12,6 @@
  * the xmms code is nas_find_device, but I did not check that. :-)
  */
 
-/*@-nullpass@*/
-/*@-onlytrans@*/
-/*@-uniondef@*/
-
 #include "common.h"
 
 #include <stdio.h>
@@ -30,7 +26,7 @@
 #define NAS_BUFFER_SAMPLES 8192
 
 /* global variables */
-static /*@null@*/ AuServer *nas_server;
+static AuServer *nas_server;
 static AuFlowID             nas_flow;
 
 /* forward function declarations */
@@ -55,7 +51,7 @@ const struct output_plugin plugout_nas = {
  * @param status  NAS status code to convert
  * @return  Pointer to static buffer with the resulting error message
  */
-static regparm  /*@temp@*/ char *nas_error(AuStatus status)
+static regparm char *nas_error(AuStatus status)
 {
 	static char s[100];
 

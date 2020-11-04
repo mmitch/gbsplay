@@ -21,6 +21,6 @@ void  regparm cfg_string(void *ptr);
 void  regparm cfg_long(void *ptr);
 void  regparm cfg_endian(void *ptr);
 void  regparm cfg_parse(const char *fname, const struct cfg_option *options);
-/*@null@*/ /*@only@*/ char* regparm get_userconfig(const char* cfgfile);
+char* regparm get_userconfig(const char* cfgfile);
 
 #endif

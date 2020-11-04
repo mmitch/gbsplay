@@ -28,29 +28,6 @@ localedir   := $(prefix)/share/locale
 mimedir     := $(prefix)/share/mime
 appdir      := $(prefix)/share/applications
 
-SPLINT := splint
-
-SPLINTFLAGS := \
-	+quiet \
-	-exportlocal \
-	-unrecog \
-	-immediatetrans \
-	-fullinitblock \
-	-namechecks \
-	-preproc \
-	-fcnuse \
-	-predboolint \
-	-boolops \
-	-formatconst \
-	-type \
-	+unixlib \
-	+boolint \
-	+matchanyintegral \
-	+charint \
-	-predboolothers \
-	-shiftnegative \
-	-shiftimplementation
-
 configured := no
 ifneq ($(noincludes),yes)
 -include config.mk
@@ -433,7 +410,6 @@ gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 	$(Q)$(BUILDCC) $(GBSCFLAGS) -fpic -c -o $@ $<
 .c.o:
 	@echo CC $< -o $@
-	$(Q)(test -x "`which $(SPLINT)`" && $(SPLINT) $(SPLINTFLAGS) $<) || true
 	$(Q)$(BUILDCC) $(GBSCFLAGS) -fpie -c -o $@ $<
 .c.ho:
 	@echo HOSTCC $< -o $@

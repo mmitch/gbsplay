@@ -7,7 +7,6 @@
 
 #ifndef _COMMON_H_
 #define _COMMON_H_
-/*@-onlytrans@*/
 
 #include "config.h"
 #include <stdio.h>
@@ -49,7 +48,7 @@
 
 #  if GBS_PRESERVE_TEXTDOMAIN == 1
 
-static /*@dependent@*/ inline char* _(const char *msgid)
+static inline char* _(const char *msgid)
 {
 	char *olddomain = textdomain(NULL);
 	char *olddir = bindtextdomain(olddomain, NULL);
@@ -64,7 +63,7 @@ static /*@dependent@*/ inline char* _(const char *msgid)
 
 #  else
 
-static inline /*@dependent@*/ char* _(const char *msgid)
+static inline char* _(const char *msgid)
 {
 	return gettext(msgid);
 }
@@ -134,5 +133,4 @@ static inline long is_be_machine() {
 
 #endif
 
-/*@=onlytrans@*/
 #endif

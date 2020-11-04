@@ -42,7 +42,7 @@ extern const struct output_plugin plugout_pulse;
 extern const struct output_plugin plugout_stdout;
 #endif
 
-typedef /*@null@*/ const struct output_plugin* output_plugin_const_t;
+typedef const struct output_plugin* output_plugin_const_t;
 
 /* in order of preference, see also PLUGOUT_DEFAULT in plugout.h */
 static output_plugin_const_t plugouts[] = {

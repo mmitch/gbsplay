@@ -15,8 +15,8 @@
 
 int fd;
 
-static long regparm stdout_open(/*@unused@*/ enum plugout_endian endian,
-                                /*@unused@*/ long rate)
+static long regparm stdout_open(enum plugout_endian endian,
+                                long rate)
 {
 	/*
 	 * clone and close STDOUT_FILENO

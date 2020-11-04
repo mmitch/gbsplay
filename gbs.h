@@ -60,13 +60,13 @@ struct gbs {
 	void *nextsubsong_cb_priv;
 };
 
-regparm /*@only@*/ /*@null@*/ struct gbs *gbs_open(const char *name);
-regparm /*@only@*/ /*@null@*/ struct gbs *gbs_open_mem(const char *name, char *buf, size_t size);
+regparm struct gbs *gbs_open(const char *name);
+regparm struct gbs *gbs_open_mem(const char *name, char *buf, size_t size);
 regparm long gbs_init(struct gbs *gbs, long subsong);
 regparm long gbs_step(struct gbs *gbs, long time_to_work);
 regparm void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv);
 regparm void gbs_printinfo(struct gbs *gbs, long verbose);
-regparm void gbs_close(/*@only@*/ /*@out@*/ struct gbs *gbs);
+regparm void gbs_close(struct gbs *gbs);
 regparm long gbs_write(struct gbs *gbs, char *name, long version);
 
 #endif

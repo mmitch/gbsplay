@@ -19,7 +19,7 @@
 #include "plugout.h"
 
 static long cfg_line, cfg_char;
-static /*@null@*/ FILE *cfg_file;
+static FILE *cfg_file;
 
 static long nextchar_state;
 

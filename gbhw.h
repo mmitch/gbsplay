@@ -23,7 +23,7 @@
 #define GBHW_FILTER_CONST_CGB 0.998943
 
 struct gbhw_buffer {
-	/*@dependent@*/ int16_t *data;
+	int16_t *data;
 	long pos;
 	long l_lvl;
 	long r_lvl;
@@ -61,16 +61,16 @@ struct gbhw_channel {
 
 extern struct gbhw_channel gbhw_ch[4];
 
-typedef regparm void (*gbhw_callback_fn)(/*@temp@*/ struct gbhw_buffer *buf, /*@temp@*/ void *priv);
-typedef regparm void (*gbhw_iocallback_fn)(long cycles, uint32_t addr, uint8_t valu, /*@temp@*/ void *priv);
-typedef regparm void (*gbhw_stepcallback_fn)(const long cycles, const struct gbhw_channel[], /*@temp@*/ void *priv);
+typedef regparm void (*gbhw_callback_fn)(struct gbhw_buffer *buf, void *priv);
+typedef regparm void (*gbhw_iocallback_fn)(long cycles, uint32_t addr, uint8_t valu, void *priv);
+typedef regparm void (*gbhw_stepcallback_fn)(const long cycles, const struct gbhw_channel[], void *priv);
 
-regparm void gbhw_setcallback(/*@dependent@*/ gbhw_callback_fn fn, /*@dependent@*/ void *priv);
-regparm void gbhw_setiocallback(/*@dependent@*/ gbhw_iocallback_fn fn, /*@dependent@*/ void *priv);
-regparm void gbhw_setstepcallback(/*@dependent@*/ gbhw_stepcallback_fn fn, /*@dependent@*/ void *priv);
+regparm void gbhw_setcallback(gbhw_callback_fn fn, void *priv);
+regparm void gbhw_setiocallback(gbhw_iocallback_fn fn, void *priv);
+regparm void gbhw_setstepcallback(gbhw_stepcallback_fn fn, void *priv);
 regparm long gbhw_setfilter(const char *type);
 regparm void gbhw_setrate(long rate);
-regparm void gbhw_setbuffer(/*@dependent@*/ struct gbhw_buffer *buffer);
+regparm void gbhw_setbuffer(struct gbhw_buffer *buffer);
 regparm void gbhw_init(uint8_t *rombuf, uint32_t size);
 regparm void gbhw_enable_bootrom(const uint8_t *rombuf);
 regparm void gbhw_pause(long new_pause);
