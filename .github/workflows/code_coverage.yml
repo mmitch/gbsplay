@@ -1,0 +1,42 @@
+# This workflow will determine the code coverage of a standard gbsplay build and upload it to CodeCov.io
+
+name: Code Coverage
+
+on:
+  push:
+  pull_request:
+    types: [opened]
+
+jobs:
+  coverage-linux:
+    name: Code Coverage under Linux
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        sudo apt-get install libasound2-dev libpulse-dev libaudio-dev
+    - name: Build impulsegen
+      # this builds impulsegen without coverage - LDFLAGS are not honored during build, so it would fail otherwise :/
+      run: |
+        ./configure
+        make impulse.h
+    - name: Build with coverage
+      # this builds gbsplay with coverage enabled with GCC
+      env:
+        CFLAGS: '-O0 -coverage'
+        LDFLAGS: '-lgcov -coverage'
+      run: |
+        ./configure
+        make gbsplay
+    - name: Test with coverage
+      # run the test under coverage
+      run: |
+        ./gbsplay -c examples/gbsplayrc_sample -E b -o stdout examples/nightmode.gbs >/dev/null
+        gcov *.o
+    - name: Upload coverage
+      # upload to codecov.io
+      run: |
+        bash <(curl -s https://codecov.io/bash)
