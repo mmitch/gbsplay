@@ -47,6 +47,8 @@ appdir=
 sysconfdir=
 buildalias=
 hostalias=
+windows_build=
+windows_libprefix=
 
 ## define sane environment
 unset LC_ALL LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY \
@@ -616,7 +618,6 @@ fi
 ## more defaults
 setdefault build_xmmsplugin no
 setdefault build_contrib yes
-setdefault use_hardening yes
 ## disable test when cross-compiling
 if [ -n "$buildalias" ] && [ "$buildalias" != "$hostalias" ]; then
     build_test=no
@@ -659,15 +660,51 @@ if [ -f .git/HEAD ]; then
     VERSION=$(git describe --tags)
 fi
 
-## check for cygwin environment
+## check for windows environment
 
-printf "checking if OS is Cygwin:  "
-if [ "$(uname -o)" = "Cygwin" ]; then
-    cygwin_build=yes
-    echo "yes"
+# see http://msys2.org/wiki/Porting/
+cc_check "checking if target is windows" windows_build "" yes no <<EOF
+int main(int argc, char **argv)
+{
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
+    return 0;
+#else
+    not windows, fail compile
+#endif
+}
+EOF
+if [ "$windows_build" = yes ]; then
+  # stack-protector has some bugs on windows
+  setdefault use_hardening no
+  if cc_check "" "" "" <<EOF; then
+int main(int argc, char **argv)
+{
+#if defined(__MSYS__)
+    return 0;
+#else
+    not msys, fail compile
+#endif
+}
+EOF
+    windows_libprefix=msys2
+  elif cc_check "" "" "" <<EOF; then
+int main(int argc, char **argv)
+{
+#if defined(__CYGWIN__)
+    return 0;
+#else
+    not cygwin, fail compile
+#endif
+}
+EOF
+    windows_libprefix=cyg
+  else
+    # mingw
+    windows_libprefix=lib
+  fi
 else
-    cygwin_build=no
-    echo "no"
+  # not windows
+  setdefault use_hardening yes
 fi
 
 ## check for various headers
@@ -1042,7 +1079,8 @@ build_xmmsplugin
 have_xgettext
 use_i18n
 use_sharedlibgbs
-cygwin_build
+windows_build
+windows_libprefix
 libaudio_flags
 __EOF__
     echo plugout_alsa := $use_alsa

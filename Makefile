@@ -160,7 +160,7 @@ endif
 
 # Cygwin automatically adds .exe to binaries.
 # We should notice that or we can't rm the files later!
-ifeq ($(cygwin_build),yes)
+ifeq ($(windows_build),yes)
 binsuffix         := .exe
 else
 binsuffix         :=
@@ -180,31 +180,31 @@ libgbs.so.1.ver: libgbs_whitelist.txt gen_linkercfg.sh
 libgbs.def: libgbs_whitelist.txt gen_linkercfg.sh
 	./gen_linkercfg.sh libgbs_whitelist.txt $@ def
 
-ifeq ($(cygwin_build),yes)
-EXTRA_INSTALL += install-cyggbs-1.dll
-EXTRA_UNINSTALL += uninstall-cyggbs-1.dll
+ifeq ($(windows_build),yes)
+EXTRA_INSTALL += install-$(windows_libprefix)gbs-1.dll
+EXTRA_UNINSTALL += uninstall-$(windows_libprefix)gbs-1.dll
 
-install-cyggbs-1.dll:
+install-$(windows_libprefix)gbs-1.dll:
 	install -d $(bindir)
 	install -d $(libdir)
-	install -m 644 cyggbs-1.dll $(bindir)/cyggbs-1.dll
+	install -m 644 $(windows_libprefix)gbs-1.dll $(bindir)/$(windows_libprefix)gbs-1.dll
 	install -m 644 libgbs.dll.a $(libdir)/libgbs.dll.a
 
-uninstall-cyggbs-1.dll:
-	rm -f $(bindir)/cyggbs-1.dll
+uninstall-$(windows_libprefix)gbs-1.dll:
+	rm -f $(bindir)/$(windows_libprefix)gbs-1.dll
 	rm -f $(libdir)/libgbs.dll.a
 	-rmdir -p $(libdir)
 
-cyggbs-1.dll: $(objs_libgbspic) libgbs.so.1.ver
+$(windows_libprefix)gbs-1.dll: $(objs_libgbspic) libgbs.so.1.ver
 	$(CC) -fpic -shared -Wl,-soname=$@ -Wl,--version-script,libgbs.so.1.ver -o $@ $(objs_libgbspic) $(EXTRA_LDFLAGS)
 
 libgbs.dll.a: libgbs.def
-	dlltool --input-def libgbs.def --dllname cyggbs-1.dll --output-lib libgbs.dll.a -k
+	dlltool --input-def libgbs.def --dllname $(windows_libprefix)gbs-1.dll --output-lib libgbs.dll.a -k
 
-libgbs: cyggbs-1.dll libgbs.dll.a
+libgbs: $(windows_libprefix)gbs-1.dll libgbs.dll.a
 	touch libgbs
 
-libgbspic: cyggbs-1.dll libgbs.dll.a
+libgbspic: $(windows_libprefix)gbs-1.dll libgbs.dll.a
 	touch libgbspic
 else
 EXTRA_INSTALL += install-libgbs.so.1
