@@ -54,4 +54,8 @@ jobs:
       env:
         CONFIGURE_FLAGS: ${{ matrix.flags }}
       run: |
-        make || bash -x -v configure
+        make
+    - name: Dump configure on error
+      if: ${{ failure() }}
+      run : |
+        bash -x -v configure
