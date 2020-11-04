@@ -945,8 +945,16 @@ if [ "$use_hardening" != "no" ]; then
         append_nodupe CFLAGS "--param=ssp-buffer-size=4"
     fi
     if cc_has_flag "-fstack-clash-protection"; then
-        append_nodupe CFLAGS "-fstack-clash-protection"
-        append_nodupe LDFLAGS "-fstack-clash-protection"
+	if cc_check "checking for working -fstack-clash-protection support" "" "-fstack-clash-protection" <<EOF; then
+int main(int argc, char **argv)
+{
+    char buf[65536];
+    return 0;
+}
+EOF
+            append_nodupe CFLAGS "-fstack-clash-protection"
+            append_nodupe LDFLAGS "-fstack-clash-protection"
+	fi
     fi
 fi
 
