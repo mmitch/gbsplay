@@ -1,0 +1,31 @@
+# This workflow will build and test gbsplay in various configurations on Linux.
+
+name: Linux Build
+
+on:
+  push:
+  pull_request:
+    types: [opened]
+
+jobs:
+  build-linux:
+    name: Build and test on Linux
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+        flags: ['', --disable-i18n, --disable-zlib, --enable-sharedlibgbs]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        sudo apt-get install libasound2-dev libpulse-dev libaudio-dev
+    - name: Build and test
+      env:
+        CC: ${{ matrix.compiler }}
+        CONFIGURE_FLAGS: ${{ matrix.flags }}
+      run: |
+        make

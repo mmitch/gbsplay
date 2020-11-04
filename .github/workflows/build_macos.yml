@@ -1,0 +1,28 @@
+# This workflow will build and test gbsplay in various configurations on macOS.
+
+name: macOS Build
+
+on:
+  push:
+  pull_request:
+    types: [opened]
+
+jobs:
+  build-macos:
+    name: Build and test on macOS
+
+    runs-on: macos-latest
+
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+        flags: ['', '--disable-i18n --disable-zlib']
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build and test
+      env:
+        CC: ${{ matrix.compiler }}
+        CONFIGURE_FLAGS: ${{ matrix.flags }}
+      run: |
+        make

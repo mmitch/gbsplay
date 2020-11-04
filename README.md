@@ -1,7 +1,9 @@
 # gbsplay - A Gameboy sound player
 
 [![Code coverage status](https://codecov.io/github/mmitch/gbsplay/coverage.svg?branch=master)](https://codecov.io/github/mmitch/gbsplay?branch=master)
-[![Build status](https://github.com/mmitch/gbsplay/workflows/Build%20and%20Test/badge.svg?branch=master)](https://github.com/mmitch/actions)
+[![Linux Build status](https://github.com/mmitch/gbsplay/workflows/Linux%20Build/badge.svg?branch=master)](https://github.com/mmitch/actions)
+[![macOS Build status](https://github.com/mmitch/gbsplay/workflows/macOS%20Build/badge.svg?branch=master)](https://github.com/mmitch/actions)
+[![Windows Build status](https://github.com/mmitch/gbsplay/workflows/Windows%20Build/badge.svg?branch=master)](https://github.com/mmitch/actions)
 [![CodeQL status](https://github.com/mmitch/gbsplay/workflows/CodeQL/badge.svg?branch=master)](https://github.com/mmitch/actions)
 
 This program emulates the sound hardware of the Nintendo Gameboy.  It

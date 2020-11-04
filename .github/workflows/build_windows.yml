@@ -1,0 +1,55 @@
+# This workflow will build and test gbsplay in various configurations on Windows.
+
+name: Windows Build 
+
+on:
+  push:
+  pull_request:
+    types: [opened]
+
+jobs:
+  build-windows:
+    name: Build and test on Windows
+
+    runs-on: windows-latest
+
+    strategy:
+      # TODO: re-activate fail-fast when the build bugs are ironed out
+      fail-fast: false
+      matrix:
+        msystem: [MSYS, MINGW64, MINGW32]
+        compiler: [gcc, mingw-w64-x86_64-toolchain, mingw-w64-i686-toolchain]
+        flags: ['', --disable-i18n, --disable-zlib, --enable-sharedlibgbs, --disable-hardening]
+        exclude:
+          # this exclusion scheme is bonkers!
+          - msystem: MSYS
+            compiler: mingw-w64-x86_64-toolchain
+          - msystem: MSYS
+            compiler: mingw-w64-i686-toolchain
+          - msystem: MINGW64
+            compiler: gcc
+          - msystem: MINGW64
+            compiler: mingw-w64-i686-toolchain
+          - msystem: MINGW32
+            compiler: gcc
+          - msystem: MINGW32
+            compiler: mingw-w64-x86_64-toolchain
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: ${{ matrix.msystem }}
+        install: git base-devel ${{ matrix.compiler }} libintl
+        release: false
+        update: false
+    - name: Build and test
+      env:
+        CONFIGURE_FLAGS: ${{ matrix.flags }}
+      run: |
+        make
