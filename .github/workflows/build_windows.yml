@@ -54,4 +54,4 @@ jobs:
       env:
         CONFIGURE_FLAGS: ${{ matrix.flags }}
       run: |
-        make
+        make || bash -x -v configure
