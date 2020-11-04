@@ -11,6 +11,8 @@ jobs:
   build-linux:
     name: Build and test under Linux
 
+    needs: build-windows
+
     runs-on: ubuntu-latest
 
     strategy:
@@ -32,6 +34,8 @@ jobs:
 
   build-macos:
     name: Build and test under macOS
+
+    needs: build-windows
 
     runs-on: macos-latest
 
@@ -55,9 +59,10 @@ jobs:
     runs-on: windows-latest
 
     strategy:
+      fail-fast: false
       matrix:
         compiler: [gcc]
-        flags: ['', --disable-i18n, --disable-zlib, --enable-sharedlibgbs]
+        flags: ['', --disable-i18n, --disable-zlib, --enable-sharedlibgbs, --disable-hardening]
 
     defaults:
       run:
