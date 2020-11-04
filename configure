@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # vim:set ts=4 et:
 #
@@ -56,11 +56,6 @@ unset LC_ALL LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY \
       LC_MEASUREMENT LC_IDENTIFICATION
 LANG=C
 export LANG
-
-## sane echo is in /usr/ucb on Solaris
-if [ -d /usr/ucb ]; then
-    PATH="/usr/ucb:$PATH"
-fi
 
 ## set default version number to unknown
 # will be overwritten on git build or tar.gz export
