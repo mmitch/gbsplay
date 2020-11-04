@@ -58,4 +58,4 @@ jobs:
     - name: Dump configure on error
       if: ${{ failure() }}
       run : |
-        bash -x -v configure
+        bash -x -v configure && cat config.err
