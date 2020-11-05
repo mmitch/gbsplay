@@ -110,8 +110,11 @@ EOF
 ## find library path needed for lib
 find_lib()
 {
+    local INFILE="$TEMPDIR/fl.c"
     local lib="$1"
     local libdirs="${2-} /usr/local/lib /opt/local/lib"
+
+    cat > "$INFILE"
 
     eval "val=\"\${lib${lib}_path-}\""
     if [ ! -z "$val" ]; then
@@ -122,9 +125,7 @@ find_lib()
             flags="-l$lib"
             test -z "$dir" || msg="$msg in $dir"
             test -z "$dir" || flags="$flags -L$dir"
-            if cc_check "$msg" "" "$flags" ok <<EOF; then
-int main(int argc, char **argv) { return 0; }
-EOF
+            if cc_check "$msg" "" "$flags" ok < "$INFILE"; then
                 eval "lib${lib}_path=\"$dir \""
                 return 0
             fi
@@ -197,7 +198,7 @@ check_libs()
     test $? -eq 0 && return 0
 
     for extralib in $extralibs; do
-        find_lib "$extralib" "$extralibdirs"
+        find_lib "$extralib" "$extralibdirs" < "$INFILE"
         test $? -ne 0 && return 1
         eval "val=\"\$lib${extralib}_path\""
         if [ "$val" != " " ]; then
