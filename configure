@@ -215,6 +215,12 @@ check_libs()
     done
 
     if [ "$minerrs" -ne 0 ]; then
+        # log the default result to config.err
+        (
+            echo "minerrs: $minerrs > 0"
+            cat "$INFILE"
+            $BUILDCC -o "$OUTFILE" "$INFILE" $cflags "-l$checklib" $extraflags
+        ) 1>&2
         return 1
     fi
 
