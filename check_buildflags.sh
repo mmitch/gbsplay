@@ -59,6 +59,7 @@ i18n=yes
 zlib=yes
 harden=yes
 sharedlib=no
+xgbsplay=no
 
 # parse build configuration
 for flag in "$@"; do
@@ -76,6 +77,9 @@ for flag in "$@"; do
 	    ;;
 	--enable-sharedlibgbs)
 	    sharedlib=yes
+	    ;;
+	--with-xgbsplay)
+	    xgbsplay=yes
 	    ;;
 	*)
 	    die "unhandled flag <$flag>"
@@ -109,6 +113,14 @@ else
 fi
 
 expect_to_contain use_sharedlibgbs "$sharedlib"
+
+if [ "$xgbsplay" = yes ]; then
+    expect_to_contain EXTRA_INSTALL "xgbsplay"
+    expect_to_contain EXTRA_UNINSTALL "xgbsplay"
+else
+    expect_to_not_contain EXTRA_INSTALL "xgbsplay"
+    expect_to_not_contain EXTRA_UNINSTALL "xgbsplay"
+fi
 
 # ok
 echo "ok"
