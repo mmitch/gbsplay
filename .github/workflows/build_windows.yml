@@ -1,6 +1,6 @@
 # This workflow will build and test gbsplay in various configurations on Windows.
 
-name: Windows Build 
+name: Windows Build
 
 on:
   push:
@@ -57,5 +57,5 @@ jobs:
         make
     - name: Dump configure on error
       if: ${{ failure() }}
-      run : |
+      run: |
         bash -x -v configure && cat config.err
