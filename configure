@@ -760,7 +760,7 @@ if [ "$use_dsound" != no ]; then
     retval1=$?
     retval2=1
     if [ $retval1 -eq 0 ]; then
-        check_libs dsound "dsound dsound3d" <<EOF
+        check_libs dsound <<EOF
 #include <windows.h>
 #include <dsound.h>
 int main(int argc, char** argv) {
