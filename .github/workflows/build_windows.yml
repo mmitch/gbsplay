@@ -67,3 +67,6 @@ jobs:
       if: ${{ failure() }}
       run: |
         bash -x -v configure && cat config.err
+    - name: Check build flags
+      run: |
+        ./check_buildflags.sh --disable-hardening ${{ matrix.flags }}

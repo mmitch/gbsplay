@@ -31,3 +31,6 @@ jobs:
     - name: Check activated plugouts
       run: |
         ./check_plugouts.sh
+    - name: Check build flags
+      run: |
+        ./check_buildflags.sh ${{ matrix.flags }}
