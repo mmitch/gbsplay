@@ -14,34 +14,44 @@ die()
     exit 1
 }
 
+is_contained_in()
+{
+    local searched="$1" current
+    shift
+    for current in "$@"; do
+	if [ "$current" = "$searched" ]; then
+	    return 0
+	fi
+    done
+    return 1
+}
+
 # these don't have dependencies and should always be built
-declare -A expected_plugouts=( [iodumper]=1 [midi]=1 [altmidi]=1 [stdout]=1 )
+declare -a expected_plugouts=( iodumper midi altmidi stdout )
 
 # additional plugouts are given as commandline parameters
-for arg in $*; do
-    expected_plugouts[$arg]=1
-done
+expected_plugouts+=( $* )
 
 # read configured plugouts
-declare -A enabled_plugouts
+declare -a enabled_plugouts
 
 while read -r prefixed_name _ state; do
     name=${prefixed_name:8}
     if [ "$state" = yes ]; then
-	enabled_plugouts[$name]=1
+	enabled_plugouts+=( $name )
     fi
 done < <( grep ^plugout config.mk)
 
 # check that all expected plugouts are present
-for expected in "${!expected_plugouts[@]}"; do
-    if [ "${enabled_plugouts[$expected]}" != 1 ]; then
+for expected in "${expected_plugouts[@]}"; do
+    if ! is_contained_in "$expected" "${enabled_plugouts[@]}"; then
 	die "expected plugout <$expected> has not been enabled by configure"
     fi
 done
 
 # check that no unexpected plugouts are present
-for enabled in "${!enabled_plugouts[@]}"; do
-    if [ "${expected_plugouts[$enabled]}" != 1 ]; then
+for enabled in "${enabled_plugouts[@]}"; do
+    if ! is_contained_in "$enabled" "${expected_plugouts[@]}" ; then
 	die "unexpected plugout <$enabled> has been enabled by configure"
     fi
 done
