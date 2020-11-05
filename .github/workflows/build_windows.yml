@@ -73,5 +73,6 @@ jobs:
             # MSYS has i18n support
             ./check_buildflags.sh --disable-hardening ${{ matrix.flags }}
         else
-            ./check_buildflags.sh --disable-hardening --disable-i18n ${{ matrix.flags }}
+            # temporarily enable for debugging
+            ./check_buildflags.sh --disable-hardening --enable-i18n ${{ matrix.flags }}
         fi
