@@ -10,6 +10,7 @@ set -e
 
 die()
 {
+    echo "error"
     echo "$@" >&2
     exit 1
 }
@@ -42,16 +43,27 @@ while read -r prefixed_name _ state; do
     fi
 done < <( grep ^plugout config.mk)
 
+# dump status
+echo "expected plugouts: ${expected_plugouts[@]}"
+echo "checking config.mk"
+
 # check that all expected plugouts are present
 for expected in "${expected_plugouts[@]}"; do
+    echo -n "check expected <$expected> to be enabled .. "
     if ! is_contained_in "$expected" "${enabled_plugouts[@]}"; then
 	die "expected plugout <$expected> has not been enabled by configure"
     fi
+    echo "ok"
 done
 
 # check that no unexpected plugouts are present
 for enabled in "${enabled_plugouts[@]}"; do
+    echo -n "check enabled <$enabled> to be expected .. "
     if ! is_contained_in "$enabled" "${expected_plugouts[@]}" ; then
 	die "unexpected plugout <$enabled> has been enabled by configure"
     fi
+    echo "ok"
 done
+
+# ok
+echo "ok"

@@ -10,6 +10,7 @@ set -e
 
 die()
 {
+    echo "error"
     echo "$@" >&2
     exit 1
 }
@@ -35,18 +36,22 @@ expect_to_contain()
 {
     local key="$1" expected="$2"
     
+    echo -n "check <$key> to contain <$expected> .. "
     if ! key_contains "$key" "$expected"; then
 	die "expected value <$expected> not found in key <$key>"
     fi
+    echo "ok"
 }
 
 expect_to_not_contain()
 {
     local key="$1" unexpected="$2"
 
+    echo -n "check <$key> to not contain <$unexpected> .. "
     if key_contains "$key" "$unexpected"; then
 	die "unexpected value <$unexpected> found in key <$key>"
     fi
+    echo "ok"
 }
 
 # default configuration when all dependencies are available
@@ -78,6 +83,10 @@ for flag in "$@"; do
     esac
 done
 
+# dump status
+echo "expected configuration: i18n=$i18n zlib=$zlib harden=$harden sharedlib=$sharedlib"
+echo "checking config.mk"
+
 # test configuration
 expect_to_contain use_i18n "$i18n"
 
@@ -100,3 +109,6 @@ else
 fi
 
 expect_to_contain use_sharedlibgbs "$sharedlib"
+
+# ok
+echo "ok"
