@@ -69,4 +69,9 @@ jobs:
         bash -x -v configure && cat config.err
     - name: Check build flags
       run: |
-        ./check_buildflags.sh --disable-hardening ${{ matrix.flags }}
+        if [ "${{ matrix.msystem }}" = "MSYS" ]; then
+            # MSYS has i18n support
+            ./check_buildflags.sh --disable-hardening ${{ matrix.flags }}
+        else
+            ./check_buildflags.sh --disable-hardening --disable-i18n ${{ matrix.flags }}
+        fi
