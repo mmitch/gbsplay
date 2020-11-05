@@ -55,6 +55,14 @@ jobs:
         CONFIGURE_FLAGS: ${{ matrix.flags }}
       run: |
         make
+    - name: Check activated plugouts
+      run: |
+        if [ "${{ matrix.msystem }}" = "MSYS" ]; then
+            # MSYS has /dev/dsp support
+            ./check_plugouts.sh dsound devdsp
+        else
+            ./check_plugouts.sh dsound
+        fi
     - name: Dump configure on error
       if: ${{ failure() }}
       run: |

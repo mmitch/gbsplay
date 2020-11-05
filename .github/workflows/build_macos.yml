@@ -28,3 +28,6 @@ jobs:
         CONFIGURE_FLAGS: ${{ matrix.flags }}
       run: |
         make
+    - name: Check activated plugouts
+      run: |
+        ./check_plugouts.sh
