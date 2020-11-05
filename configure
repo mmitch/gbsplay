@@ -835,13 +835,8 @@ if [ "$use_i18n" != no ]; then
             append_nodupe CFLAGS "-I$include_libintl_h_path"
             EXTRA_I18NFLAGS="$EXTRA_I18NFLAGS -I$include_libintl_h_path"
         fi
-        use_i18n=yes
-    fi
-    recheck_use i18n
-fi
 
-if [ "$use_i18n" = "yes" ]; then
-    check_libs c "intl" "" "" "$EXTRA_I18NFLAGS" "i18n" <<EOF
+	check_libs c "intl" "" "" "$EXTRA_I18NFLAGS" "i18n" <<EOF
 #include <libintl.h>
 int main(int argc, char **argv)
 {
@@ -851,9 +846,14 @@ int main(int argc, char **argv)
     return 0;
 }
 EOF
-    if [ $? -eq 0 ] && [ "$libc_flags" != "" ]; then
-        append_nodupe LDFLAGS "$libc_flags"
+	if [ $? -eq 0 ]; then
+            use_i18n=yes
+	    if [ "$libc_flags" != "" ]; then
+		append_nodupe LDFLAGS "$libc_flags"
+	    fi
+	fi
     fi
+    recheck_use i18n
 fi
 
 if [ "$build_xmmsplugin" != "no" ]; then
