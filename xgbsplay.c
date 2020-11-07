@@ -26,7 +26,7 @@ static Window window;
 static int screen;
 static GC gc;
 
-static regparm void updatetitle(struct gbs *gbs)
+static void updatetitle(struct gbs *gbs)
 {
 	struct displaytime time;
 
@@ -44,10 +44,6 @@ static regparm void updatetitle(struct gbs *gbs)
 	}
 }
 
-/*
- * signal handlers and main may not use regparm
- * unless libc is using regparm too...
- */
 void exit_handler(int signum)
 {
 	printf(_("\nCaught signal %d, exiting...\n"), signum);
@@ -118,7 +114,7 @@ static void drawbuttons()
 	XFillPolygon(display, window, gc, triangle, 3, Convex, CoordModeOrigin);
 }
 
-static regparm int handlebutton(XButtonEvent *xev, struct gbs *gbs)
+static int handlebutton(XButtonEvent *xev, struct gbs *gbs)
 {
 	XWindowAttributes attrs;
 

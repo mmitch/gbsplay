@@ -83,7 +83,7 @@ const struct cfg_option options[] = {
 	{ NULL, NULL, NULL }
 };
 
-static regparm void swap_endian(struct gbhw_buffer *buf)
+static void swap_endian(struct gbhw_buffer *buf)
 {
 	long i;
 
@@ -93,12 +93,12 @@ static regparm void swap_endian(struct gbhw_buffer *buf)
 	}
 }
 
-static regparm void iocallback(long cycles, uint32_t addr, uint8_t val, void *priv)
+static void iocallback(long cycles, uint32_t addr, uint8_t val, void *priv)
 {
 	sound_io(cycles, addr, val);
 }
 
-static regparm void callback(struct gbhw_buffer *buf, void *priv)
+static void callback(struct gbhw_buffer *buf, void *priv)
 {
 	if ((is_le_machine() && endian == PLUGOUT_ENDIAN_BIG) ||
 	    (is_be_machine() && endian == PLUGOUT_ENDIAN_LITTLE)) {
@@ -108,7 +108,7 @@ static regparm void callback(struct gbhw_buffer *buf, void *priv)
 	buf->pos = 0;
 }
 
-regparm long *setup_playlist(long songs)
+long *setup_playlist(long songs)
 /* setup a playlist in shuffle mode */
 {
 	long i;
@@ -126,7 +126,7 @@ regparm long *setup_playlist(long songs)
 	return playlist;
 }
 
-regparm long get_next_subsong(struct gbs *gbs)
+long get_next_subsong(struct gbs *gbs)
 /* returns the number of the subsong that is to be played next */
 {
 	long next = -1;
@@ -154,7 +154,7 @@ regparm long get_next_subsong(struct gbs *gbs)
 	return next;
 }
 
-regparm int get_prev_subsong(struct gbs *gbs)
+int get_prev_subsong(struct gbs *gbs)
 /* returns the number of the subsong that has been played previously */
 {
 	int prev = -1;
@@ -182,7 +182,7 @@ regparm int get_prev_subsong(struct gbs *gbs)
 	return prev;
 }
 
-static regparm void setup_playmode(struct gbs *gbs)
+static void setup_playmode(struct gbs *gbs)
 /* initializes the chosen playmode (set start subsong etc.) */
 {
 	switch (playmode) {
@@ -217,7 +217,7 @@ static regparm void setup_playmode(struct gbs *gbs)
 	}
 }
 
-regparm long nextsubsong_cb(struct gbs *gbs, void *priv)
+long nextsubsong_cb(struct gbs *gbs, void *priv)
 {
 	long subsong = get_next_subsong(gbs);
 
@@ -237,7 +237,7 @@ regparm long nextsubsong_cb(struct gbs *gbs, void *priv)
 	return true;
 }
 
-regparm void update_displaytime(struct displaytime *time, struct gbs *gbs)
+void update_displaytime(struct displaytime *time, struct gbs *gbs)
 {
 	long played = gbs->ticks / GBHW_CLOCK;
 	long total = gbs->subsong_info[gbs->subsong].len / 1024;
@@ -252,7 +252,7 @@ regparm void update_displaytime(struct displaytime *time, struct gbs *gbs)
 	time->total_sec = total % 60;
 }
 
-static regparm char *endian_str(long endian)
+static char *endian_str(long endian)
 {
 	switch (endian) {
 	case PLUGOUT_ENDIAN_BIG: return "big";
@@ -262,7 +262,7 @@ static regparm char *endian_str(long endian)
 	}
 }
 
-static regparm char *filename_only(char *with_pathname)
+static char *filename_only(char *with_pathname)
 /* this creates an additional reference the original string, so don't free it */
 {
 	char *ret = with_pathname;
@@ -277,13 +277,13 @@ static regparm char *filename_only(char *with_pathname)
 	return ret;
 }
 
-static regparm void version(void)
+static void version(void)
 {
 	printf("%s %s\n", myname, GBS_VERSION);
 	exit(0);
 }
 
-static regparm void usage(long exitcode)
+static void usage(long exitcode)
 {
 	FILE *out = exitcode ? stderr : stdout;
 	fprintf(out,
@@ -321,7 +321,7 @@ static regparm void usage(long exitcode)
 	exit(exitcode);
 }
 
-static regparm void parseopts(int *argc, char ***argv)
+static void parseopts(int *argc, char ***argv)
 {
 	long res;
 	myname = filename_only(*argv[0]);
@@ -402,7 +402,7 @@ static regparm void parseopts(int *argc, char ***argv)
 	*argv += optind;
 }
 
-static regparm void select_plugin(void)
+static void select_plugin(void)
 {
 	const struct output_plugin *plugout;
 
@@ -432,7 +432,7 @@ static regparm void select_plugin(void)
 	}
 }
 
-regparm struct gbs *common_init(int argc, char **argv)
+struct gbs *common_init(int argc, char **argv)
 {
 	char *usercfg;
 	struct gbs *gbs;

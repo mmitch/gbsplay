@@ -23,7 +23,7 @@
 pa_simple *pulse_handle;
 pa_sample_spec pulse_spec;
 
-static long regparm pulse_open(enum plugout_endian endian, long rate)
+static long pulse_open(enum plugout_endian endian, long rate)
 {
 	int err;
 
@@ -44,12 +44,12 @@ static long regparm pulse_open(enum plugout_endian endian, long rate)
 	return 0;
 }
 
-static ssize_t regparm pulse_write(const void *buf, size_t count)
+static ssize_t pulse_write(const void *buf, size_t count)
 {
 	return pa_simple_write(pulse_handle, buf, count, NULL);
 }
 
-static void regparm pulse_close()
+static void pulse_close()
 {
 	pa_simple_free(pulse_handle);
 }

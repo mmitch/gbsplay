@@ -111,7 +111,7 @@ enum gbs_state {
  * into libgbs.
  ********************************************************************/
 
-static regparm long gbs_time(struct gbs *gbs, long subsong) {
+static long gbs_time(struct gbs *gbs, long subsong) {
 	long res = 0;
 	long i;
 
@@ -125,7 +125,7 @@ static regparm long gbs_time(struct gbs *gbs, long subsong) {
 	return res;
 }
 
-static regparm void next_subsong(long flush)
+static void next_subsong(long flush)
 {
 	if (!(gbs_ip.output && gbs)) return;
 	if (!flush) {
@@ -143,7 +143,7 @@ static regparm void next_subsong(long flush)
 	gbs_ip.output->flush(gbs_time(gbs, gbs->subsong));
 }
 
-static regparm void prev_subsong(void)
+static void prev_subsong(void)
 {
 	if (!(gbs_ip.output && gbs)) return;
 	DPRINTF("locking gbs_mutex\n");
@@ -156,7 +156,7 @@ static regparm void prev_subsong(void)
 	gbs_ip.output->flush(gbs_time(gbs, gbs->subsong));
 }
 
-static regparm void callback(struct gbhw_buffer *buf, void *priv)
+static void callback(struct gbhw_buffer *buf, void *priv)
 {
 	gbs_ip.add_vis_pcm(gbs_ip.output->written_time(),
 	                   FMT_S16_NE, 2,
@@ -192,7 +192,7 @@ static void *playloop(void *priv)
 	return 0;
 }
 
-static regparm void set_song_info(struct gbs *gbs, char **title, int *length)
+static void set_song_info(struct gbs *gbs, char **title, int *length)
 {
 	long len = 13 + strlen(gbs->title) + strlen(gbs->author) + strlen(gbs->copyright);
 
@@ -203,7 +203,7 @@ static regparm void set_song_info(struct gbs *gbs, char **title, int *length)
 	         gbs->title, gbs->author, gbs->copyright);
 }
 
-static regparm void gbs_stop(void)
+static void gbs_stop(void)
 {
 	if (gbs_state == STATE_RUNNING) {
 		stopthread = true;
@@ -220,7 +220,7 @@ static regparm void gbs_stop(void)
 	}
 }
 
-static regparm void gbs_play(char *filename)
+static void gbs_play(char *filename)
 {
 	long len, length;
 	char *title;

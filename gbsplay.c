@@ -28,7 +28,7 @@ static long pause_mode = 0;
 /* default values */
 long redraw = false;
 
-static regparm long getnote(long div)
+static long getnote(long div)
 {
 	long n = 0;
 
@@ -45,7 +45,7 @@ static regparm long getnote(long div)
 	return n;
 }
 
-static regparm void precalc_notes(void)
+static void precalc_notes(void)
 {
 	long i;
 	for (i=0; i<MAXOCTAVE*12; i++) {
@@ -63,7 +63,7 @@ static regparm void precalc_notes(void)
 	}
 }
 
-static regparm char *reverse_vol(char *s)
+static char *reverse_vol(char *s)
 {
 	static char buf[5];
 	long i;
@@ -76,7 +76,7 @@ static regparm char *reverse_vol(char *s)
 	return buf;
 }
 
-static regparm void precalc_vols(void)
+static void precalc_vols(void)
 {
 	long i, k;
 	for (k=0; k<16; k++) {
@@ -95,12 +95,12 @@ static regparm void precalc_vols(void)
 	}
 }
 
-static regparm void stepcallback(long cycles, const struct gbhw_channel chan[], void *priv)
+static void stepcallback(long cycles, const struct gbhw_channel chan[], void *priv)
 {
 	sound_step(cycles, chan);
 }
 
-static regparm void handleuserinput(struct gbs *gbs)
+static void handleuserinput(struct gbs *gbs)
 {
 	char c;
 
@@ -141,7 +141,7 @@ static regparm void handleuserinput(struct gbs *gbs)
 	}
 }
 
-static regparm char *notestring(long ch)
+static char *notestring(long ch)
 {
 	long n;
 
@@ -157,7 +157,7 @@ static regparm char *notestring(long ch)
 	else return "nse";
 }
 
-static regparm long chvol(long ch)
+static long chvol(long ch)
 {
 	long v;
 
@@ -173,7 +173,7 @@ static regparm long chvol(long ch)
 	return v;
 }
 
-static regparm char *volstring(long v)
+static char *volstring(long v)
 {
 	if (v < 0) v = 0;
 	if (v > 15) v = 15;
@@ -181,7 +181,7 @@ static regparm char *volstring(long v)
 	return &vollookup[5*v];
 }
 
-static regparm void printregs(void)
+static void printregs(void)
 {
 	long i;
 	for (i=0; i<5*4; i++) {
@@ -202,7 +202,7 @@ static regparm void printregs(void)
 	printf("\n\033[A\033[A\033[A\033[A\033[A\033[A");
 }
 
-static regparm void printstatus(struct gbs *gbs)
+static void printstatus(struct gbs *gbs)
 {
 	struct displaytime time;
 	char *songtitle;
@@ -235,7 +235,7 @@ static regparm void printstatus(struct gbs *gbs)
 	fflush(stdout);
 }
 
-static regparm void printinfo()
+static void printinfo()
 {
 	if (verbosity>0) {
 		puts(_("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player\n" \

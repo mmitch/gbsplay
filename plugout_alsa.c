@@ -27,7 +27,7 @@ snd_pcm_t *pcm_handle;
 #define SND_PCM_FORMAT_S16_NE SND_PCM_FORMAT_S16_BE
 #endif
 
-static long regparm alsa_open(enum plugout_endian endian, long rate)
+static long alsa_open(enum plugout_endian endian, long rate)
 {
 	const char *pcm_name = "default";
 	int fmt, err;
@@ -103,7 +103,7 @@ static long is_suspended(snd_pcm_sframes_t retval)
 #endif
 }
 
-static ssize_t regparm alsa_write(const void *buf, size_t count)
+static ssize_t alsa_write(const void *buf, size_t count)
 {
 	snd_pcm_sframes_t retval;
 
@@ -123,7 +123,7 @@ static ssize_t regparm alsa_write(const void *buf, size_t count)
 	return retval;
 }
 
-static void regparm alsa_close()
+static void alsa_close()
 {
 	snd_pcm_drop(pcm_handle);
 	snd_pcm_close(pcm_handle);

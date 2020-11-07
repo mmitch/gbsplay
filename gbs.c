@@ -44,7 +44,7 @@
 
 const char *boot_rom_file = ".dmg_rom.bin";
 
-regparm long gbs_init(struct gbs *gbs, long subsong)
+long gbs_init(struct gbs *gbs, long subsong)
 {
 	gbhw_init(gbs->rom, gbs->romsize);
 
@@ -82,13 +82,13 @@ regparm long gbs_init(struct gbs *gbs, long subsong)
 	return 1;
 }
 
-regparm void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv)
+void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv)
 {
 	gbs->nextsubsong_cb = cb;
 	gbs->nextsubsong_cb_priv = priv;
 }
 
-static regparm long gbs_nextsubsong(struct gbs *gbs)
+static long gbs_nextsubsong(struct gbs *gbs)
 {
 	if (gbs->nextsubsong_cb != NULL) {
 		return gbs->nextsubsong_cb(gbs, gbs->nextsubsong_cb_priv);
@@ -101,7 +101,7 @@ static regparm long gbs_nextsubsong(struct gbs *gbs)
 	return true;
 }
 
-regparm long gbs_step(struct gbs *gbs, long time_to_work)
+long gbs_step(struct gbs *gbs, long time_to_work)
 {
 	long cycles = gbhw_step(time_to_work);
 	long time;
@@ -144,7 +144,7 @@ regparm long gbs_step(struct gbs *gbs, long time_to_work)
 	return true;
 }
 
-regparm void gbs_printinfo(struct gbs *gbs, long verbose)
+void gbs_printinfo(struct gbs *gbs, long verbose)
 {
 	printf(_("GBSVersion:       %u\n"
 	         "Title:            \"%s\"\n"
@@ -212,7 +212,7 @@ regparm void gbs_printinfo(struct gbs *gbs, long verbose)
 	}
 }
 
-static regparm void gbs_free(struct gbs *gbs)
+static void gbs_free(struct gbs *gbs)
 {
 	if (gbs->buf)
 		free(gbs->buf);
@@ -221,12 +221,12 @@ static regparm void gbs_free(struct gbs *gbs)
 	free(gbs);
 }
 
-regparm void gbs_close(struct gbs *gbs)
+void gbs_close(struct gbs *gbs)
 {
 	gbs_free(gbs);
 }
 
-static regparm void writeint(char *buf, uint32_t val, long bytes)
+static void writeint(char *buf, uint32_t val, long bytes)
 {
 	long shift = 0;
 	long i;
@@ -237,7 +237,7 @@ static regparm void writeint(char *buf, uint32_t val, long bytes)
 	}
 }
 
-static regparm uint32_t readint(char *buf, long bytes)
+static uint32_t readint(char *buf, long bytes)
 {
 	long i;
 	long shift = 0;
@@ -251,7 +251,7 @@ static regparm uint32_t readint(char *buf, long bytes)
 	return res;
 }
 
-regparm long gbs_write(struct gbs *gbs, char *name, long version)
+long gbs_write(struct gbs *gbs, char *name, long version)
 {
 	long fd;
 	long codelen = (gbs->codelen + 15) >> 4;
@@ -343,7 +343,7 @@ regparm long gbs_write(struct gbs *gbs, char *name, long version)
 	return 1;
 }
 
-static regparm struct gbs *gb_open(const char *name, char *buf, size_t size)
+static struct gbs *gb_open(const char *name, char *buf, size_t size)
 {
 	int fd;
 	long i, name_len;
@@ -409,7 +409,7 @@ static regparm struct gbs *gb_open(const char *name, char *buf, size_t size)
 	return gbs;
 }
 
-static regparm struct gbs *gbr_open(const char *name, char *buf, size_t size)
+static struct gbs *gbr_open(const char *name, char *buf, size_t size)
 {
 	long i;
 	struct gbs *gbs = malloc(sizeof(struct gbs));
@@ -527,7 +527,7 @@ static void emit(struct gbs *gbs, long *code_used, uint8_t data, long reserve)
 	(*code_used)++;
 }
 
-static regparm void gd3_parse(struct gbs **gbs, const char *gd3, long gd3_len)
+static void gd3_parse(struct gbs **gbs, const char *gd3, long gd3_len)
 {
 	char *buf;
 	char *s;
@@ -568,7 +568,7 @@ static regparm void gd3_parse(struct gbs **gbs, const char *gd3, long gd3_len)
 	}
 }
 
-static regparm struct gbs *vgm_open(const char *name, char *buf, size_t size)
+static struct gbs *vgm_open(const char *name, char *buf, size_t size)
 {
 	struct gbs *gbs = malloc(sizeof(struct gbs));
 	char *na_str = _("vgm / not available");
@@ -795,7 +795,7 @@ static regparm struct gbs *vgm_open(const char *name, char *buf, size_t size)
 	return gbs;
 }
 
-static regparm struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
+static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 {
 	struct gbs *gbs = malloc(sizeof(struct gbs));
 	long i;
@@ -951,7 +951,7 @@ static regparm struct gbs *gbs_open_internal(const char *name, char *buf, size_t
 }
 
 #ifdef USE_ZLIB
-static regparm struct gbs *gzip_open(const char *name, char *buf, size_t size)
+static struct gbs *gzip_open(const char *name, char *buf, size_t size)
 {
 	struct gbs *gbs;
 	int ret;
@@ -987,14 +987,14 @@ static regparm struct gbs *gzip_open(const char *name, char *buf, size_t size)
 	return gbs;
 }
 #else
-static regparm struct gbs *gzip_open(const char *name, char *buf, size_t size)
+static struct gbs *gzip_open(const char *name, char *buf, size_t size)
 {
 	fprintf(stderr, _("Could not open %s: %s\n"), name, _("Not compiled with zlib support"));
 	return NULL;
 }
 #endif
 
-regparm struct gbs *gbs_open_mem(const char *name, char *buf, size_t size)
+struct gbs *gbs_open_mem(const char *name, char *buf, size_t size)
 {
 	if (size > HDR_LEN_GZIP && strncmp(buf, GZIP_MAGIC, 3) == 0) {
 		return gzip_open(name, buf, size);
@@ -1015,7 +1015,7 @@ regparm struct gbs *gbs_open_mem(const char *name, char *buf, size_t size)
 	return NULL;
 }
 
-regparm struct gbs *gbs_open(const char *name)
+struct gbs *gbs_open(const char *name)
 {
 	struct gbs *gbs = NULL;
 	FILE *f;

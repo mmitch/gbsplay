@@ -23,7 +23,7 @@
 
 static int fd;
 
-static long regparm devdsp_open(enum plugout_endian endian, long rate)
+static long devdsp_open(enum plugout_endian endian, long rate)
 {
 	int c;
 	int flags;
@@ -68,12 +68,12 @@ static long regparm devdsp_open(enum plugout_endian endian, long rate)
 	return 0;
 }
 
-static ssize_t regparm devdsp_write(const void *buf, size_t count)
+static ssize_t devdsp_write(const void *buf, size_t count)
 {
 	return write(fd, buf, count);
 }
 
-static void regparm devdsp_close()
+static void devdsp_close()
 {
 	(void)close(fd);
 }

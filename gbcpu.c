@@ -26,7 +26,7 @@ static const char *conds[4] = {
 
 struct opinfo;
 
-typedef void regparm (*ex_fn)(uint32_t op, const struct opinfo *oi);
+typedef void (*ex_fn)(uint32_t op, const struct opinfo *oi);
 
 struct opinfo {
 #if DEBUG == 1 || defined(S_SPLINT_S)
@@ -46,12 +46,12 @@ long gbcpu_if;
 long gbcpu_halt_at_pc;
 long gbcpu_cycles;
 
-static regparm uint32_t none_get(uint32_t addr)
+static uint32_t none_get(uint32_t addr)
 {
 	return 0xff;
 }
 
-static regparm void none_put(uint32_t addr, uint8_t val)
+static void none_put(uint32_t addr, uint8_t val)
 {
 }
 
@@ -573,31 +573,31 @@ static gbcpu_put_fn putlookup[256] = {
 	&none_put
 };
 
-static inline regparm uint32_t mem_get(uint32_t addr)
+static inline uint32_t mem_get(uint32_t addr)
 {
 	gbcpu_get_fn fn = getlookup[(addr >> 8) & 0xff];
 	gbcpu_cycles += 4;
 	return fn(addr);
 }
 
-static inline regparm void mem_put(uint32_t addr, uint32_t val)
+static inline void mem_put(uint32_t addr, uint32_t val)
 {
 	gbcpu_put_fn fn = putlookup[(addr >> 8) & 0xff];
 	gbcpu_cycles += 4;
 	fn(addr, val);
 }
 
-regparm uint8_t gbcpu_mem_get(uint16_t addr)
+uint8_t gbcpu_mem_get(uint16_t addr)
 {
 	return mem_get(addr);
 }
 
-regparm void gbcpu_mem_put(uint16_t addr, uint8_t val)
+void gbcpu_mem_put(uint16_t addr, uint8_t val)
 {
 	mem_put(addr, val);
 }
 
-static regparm void push(uint32_t val)
+static void push(uint32_t val)
 {
 	uint32_t sp = REGS16_R(gbcpu_regs, SP) - 2;
 	REGS16_W(gbcpu_regs, SP, sp);
@@ -605,7 +605,7 @@ static regparm void push(uint32_t val)
 	mem_put(sp+1, val >> 8);
 }
 
-static regparm uint32_t pop(void)
+static uint32_t pop(void)
 {
 	uint32_t res;
 	uint32_t sp = REGS16_R(gbcpu_regs, SP);
@@ -617,7 +617,7 @@ static regparm uint32_t pop(void)
 	return res;
 }
 
-static regparm uint32_t get_imm8(void)
+static uint32_t get_imm8(void)
 {
 	uint32_t pc = REGS16_R(gbcpu_regs, PC);
 	uint32_t res;
@@ -627,7 +627,7 @@ static regparm uint32_t get_imm8(void)
 	return res;
 }
 
-static regparm uint32_t get_imm16(void)
+static uint32_t get_imm16(void)
 {
 	uint32_t pc = REGS16_R(gbcpu_regs, PC);
 	uint32_t res;
@@ -643,27 +643,27 @@ static inline void print_reg(long i)
 	else DPRINTF("%c", regnames[i]);
 }
 
-static regparm uint32_t get_reg(long i)
+static uint32_t get_reg(long i)
 {
 	if (i == 6) /* indirect memory access by [HL] */
 		return mem_get(REGS16_R(gbcpu_regs, HL));
 	return REGS8_R(gbcpu_regs, i);
 }
 
-static regparm void put_reg(long i, uint32_t val)
+static void put_reg(long i, uint32_t val)
 {
 	if (i == 6) /* indirect memory access by [HL] */
 		mem_put(REGS16_R(gbcpu_regs, HL), val);
 	else REGS8_W(gbcpu_regs, i, val);
 }
 
-static regparm void op_unknown(uint32_t op, const struct opinfo *oi)
+static void op_unknown(uint32_t op, const struct opinfo *oi)
 {
 	fprintf(stderr, "\n\nUnknown opcode %02x.\n", (unsigned char)op);
 	gbcpu_stopped = 1;
 }
 
-static regparm void op_set(uint32_t op)
+static void op_set(uint32_t op)
 {
 	long reg = op & 7;
 	unsigned long bit = (op >> 3) & 7;
@@ -673,7 +673,7 @@ static regparm void op_set(uint32_t op)
 	put_reg(reg, get_reg(reg) | (1 << bit));
 }
 
-static regparm void op_res(uint32_t op)
+static void op_res(uint32_t op)
 {
 	long reg = op & 7;
 	unsigned long bit = (op >> 3) & 7;
@@ -683,7 +683,7 @@ static regparm void op_res(uint32_t op)
 	put_reg(reg, get_reg(reg) & ~(1 << bit));
 }
 
-static regparm void op_bit(uint32_t op)
+static void op_bit(uint32_t op)
 {
 	long reg = op & 7;
 	unsigned long bit = (op >> 3) & 7;
@@ -695,7 +695,7 @@ static regparm void op_bit(uint32_t op)
 	gbcpu_regs.rn.f ^= ((get_reg(reg) << 8) >> (bit+1)) & ZF;
 }
 
-static regparm void op_rl(uint32_t op, const struct opinfo *oi)
+static void op_rl(uint32_t op, const struct opinfo *oi)
 {
 	/* C <- rrrrrrrr <-
 	 * |              |
@@ -714,7 +714,7 @@ static regparm void op_rl(uint32_t op, const struct opinfo *oi)
 	put_reg(reg, res);
 }
 
-static regparm void op_rla(uint32_t op, const struct opinfo *oi)
+static void op_rla(uint32_t op, const struct opinfo *oi)
 {
 	/* C <- aaaaaaaa <-
 	 * |              |
@@ -730,7 +730,7 @@ static regparm void op_rla(uint32_t op, const struct opinfo *oi)
 	gbcpu_regs.rn.a = res;
 }
 
-static regparm void op_rlc(uint32_t op, const struct opinfo *oi)
+static void op_rlc(uint32_t op, const struct opinfo *oi)
 {
 	/* C <- rrrrrrrr <-
 	 *    |           |
@@ -749,7 +749,7 @@ static regparm void op_rlc(uint32_t op, const struct opinfo *oi)
 	put_reg(reg, res);
 }
 
-static regparm void op_rlca(uint32_t op, const struct opinfo *oi)
+static void op_rlca(uint32_t op, const struct opinfo *oi)
 {
 	/* C <- aaaaaaaa <-
 	 *    |           |
@@ -765,7 +765,7 @@ static regparm void op_rlca(uint32_t op, const struct opinfo *oi)
 	gbcpu_regs.rn.a = res;
 }
 
-static regparm void op_sla(uint32_t op, const struct opinfo *oi)
+static void op_sla(uint32_t op, const struct opinfo *oi)
 {
 	long reg = op & 7;
 	uint8_t res, val;
@@ -779,7 +779,7 @@ static regparm void op_sla(uint32_t op, const struct opinfo *oi)
 	put_reg(reg, res);
 }
 
-static regparm void op_rr(uint32_t op, const struct opinfo *oi)
+static void op_rr(uint32_t op, const struct opinfo *oi)
 {
 	long reg = op & 7;
 	uint8_t res, val;
@@ -794,7 +794,7 @@ static regparm void op_rr(uint32_t op, const struct opinfo *oi)
 	put_reg(reg, res);
 }
 
-static regparm void op_rra(uint32_t op, const struct opinfo *oi)
+static void op_rra(uint32_t op, const struct opinfo *oi)
 {
 	uint8_t res;
 
@@ -806,7 +806,7 @@ static regparm void op_rra(uint32_t op, const struct opinfo *oi)
 	gbcpu_regs.rn.a = res;
 }
 
-static regparm void op_rrc(uint32_t op, const struct opinfo *oi)
+static void op_rrc(uint32_t op, const struct opinfo *oi)
 {
 	long reg = op & 7;
 	uint8_t res, val;
@@ -821,7 +821,7 @@ static regparm void op_rrc(uint32_t op, const struct opinfo *oi)
 	put_reg(reg, res);
 }
 
-static regparm void op_rrca(uint32_t op, const struct opinfo *oi)
+static void op_rrca(uint32_t op, const struct opinfo *oi)
 {
 	uint8_t res;
 
@@ -833,7 +833,7 @@ static regparm void op_rrca(uint32_t op, const struct opinfo *oi)
 	gbcpu_regs.rn.a = res;
 }
 
-static regparm void op_sra(uint32_t op, const struct opinfo *oi)
+static void op_sra(uint32_t op, const struct opinfo *oi)
 {
 	long reg = op & 7;
 	uint8_t res, val;
@@ -848,7 +848,7 @@ static regparm void op_sra(uint32_t op, const struct opinfo *oi)
 	put_reg(reg, res);
 }
 
-static regparm void op_srl(uint32_t op, const struct opinfo *oi)
+static void op_srl(uint32_t op, const struct opinfo *oi)
 {
 	long reg = op & 7;
 	uint8_t res, val;
@@ -862,7 +862,7 @@ static regparm void op_srl(uint32_t op, const struct opinfo *oi)
 	put_reg(reg, res);
 }
 
-static regparm void op_swap(uint32_t op, const struct opinfo *oi)
+static void op_swap(uint32_t op, const struct opinfo *oi)
 {
 	long reg = op & 7;
 	uint32_t res;
@@ -889,7 +889,7 @@ static const struct opinfo cbops[8] = {
 	OPINFO("SRL",  &op_srl,  0, 0),		/* opcode cb38-cb3f */
 };
 
-static regparm void op_cbprefix(uint32_t op, const struct opinfo *oi)
+static void op_cbprefix(uint32_t op, const struct opinfo *oi)
 {
 	uint16_t pc = REGS16_R(gbcpu_regs, PC);
 
@@ -906,7 +906,7 @@ static regparm void op_cbprefix(uint32_t op, const struct opinfo *oi)
 	gbcpu_stopped = 1;
 }
 
-static regparm void op_ld(uint32_t op, const struct opinfo *oi)
+static void op_ld(uint32_t op, const struct opinfo *oi)
 {
 	long src = op & 7;
 	long dst = (op >> 3) & 7;
@@ -918,7 +918,7 @@ static regparm void op_ld(uint32_t op, const struct opinfo *oi)
 	put_reg(dst, get_reg(src));
 }
 
-static regparm void op_ld_imm(uint32_t op, const struct opinfo *oi)
+static void op_ld_imm(uint32_t op, const struct opinfo *oi)
 {
 	long ofs = get_imm16();
 
@@ -926,7 +926,7 @@ static regparm void op_ld_imm(uint32_t op, const struct opinfo *oi)
 	gbcpu_regs.rn.a = mem_get(ofs);
 }
 
-static regparm void op_ld_ind16_a(uint32_t op, const struct opinfo *oi)
+static void op_ld_ind16_a(uint32_t op, const struct opinfo *oi)
 {
 	long ofs = get_imm16();
 
@@ -934,7 +934,7 @@ static regparm void op_ld_ind16_a(uint32_t op, const struct opinfo *oi)
 	mem_put(ofs, gbcpu_regs.rn.a);
 }
 
-static regparm void op_ld_ind16_sp(uint32_t op, const struct opinfo *oi)
+static void op_ld_ind16_sp(uint32_t op, const struct opinfo *oi)
 {
 	long ofs = get_imm16();
 	long sp = REGS16_R(gbcpu_regs, SP);
@@ -944,7 +944,7 @@ static regparm void op_ld_ind16_sp(uint32_t op, const struct opinfo *oi)
 	mem_put(ofs+1, sp >> 8);
 }
 
-static regparm void op_ld_hlsp(uint32_t op, const struct opinfo *oi)
+static void op_ld_hlsp(uint32_t op, const struct opinfo *oi)
 {
 	int8_t ofs = get_imm8();
 	uint16_t old = REGS16_R(gbcpu_regs, SP);
@@ -961,7 +961,7 @@ static regparm void op_ld_hlsp(uint32_t op, const struct opinfo *oi)
 	gbcpu_cycles += 4;
 }
 
-static regparm void op_ld_sphl(uint32_t op, const struct opinfo *oi)
+static void op_ld_sphl(uint32_t op, const struct opinfo *oi)
 {
 	DPRINTF(" \t%s  SP, HL", oi->name);
 	REGS16_W(gbcpu_regs, SP, REGS16_R(gbcpu_regs, HL));
@@ -969,7 +969,7 @@ static regparm void op_ld_sphl(uint32_t op, const struct opinfo *oi)
 	gbcpu_cycles += 4;
 }
 
-static regparm void op_ld_reg16_imm(uint32_t op, const struct opinfo *oi)
+static void op_ld_reg16_imm(uint32_t op, const struct opinfo *oi)
 {
 	long val = get_imm16();
 	long reg = (op >> 4) & 3;
@@ -979,7 +979,7 @@ static regparm void op_ld_reg16_imm(uint32_t op, const struct opinfo *oi)
 	REGS16_W(gbcpu_regs, reg, val);
 }
 
-static regparm void op_ld_reg16_a(uint32_t op, const struct opinfo *oi)
+static void op_ld_reg16_a(uint32_t op, const struct opinfo *oi)
 {
 	long reg = (op >> 4) & 3;
 	uint16_t r;
@@ -999,7 +999,7 @@ static regparm void op_ld_reg16_a(uint32_t op, const struct opinfo *oi)
 	}
 }
 
-static regparm void op_ld_reg8_imm(uint32_t op, const struct opinfo *oi)
+static void op_ld_reg8_imm(uint32_t op, const struct opinfo *oi)
 {
 	long val = get_imm8();
 	long reg = (op >> 3) & 7;
@@ -1010,7 +1010,7 @@ static regparm void op_ld_reg8_imm(uint32_t op, const struct opinfo *oi)
 	DPRINTF(", 0x%02lx", val);
 }
 
-static regparm void op_ldh(uint32_t op, const struct opinfo *oi)
+static void op_ldh(uint32_t op, const struct opinfo *oi)
 {
 	long ofs = op & 2 ? 0 : get_imm8();
 
@@ -1034,7 +1034,7 @@ static regparm void op_ldh(uint32_t op, const struct opinfo *oi)
 	}
 }
 
-static regparm void op_inc(uint32_t op, const struct opinfo *oi)
+static void op_inc(uint32_t op, const struct opinfo *oi)
 {
 	long reg = (op >> 3) & 7;
 	uint8_t res;
@@ -1050,7 +1050,7 @@ static regparm void op_inc(uint32_t op, const struct opinfo *oi)
 	if ((old & 15) > (res & 15)) gbcpu_regs.rn.f |= HF;
 }
 
-static regparm void op_inc16(uint32_t op, const struct opinfo *oi)
+static void op_inc16(uint32_t op, const struct opinfo *oi)
 {
 	long reg = (op >> 4) & 3;
 	uint16_t res;
@@ -1064,7 +1064,7 @@ static regparm void op_inc16(uint32_t op, const struct opinfo *oi)
 	gbcpu_cycles += 4;
 }
 
-static regparm void op_dec(uint32_t op, const struct opinfo *oi)
+static void op_dec(uint32_t op, const struct opinfo *oi)
 {
 	long reg = (op >> 3) & 7;
 	uint8_t res;
@@ -1081,7 +1081,7 @@ static regparm void op_dec(uint32_t op, const struct opinfo *oi)
 	if ((old & 15) < (res & 15)) gbcpu_regs.rn.f |= HF;
 }
 
-static regparm void op_dec16(uint32_t op, const struct opinfo *oi)
+static void op_dec16(uint32_t op, const struct opinfo *oi)
 {
 	long reg = (op >> 4) & 3;
 	uint16_t res;
@@ -1095,7 +1095,7 @@ static regparm void op_dec16(uint32_t op, const struct opinfo *oi)
 	gbcpu_cycles += 4;
 }
 
-static regparm void op_add_sp_imm(uint32_t op, const struct opinfo *oi)
+static void op_add_sp_imm(uint32_t op, const struct opinfo *oi)
 {
 	int8_t imm = get_imm8();
 	uint16_t old = REGS16_R(gbcpu_regs, SP);
@@ -1112,7 +1112,7 @@ static regparm void op_add_sp_imm(uint32_t op, const struct opinfo *oi)
 	gbcpu_cycles += 8;
 }
 
-static regparm void op_add(uint32_t op, const struct opinfo *oi)
+static void op_add(uint32_t op, const struct opinfo *oi)
 {
 	uint8_t old = gbcpu_regs.rn.a;
 	uint8_t new;
@@ -1127,7 +1127,7 @@ static regparm void op_add(uint32_t op, const struct opinfo *oi)
 	if (new == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static regparm void op_add_imm(uint32_t op, const struct opinfo *oi)
+static void op_add_imm(uint32_t op, const struct opinfo *oi)
 {
 	uint8_t imm = get_imm8();
 	uint8_t old = gbcpu_regs.rn.a;
@@ -1142,7 +1142,7 @@ static regparm void op_add_imm(uint32_t op, const struct opinfo *oi)
 	if (new == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static regparm void op_add_hl(uint32_t op, const struct opinfo *oi)
+static void op_add_hl(uint32_t op, const struct opinfo *oi)
 {
 	long reg = (op >> 4) & 3;
 	uint16_t old = REGS16_R(gbcpu_regs, HL);
@@ -1162,7 +1162,7 @@ static regparm void op_add_hl(uint32_t op, const struct opinfo *oi)
 	gbcpu_cycles += 4;
 }
 
-static regparm void op_adc(uint32_t op, const struct opinfo *oi)
+static void op_adc(uint32_t op, const struct opinfo *oi)
 {
 	uint8_t reg = get_reg(op & 7);
 	uint8_t old = gbcpu_regs.rn.a;
@@ -1180,7 +1180,7 @@ static regparm void op_adc(uint32_t op, const struct opinfo *oi)
 	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static regparm void op_adc_imm(uint32_t op, const struct opinfo *oi)
+static void op_adc_imm(uint32_t op, const struct opinfo *oi)
 {
 	uint8_t imm = get_imm8();
 	uint8_t old = gbcpu_regs.rn.a;
@@ -1197,7 +1197,7 @@ static regparm void op_adc_imm(uint32_t op, const struct opinfo *oi)
 	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static regparm void op_cp(uint32_t op, const struct opinfo *oi)
+static void op_cp(uint32_t op, const struct opinfo *oi)
 {
 	uint8_t old = gbcpu_regs.rn.a;
 	uint8_t new = old;
@@ -1211,7 +1211,7 @@ static regparm void op_cp(uint32_t op, const struct opinfo *oi)
 	if (new == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static regparm void op_cp_imm(uint32_t op, const struct opinfo *oi)
+static void op_cp_imm(uint32_t op, const struct opinfo *oi)
 {
 	uint8_t imm = get_imm8();
 	uint8_t old = gbcpu_regs.rn.a;
@@ -1225,7 +1225,7 @@ static regparm void op_cp_imm(uint32_t op, const struct opinfo *oi)
 	if (new == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static regparm void op_sub(uint32_t op, const struct opinfo *oi)
+static void op_sub(uint32_t op, const struct opinfo *oi)
 {
 	uint8_t old = gbcpu_regs.rn.a;
 	uint8_t new;
@@ -1240,7 +1240,7 @@ static regparm void op_sub(uint32_t op, const struct opinfo *oi)
 	if (new == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static regparm void op_sub_imm(uint32_t op, const struct opinfo *oi)
+static void op_sub_imm(uint32_t op, const struct opinfo *oi)
 {
 	uint8_t imm = get_imm8();
 	uint8_t old = gbcpu_regs.rn.a;
@@ -1255,7 +1255,7 @@ static regparm void op_sub_imm(uint32_t op, const struct opinfo *oi)
 	if (new == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static regparm void op_sbc(uint32_t op, const struct opinfo *oi)
+static void op_sbc(uint32_t op, const struct opinfo *oi)
 {
 	uint8_t reg = get_reg(op & 7);
 	uint8_t old = gbcpu_regs.rn.a;
@@ -1273,7 +1273,7 @@ static regparm void op_sbc(uint32_t op, const struct opinfo *oi)
 	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static regparm void op_sbc_imm(uint32_t op, const struct opinfo *oi)
+static void op_sbc_imm(uint32_t op, const struct opinfo *oi)
 {
 	uint8_t imm = get_imm8();
 	uint8_t old = gbcpu_regs.rn.a;
@@ -1290,7 +1290,7 @@ static regparm void op_sbc_imm(uint32_t op, const struct opinfo *oi)
 	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static regparm void op_and(uint32_t op, const struct opinfo *oi)
+static void op_and(uint32_t op, const struct opinfo *oi)
 {
 	DPRINTF(" \t%s A, ", oi->name);
 	print_reg(op & 7);
@@ -1299,7 +1299,7 @@ static regparm void op_and(uint32_t op, const struct opinfo *oi)
 	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static regparm void op_and_imm(uint32_t op, const struct opinfo *oi)
+static void op_and_imm(uint32_t op, const struct opinfo *oi)
 {
 	uint8_t imm = get_imm8();
 
@@ -1309,7 +1309,7 @@ static regparm void op_and_imm(uint32_t op, const struct opinfo *oi)
 	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static regparm void op_or(uint32_t op, const struct opinfo *oi)
+static void op_or(uint32_t op, const struct opinfo *oi)
 {
 	DPRINTF(" \t%s A, ", oi->name);
 	print_reg(op & 7);
@@ -1318,7 +1318,7 @@ static regparm void op_or(uint32_t op, const struct opinfo *oi)
 	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static regparm void op_or_imm(uint32_t op, const struct opinfo *oi)
+static void op_or_imm(uint32_t op, const struct opinfo *oi)
 {
 	uint8_t imm = get_imm8();
 
@@ -1328,7 +1328,7 @@ static regparm void op_or_imm(uint32_t op, const struct opinfo *oi)
 	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static regparm void op_xor(uint32_t op, const struct opinfo *oi)
+static void op_xor(uint32_t op, const struct opinfo *oi)
 {
 	DPRINTF(" \t%s A, ", oi->name);
 	print_reg(op & 7);
@@ -1337,7 +1337,7 @@ static regparm void op_xor(uint32_t op, const struct opinfo *oi)
 	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static regparm void op_xor_imm(uint32_t op, const struct opinfo *oi)
+static void op_xor_imm(uint32_t op, const struct opinfo *oi)
 {
 	uint8_t imm = get_imm8();
 
@@ -1347,7 +1347,7 @@ static regparm void op_xor_imm(uint32_t op, const struct opinfo *oi)
 	if (gbcpu_regs.rn.a == 0) gbcpu_regs.rn.f |= ZF;
 }
 
-static regparm void op_push(uint32_t op, const struct opinfo *oi)
+static void op_push(uint32_t op, const struct opinfo *oi)
 {
 	long reg = op >> 4 & 3;
 
@@ -1357,7 +1357,7 @@ static regparm void op_push(uint32_t op, const struct opinfo *oi)
 	DPRINTF(" \t%s %s\t", oi->name, regnamech16[reg]);
 }
 
-static regparm void op_push_af(uint32_t op, const struct opinfo *oi)
+static void op_push_af(uint32_t op, const struct opinfo *oi)
 {
 	uint16_t tmp = gbcpu_regs.rn.a << 8;
 
@@ -1368,7 +1368,7 @@ static regparm void op_push_af(uint32_t op, const struct opinfo *oi)
 	DPRINTF(" \t%s %s\t", oi->name, regnamech16[op >> 4 & 3]);
 }
 
-static regparm void op_pop(uint32_t op, const struct opinfo *oi)
+static void op_pop(uint32_t op, const struct opinfo *oi)
 {
 	long reg = op >> 4 & 3;
 
@@ -1376,7 +1376,7 @@ static regparm void op_pop(uint32_t op, const struct opinfo *oi)
 	DPRINTF(" \t%s %s\t", oi->name, regnamech16[reg]);
 }
 
-static regparm void op_pop_af(uint32_t op, const struct opinfo *oi)
+static void op_pop_af(uint32_t op, const struct opinfo *oi)
 {
 	uint16_t tmp = pop();
 
@@ -1385,28 +1385,28 @@ static regparm void op_pop_af(uint32_t op, const struct opinfo *oi)
 	DPRINTF(" \t%s %s\t", oi->name, regnamech16[op >> 4 & 3]);
 }
 
-static regparm void op_cpl(uint32_t op, const struct opinfo *oi)
+static void op_cpl(uint32_t op, const struct opinfo *oi)
 {
 	DPRINTF(" \t%s", oi->name);
 	gbcpu_regs.rn.a = ~gbcpu_regs.rn.a;
 	gbcpu_regs.rn.f |= NF | HF;
 }
 
-static regparm void op_ccf(uint32_t op, const struct opinfo *oi)
+static void op_ccf(uint32_t op, const struct opinfo *oi)
 {
 	DPRINTF(" \t%s", oi->name);
 	gbcpu_regs.rn.f ^= CF;
 	gbcpu_regs.rn.f &= ~(NF | HF);
 }
 
-static regparm void op_scf(uint32_t op, const struct opinfo *oi)
+static void op_scf(uint32_t op, const struct opinfo *oi)
 {
 	DPRINTF(" \t%s", oi->name);
 	gbcpu_regs.rn.f |= CF;
 	gbcpu_regs.rn.f &= ~(NF | HF);
 }
 
-static regparm void op_call(uint32_t op, const struct opinfo *oi)
+static void op_call(uint32_t op, const struct opinfo *oi)
 {
 	uint16_t ofs = get_imm16();
 
@@ -1417,7 +1417,7 @@ static regparm void op_call(uint32_t op, const struct opinfo *oi)
 	gbcpu_cycles += 4;
 }
 
-static regparm void op_call_cond(uint32_t op, const struct opinfo *oi)
+static void op_call_cond(uint32_t op, const struct opinfo *oi)
 {
 	uint16_t ofs = get_imm16();
 	long cond = (op >> 3) & 3;
@@ -1435,7 +1435,7 @@ static regparm void op_call_cond(uint32_t op, const struct opinfo *oi)
 	REGS16_W(gbcpu_regs, PC, ofs);
 }
 
-static regparm void op_ret(uint32_t op, const struct opinfo *oi)
+static void op_ret(uint32_t op, const struct opinfo *oi)
 {
 	REGS16_W(gbcpu_regs, PC, pop());
 	// 4 extra cycles.
@@ -1443,7 +1443,7 @@ static regparm void op_ret(uint32_t op, const struct opinfo *oi)
 	DPRINTF(" \t%s", oi->name);
 }
 
-static regparm void op_reti(uint32_t op, const struct opinfo *oi)
+static void op_reti(uint32_t op, const struct opinfo *oi)
 {
 	gbcpu_if = 1;
 	REGS16_W(gbcpu_regs, PC, pop());
@@ -1452,7 +1452,7 @@ static regparm void op_reti(uint32_t op, const struct opinfo *oi)
 	gbcpu_cycles += 4;
 }
 
-static regparm void op_ret_cond(uint32_t op, const struct opinfo *oi)
+static void op_ret_cond(uint32_t op, const struct opinfo *oi)
 {
 	long cond = (op >> 3) & 3;
 
@@ -1470,30 +1470,30 @@ static regparm void op_ret_cond(uint32_t op, const struct opinfo *oi)
 	REGS16_W(gbcpu_regs, PC, pop());
 }
 
-static regparm void op_halt(uint32_t op, const struct opinfo *oi)
+static void op_halt(uint32_t op, const struct opinfo *oi)
 {
 	gbcpu_halted = 1;
 	DPRINTF(" \t%s", oi->name);
 }
 
-static regparm void op_stop(uint32_t op, const struct opinfo *oi)
+static void op_stop(uint32_t op, const struct opinfo *oi)
 {
 	DPRINTF(" \t%s", oi->name);
 }
 
-static regparm void op_di(uint32_t op, const struct opinfo *oi)
+static void op_di(uint32_t op, const struct opinfo *oi)
 {
 	gbcpu_if = 0;
 	DPRINTF(" \t%s", oi->name);
 }
 
-static regparm void op_ei(uint32_t op, const struct opinfo *oi)
+static void op_ei(uint32_t op, const struct opinfo *oi)
 {
 	gbcpu_if = 1;
 	DPRINTF(" \t%s", oi->name);
 }
 
-static regparm void op_jr(uint32_t op, const struct opinfo *oi)
+static void op_jr(uint32_t op, const struct opinfo *oi)
 {
 	int16_t ofs = (int8_t) get_imm8();
 
@@ -1508,7 +1508,7 @@ static regparm void op_jr(uint32_t op, const struct opinfo *oi)
 	REGS16_W(gbcpu_regs, PC, REGS16_R(gbcpu_regs, PC) + ofs);
 }
 
-static regparm void op_jr_cond(uint32_t op, const struct opinfo *oi)
+static void op_jr_cond(uint32_t op, const struct opinfo *oi)
 {
 	int16_t ofs = (int8_t) get_imm8();
 	long cond = (op >> 3) & 3;
@@ -1526,7 +1526,7 @@ static regparm void op_jr_cond(uint32_t op, const struct opinfo *oi)
 	REGS16_W(gbcpu_regs, PC, REGS16_R(gbcpu_regs, PC) + ofs);
 }
 
-static regparm void op_jp(uint32_t op, const struct opinfo *oi)
+static void op_jp(uint32_t op, const struct opinfo *oi)
 {
 	uint16_t ofs = get_imm16();
 
@@ -1536,13 +1536,13 @@ static regparm void op_jp(uint32_t op, const struct opinfo *oi)
 	REGS16_W(gbcpu_regs, PC, ofs);
 }
 
-static regparm void op_jp_hl(uint32_t op, const struct opinfo *oi)
+static void op_jp_hl(uint32_t op, const struct opinfo *oi)
 {
 	DPRINTF(" \t%s HL", oi->name);
 	REGS16_W(gbcpu_regs, PC, REGS16_R(gbcpu_regs, HL));
 }
 
-static regparm void op_jp_cond(uint32_t op, const struct opinfo *oi)
+static void op_jp_cond(uint32_t op, const struct opinfo *oi)
 {
 	uint16_t ofs = get_imm16();
 	long cond = (op >> 3) & 3;
@@ -1559,7 +1559,7 @@ static regparm void op_jp_cond(uint32_t op, const struct opinfo *oi)
 	REGS16_W(gbcpu_regs, PC, ofs);
 }
 
-static regparm void op_rst(uint32_t op, const struct opinfo *oi)
+static void op_rst(uint32_t op, const struct opinfo *oi)
 {
 	int16_t ofs = op & 0x38;
 
@@ -1570,12 +1570,12 @@ static regparm void op_rst(uint32_t op, const struct opinfo *oi)
 	gbcpu_cycles += 4;
 }
 
-static regparm void op_nop(uint32_t op, const struct opinfo *oi)
+static void op_nop(uint32_t op, const struct opinfo *oi)
 {
 	DPRINTF(" \t%s", oi->name);
 }
 
-static regparm void op_daa(uint32_t op, const struct opinfo *oi)
+static void op_daa(uint32_t op, const struct opinfo *oi)
 {
 	long a = gbcpu_regs.rn.a;
 	long f = gbcpu_regs.rn.f;
@@ -1868,7 +1868,7 @@ static const struct opinfo ops[256] = {
 #if DEBUG == 1
 static gbcpu_regs_u oldregs;
 
-static regparm void dump_regs(void)
+static void dump_regs(void)
 {
 	long i;
 
@@ -1883,7 +1883,7 @@ static regparm void dump_regs(void)
 	oldregs = gbcpu_regs;
 }
 
-static regparm void show_reg_diffs(const struct opinfo *oi)
+static void show_reg_diffs(const struct opinfo *oi)
 {
 	long i;
 
@@ -1926,7 +1926,7 @@ static regparm void show_reg_diffs(const struct opinfo *oi)
 }
 #endif
 
-regparm void gbcpu_addmem(uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn)
+void gbcpu_addmem(uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn)
 {
 	uint32_t i;
 
@@ -1936,7 +1936,7 @@ regparm void gbcpu_addmem(uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcp
 	}
 }
 
-regparm void gbcpu_init(void)
+void gbcpu_init(void)
 {
 	memset(&gbcpu_regs, 0, sizeof(gbcpu_regs));
 	gbcpu_halted = 0;
@@ -1946,7 +1946,7 @@ regparm void gbcpu_init(void)
 	DEB(dump_regs());
 }
 
-regparm void gbcpu_intr(long vec)
+void gbcpu_intr(long vec)
 {
 	DPRINTF("gbcpu_intr(%04lx)\n", vec);
 	gbcpu_halted = 0;
@@ -1955,7 +1955,7 @@ regparm void gbcpu_intr(long vec)
 	REGS16_W(gbcpu_regs, PC, vec);
 }
 
-regparm long gbcpu_step(void)
+long gbcpu_step(void)
 {
 	uint8_t op;
 

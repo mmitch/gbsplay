@@ -17,7 +17,7 @@
 
 struct gbs;
 
-typedef regparm long (*gbs_nextsubsong_cb)(struct gbs *gbs, void *priv);
+typedef long (*gbs_nextsubsong_cb)(struct gbs *gbs, void *priv);
 
 struct gbs_subsong_info {
 	uint32_t len;
@@ -60,13 +60,13 @@ struct gbs {
 	void *nextsubsong_cb_priv;
 };
 
-regparm struct gbs *gbs_open(const char *name);
-regparm struct gbs *gbs_open_mem(const char *name, char *buf, size_t size);
-regparm long gbs_init(struct gbs *gbs, long subsong);
-regparm long gbs_step(struct gbs *gbs, long time_to_work);
-regparm void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv);
-regparm void gbs_printinfo(struct gbs *gbs, long verbose);
-regparm void gbs_close(struct gbs *gbs);
-regparm long gbs_write(struct gbs *gbs, char *name, long version);
+struct gbs *gbs_open(const char *name);
+struct gbs *gbs_open_mem(const char *name, char *buf, size_t size);
+long gbs_init(struct gbs *gbs, long subsong);
+long gbs_step(struct gbs *gbs, long time_to_work);
+void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv);
+void gbs_printinfo(struct gbs *gbs, long verbose);
+void gbs_close(struct gbs *gbs);
+long gbs_write(struct gbs *gbs, char *name, long version);
 
 #endif

@@ -29,13 +29,13 @@ enum plugout_endian {
 	PLUGOUT_ENDIAN_NATIVE
 };
 
-typedef long    regparm (*plugout_open_fn )(enum plugout_endian endian, long rate);
-typedef int     regparm (*plugout_skip_fn )(int subsong);
-typedef void    regparm (*plugout_pause_fn)(int pause);
-typedef int     regparm (*plugout_io_fn   )(long cycles, uint32_t addr, uint8_t val);
-typedef int     regparm (*plugout_step_fn )(const long cycles, const struct gbhw_channel[]);
-typedef ssize_t regparm (*plugout_write_fn)(const void *buf, size_t count);
-typedef void    regparm (*plugout_close_fn)(void);
+typedef long    (*plugout_open_fn )(enum plugout_endian endian, long rate);
+typedef int     (*plugout_skip_fn )(int subsong);
+typedef void    (*plugout_pause_fn)(int pause);
+typedef int     (*plugout_io_fn   )(long cycles, uint32_t addr, uint8_t val);
+typedef int     (*plugout_step_fn )(const long cycles, const struct gbhw_channel[]);
+typedef ssize_t (*plugout_write_fn)(const void *buf, size_t count);
+typedef void    (*plugout_close_fn)(void);
 
 #define PLUGOUT_USES_STDOUT	1
 
@@ -52,7 +52,7 @@ struct output_plugin {
 	plugout_close_fn close;
 };
 
-regparm void plugout_list_plugins(void);
-regparm const struct output_plugin* plugout_select_by_name(const char *name);
+void plugout_list_plugins(void);
+const struct output_plugin* plugout_select_by_name(const char *name);
 
 #endif

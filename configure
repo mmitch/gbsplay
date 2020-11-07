@@ -532,13 +532,10 @@ Installation directories:
 
 Optional Features:
   --disable-i18n         omit libintl support
-  --disable-regparm      do not use register arguments on x86
   --disable-hardening    disable hardening flags
   --disable-zlib         disable transparent gzip decompression
   --enable-debug         build with debug code
   --enable-sharedlibgbs  build libgbs as a shared library
-  --enable-regparm       build with explicit regparm support
-                         (enabled by default on Linux x86 only)
 
 Optional Modules:
   --with-xmmsplugin      build XMMS input plugin
@@ -576,7 +573,6 @@ OPTS="${OPTS} use_midi"
 OPTS="${OPTS} use_altmidi"
 OPTS="${OPTS} use_nas"
 OPTS="${OPTS} use_pulse"
-OPTS="${OPTS} use_regparm"
 OPTS="${OPTS} use_sharedlibgbs"
 OPTS="${OPTS} use_stdout"
 OPTS="${OPTS} use_zlib"
@@ -604,18 +600,14 @@ while [ "${1-}" ]; do
     shift
 done
 
-## on Linux x86, regparm defaults to on
-
 if (      [ "$BUILDARCH" = "i386"   ] \
        || [ "$BUILDARCH" = "i486"   ] \
        || [ "$BUILDARCH" = "i586"   ] \
        || [ "$BUILDARCH" = "i686"   ] \
        || [ "$BUILDARCH" = "x86_64" ] \
    ) && [ "$BUILDOS" = "Linux" ]; then
-    setdefault use_regparm yes
     setdefault build_test yes
 else
-    setdefault use_regparm no
     setdefault build_test no
 fi
 
@@ -1044,19 +1036,6 @@ EOF
     fi
 fi
 
-if [ "$use_regparm" != "no" ]; then
-    cc_check "checking for regparm support" use_regparm <<EOF
-void __attribute__((regparm(3))) foo(void)
-{
-}
-int main(int argc, char **argv)
-{
-    foo();
-    return 0;
-}
-EOF
-fi
-
 ## set variables we have no test for to default values if not set
 
 setdefault exec_prefix "$prefix"
@@ -1161,7 +1140,6 @@ __EOF__
     plugout_x PULSE
     plugout_x STDOUT
     use_x I18N
-    use_x REGPARM
     use_x ZLIB
     have_x ESTRPIPE
     echo "#endif"

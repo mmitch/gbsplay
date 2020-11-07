@@ -18,7 +18,7 @@
 static FILE *file;
 static long cycles_prev = 0;
 
-static long regparm iodumper_open(enum plugout_endian endian, long rate)
+static long iodumper_open(enum plugout_endian endian, long rate)
 {
 	/*
 	 * clone and close STDOUT_FILENO
@@ -32,7 +32,7 @@ static long regparm iodumper_open(enum plugout_endian endian, long rate)
 	return 0;
 }
 
-static int regparm iodumper_skip(int subsong)
+static int iodumper_skip(int subsong)
 {
 	fprintf(file, "\nsubsong %d\n", subsong);
 	fprintf(stderr, "dumping subsong %d\n", subsong);
@@ -40,7 +40,7 @@ static int regparm iodumper_skip(int subsong)
 	return 0;
 }
 
-static int regparm iodumper_io(long cycles, uint32_t addr, uint8_t val)
+static int iodumper_io(long cycles, uint32_t addr, uint8_t val)
 {
 	long cycle_diff = cycles - cycles_prev;
 
@@ -50,7 +50,7 @@ static int regparm iodumper_io(long cycles, uint32_t addr, uint8_t val)
 	return 0;
 }
 
-static void regparm iodumper_close(void)
+static void iodumper_close(void)
 {
 	fflush(file);
 	fclose(file);

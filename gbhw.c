@@ -129,7 +129,7 @@ static long ch3_next_nibble = 0;
 #define IMPULSE_N (1 << IMPULSE_N_SHIFT)
 #define IMPULSE_N_MASK (IMPULSE_N - 1)
 
-static regparm uint32_t rom_get(uint32_t addr)
+static uint32_t rom_get(uint32_t addr)
 {
 	if ((addr >> 8) == 0 && rom_lockout == 0) {
 		return boot_rom[addr & 0xff];
@@ -138,13 +138,13 @@ static regparm uint32_t rom_get(uint32_t addr)
 	return rom[addr & 0x3fff];
 }
 
-static regparm uint32_t rombank_get(uint32_t addr)
+static uint32_t rombank_get(uint32_t addr)
 {
 //	DPRINTF("rombank_get(%04x)\n", addr);
 	return rom[(addr & 0x3fff) + 0x4000*rombank];
 }
 
-static regparm uint32_t io_get(uint32_t addr)
+static uint32_t io_get(uint32_t addr)
 {
 	if (addr >= 0xff80 && addr <= 0xfffe) {
 		return hiram[addr & 0x7f];
@@ -202,19 +202,19 @@ static regparm uint32_t io_get(uint32_t addr)
 	}
 }
 
-static regparm uint32_t intram_get(uint32_t addr)
+static uint32_t intram_get(uint32_t addr)
 {
 //	DPRINTF("intram_get(%04x)\n", addr);
 	return intram[addr & 0x1fff];
 }
 
-static regparm uint32_t extram_get(uint32_t addr)
+static uint32_t extram_get(uint32_t addr)
 {
 //	DPRINTF("extram_get(%04x)\n", addr);
 	return extram[addr & 0x1fff];
 }
 
-static regparm void rom_put(uint32_t addr, uint8_t val)
+static void rom_put(uint32_t addr, uint8_t val)
 {
 	if (addr >= 0x2000 && addr <= 0x3fff) {
 		val &= 0x1f;
@@ -228,7 +228,7 @@ static regparm void rom_put(uint32_t addr, uint8_t val)
 	}
 }
 
-static regparm void apu_reset(void)
+static void apu_reset(void)
 {
 	long i;
 	int mute_tmp[4];
@@ -255,7 +255,7 @@ static regparm void apu_reset(void)
 
 static void linkport_atexit(void);
 
-static regparm void linkport_write(long c)
+static void linkport_write(long c)
 {
 	static char buf[256];
 	static long idx = 0;
@@ -288,7 +288,7 @@ static void linkport_atexit(void)
 	linkport_write(-1);
 }
 
-static regparm void sequencer_update_len(long chn)
+static void sequencer_update_len(long chn)
 {
 	if (gbhw_ch[chn].len_enable && gbhw_ch[chn].len_gate) {
 		gbhw_ch[chn].len++;
@@ -302,7 +302,7 @@ static regparm void sequencer_update_len(long chn)
 	}
 }
 
-static regparm long sweep_check_overflow(void)
+static long sweep_check_overflow(void)
 {
 	long val = (2048 - gbhw_ch[0].div_tc_shadow) >> gbhw_ch[0].sweep_shift;
 
@@ -319,7 +319,7 @@ static regparm long sweep_check_overflow(void)
 	return 1;
 }
 
-static regparm void io_put(uint32_t addr, uint8_t val)
+static void io_put(uint32_t addr, uint8_t val)
 {
 	long chn = (addr - 0xff10)/5;
 
@@ -572,17 +572,17 @@ static regparm void io_put(uint32_t addr, uint8_t val)
 	}
 }
 
-static regparm void intram_put(uint32_t addr, uint8_t val)
+static void intram_put(uint32_t addr, uint8_t val)
 {
 	intram[addr & 0x1fff] = val;
 }
 
-static regparm void extram_put(uint32_t addr, uint8_t val)
+static void extram_put(uint32_t addr, uint8_t val)
 {
 	extram[addr & 0x1fff] = val;
 }
 
-static regparm void sequencer_step(void)
+static void sequencer_step(void)
 {
 	long i;
 	long clock_len = 0;
@@ -651,7 +651,7 @@ static regparm void sequencer_step(void)
 	}
 }
 
-regparm void gbhw_master_fade(long speed, long dstvol)
+void gbhw_master_fade(long speed, long dstvol)
 {
 	if (dstvol < MASTER_VOL_MIN) dstvol = MASTER_VOL_MIN;
 	if (dstvol > MASTER_VOL_MAX) dstvol = MASTER_VOL_MAX;
@@ -666,7 +666,7 @@ regparm void gbhw_master_fade(long speed, long dstvol)
 	long shift = (~(n) & 1) << 2; \
 	(((p)[index] >> shift) & 0xf); })
 
-static regparm void gb_flush_buffer(void)
+static void gb_flush_buffer(void)
 {
 	long i;
 	long overlap;
@@ -728,7 +728,7 @@ static regparm void gb_flush_buffer(void)
 	impbuf->cycles -= (sound_div_tc * soundbuf->samples) / SOUND_DIV_MULT;
 }
 
-static regparm void gb_change_level(long l_ofs, long r_ofs)
+static void gb_change_level(long l_ofs, long r_ofs)
 {
 	long pos;
 	long imp_idx;
@@ -756,7 +756,7 @@ static regparm void gb_change_level(long l_ofs, long r_ofs)
 	impbuf->r_lvl += r_ofs*256;
 }
 
-static regparm void gb_sound(long cycles)
+static void gb_sound(long cycles)
 {
 	long i, j;
 	long l_lvl = 0, r_lvl = 0;
@@ -841,25 +841,25 @@ static regparm void gb_sound(long cycles)
 	}
 }
 
-regparm void gbhw_setcallback(gbhw_callback_fn fn, void *priv)
+void gbhw_setcallback(gbhw_callback_fn fn, void *priv)
 {
 	callback = fn;
 	callbackpriv = priv;
 }
 
-regparm void gbhw_setiocallback(gbhw_iocallback_fn fn, void *priv)
+void gbhw_setiocallback(gbhw_iocallback_fn fn, void *priv)
 {
 	iocallback = fn;
 	iocallback_priv = priv;
 }
 
-regparm void gbhw_setstepcallback(gbhw_stepcallback_fn fn, void *priv)
+void gbhw_setstepcallback(gbhw_stepcallback_fn fn, void *priv)
 {
 	stepcallback = fn;
 	stepcallback_priv = priv;
 }
 
-static regparm void gbhw_impbuf_reset(struct gbhw_buffer *impbuf)
+static void gbhw_impbuf_reset(struct gbhw_buffer *impbuf)
 {
 	assert(sound_div_tc != 0);
 	impbuf->cycles = (long)(sound_div_tc * IMPULSE_WIDTH/2 / SOUND_DIV_MULT);
@@ -868,7 +868,7 @@ static regparm void gbhw_impbuf_reset(struct gbhw_buffer *impbuf)
 	memset(impbuf->data, 0, impbuf->bytes);
 }
 
-regparm void gbhw_setbuffer(struct gbhw_buffer *buffer)
+void gbhw_setbuffer(struct gbhw_buffer *buffer)
 {
 	soundbuf = buffer;
 	soundbuf->samples = soundbuf->bytes / 4;
@@ -892,7 +892,7 @@ static void gbhw_update_filter()
 	cap_factor = round(65536.0 * cap_constant);
 }
 
-regparm long gbhw_setfilter(const char *type)
+long gbhw_setfilter(const char *type)
 {
 	if (strcasecmp(type, GBHW_CFG_FILTER_OFF) == 0) {
 		filter_enabled = 0;
@@ -912,14 +912,14 @@ regparm long gbhw_setfilter(const char *type)
 	return 1;
 }
 
-regparm void gbhw_setrate(long rate)
+void gbhw_setrate(long rate)
 {
 	sample_rate = rate;
 	sound_div_tc = GBHW_CLOCK*SOUND_DIV_MULT/rate;
 	gbhw_update_filter();
 }
 
-regparm void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax)
+void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax)
 {
 	if (lminval == INT_MAX) return;
 	*lmin = lminval;
@@ -936,7 +936,7 @@ regparm void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t
  * so we don't need range checking in rom_get and
  * rombank_get.
  */
-regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
+void gbhw_init(uint8_t *rombuf, uint32_t size)
 {
 	long i;
 
@@ -984,21 +984,21 @@ regparm void gbhw_init(uint8_t *rombuf, uint32_t size)
 	gbcpu_addmem(0xff, 0xff, io_put, io_get);
 }
 
-regparm void gbhw_enable_bootrom(const uint8_t *rombuf)
+void gbhw_enable_bootrom(const uint8_t *rombuf)
 {
 	memcpy(boot_rom, rombuf, sizeof(boot_rom));
 	rom_lockout = 0;
 }
 
 /* internal for gbs.c, not exported from libgbs */
-regparm void gbhw_io_put(uint16_t addr, uint8_t val) {
+void gbhw_io_put(uint16_t addr, uint8_t val) {
 	if (addr != 0xffff && (addr < 0xff00 || addr > 0xff7f))
 		return;
 	io_put(addr, val);
 }
 
 /* unmasked peek used by gbsplay.c to print regs */
-regparm uint8_t gbhw_io_peek(uint16_t addr)
+uint8_t gbhw_io_peek(uint16_t addr)
 {
 	if (addr >= 0xff10 && addr <= 0xff3f) {
 		return ioregs[addr & 0x7f];
@@ -1007,7 +1007,7 @@ regparm uint8_t gbhw_io_peek(uint16_t addr)
 }
 
 
-regparm void gbhw_check_if(void)
+void gbhw_check_if(void)
 {
 	uint8_t mask = 0x01; /* lowest bit is highest priority irq */
 	uint8_t vec = 0x40;
@@ -1031,7 +1031,7 @@ regparm void gbhw_check_if(void)
 	}
 }
 
-static regparm void blargg_debug(void)
+static void blargg_debug(void)
 {
 	long i;
 
@@ -1060,7 +1060,7 @@ static regparm void blargg_debug(void)
  * @param time_to_work  emulated time in milliseconds
  * @return  elapsed cpu cycles
  */
-regparm long gbhw_step(long time_to_work)
+long gbhw_step(long time_to_work)
 {
 	long cycles_total = 0;
 
@@ -1128,7 +1128,7 @@ regparm long gbhw_step(long time_to_work)
 	return cycles_total;
 }
 
-regparm void gbhw_pause(long new_pause)
+void gbhw_pause(long new_pause)
 {
 	pause_output = new_pause != 0;
 }

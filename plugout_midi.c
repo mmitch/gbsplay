@@ -28,7 +28,7 @@
 #define FREQ(x) (262144 / (x))
 #define NOTE(x) ((long)((log(FREQ(x))/LN2 - MAGIC)*12 + .2))
 
-static long regparm midi_open(enum plugout_endian endian, long rate)
+static long midi_open(enum plugout_endian endian, long rate)
 {
 	return 0;
 }
@@ -192,7 +192,7 @@ out:
 	return 1;
 }
 
-static int regparm midi_skip(int subsong)
+static int midi_skip(int subsong)
 {
 	cycles_prev = 0;
 
@@ -253,7 +253,7 @@ static int pan(long cycles, int channel, int pan)
 	return 0;
 }
 
-static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
+static int midi_io(long cycles, uint32_t addr, uint8_t val)
 {
 	static long div[4] = {0, 0, 0, 0};
 	static int volume[4] = {0, 0, 0, 0};
@@ -409,7 +409,7 @@ static int regparm midi_io(long cycles, uint32_t addr, uint8_t val)
 	return 0;
 }
 
-static void regparm midi_close(void)
+static void midi_close(void)
 {
 	int chan;
 	

@@ -26,7 +26,7 @@ static DWORD writeMax;       // Maximum amount we can write at once.
 static WAVEFORMATEX wfx;
 static DSBUFFERDESC dsbdesc;
 
-static long regparm dsound_open(enum plugout_endian endian, long rate)
+static long dsound_open(enum plugout_endian endian, long rate)
 {
 	HRESULT hr;
 
@@ -101,7 +101,7 @@ static long regparm dsound_open(enum plugout_endian endian, long rate)
 	return 0; /* We're open, rock and roll! */
 }
 
-static ssize_t regparm dsound_write(const void* buf, size_t count)
+static ssize_t dsound_write(const void* buf, size_t count)
 {
 	size_t orig_count = count;
 	DWORD playCursor, writeCursor;
@@ -158,7 +158,7 @@ static ssize_t regparm dsound_write(const void* buf, size_t count)
 	return orig_count;
 }
 
-static int regparm dsound_skip(int subsound)
+static int dsound_skip(int subsound)
 {
 	HRESULT hr;
 	LPDIRECTSOUNDBUFFER pDsb = NULL;
@@ -180,7 +180,7 @@ static int regparm dsound_skip(int subsound)
 	return 0;
 }
 
-static void regparm dsound_pause(int pause_mode)
+static void dsound_pause(int pause_mode)
 {
 	if (pause_mode && dsound_buffer)
 		IDirectSoundBuffer8_Stop(dsound_buffer);
@@ -188,7 +188,7 @@ static void regparm dsound_pause(int pause_mode)
 		IDirectSoundBuffer8_Play(dsound_buffer, 0, 0, DSBPLAY_LOOPING);
 }
 
-static void regparm dsound_close()
+static void dsound_close()
 {
 	if (dsound_buffer)
 	{

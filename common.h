@@ -35,12 +35,6 @@
 #define TEXTDOMAIN "gbsplay"
 #define N_(x) x
 
-#if USE_REGPARM == 1
-#  define regparm __attribute__((regparm(3)))
-#else
-#  define regparm
-#endif
-
 #if USE_I18N == 1
 
 #  include <locale.h>

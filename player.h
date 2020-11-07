@@ -50,10 +50,10 @@ struct displaytime {
 	long played_min, played_sec, total_min, total_sec;
 };
 
-regparm long get_next_subsong(struct gbs *gbs);
-regparm int get_prev_subsong(struct gbs *gbs);
-regparm long nextsubsong_cb(struct gbs *gbs, void *priv);
-regparm void update_displaytime(struct displaytime *time, struct gbs *gbs);
-regparm struct gbs *common_init(int argc, char **argv);
+long get_next_subsong(struct gbs *gbs);
+int get_prev_subsong(struct gbs *gbs);
+long nextsubsong_cb(struct gbs *gbs, void *priv);
+void update_displaytime(struct displaytime *time, struct gbs *gbs);
+struct gbs *common_init(int argc, char **argv);
 
 #endif

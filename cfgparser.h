@@ -9,7 +9,7 @@
 #ifndef _CFGPARSER_H_
 #define _CFGPARSER_H_
 
-typedef void regparm (*cfg_parse_fn)(void *ptr);
+typedef void (*cfg_parse_fn)(void *ptr);
 
 struct cfg_option {
 	char *name;
@@ -17,10 +17,10 @@ struct cfg_option {
 	cfg_parse_fn parse_fn;
 };
 
-void  regparm cfg_string(void *ptr);
-void  regparm cfg_long(void *ptr);
-void  regparm cfg_endian(void *ptr);
-void  regparm cfg_parse(const char *fname, const struct cfg_option *options);
-char* regparm get_userconfig(const char* cfgfile);
+void  cfg_string(void *ptr);
+void  cfg_long(void *ptr);
+void  cfg_endian(void *ptr);
+void  cfg_parse(const char *fname, const struct cfg_option *options);
+char* get_userconfig(const char* cfgfile);
 
 #endif

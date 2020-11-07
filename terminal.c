@@ -20,10 +20,6 @@
 
 static struct termios ots;
 
-/*
- * signal handlers and main may not use regparm
- * unless libc is using regparm too...
- */
 void exit_handler(int signum)
 {
 	printf(_("\nCaught signal %d, exiting...\n"), signum);

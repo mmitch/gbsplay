@@ -30,9 +30,9 @@ static AuServer *nas_server;
 static AuFlowID             nas_flow;
 
 /* forward function declarations */
-static long    regparm nas_open(enum plugout_endian endian, long rate);
-static ssize_t regparm nas_write(const void *buf, size_t count);
-static void    regparm nas_close();
+static long    nas_open(enum plugout_endian endian, long rate);
+static ssize_t nas_write(const void *buf, size_t count);
+static void    nas_close();
 
 /* descripton of this plugin */
 const struct output_plugin plugout_nas = {
@@ -51,7 +51,7 @@ const struct output_plugin plugout_nas = {
  * @param status  NAS status code to convert
  * @return  Pointer to static buffer with the resulting error message
  */
-static regparm char *nas_error(AuStatus status)
+static char *nas_error(AuStatus status)
 {
 	static char s[100];
 
@@ -66,7 +66,7 @@ static regparm char *nas_error(AuStatus status)
  * @param aud  NAS server connection handle
  * @return  Device ID or AuNone if 2 channels are not supported on this server
  */
-static AuDeviceID regparm nas_find_device(AuServer *aud)
+static AuDeviceID nas_find_device(AuServer *aud)
 {
 	long i;
 	for (i=0; i < AuServerNumDevices(aud); i++) {
@@ -88,7 +88,7 @@ static AuDeviceID regparm nas_find_device(AuServer *aud)
  * @param endian  requested endianness
  * @param rate  requested samplerate
  */
-static long regparm nas_open(enum plugout_endian endian, long rate)
+static long nas_open(enum plugout_endian endian, long rate)
 {
 	char *text = "";
 	unsigned char nas_format;
@@ -178,7 +178,7 @@ err:
  * @param count  length of audio data in bytes
  * @return  the number of bytes actually written
  */
-static ssize_t regparm nas_write(const void *buf, size_t count)
+static ssize_t nas_write(const void *buf, size_t count)
 {
 	long maxlen = NAS_BUFFER_SAMPLES * 2;
 	long numwritten = 0;
@@ -220,7 +220,7 @@ static ssize_t regparm nas_write(const void *buf, size_t count)
 /**
  * stop flow and close NAS server connection.
  */
-static void regparm nas_close()
+static void nas_close()
 {
 	if (nas_server) {
 		AuStopFlow(nas_server, nas_flow, NULL);

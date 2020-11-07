@@ -76,7 +76,7 @@ static output_plugin_const_t plugouts[] = {
 	NULL
 };
 
-regparm void plugout_list_plugins(void)
+void plugout_list_plugins(void)
 {
 	long idx;
 
@@ -93,7 +93,7 @@ regparm void plugout_list_plugins(void)
 	(void)puts("");
 }
 
-regparm const struct output_plugin* plugout_select_by_name(const char *name)
+const struct output_plugin* plugout_select_by_name(const char *name)
 {
 	long idx;
 

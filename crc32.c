@@ -17,7 +17,7 @@ static unsigned long crc_table[256];
  * with the correct final value.  Thus, it is safe to call
  * even on a table that someone else is using concurrently.
  */
-static regparm void make_crc_table(void) {
+static void make_crc_table(void) {
   unsigned long i, j, h = 1;
   crc_table[0] = 0;
   for (i = 128; i; i >>= 1) {
@@ -38,7 +38,7 @@ static regparm void make_crc_table(void) {
  * to data in little-endian byte and bit order to preserve the
  * property of detecting all burst errors of length 32 bits or less.
  */
-regparm unsigned long gbs_crc32(unsigned long crc, const char *buf, size_t len) {
+unsigned long gbs_crc32(unsigned long crc, const char *buf, size_t len) {
   if (crc_table[255] == 0)
     make_crc_table();
   crc ^= 0xffffffff;

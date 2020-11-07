@@ -61,23 +61,23 @@ struct gbhw_channel {
 
 extern struct gbhw_channel gbhw_ch[4];
 
-typedef regparm void (*gbhw_callback_fn)(struct gbhw_buffer *buf, void *priv);
-typedef regparm void (*gbhw_iocallback_fn)(long cycles, uint32_t addr, uint8_t valu, void *priv);
-typedef regparm void (*gbhw_stepcallback_fn)(const long cycles, const struct gbhw_channel[], void *priv);
+typedef void (*gbhw_callback_fn)(struct gbhw_buffer *buf, void *priv);
+typedef void (*gbhw_iocallback_fn)(long cycles, uint32_t addr, uint8_t valu, void *priv);
+typedef void (*gbhw_stepcallback_fn)(const long cycles, const struct gbhw_channel[], void *priv);
 
-regparm void gbhw_setcallback(gbhw_callback_fn fn, void *priv);
-regparm void gbhw_setiocallback(gbhw_iocallback_fn fn, void *priv);
-regparm void gbhw_setstepcallback(gbhw_stepcallback_fn fn, void *priv);
-regparm long gbhw_setfilter(const char *type);
-regparm void gbhw_setrate(long rate);
-regparm void gbhw_setbuffer(struct gbhw_buffer *buffer);
-regparm void gbhw_init(uint8_t *rombuf, uint32_t size);
-regparm void gbhw_enable_bootrom(const uint8_t *rombuf);
-regparm void gbhw_pause(long new_pause);
-regparm void gbhw_master_fade(long speed, long dstvol);
-regparm void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax);
-regparm long gbhw_step(long time_to_work);
-regparm uint8_t gbhw_io_peek(uint16_t addr);  /* unmasked peek */
-regparm void gbhw_io_put(uint16_t addr, uint8_t val);
+void gbhw_setcallback(gbhw_callback_fn fn, void *priv);
+void gbhw_setiocallback(gbhw_iocallback_fn fn, void *priv);
+void gbhw_setstepcallback(gbhw_stepcallback_fn fn, void *priv);
+long gbhw_setfilter(const char *type);
+void gbhw_setrate(long rate);
+void gbhw_setbuffer(struct gbhw_buffer *buffer);
+void gbhw_init(uint8_t *rombuf, uint32_t size);
+void gbhw_enable_bootrom(const uint8_t *rombuf);
+void gbhw_pause(long new_pause);
+void gbhw_master_fade(long speed, long dstvol);
+void gbhw_getminmax(int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax);
+long gbhw_step(long time_to_work);
+uint8_t gbhw_io_peek(uint16_t addr);  /* unmasked peek */
+void gbhw_io_put(uint16_t addr, uint8_t val);
 
 #endif

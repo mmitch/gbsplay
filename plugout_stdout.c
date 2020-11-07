@@ -15,7 +15,7 @@
 
 int fd;
 
-static long regparm stdout_open(enum plugout_endian endian,
+static long stdout_open(enum plugout_endian endian,
                                 long rate)
 {
 	/*
@@ -29,12 +29,12 @@ static long regparm stdout_open(enum plugout_endian endian,
 	return 0;
 }
 
-static ssize_t regparm stdout_write(const void *buf, size_t count)
+static ssize_t stdout_write(const void *buf, size_t count)
 {
 	return write(fd, buf, count);
 }
 
-static void regparm stdout_close()
+static void stdout_close()
 {
 	(void)close(fd);
 }
