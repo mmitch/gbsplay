@@ -7,6 +7,7 @@ config.*
 *.exe
 man/gbsinfo.1
 man/gbsplay.1
+man/xgbsplay.1
 man/gbsplayrc.5
 libgbs
 *.a
@@ -15,6 +16,7 @@ libgbs
 *.pot
 gbsinfo
 gbsplay
+xgbsplay
 test_gbs
 gen_impulse_h
 impulse.h

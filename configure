@@ -542,6 +542,7 @@ Optional Features:
 
 Optional Modules:
   --with-xmmsplugin      build XMMS input plugin
+  --with-xgbsplay        build graphical frontend xgbsplay
   --without-contrib      don't install contrib scripts
   --without-test         don't test gbsplay output during build
 
@@ -563,6 +564,7 @@ OPTS=""
 OPTS="${OPTS} build_contrib"
 OPTS="${OPTS} build_test"
 OPTS="${OPTS} build_xmmsplugin"
+OPTS="${OPTS} build_xgbsplay"
 OPTS="${OPTS} use_alsa"
 OPTS="${OPTS} use_debug"
 OPTS="${OPTS} use_devdsp"
@@ -619,6 +621,7 @@ fi
 
 ## more defaults
 setdefault build_xmmsplugin no
+setdefault build_xgbsplay no
 setdefault build_contrib yes
 ## disable test when cross-compiling
 if [ -n "$buildalias" ] && [ "$buildalias" != "$hostalias" ]; then
@@ -944,6 +947,31 @@ else
     build_xmmsplugin=no
 fi
 
+## can xgbsplay be built?
+
+if [ "$build_xgbsplay" != "no" ]; then
+    ## check for Xlib
+
+    check_include X11/Xlib.h "/usr/X11R6/include"
+    retval1=$?
+    retval2=1
+    if [ $retval1 -eq 0 ]; then
+        check_libs X11 "" "/usr/X11R6/lib /usr/X11/lib /usr/lib/X11" <<EOF
+int main(int argc, char **argv) { return 0; }
+EOF
+        retval2=$?
+    fi
+    if [ $retval1 -eq 0 ] && [ $retval2 -eq 0 ]; then
+        if [ "$include_X11_Xlib_h_path" != " " ]; then
+            append_nodupe CFLAGS "-I$include_X11_Xlib_h_path"
+        fi
+	EXTRA_INSTALL="$EXTRA_INSTALL xgbsplay"
+	EXTRA_UNINSTALL="$EXTRA_UNINSTALL xgbsplay"
+    else
+	build_xgbsplay=no
+    fi
+fi
+
 ## check compiler features
 
 if cc_has_flag "-Wdeclaration-after-statement"; then
@@ -1091,6 +1119,7 @@ HOSTCC
 build_contrib
 build_test
 build_xmmsplugin
+build_xgbsplay
 have_xgettext
 use_i18n
 use_sharedlibgbs

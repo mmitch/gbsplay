@@ -18,13 +18,13 @@ jobs:
     strategy:
       matrix:
         compiler: [gcc, clang]
-        flags: ['', --disable-i18n, --disable-zlib, --enable-sharedlibgbs]
+        flags: ['', --disable-i18n, --disable-zlib, --enable-sharedlibgbs, --with-xgbsplay]
 
     steps:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: |
-        sudo apt-get install libasound2-dev libpulse-dev libaudio-dev
+        sudo apt-get install libasound2-dev libpulse-dev libaudio-dev libx11-dev
     - name: Build and test
       env:
         CC: ${{ matrix.compiler }}
