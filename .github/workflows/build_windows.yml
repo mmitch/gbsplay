@@ -57,21 +57,11 @@ jobs:
         make && cat config.err
     - name: Check activated plugouts
       run: |
-        if [ "${{ matrix.msystem }}" = "MSYS" ]; then
-            # MSYS has /dev/dsp support
-            ./check_plugouts.sh dsound devdsp
-        else
-            ./check_plugouts.sh dsound
-        fi
+        ./check_plugouts.sh dsound
     - name: Dump configure on error
       if: ${{ failure() }}
       run: |
         bash -x -v configure && cat config.err
     - name: Check build flags
       run: |
-        if [ "${{ matrix.msystem }}" = "MSYS" ]; then
-            # MSYS has i18n support
-            ./check_buildflags.sh --disable-hardening ${{ matrix.flags }}
-        else
-            ./check_buildflags.sh --disable-hardening --disable-i18n ${{ matrix.flags }}
-        fi
+        ./check_buildflags.sh --disable-hardening ${{ matrix.flags }}
