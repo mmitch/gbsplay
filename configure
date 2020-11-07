@@ -679,8 +679,14 @@ int main(int argc, char **argv)
 }
 EOF
 if [ "$windows_build" = yes ]; then
-  # stack-protector has some bugs on windows
+  # stack-protector has some bugs on Windows
   setdefault use_hardening no
+  # Don't look for audio libs that are unavailable on Windows
+  setdefault use_alsa no
+  setdefault use_nas no
+  setdefault use_pulse no
+  # /dev/dsp may be available on Cygwin/Msys, but we native DirectSound support
+  setdefault use_devdsp no
   if cc_check "" "" "" <<EOF; then
 int main(int argc, char **argv)
 {
