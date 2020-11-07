@@ -183,11 +183,11 @@ check_libs()
     local INFILE="$TEMPDIR/cl.c"
     local OUTFILE="$TEMPDIR/cl"
     local checklib="$1"
-    local extralibs="${2-}"
+    local extralibs="${checklib} ${2-}"
     local extralibdirs="${3-}"
     local name="${4-}"
     local extraflags="${5-}"
-    local msg="${6--l$checklib}"
+    local msg="${6-$checklib}"
     local cflags="$CFLAGS $LDFLAGS"
 
     eval "lib${checklib}_flags="
@@ -206,9 +206,9 @@ check_libs()
         fi
     done
 
-    local minerrs=$($BUILDCC -o "$OUTFILE" "$INFILE" $cflags "-l$checklib" $extraflags 2>&1 | wc -l)
+    local minerrs=$($BUILDCC -o "$OUTFILE" "$INFILE" $cflags $extraflags 2>&1 | wc -l)
     for extralib in $extralibs; do
-        local errs=$($BUILDCC -o "$OUTFILE" "$INFILE" $cflags "-l$checklib" "-l$extralib" $extraflags 2>&1 | wc -l)
+        local errs=$($BUILDCC -o "$OUTFILE" "$INFILE" $cflags "-l$extralib" $extraflags 2>&1 | wc -l)
         if [ "$errs" -lt "$minerrs" ]; then
             minerrs=$errs
             append_nodupe extraflags "-l$extralib"
@@ -846,7 +846,7 @@ if [ "$use_i18n" != no ]; then
             EXTRA_I18NFLAGS="$EXTRA_I18NFLAGS -I$include_libintl_h_path"
         fi
 
-	check_libs c "intl" "" "" "$EXTRA_I18NFLAGS" "i18n" <<EOF
+	check_libs intl "" "" "" "$EXTRA_I18NFLAGS" <<EOF
 #include <libintl.h>
 int main(int argc, char **argv)
 {
@@ -858,8 +858,8 @@ int main(int argc, char **argv)
 EOF
 	if [ $? -eq 0 ]; then
             use_i18n=yes
-	    if [ "$libc_flags" != "" ]; then
-		append_nodupe LDFLAGS "$libc_flags"
+	    if [ "$libintl_flags" != "" ]; then
+		append_nodupe LDFLAGS "$libintl_flags"
 	    fi
 	fi
     fi
