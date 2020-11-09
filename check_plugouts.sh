@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #
 # Ensure that configure enabled the plugouts as it was expected to.
-# This needs a bash with hashmap support but it is only used on the build machines
 #
 # 2020 (C) by Christian Garbs <mitch@cgarbs.de>
 # Licensed under GNU GPL v1 or, at your option, any later version.
