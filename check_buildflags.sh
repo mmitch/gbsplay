@@ -11,6 +11,9 @@ die()
 {
     echo "ERROR"
     echo "$@"
+    echo
+    echo "dumping config.mk:"
+    cat config.mk
     exit 1
 }
 
