@@ -59,6 +59,7 @@ zlib=yes
 harden=yes
 sharedlib=no
 xgbsplay=no
+prefix=/usr/local
 
 # parse build configuration
 for flag in "$@"; do
@@ -79,6 +80,9 @@ for flag in "$@"; do
 	    ;;
 	--with-xgbsplay)
 	    xgbsplay=yes
+	    ;;
+	--prefix=*)
+	    prefix="${flag#--prefix=}"
 	    ;;
 	*)
 	    die "unhandled flag <$flag>"
@@ -120,6 +124,8 @@ else
     expect_to_not_contain EXTRA_INSTALL "xgbsplay"
     expect_to_not_contain EXTRA_UNINSTALL "xgbsplay"
 fi
+
+expect_to_contain prefix "$prefix"
 
 # ok
 echo "ok"
