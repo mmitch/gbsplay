@@ -9,8 +9,8 @@ set -e
 
 die()
 {
-    echo "error"
-    echo "$@" >&2
+    echo "ERROR"
+    echo "$@"
     exit 1
 }
 
