@@ -77,7 +77,7 @@ EXTRA_CLEAN :=
 
 export Q VERBOSE CC HOSTCC BUILDCC GBSCFLAGS GBSLDFLAGS
 
-docs               := README HISTORY COPYRIGHT
+docs               := README.md HISTORY COPYRIGHT
 docs-dist          := INSTALL CODINGSTYLE TESTSUITE gbsformat.txt
 contribs           := contrib/gbs2ogg.sh contrib/gbsplay.bashcompletion
 examples           := examples/nightmode.gbs examples/gbsplayrc_sample
