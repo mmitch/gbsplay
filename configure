@@ -300,26 +300,6 @@ use_x() {
     fi
 }
 
-## external which is unreliable
-which()
-{
-    local IFS_SAVE="$IFS"
-    IFS=:
-    local PROGRAM="$1"
-    for ELEMENT in $PATH; do
-        if [ -z "$ELEMENT" ]; then
-            ELEMENT=.
-        fi
-        if [ -f "$ELEMENT/$PROGRAM" ] && [ -x "$ELEMENT/$PROGRAM" ]; then
-            IFS="$IFS_SAVE"
-            echo "$ELEMENT/$PROGRAM"
-            return 0
-        fi
-    done
-    IFS="$IFS_SAVE"
-    return 1
-}
-
 # set variable to default value if empty
 # really the same as $var="${var-$default}"
 setdefault()
@@ -493,7 +473,7 @@ fi
 ## generate tmp directory
 
 BASENAME="$(basename "$0")"
-if [ "$(which mktemp)" != "" ]; then
+if [ "$(command -v mktemp)" != "" ]; then
     TEMPDIR="$(mktemp -d "$TMPPATH/$BASENAME.XXXXXXXXXX")"
     RESULT=$?
 else
@@ -825,7 +805,7 @@ if [ "$use_i18n" != no ]; then
     printf "checking for gettext tools:  "
     have_xgettext=yes
     for i in xgettext msgmerge msgfmt msgen; do
-        if [ "$(which $i)" = "" ]; then
+        if [ "$(command -v $i)" = "" ]; then
             test "$have_xgettext" = "yes" && echo "not ok"
             have_xgettext=no
             echo "$i is missing"
@@ -901,7 +881,7 @@ EOF
 
     printf "checking for glib-dev:  "
     GLIB_CFLAGS=
-    if CONFIG=$(which glib-config); then
+    if CONFIG=$(command -v glib-config); then
         if GLIB_CFLAGS=$(glib-config --cflags); then
             echo "ok"
         else
@@ -915,7 +895,7 @@ EOF
 
     printf "checking for xmms-dev:  "
     XMMS_CFLAGS=
-    if CONFIG=$(which xmms-config); then
+    if CONFIG=$(command -v xmms-config); then
         if XMMS_CFLAGS=$(xmms-config --cflags); then
             if XMMS_INPUT_PLUGIN_DIR=$(xmms-config --input-plugin-dir); then
                 echo "ok"
