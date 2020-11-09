@@ -37,3 +37,8 @@ jobs:
     - name: Check build flags
       run: |
         ./check_buildflags.sh ${{ matrix.flags }}
+    - name: Check install and uninstall targets
+      run: |
+        # add the sudo here and not inside the script
+        # to prevent a mess when somebody runs the script locally
+        sudo ./check_install_uninstall.sh
