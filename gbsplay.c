@@ -272,7 +272,7 @@ int main(int argc, char **argv)
 			break;
 		}
 
-		if (redraw) printinfo(gbs);
+		if (redraw) printinfo();
 		if (verbosity>1) printstatus(gbs);
 		handleuserinput(gbs);
 	}
