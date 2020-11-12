@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+#include <time.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
@@ -52,6 +52,11 @@ static pthread_mutex_t debug_mutex = PTHREAD_MUTEX_INITIALIZER;
 #else
 #define DPRINTF(...) do { } while (0)
 #endif
+
+static const struct timespec TEN_MILLISECONDS = {
+	.tv_sec = 0,
+	.tv_nsec = 10000
+};
 
 static InputPlugin gbs_ip;
 
@@ -131,7 +136,7 @@ static void next_subsong(long flush)
 	if (!flush) {
 		gbs_ip.output->buffer_free();
 		gbs_ip.output->buffer_free();
-		while (gbs_ip.output->buffer_playing() && !stopthread) usleep(10000);
+		while (gbs_ip.output->buffer_playing() && !stopthread) nanosleep(&TEN_MILLISECONDS, NULL);
 	}
 	DPRINTF("locking gbs_mutex\n");
 	pthread_mutex_lock(&gbs_mutex);
@@ -173,7 +178,11 @@ static void *playloop(void *priv)
 	}
 	while (!stopthread) {
 		if (gbs_ip.output->buffer_free() < buffer.bytes) {
-			usleep(workunit*1000);
+			struct timespec waittime = {
+				.tv_sec = 0,
+				.tv_nsec = workunit*1000
+			};
+			nanosleep(&waittime, NULL);
 			continue;
 		}
 

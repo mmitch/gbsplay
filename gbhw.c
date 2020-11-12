@@ -8,8 +8,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <time.h>
 #include <limits.h>
 #include <assert.h>
 #include <math.h>
@@ -1065,7 +1065,11 @@ long gbhw_step(long time_to_work)
 	long cycles_total = 0;
 
 	if (pause_output) {
-		(void)usleep(time_to_work*1000);
+		struct timespec waittime = {
+			.tv_sec = 0,
+			.tv_nsec = time_to_work*1000
+		};
+		nanosleep(&waittime, NULL);
 		return 0;
 	}
 

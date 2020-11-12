@@ -16,14 +16,19 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <time.h>
 
 #include <audio/audiolib.h>
 
 #include "plugout.h"
 
 #define NAS_BUFFER_SAMPLES 8192
+
+static const struct timespec ONE_MILLISECOND = {
+	.tv_sec = 0,
+	.tv_nsec = 1000
+};
 
 /* global variables */
 static AuServer *nas_server;
@@ -200,7 +205,7 @@ static ssize_t nas_write(const void *buf, size_t count)
 			 * Does not fit in remaining buffer space,
 			 * wait a bit and try again
 			 */
-			(void)usleep(1000);
+			nanosleep(&ONE_MILLISECOND, NULL);
 			continue;
 		}
 		if (as != AuSuccess) {
