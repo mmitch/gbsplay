@@ -113,6 +113,12 @@ objs_xgbsplay += plugout_nas.o
 GBSPLAYLDFLAGS += -laudio $(libaudio_flags)
 XGBSPLAYLDFLAGS += -laudio $(libaudio_flags)
 endif
+ifeq ($(plugout_sdl),yes)
+objs_gbsplay += plugout_sdl.o
+objs_xgbsplay += plugout_sdl.o
+GBSPLAYLDFLAGS += -lSDL2
+XGBSPLAYLDFLAGS += -lSDL2
+endif
 ifeq ($(plugout_stdout),yes)
 objs_gbsplay += plugout_stdout.o
 objs_xgbsplay += plugout_stdout.o

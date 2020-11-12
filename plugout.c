@@ -38,6 +38,9 @@ extern const struct output_plugin plugout_nas;
 #ifdef PLUGOUT_PULSE
 extern const struct output_plugin plugout_pulse;
 #endif
+#ifdef PLUGOUT_SDL
+extern const struct output_plugin plugout_sdl;
+#endif
 #ifdef PLUGOUT_STDOUT
 extern const struct output_plugin plugout_stdout;
 #endif
@@ -72,6 +75,9 @@ static output_plugin_const_t plugouts[] = {
 #endif
 #ifdef PLUGOUT_IODUMPER
 	&plugout_iodumper,
+#endif
+#ifdef PLUGOUT_SDL
+	&plugout_sdl,
 #endif
 	NULL
 };
