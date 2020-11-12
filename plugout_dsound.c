@@ -16,6 +16,7 @@
 #include <dsound.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <assert.h>
 
 static LPDIRECTSOUND8 dsound_device;
 static LPDIRECTSOUNDBUFFER8 dsound_buffer;
@@ -95,7 +96,8 @@ static long dsound_open(enum plugout_endian endian, long rate)
 	memset(&dsbdesc, 0, sizeof(DSBUFFERDESC));
 	dsbdesc.dwSize = sizeof(DSBUFFERDESC);
 	dsbdesc.dwFlags = DSBCAPS_GLOBALFOCUS | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLPAN | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY; /* Keep sound buffer going if inactive, use accurate play cursor */
-	writeMax = dsbdesc.dwBufferBytes = wfx.nAvgBytesPerSec / 10;
+	/* Round off buffer size to sample boundary */
+	writeMax = dsbdesc.dwBufferBytes = (wfx.nAvgBytesPerSec / 10) & ~(wfx.nBlockAlign - 1);
 	dsbdesc.lpwfxFormat = &wfx;
 
 	return 0; /* We're open, rock and roll! */
@@ -112,11 +114,9 @@ static ssize_t dsound_write(const void* buf, size_t count)
 	while (count > 0)
 	{
 		IDirectSoundBuffer8_GetCurrentPosition(dsound_buffer, &playCursor, &writeCursor);
-		if (writeOffset == -1)
+		if (writeOffset == -1) {
+			/* Initial buffering */
 			writeOffset = writeCursor;
-		if (writeCursor == 0 && playCursor == 0)
-		{
-			/* Starting write before DSound begins playing */
 			writeLimit = writeMax - writeOffset;
 		}
 		else if (writeOffset <= playCursor)
@@ -137,14 +137,21 @@ static ssize_t dsound_write(const void* buf, size_t count)
 			writeLimit = count;
 		}
 		IDirectSoundBuffer8_Lock(dsound_buffer, writeOffset, writeLimit, &pBuf1, &nBuf1, &pBuf2, &nBuf2, 0);
+		assert(pBuf1 != NULL);
 		memcpy(pBuf1, buf, nBuf1);
-		if (nBuf1 < writeLimit)
+		if (pBuf2)
 		{
+			/* DirectSound gave us a wraparound pointer because the requested lock
+			   extends past the end of the buffer */
 			memcpy(pBuf2, (void*)((char*)buf + nBuf1), nBuf2);
 			writeOffset = nBuf2; /* NOT += */
 		}
-		else
-			writeOffset += nBuf1;
+		else {
+		/* All requested data fits buffer without wraparound; make sure we don't
+		   start the next request right at the end of the buffer (reset to 0 instead) */
+			assert((writeOffset + nBuf1) <= writeMax);
+			writeOffset = (writeOffset + nBuf1) % writeMax;
+		}
 		IDirectSoundBuffer8_Unlock(dsound_buffer, pBuf1, nBuf1, pBuf2, nBuf2);
 		if (writeLimit < count)
 		{
