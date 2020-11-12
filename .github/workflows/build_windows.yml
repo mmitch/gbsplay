@@ -22,10 +22,13 @@ jobs:
         include:
           - msystem: MSYS
             packages: gcc
+            plugouts: dsound devdsp
           - msystem: MINGW64
             packages: mingw-w64-x86_64-toolchain
+            plugouts: dsound
           - msystem: MINGW32
             packages: mingw-w64-i686-toolchain
+            plugouts: dsound
 
     defaults:
       run:
@@ -47,7 +50,7 @@ jobs:
         make && cat config.err
     - name: Check activated plugouts
       run: |
-        ./check_plugouts.sh dsound
+        ./check_plugouts.sh ${{ matrix.plugouts }}
     - name: Dump configure on error
       if: ${{ failure() }}
       run: |

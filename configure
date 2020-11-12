@@ -657,8 +657,6 @@ if [ "$windows_build" = yes ]; then
   setdefault use_alsa no
   setdefault use_nas no
   setdefault use_pulse no
-  # /dev/dsp may be available on Cygwin/Msys, but we have native DirectSound support
-  setdefault use_devdsp no
   if cc_check "" "" "" <<EOF; then
 int main(int argc, char **argv)
 {
