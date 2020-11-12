@@ -18,22 +18,14 @@ jobs:
     strategy:
       matrix:
         msystem: [MSYS, MINGW64, MINGW32]
-        compiler: [gcc, mingw-w64-x86_64-toolchain, mingw-w64-i686-toolchain]
         flags: ['', --enable-sharedlibgbs]
-        exclude:
-          # this exclusion scheme is bonkers!
+        include:
           - msystem: MSYS
-            compiler: mingw-w64-x86_64-toolchain
-          - msystem: MSYS
-            compiler: mingw-w64-i686-toolchain
+            packages: gcc
           - msystem: MINGW64
-            compiler: gcc
-          - msystem: MINGW64
-            compiler: mingw-w64-i686-toolchain
+            packages: mingw-w64-x86_64-toolchain
           - msystem: MINGW32
-            compiler: gcc
-          - msystem: MINGW32
-            compiler: mingw-w64-x86_64-toolchain
+            packages: mingw-w64-i686-toolchain
 
     defaults:
       run:
@@ -45,7 +37,7 @@ jobs:
       uses: msys2/setup-msys2@v2
       with:
         msystem: ${{ matrix.msystem }}
-        install: git base-devel ${{ matrix.compiler }} libintl gettext-devel zlib-devel
+        install: git base-devel ${{ matrix.packages }} libintl gettext-devel zlib-devel
         release: false
         update: false
     - name: Build and test
