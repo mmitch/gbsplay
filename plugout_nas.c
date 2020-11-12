@@ -186,7 +186,7 @@ err:
 static ssize_t nas_write(const void *buf, size_t count)
 {
 	long maxlen = NAS_BUFFER_SAMPLES * 2;
-	long numwritten = 0;
+	size_t numwritten = 0;
 
 	while (numwritten < count) {
 		AuStatus as = AuBadValue;
