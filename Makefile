@@ -104,8 +104,8 @@ endif
 ifeq ($(plugout_alsa),yes)
 objs_gbsplay += plugout_alsa.o
 objs_xgbsplay += plugout_alsa.o
-GBSPLAYLDFLAGS += -lasound $(libaudio_flags)
-XGBSPLAYLDFLAGS += -lasound $(libaudio_flags)
+GBSPLAYLDFLAGS += -lasound
+XGBSPLAYLDFLAGS += -lasound
 endif
 ifeq ($(plugout_nas),yes)
 objs_gbsplay += plugout_nas.o
