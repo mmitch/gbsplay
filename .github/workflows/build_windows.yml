@@ -24,11 +24,11 @@ jobs:
             packages: gcc
             plugouts: dsound devdsp
           - msystem: MINGW64
-            packages: mingw-w64-x86_64-toolchain
-            plugouts: dsound
+            packages: mingw-w64-x86_64-toolchain mingw-w64-x86_64-SDL2
+            plugouts: dsound sdl
           - msystem: MINGW32
-            packages: mingw-w64-i686-toolchain
-            plugouts: dsound
+            packages: mingw-w64-i686-toolchain mingw-w64-i686-SDL2
+            plugouts: dsound sdl
 
     defaults:
       run:
