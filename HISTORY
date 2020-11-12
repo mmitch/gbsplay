@@ -21,6 +21,7 @@ Removals:
 - gbsplay:
   - remove unmaintained splint annotations
   - remove regparm optimizations
+  - remove usleep() usage, use nanosleep() instead (it's more POSIX)
 
 Enhancements:
 
