@@ -5,11 +5,49 @@ gbsplay HISTORY
 2020/xx/xx  -  unreleased
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Bugfixes:
+
+- gbsplay:
+  - fix off-by-one error in gbhw_io_peek (fixes verbose WAVE display)
+  - fix Windows builds on MSYS2, MINGW32 and MINGW64
+
+- build process:
+  - don't run depend.sh before config.mk is included
+  - only enable i18n if it really works
+  - only build with -fstack-* protections if they really work
+
+Removals:
+
+- gbsplay:
+  - remove unmaintained splint annotations
+  - remove regparm optimizations
+
 Enhancements:
 
 - gbsplay:
   - transparent decompression of gzip-compressed files
   - basic VGM file support
+  - remove unneeded dsound3d dependency from dsound plugin
+
+- xgbsplay:
+  - added simple X11 frontend; use configure --with-xgbsplay
+
+- build process:
+  - depend on bash 3.x for configure script
+  - add automated build pipelines for Linux, macOS and
+    Windows (MSYS2, MINGW32 and MINGW64; no CygWin yet)
+    - test for successful builds
+    - test plugout configuration
+    - test some configure options
+    - test install and uninstall targets
+    - calculate code coverage
+  - use command -v instead of homegrown which replacement
+
+Documentation:
+
+- convert README to Markdown format
+- add shiny build status badges to README.md
+
 
 2020/06/26  -  0.0.94
 ~~~~~~~~~~~~~~~~~~~~~~~~~
