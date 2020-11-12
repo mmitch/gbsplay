@@ -48,6 +48,7 @@ static void setup_handlers(void)
 	sigaction(SIGSEGV, &sa, NULL);
 	sa.sa_handler = stop_handler;
 	sigaction(SIGSTOP, &sa, NULL);
+	sigaction(SIGABRT, &sa, NULL);
 	sa.sa_handler = cont_handler;
 	sigaction(SIGCONT, &sa, NULL);
 }
