@@ -4,7 +4,7 @@
 #
 # generate config.mk for gbsplay Makefile
 #
-# 2003-2006,2008,2010,2015,2017-2019 (C) by Christian Garbs <mitch@cgarbs.de>
+# 2003-2006,2008,2010,2015,2017-2020 (C) by Christian Garbs <mitch@cgarbs.de>
 #                                           Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
 # Licensed under GNU GPL v1 or, at your option, any later version.
 #
@@ -532,6 +532,7 @@ Output Plugins:
   --disable-altmidi      omit alternative MIDI file writer plugin
   --disable-nas          omit NAS sound output plugin
   --disable-pulse        omit PulseAudio sound output plugin
+  --disable-sdl          omit SDL sound output plugin
   --disable-stdout       omit stdout file writer plugin
 EOF
     exit "$1"
@@ -553,6 +554,7 @@ OPTS="${OPTS} use_midi"
 OPTS="${OPTS} use_altmidi"
 OPTS="${OPTS} use_nas"
 OPTS="${OPTS} use_pulse"
+OPTS="${OPTS} use_sdl"
 OPTS="${OPTS} use_sharedlibgbs"
 OPTS="${OPTS} use_stdout"
 OPTS="${OPTS} use_zlib"
@@ -791,6 +793,13 @@ EOF
         use_nas=yes
     fi
     recheck_use nas
+fi
+
+if [ "$use_sdl" != no ]; then
+    remember_use sdl
+    check_include SDL2/SDL.h
+    use_sdl="$have_SDL2_SDL_h"
+    recheck_use sdl
 fi
 
 if [ "$use_i18n" != no ]; then
@@ -1098,6 +1107,7 @@ __EOF__
     echo plugout_altmidi := $use_altmidi
     echo plugout_nas := $use_nas
     echo plugout_pulse := $use_pulse
+    echo plugout_sdl := $use_sdl
     echo plugout_stdout := $use_stdout
     echo configured := yes
 ) > config.mk
@@ -1117,6 +1127,7 @@ __EOF__
     plugout_x NAS
     plugout_x PULSE
     plugout_x STDOUT
+    plugout_x SDL
     use_x I18N
     use_x ZLIB
     have_x ESTRPIPE
