@@ -24,7 +24,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: |
-        sudo apt-get install libasound2-dev libpulse-dev libaudio-dev libx11-dev
+        sudo apt-get install libasound2-dev libpulse-dev libaudio-dev libx11-dev libsdl2-dev
     - name: Build and test
       env:
         CC: ${{ matrix.compiler }}
@@ -33,7 +33,7 @@ jobs:
         make
     - name: Check activated plugouts
       run: |
-        ./check_plugouts.sh alsa pulse devdsp nas
+        ./check_plugouts.sh alsa pulse devdsp nas sdl
     - name: Check build flags
       run: |
         ./check_buildflags.sh ${{ matrix.flags }}
