@@ -16,8 +16,6 @@ jobs:
     runs-on: windows-latest
 
     strategy:
-      # TODO: re-activate fail-fast when the build bugs are ironed out
-      fail-fast: false
       matrix:
         msystem: [MSYS, MINGW64, MINGW32]
         compiler: [gcc, mingw-w64-x86_64-toolchain, mingw-w64-i686-toolchain]
