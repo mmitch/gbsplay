@@ -22,6 +22,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        brew install sdl2
     - name: Build and test
       env:
         CC: ${{ matrix.compiler }}
@@ -30,7 +33,7 @@ jobs:
         make
     - name: Check activated plugouts
       run: |
-        ./check_plugouts.sh
+        ./check_plugouts.sh sdl
     - name: Check build flags
       run: |
         ./check_buildflags.sh ${{ matrix.flags }}
