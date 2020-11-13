@@ -10,6 +10,7 @@ Bugfixes:
 - gbsplay:
   - fix off-by-one error in gbhw_io_peek (fixes verbose WAVE display)
   - fix Windows builds on MSYS2, MINGW32 and MINGW64
+  - fix buffer handling in dsound plugout (fixes choppy and too fast playback)
 
 - build process:
   - don't run depend.sh before config.mk is included
