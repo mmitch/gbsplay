@@ -797,7 +797,7 @@ fi
 
 if [ "$use_sdl" != no ]; then
     remember_use sdl
-    check_include SDL2/SDL.h
+    check_include SDL2/SDL.h "" "#define SDL_MAIN_HANDLED"
     use_sdl="$have_SDL2_SDL_h"
     recheck_use sdl
 fi
