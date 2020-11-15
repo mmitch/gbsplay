@@ -19,6 +19,8 @@
 #  define PLUGOUT_DEFAULT "pulse"
 #elif PLUGOUT_ALSA == 1
 #  define PLUGOUT_DEFAULT "alsa"
+#elif PLUGOUT_SDL == 1
+#  define PLUGOUT_DEFAULT "sdl"
 #else
 #  define PLUGOUT_DEFAULT "oss"
 #endif
