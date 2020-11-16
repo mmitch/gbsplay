@@ -16,7 +16,14 @@
 #include "plugout.h"
 
 static const int PLAYBACK_MODE = 0;
+static const int NO_CHANGES = 0;
 static const int UNPAUSE = 0;
+
+#ifdef SDL_AUDIO_ALLOW_SAMPLES_CHANGE
+	static const int SDL_FLAGS = SDL_AUDIO_ALLOW_SAMPLES_CHANGE;
+#else
+	static const int SDL_FLAGS = NO_CHANGES;
+#endif
 
 static const struct timespec SLEEP_INTERVAL = {
 	.tv_sec = 0,
@@ -42,7 +49,7 @@ static long sdl_open(enum plugout_endian endian, long rate)
 	desired.samples = 1024; // 4096;
 	desired.callback = NULL;
 
-	device = SDL_OpenAudioDevice(NULL, PLAYBACK_MODE, &desired, &obtained, SDL_AUDIO_ALLOW_SAMPLES_CHANGE);
+	device = SDL_OpenAudioDevice(NULL, PLAYBACK_MODE, &desired, &obtained, SDL_FLAGS);
 	if (device == 0) {
 		fprintf(stderr, _("Could not open SDL audio device: %s\n"), SDL_GetError());
 		return -1;
