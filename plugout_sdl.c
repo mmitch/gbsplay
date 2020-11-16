@@ -15,14 +15,14 @@
 
 #include "plugout.h"
 
-static const int PLAYBACK_MODE = 0;
-static const int NO_CHANGES = 0;
-static const int UNPAUSE = 0;
+#define PLAYBACK_MODE      0
+#define NO_CHANGES_ALLOWED 0
+#define UNPAUSE            0
 
 #ifdef SDL_AUDIO_ALLOW_SAMPLES_CHANGE
-	static const int SDL_FLAGS = SDL_AUDIO_ALLOW_SAMPLES_CHANGE;
+	#define SDL_FLAGS SDL_AUDIO_ALLOW_SAMPLES_CHANGE
 #else
-	static const int SDL_FLAGS = NO_CHANGES;
+	#define SDL_FLAGS NO_CHANGES_ALLOWED
 #endif
 
 static const struct timespec SLEEP_INTERVAL = {
