@@ -16,7 +16,6 @@
 #include "plugout.h"
 
 static const int PLAYBACK_MODE = 0;
-static const int NO_CHANGES_ALLOWED = 0;
 static const int UNPAUSE = 0;
 
 static const struct timespec SLEEP_INTERVAL = {
@@ -25,11 +24,11 @@ static const struct timespec SLEEP_INTERVAL = {
 };
 
 int device;
+SDL_AudioSpec obtained;
 
 static long sdl_open(enum plugout_endian endian, long rate)
 {
-	SDL_AudioSpec desired, obtained;
-	
+	SDL_AudioSpec desired;
 	if (SDL_Init(SDL_INIT_AUDIO) != 0) {
 		fprintf(stderr, _("Could not init SDL: %s\n"), SDL_GetError());
 		return -1;
@@ -43,7 +42,7 @@ static long sdl_open(enum plugout_endian endian, long rate)
 	desired.samples = 1024; // 4096;
 	desired.callback = NULL;
 
-	device = SDL_OpenAudioDevice(NULL, PLAYBACK_MODE, &desired, &obtained, NO_CHANGES_ALLOWED);
+	device = SDL_OpenAudioDevice(NULL, PLAYBACK_MODE, &desired, &obtained, SDL_AUDIO_ALLOW_SAMPLES_CHANGE);
 	if (device == 0) {
 		fprintf(stderr, _("Could not open SDL audio device: %s\n"), SDL_GetError());
 		return -1;
@@ -56,9 +55,8 @@ static long sdl_open(enum plugout_endian endian, long rate)
 
 static ssize_t sdl_write(const void *buf, size_t count)
 {
-	while (SDL_GetQueuedAudioSize(device) > count)
+	while (SDL_GetQueuedAudioSize(device) > obtained.size * 2)
 		nanosleep(&SLEEP_INTERVAL, NULL);
-
 	if (SDL_QueueAudio(device, buf, count) != 0) {
 		fprintf(stderr, _("Could not write SDL audio data: %s\n"), SDL_GetError());
 		return -1;
