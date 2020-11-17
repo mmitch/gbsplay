@@ -27,12 +27,13 @@ Removals:
 Enhancements:
 
 - gbsplay:
+  - add SDL2 plugout
   - transparent decompression of gzip-compressed files
   - basic VGM file support
   - remove unneeded dsound3d dependency from dsound plugin
 
 - xgbsplay:
-  - added simple X11 frontend; use configure --with-xgbsplay
+  - add simple X11 frontend; use configure --with-xgbsplay
 
 - build process:
   - depend on bash 3.x for configure script

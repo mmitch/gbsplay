@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-27 22:20+0200\n"
-"PO-Revision-Date: 2015-07-18 22:22+0200\n"
+"POT-Creation-Date: 2020-11-12 21:14+0100\n"
+"PO-Revision-Date: 2020-11-12 21:21+0100\n"
 "Last-Translator: Christian Garbs <mitch@cgarbs.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -95,16 +95,16 @@ msgstr ""
 "\n"
 
 #, c-format
-msgid "Bad GD3 offset: %08x\n"
-msgstr "Unzulässiger GD3 offset: %08x\n"
+msgid "Bad GD3 offset: %08lx\n"
+msgstr "Unzulässiger GD3 offset: %08lx\n"
 
 #, c-format
-msgid "Bad data length: %d\n"
-msgstr "Unzulässige Datenlänge: %d\n"
+msgid "Bad data length: %ld\n"
+msgstr "Unzulässige Datenlänge: %ld\n"
 
 #, c-format
-msgid "Bad file size in header: %d\n"
-msgstr "Unzulässige Dateigröße im Header: %d\n"
+msgid "Bad file size in header: %ld\n"
+msgstr "Unzulässige Dateigröße im Header: %ld\n"
 
 #, c-format
 msgid "Bank @0x4000:     %d\n"
@@ -128,6 +128,10 @@ msgid "Copyright:"
 msgstr "Copyright:"
 
 #, c-format
+msgid "Could not init SDL: %s\n"
+msgstr "Konnte SDL nicht initialisieren: %s\n"
+
+#, c-format
 msgid "Could not open %s: %s\n"
 msgstr "Konnte %s nicht öffnen: %s\n"
 
@@ -148,6 +152,10 @@ msgid "Could not open ALSA PCM device '%s': %s\n"
 msgstr "Konnte ALSA-PCM-Gerät '%s' nicht öffnen: %s\n"
 
 #, c-format
+msgid "Could not open SDL audio device: %s\n"
+msgstr "Konnte SDL-Audiogerät nicht öffnen: %s\n"
+
+#, c-format
 msgid "Could not open output plugin \"%s\"\n"
 msgstr "Konnte Ausgabemethode \"%s\" nicht öffnen\n"
 
@@ -158,6 +166,14 @@ msgstr "Konnte %s nicht lesen: %s\n"
 #, c-format
 msgid "Could not rename %s to %s: %s\n"
 msgstr "Konnte %s nicht in %s umbenennen: %s\n"
+
+#, c-format
+msgid "Could not stat %s: %s\n"
+msgstr "Konnte Dateiattribute von %s nicht ermitteln: %s\n"
+
+#, c-format
+msgid "Could not write SDL audio data: %s\n"
+msgstr "Konnte SDL-Audiodaten nicht schreiben: %s\n"
 
 #, c-format
 msgid "Default subsong %d is out of range [1..%d].\n"
@@ -301,8 +317,8 @@ msgid "Unknown option %s at %s line %ld.\n"
 msgstr "Unbekannte Option %s in %s Zeile %ld.\n"
 
 #, c-format
-msgid "Unsupported DMG clock: %dHz\n"
-msgstr "Nicht unterstützter DMG-Takt: %dHz\n"
+msgid "Unsupported DMG clock: %ldHz\n"
+msgstr "Nicht unterstützter DMG-Takt: %ldHz\n"
 
 #, c-format
 msgid "Unsupported VGM opcode: 0x%02x\n"
