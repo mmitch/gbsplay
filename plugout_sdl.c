@@ -41,13 +41,17 @@ static long sdl_open(enum plugout_endian endian, long rate)
 		return -1;
 	}
 
-	// TODO: what about endianess?
 	SDL_zero(desired);
 	desired.freq = rate;
-	desired.format = AUDIO_S16;
 	desired.channels = 2;
-	desired.samples = 1024; // 4096;
+	desired.samples = 1024;
 	desired.callback = NULL;
+
+	switch (endian) {
+	case PLUGOUT_ENDIAN_BIG:    desired.format = AUDIO_S16MSB; break;
+	case PLUGOUT_ENDIAN_LITTLE: desired.format = AUDIO_S16LSB; break;
+	case PLUGOUT_ENDIAN_NATIVE: desired.format = AUDIO_S16SYS; break;
+	}
 
 	device = SDL_OpenAudioDevice(NULL, PLAYBACK_MODE, &desired, &obtained, SDL_FLAGS);
 	if (device == 0) {
