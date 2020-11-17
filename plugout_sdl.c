@@ -10,7 +10,6 @@
 #include "common.h"
 
 #include <time.h>
-
 #include <SDL2/SDL.h>
 
 #include "plugout.h"
@@ -24,11 +23,6 @@
 #else
 	#define SDL_FLAGS NO_CHANGES_ALLOWED
 #endif
-
-static const struct timespec SLEEP_INTERVAL = {
-	.tv_sec = 0,
-	.tv_nsec = 1000
-};
 
 int device;
 SDL_AudioSpec obtained;
@@ -66,8 +60,12 @@ static long sdl_open(enum plugout_endian endian, long rate)
 
 static ssize_t sdl_write(const void *buf, size_t count)
 {
-	while (SDL_GetQueuedAudioSize(device) > obtained.size * 2)
-		nanosleep(&SLEEP_INTERVAL, NULL);
+	int overqueued = SDL_GetQueuedAudioSize(device) - obtained.size;
+	float delaynanos = (float)overqueued / 4.0 / obtained.freq * 1000000000.0;
+	struct timespec interval = {.tv_sec = 0, .tv_nsec = (long)delaynanos};
+	if (overqueued > 0) {
+		nanosleep(&interval, NULL);
+	}
 	if (SDL_QueueAudio(device, buf, count) != 0) {
 		fprintf(stderr, _("Could not write SDL audio data: %s\n"), SDL_GetError());
 		return -1;
