@@ -208,6 +208,11 @@ Use the Pulseaudio sound driver for sound output.
 .TP
 .B sdl
 Use SDL sound driver for sound output.
+On Microsoft Windows, libSDL might use the \fIwasapi\fP audio backend
+by default which can result in choppy sound.  To fix this, set the
+environment variable \fISDL_AUDIODRIVER\fP to \fIdirectsound\fP to
+select a different libSDL audio backend (or switch to the \fIdsound\fP
+plugout instead).
 .TP
 .B stdout
 Dump the raw audio stream to stdout.
