@@ -31,7 +31,7 @@ enum plugout_endian {
 	PLUGOUT_ENDIAN_NATIVE
 };
 
-typedef long    (*plugout_open_fn )(enum plugout_endian endian, long rate);
+typedef long    (*plugout_open_fn )(enum plugout_endian endian, long rate, long *buffer_bytes);
 typedef int     (*plugout_skip_fn )(int subsong);
 typedef void    (*plugout_pause_fn)(int pause);
 typedef int     (*plugout_io_fn   )(long cycles, uint32_t addr, uint8_t val);

@@ -27,7 +27,7 @@ static DWORD writeMax;       // Maximum amount we can write at once.
 static WAVEFORMATEX wfx;
 static DSBUFFERDESC dsbdesc;
 
-static long dsound_open(enum plugout_endian endian, long rate)
+static long dsound_open(enum plugout_endian endian, long rate, long *buffer_bytes)
 {
 	HRESULT hr;
 
@@ -100,6 +100,7 @@ static long dsound_open(enum plugout_endian endian, long rate)
 	writeMax = dsbdesc.dwBufferBytes = (wfx.nAvgBytesPerSec / 10) & ~(wfx.nBlockAlign - 1);
 	dsbdesc.lpwfxFormat = &wfx;
 
+	*buffer_bytes = writeMax;
 	return 0; /* We're open, rock and roll! */
 }
 

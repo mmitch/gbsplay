@@ -18,7 +18,7 @@
 static FILE *file;
 static long cycles_prev = 0;
 
-static long iodumper_open(enum plugout_endian endian, long rate)
+static long iodumper_open(enum plugout_endian endian, long rate, long *buffer_bytes)
 {
 	/*
 	 * clone and close STDOUT_FILENO

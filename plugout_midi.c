@@ -28,7 +28,7 @@
 #define FREQ(x) (262144 / (x))
 #define NOTE(x) ((long)((log(FREQ(x))/LN2 - MAGIC)*12 + .2))
 
-static long midi_open(enum plugout_endian endian, long rate)
+static long midi_open(enum plugout_endian endian, long rate, long *buffer_bytes)
 {
 	return 0;
 }

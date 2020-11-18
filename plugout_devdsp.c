@@ -23,7 +23,7 @@
 
 static int fd;
 
-static long devdsp_open(enum plugout_endian endian, long rate)
+static long devdsp_open(enum plugout_endian endian, long rate, long *buffer_bytes)
 {
 	int c;
 	int flags;
@@ -61,9 +61,16 @@ static long devdsp_open(enum plugout_endian endian, long rate)
 		fprintf(stderr, _("ioctl(fd, SNDCTL_DSP_STEREO, %d) failed: %s\n"), c, strerror(errno));
 		return -1;
 	}
-	c=(4 << 16) + 11;
+	c=(4 /* max fragments */ << 16) + 11 /* selector for 2048 bytes fragment size */;
 	if ((ioctl(fd, SNDCTL_DSP_SETFRAGMENT, &c)) == -1)
 		fprintf(stderr, _("ioctl(fd, SNDCTL_DSP_SETFRAGMENT, %08x) failed: %s\n"), c, strerror(errno));
+
+	/* get the actual fragment size we got */
+	if ((ioctl(fd, SNDCTL_DSP_GETBLKSIZE, &c)) == -1) {
+		fprintf(stderr, _("ioctl(fd, SNDCTL_DSP_GETBLKSIZE) failed: %s\n"), strerror(errno));
+		return -1;
+	}
+	*buffer_bytes = c;
 
 	return 0;
 }

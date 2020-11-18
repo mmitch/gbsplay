@@ -278,7 +278,7 @@ int main(int argc, char **argv)
 	}
 
 	/* stop sound */
-	sound_close();
+	common_cleanup(gbs);
 
 	/* clean up terminal */
 	restore_terminal();

@@ -16,7 +16,7 @@
 int fd;
 
 static long stdout_open(enum plugout_endian endian,
-                                long rate)
+                        long rate, long *buffer_bytes)
 {
 	/*
 	 * clone and close STDOUT_FILENO

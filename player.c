@@ -59,11 +59,10 @@ static char *sound_name = PLUGOUT_DEFAULT;
 static char *filter_type = GBHW_CFG_FILTER_DMG;
 static char *sound_description;
 
-static int16_t samples[4096];
-struct gbhw_buffer buf = {
-	.data = samples,
+static struct gbhw_buffer buf = {
+	.data = NULL,
 	.pos  = 0,
-	.bytes = sizeof(samples),
+	.bytes = 8192,
 };
 
 /* configuration directives */
@@ -454,11 +453,12 @@ struct gbs *common_init(int argc, char **argv)
 		usage(1);
 	}
 
-	if (sound_open(endian, rate) != 0) {
+	if (sound_open(endian, rate, &buf.bytes) != 0) {
 		fprintf(stderr, _("Could not open output plugin \"%s\"\n"),
 		        sound_name);
 		exit(1);
 	}
+	buf.data = malloc(buf.bytes);
 
 	if (sound_io)
 		gbhw_setiocallback(iocallback, NULL);
@@ -516,4 +516,11 @@ struct gbs *common_init(int argc, char **argv)
 	}
 
 	return gbs;
+}
+
+void common_cleanup(struct gbs *gbs)
+{
+	sound_close();
+	free(buf.data);
+	gbs_close(gbs);
 }

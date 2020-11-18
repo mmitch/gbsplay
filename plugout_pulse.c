@@ -23,7 +23,7 @@
 pa_simple *pulse_handle;
 pa_sample_spec pulse_spec;
 
-static long pulse_open(enum plugout_endian endian, long rate)
+static long pulse_open(enum plugout_endian endian, long rate, long *buffer_bytes)
 {
 	int err;
 

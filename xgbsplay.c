@@ -223,7 +223,7 @@ int main(int argc, char **argv)
 	}
 
 	/* stop sound */
-	sound_close();
+	common_cleanup(gbs);
 
 	/* clean up X11 stuff */
 	XFreeGC(display, gc);

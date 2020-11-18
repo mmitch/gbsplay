@@ -27,12 +27,14 @@ snd_pcm_t *pcm_handle;
 #define SND_PCM_FORMAT_S16_NE SND_PCM_FORMAT_S16_BE
 #endif
 
-static long alsa_open(enum plugout_endian endian, long rate)
+static long alsa_open(enum plugout_endian endian, long rate, long *buffer_bytes)
 {
 	const char *pcm_name = "default";
 	int fmt, err;
 	unsigned exact_rate;
 	snd_pcm_hw_params_t *hwparams;
+	snd_pcm_uframes_t buffer_frames = *buffer_bytes / 4;
+	snd_pcm_uframes_t period_frames;
 
 	switch (endian) {
 	case PLUGOUT_ENDIAN_BIG: fmt = SND_PCM_FORMAT_S16_BE; break;
@@ -78,18 +80,21 @@ static long alsa_open(enum plugout_endian endian, long rate)
 		return -1;
 	}
 
-	if ((err = snd_pcm_hw_params_set_periods(pcm_handle, hwparams, 4, 0)) < 0) {
-		fprintf(stderr, _("snd_pcm_hw_params_set_periods failed: %s\n"), snd_strerror(err));
+	if ((err = snd_pcm_hw_params_set_buffer_size_near(pcm_handle, hwparams, &buffer_frames)) < 0) {
+		fprintf(stderr, _("snd_pcm_hw_params_set_buffer_size_near failed: %s\n"), snd_strerror(err));
 	}
 
-	if ((err = snd_pcm_hw_params_set_buffer_size(pcm_handle, hwparams, 8192)) < 0) {
-		fprintf(stderr, _("snd_pcm_hw_params_set_buffer_size failed: %s\n"), snd_strerror(err));
+	period_frames = buffer_frames / 2;
+	if ((err = snd_pcm_hw_params_set_period_size_near(pcm_handle, hwparams, &period_frames, 0)) < 0) {
+		fprintf(stderr, _("snd_pcm_hw_params_set_period_size_near failed: %s\n"), snd_strerror(err));
 	}
 
 	if ((err = snd_pcm_hw_params(pcm_handle, hwparams)) < 0) {
 		fprintf(stderr, _("snd_pcm_hw_params failed: %s\n"), snd_strerror(err));
 		return -1;
 	}
+
+	*buffer_bytes = buffer_frames * 4;
 
 	return 0;
 }

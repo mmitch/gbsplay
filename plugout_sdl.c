@@ -27,7 +27,7 @@
 int device;
 SDL_AudioSpec obtained;
 
-static long sdl_open(enum plugout_endian endian, long rate)
+static long sdl_open(enum plugout_endian endian, long rate, long *buffer_bytes)
 {
 	SDL_AudioSpec desired;
 	if (SDL_Init(SDL_INIT_AUDIO) != 0) {
@@ -55,6 +55,7 @@ static long sdl_open(enum plugout_endian endian, long rate)
 
 	SDL_PauseAudioDevice(device, UNPAUSE);
 
+	*buffer_bytes = obtained.samples * 4;
 	return 0;
 }
 
