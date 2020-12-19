@@ -250,7 +250,7 @@ static void linkport_atexit(void);
 static void linkport_write(long c)
 {
 	static char buf[256];
-	static long idx = 0;
+	static unsigned long idx = 0;
 	static long exit_handler_set = 0;
 	static long enabled = 1;
 
