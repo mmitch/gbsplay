@@ -227,7 +227,7 @@ static void apu_reset(struct gbhw *gbhw)
 	for (i = 0; i < 4; i++) {
 		mute_tmp[i] = gbhw->ch[i].mute;
 	}
-	memset(gbhw->ch, 0, sizeof(gbhw->ch));
+	memset(gbhw->ch, 0, sizeof(struct gbhw_channel) * 4);
 	for (i = 0xff10; i < 0xff26; i++) {
 		gbhw->ioregs[i & 0x7f] = 0;
 	}
@@ -955,10 +955,10 @@ void gbhw_init(struct gbhw *gbhw, uint8_t *rombuf, uint32_t size)
 	gbhw->lminval = gbhw->rminval = INT_MAX;
 	gbhw->lmaxval = gbhw->rmaxval = INT_MIN;
 	apu_reset(gbhw);
-	memset(gbhw->extram, 0, sizeof(gbhw->extram));
-	memset(gbhw->intram, 0, sizeof(gbhw->intram));
-	memset(gbhw->hiram, 0, sizeof(gbhw->hiram));
-	memset(gbhw->ioregs, 0, sizeof(gbhw->ioregs));
+	memset(gbhw->extram, 0, sizeof(uint8_t) * GBHW_EXTRAM_SIZE);
+	memset(gbhw->intram, 0, sizeof(uint8_t) * GBHW_INTRAM_SIZE);
+	memset(gbhw->hiram, 0, sizeof(uint8_t) * GBHW_HIRAM_SIZE);
+	memset(gbhw->ioregs, 0, sizeof(uint8_t) * GBHW_IOREGS_SIZE);
 	for (i=0x10; i<0x40; i++) {
 		io_put(gbhw, 0xff00 + i, ioregs_initdata[i]);
 	}
@@ -980,7 +980,7 @@ void gbhw_init(struct gbhw *gbhw, uint8_t *rombuf, uint32_t size)
 
 void gbhw_enable_bootrom(struct gbhw *gbhw, const uint8_t *rombuf)
 {
-	memcpy(gbhw->boot_rom, rombuf, sizeof(gbhw->boot_rom));
+	memcpy(gbhw->boot_rom, rombuf, sizeof(uint8_t) * GBHW_BOOT_ROM_SIZE);
 	gbhw->rom_lockout = 0;
 }
 

@@ -25,7 +25,12 @@
 #define GBHW_FILTER_CONST_DMG 0.999958
 #define GBHW_FILTER_CONST_CGB 0.998943
 
+#define GBHW_HIRAM_SIZE 0x80
+#define GBHW_INTRAM_SIZE 0x200
+#define GBHW_EXTRAM_SIZE 0x200
 #define GBHW_IOREGS_SIZE 0x80
+
+#define GBHW_BOOT_ROM_SIZE 256
 
 struct gbhw_buffer {
 	int16_t *data;
@@ -125,12 +130,12 @@ struct gbhw {
 
 	struct gbhw_channel ch[4];
 
-	uint8_t hiram[0x80];
-	uint8_t intram[0x2000];
-	uint8_t extram[0x2000];
+	uint8_t hiram[GBHW_HIRAM_SIZE];
+	uint8_t intram[GBHW_INTRAM_SIZE];
+	uint8_t extram[GBHW_EXTRAM_SIZE];
 	uint8_t ioregs[GBHW_IOREGS_SIZE];
 
-	uint8_t boot_rom[256];
+	uint8_t boot_rom[GBHW_BOOT_ROM_SIZE];
 };
 
 struct gbhw* gbhw_create();

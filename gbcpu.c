@@ -1608,7 +1608,7 @@ void gbcpu_addmem(struct gbcpu *gbcpu, uint32_t start, uint32_t end, gbcpu_put_f
 
 void gbcpu_init(struct gbcpu *gbcpu)
 {
-	memset(&gbcpu->regs, 0, sizeof(gbcpu->regs));
+	memset(&gbcpu->regs, 0, sizeof(gbcpu_regs_u));
 	gbcpu->halted = 0;
 	gbcpu->stopped = 0;
 	gbcpu->ie = 0;
