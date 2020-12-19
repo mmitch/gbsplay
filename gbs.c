@@ -47,7 +47,10 @@ const char *boot_rom_file = ".dmg_rom.bin";
 
 long gbs_init(struct gbs *gbs, long subsong)
 {
-	gbhw_init(gbs->rom, gbs->romsize);
+	struct gbhw *gbhw = &gbs->gbhw;
+	struct gbcpu *gbcpu = &gbhw->gbcpu;
+	
+	gbhw_init(gbhw, gbs->rom, gbs->romsize);
 
 	if (subsong == -1) subsong = gbs->defaultsong - 1;
 	if (subsong >= gbs->songs) {
@@ -56,26 +59,26 @@ long gbs_init(struct gbs *gbs, long subsong)
 	}
 
 	if (gbs->defaultbank != 1) {
-		gbcpu_mem_put(0x2000, gbs->defaultbank);
+		gbcpu_mem_put(gbcpu, 0x2000, gbs->defaultbank);
 	}
-	gbhw_io_put(0xff06, gbs->tma);
-	gbhw_io_put(0xff07, gbs->tac);
-	gbhw_io_put(0xffff, 0x05);
+	gbhw_io_put(gbhw, 0xff06, gbs->tma);
+	gbhw_io_put(gbhw, 0xff07, gbs->tac);
+	gbhw_io_put(gbhw, 0xffff, 0x05);
 
-	REGS16_W(gbcpu_regs, SP, gbs->stack);
+	REGS16_W(gbcpu->regs, SP, gbs->stack);
 
 	/* put halt breakpoint PC on stack */
-	gbcpu_halt_at_pc = 0xffff;
-	REGS16_W(gbcpu_regs, PC, 0xff80);
-	REGS16_W(gbcpu_regs, HL, gbcpu_halt_at_pc);
-	gbcpu_mem_put(0xff80, 0xe5); /* push hl */
-	gbcpu_step();
+	gbcpu->halt_at_pc = 0xffff;
+	REGS16_W(gbcpu->regs, PC, 0xff80);
+	REGS16_W(gbcpu->regs, HL, gbcpu->halt_at_pc);
+	gbcpu_mem_put(gbcpu, 0xff80, 0xe5); /* push hl */
+	gbcpu_step(gbcpu);
 	/* clear regs/memory touched by stack etup */
-	REGS16_W(gbcpu_regs, HL, 0x0000);
-	gbcpu_mem_put(0xff80, 0x00);
+	REGS16_W(gbcpu->regs, HL, 0x0000);
+	gbcpu_mem_put(gbcpu, 0xff80, 0x00);
 
-	REGS16_W(gbcpu_regs, PC, gbs->init);
-	gbcpu_regs.rn.a = subsong;
+	REGS16_W(gbcpu->regs, PC, gbs->init);
+	gbcpu->regs.rn.a = subsong;
 
 	gbs->ticks = 0;
 	gbs->subsong = subsong;
@@ -104,7 +107,9 @@ static long gbs_nextsubsong(struct gbs *gbs)
 
 long gbs_step(struct gbs *gbs, long time_to_work)
 {
-	long cycles = gbhw_step(time_to_work);
+	struct gbhw *gbhw = &gbs->gbhw;
+
+	long cycles = gbhw_step(gbhw, time_to_work);
 	long time;
 
 	if (cycles < 0) {
@@ -113,7 +118,7 @@ long gbs_step(struct gbs *gbs, long time_to_work)
 
 	gbs->ticks += cycles;
 
-	gbhw_getminmax(&gbs->lmin, &gbs->lmax, &gbs->rmin, &gbs->rmax);
+	gbhw_getminmax(gbhw, &gbs->lmin, &gbs->lmax, &gbs->rmin, &gbs->rmax);
 	gbs->lvol = -gbs->lmin > gbs->lmax ? -gbs->lmin : gbs->lmax;
 	gbs->rvol = -gbs->rmin > gbs->rmax ? -gbs->rmin : gbs->rmax;
 
@@ -127,10 +132,10 @@ long gbs_step(struct gbs *gbs, long time_to_work)
 
 	if (gbs->fadeout && gbs->subsong_timeout &&
 	    time >= gbs->subsong_timeout - gbs->fadeout - gbs->gap)
-		gbhw_master_fade(128/gbs->fadeout, 0);
+		gbhw_master_fade(gbhw, 128/gbs->fadeout, 0);
 	if (gbs->subsong_timeout &&
 	    time >= gbs->subsong_timeout - gbs->gap)
-		gbhw_master_fade(128*16, 0);
+		gbhw_master_fade(gbhw, 128*16, 0);
 
 	if (gbs->silence_start &&
 	    (gbs->ticks - gbs->silence_start) / GBHW_CLOCK >= gbs->silence_timeout) {
@@ -374,7 +379,7 @@ static struct gbs *gb_open(const char *name, char *buf, size_t size)
 	snprintf(bootname, name_len, "%s/%s", getenv("HOME"), boot_rom_file);
 	if ((fd = open(bootname, O_RDONLY)) != -1) {
 		if (read(fd, bootrom, sizeof(bootrom)) == sizeof(bootrom)) {
-			gbhw_enable_bootrom(bootrom);
+			gbhw_enable_bootrom(&gbs->gbhw, bootrom);
 			gbs->init = 0;
 		}
 	}
@@ -804,6 +809,7 @@ static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 	char *buf2;
 
 	memset(gbs, 0, sizeof(struct gbs));
+	gbhw_handle_init(&gbs->gbhw);
 	gbs->silence_timeout = 2;
 	gbs->subsong_timeout = 2*60;
 	gbs->gap = 2;

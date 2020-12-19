@@ -12,6 +12,7 @@
 
 #include <inttypes.h>
 #include "common.h"
+#include "gbhw.h"
 
 #define GBS_LEN_SHIFT	10
 #define GBS_LEN_DIV	(1 << GBS_LEN_SHIFT)
@@ -59,6 +60,8 @@ struct gbs {
 	int subsong;
 	gbs_nextsubsong_cb nextsubsong_cb;
 	void *nextsubsong_cb_priv;
+
+	struct gbhw gbhw;
 };
 
 struct gbs *gbs_open(const char *name);
