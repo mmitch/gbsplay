@@ -54,7 +54,7 @@ struct displaytime {
 long get_next_subsong(struct gbs *gbs);
 int get_prev_subsong(struct gbs *gbs);
 long nextsubsong_cb(struct gbs *gbs, void *priv);
-void update_displaytime(struct displaytime *time, struct gbs *gbs);
+void update_displaytime(struct displaytime *time, const struct gbs_status *status);
 struct gbs *common_init(int argc, char **argv);
 void common_cleanup(struct gbs *gbs);
 

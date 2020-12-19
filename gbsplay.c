@@ -103,22 +103,22 @@ static void stepcallback(long cycles, const struct gbhw_channel chan[], void *pr
 
 static void handleuserinput(struct gbs *gbs)
 {
-	struct gbhw *gbhw = &gbs->gbhw;
+	long subsong;
 	char c;
 
 	if (get_input(&c)) {
 		switch (c) {
 		case 'p':
-			gbs->subsong = get_prev_subsong(gbs);
-			gbs_init(gbs, gbs->subsong);
+			subsong = get_prev_subsong(gbs);
+			gbs_init(gbs, subsong);
 			if (sound_skip)
-				sound_skip(gbs->subsong);
+				sound_skip(subsong);
 			break;
 		case 'n':
-			gbs->subsong = get_next_subsong(gbs);
-			gbs_init(gbs, gbs->subsong);
+			subsong = get_next_subsong(gbs);
+			gbs_init(gbs, subsong);
 			if (sound_skip)
-				sound_skip(gbs->subsong);
+				sound_skip(subsong);
 			break;
 		case 'q':
 		case 27:
@@ -126,50 +126,31 @@ static void handleuserinput(struct gbs *gbs)
 			break;
 		case ' ':
 			pause_mode = !pause_mode;
-			gbhw_pause(gbhw, pause_mode);
+			gbs_pause(gbs, pause_mode);
 			if (sound_pause) sound_pause(pause_mode);
 			break;
 		case '1':
 		case '2':
 		case '3':
 		case '4':
-			gbhw->ch[c-'1'].mute ^= 1;
+			gbs_toggle_mute(gbs, c-'1');
 			break;
 		}
 	}
 }
 
 // TODO: only pass struct gbhw_channnel instead of struct gbhw?
-static char *notestring(struct gbhw *gbhw, long ch)
+static char *notestring(const struct gbs_status *status, long ch)
 {
 	long n;
 
-	if (gbhw->ch[ch].mute) return "-M-";
+	if (status->ch[ch].mute) return "-M-";
 
-	if (gbhw->ch[ch].env_volume == 0 ||
-	    gbhw->ch[ch].master == 0 ||
-	    (gbhw->ch[ch].leftgate == 0 &&
-	     gbhw->ch[ch].rightgate == 0)) return "---";
+	if (status->ch[ch].vol == 0) return "---";
 
-	n = getnote(gbhw->ch[ch].div_tc);
+	n = getnote(status->ch[ch].div_tc);
 	if (ch != 3) return &notelookup[4*n];
 	else return "nse";
-}
-
-static long chvol(struct gbhw *gbhw, long ch)
-{
-	long v;
-
-	if (gbhw->ch[ch].mute ||
-	    gbhw->ch[ch].master == 0 ||
-	    (gbhw->ch[ch].leftgate == 0 &&
-	     gbhw->ch[ch].rightgate == 0)) return 0;
-
-	if (ch == 2)
-		v = (3-((gbhw->ch[2].env_volume+3)&3)) << 2;
-	else v = gbhw->ch[ch].env_volume;
-
-	return v;
 }
 
 static char *volstring(long v)
@@ -180,57 +161,54 @@ static char *volstring(long v)
 	return &vollookup[5*v];
 }
 
-static void printregs(struct gbhw *gbhw)
+static void printregs(struct gbs *gbs)
 {
 	long i;
 	for (i=0; i<5*4; i++) {
 		if (i % 5 == 0)
 			printf("CH%ld:", i/5 + 1);
-		printf(" %02x", gbhw_io_peek(gbhw, 0xff10+i));
+		printf(" %02x", gbs_io_peek(gbs, 0xff10+i));
 		if (i % 5 == 4)
 			printf("\n");
 	}
 	printf("MISC:");
 	for (i+=0x10; i<0x27; i++) {
-		printf(" %02x", gbhw_io_peek(gbhw, 0xff00+i));
+		printf(" %02x", gbs_io_peek(gbs, 0xff00+i));
 	}
 	printf("\nWAVE: ");
 	for (i=0; i<16; i++) {
-		printf("%02x", gbhw_io_peek(gbhw, 0xff30+i));
+		printf("%02x", gbs_io_peek(gbs, 0xff30+i));
 	}
 	printf("\n\033[A\033[A\033[A\033[A\033[A\033[A");
 }
 
 static void printstatus(struct gbs *gbs)
 {
-	struct gbhw *gbhw = &gbs->gbhw;
+	const struct gbs_status *status;
 	struct displaytime time;
-	char *songtitle;
 
-	update_displaytime(&time, gbs);
+	status = gbs_get_status(gbs);
 
-	songtitle = gbs->subsong_info[gbs->subsong].title;
-	if (!songtitle) {
-		songtitle=_("Untitled");
-	}
+	update_displaytime(&time, status);
+
 	printf("\r\033[A\033[A"
 	       "Song %3d/%3d (%s)\033[K\n"
 	       "%02ld:%02ld/%02ld:%02ld",
-	       gbs->subsong+1, gbs->songs, songtitle,
+	       status->subsong+1, status->songs, status->songtitle,
 	       time.played_min, time.played_sec, time.total_min, time.total_sec);
 	if (verbosity>2) {
 		printf("  %s %s  %s %s  %s %s  %s %s  [%s|%s]\n",
-		       notestring(gbhw, 0), volstring(chvol(gbhw, 0)),
-		       notestring(gbhw, 1), volstring(chvol(gbhw, 1)),
-		       notestring(gbhw, 2), volstring(chvol(gbhw, 2)),
-		       notestring(gbhw, 3), volstring(chvol(gbhw, 3)),
-		       reverse_vol(volstring(gbs->lvol/1024)),
-		       volstring(gbs->rvol/1024));
+		       notestring(status, 0), volstring(status->ch[0].vol),
+		       notestring(status, 1), volstring(status->ch[1].vol),
+		       notestring(status, 2), volstring(status->ch[2].vol),
+		       notestring(status, 3), volstring(status->ch[3].vol),
+		       reverse_vol(volstring(status->lvol/1024)),
+		       volstring(status->rvol/1024));
 	} else {
 		puts("");
 	}
 	if (verbosity>3) {
-		printregs(gbhw);
+		printregs(gbs);
 	}
 	fflush(stdout);
 }
@@ -259,7 +237,7 @@ int main(int argc, char **argv)
 
 	/* init additional callbacks */
 	if (sound_step)
-		gbhw_setstepcallback(&gbs->gbhw, stepcallback, NULL);
+		gbs_set_gbhw_step_callback(gbs, stepcallback, NULL);
 
 	/* precalculate lookup tables */
 	precalc_notes();

@@ -70,11 +70,14 @@ struct gbhw_channel {
 	long duty_ctr;
 };
 
-typedef void (*gbhw_callback_fn)(struct gbhw_buffer *buf, void *priv);
+struct gbs;
+
+typedef void (*gbhw_callback_fn)(struct gbs *gbs, void *priv);
 typedef void (*gbhw_iocallback_fn)(long cycles, uint32_t addr, uint8_t valu, void *priv);
 typedef void (*gbhw_stepcallback_fn)(const long cycles, const struct gbhw_channel[], void *priv);
 
 struct gbhw {
+	struct gbs *gbs; // FIXME: another circular backreference
 	uint8_t *rom;
 	long rombank;
 	long lastbank;
@@ -139,7 +142,7 @@ struct gbhw {
 };
 
 struct gbhw* gbhw_create();
-void gbhw_handle_init(struct gbhw *gbhw);
+void gbhw_handle_init(struct gbhw *gbhw, struct gbs *gbs);
 void gbhw_free(struct gbhw *gbhw);
 
 void gbhw_setcallback(struct gbhw *gbhw, gbhw_callback_fn fn, void *priv);

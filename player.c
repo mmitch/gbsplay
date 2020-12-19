@@ -63,10 +63,10 @@ static char *sound_name = PLUGOUT_DEFAULT;
 static char *filter_type = GBHW_CFG_FILTER_DMG;
 static char *sound_description;
 
-static struct gbhw_buffer buf = {
+static struct gbs_output_buffer buf = {
 	.data = NULL,
-	.pos  = 0,
 	.bytes = 8192,
+	.pos  = 0,
 };
 
 /* configuration directives */
@@ -86,7 +86,7 @@ const struct cfg_option options[] = {
 	{ NULL, NULL, NULL }
 };
 
-static void swap_endian(struct gbhw_buffer *buf)
+static void swap_endian(struct gbs_output_buffer *buf)
 {
 	long i;
 
@@ -101,7 +101,7 @@ static void iocallback(long cycles, uint32_t addr, uint8_t val, void *priv)
 	sound_io(cycles, addr, val);
 }
 
-static void callback(struct gbhw_buffer *buf, void *priv)
+static void callback(struct gbs_output_buffer *buf, void *priv)
 {
 	if ((is_le_machine() && endian == PLUGOUT_ENDIAN_BIG) ||
 	    (is_be_machine() && endian == PLUGOUT_ENDIAN_LITTLE)) {
@@ -132,30 +132,30 @@ long *setup_playlist(long songs)
 long get_next_subsong(struct gbs *gbs)
 /* returns the number of the subsong that is to be played next */
 {
+	const struct gbs_status *status = gbs_get_status(gbs);
 	long next = -1;
+
 	switch (playmode) {
 
 	case PLAYMODE_RANDOM:
-		next = rand_long(gbs->songs);
+		next = rand_long(status->songs);
 		break;
 
 	case PLAYMODE_SHUFFLE:
 		subsong_playlist_idx++;
-		if (subsong_playlist_idx == gbs->songs) {
+		if (subsong_playlist_idx == status->songs) {
 			free(subsong_playlist);
 			random_seed++;
-			subsong_playlist = setup_playlist(gbs->songs);
+			subsong_playlist = setup_playlist(status->songs);
 			subsong_playlist_idx = 0;
 		}
 		next = subsong_playlist[subsong_playlist_idx];
 		break;
 
 	case PLAYMODE_LINEAR:
-		next = gbs->subsong + 1;
+		next = status->subsong + 1;
 		break;
 	}
-
-	gbs->subsong %= gbs->songs;
 
 	return next;
 }
@@ -163,11 +163,13 @@ long get_next_subsong(struct gbs *gbs)
 int get_prev_subsong(struct gbs *gbs)
 /* returns the number of the subsong that has been played previously */
 {
+	const struct gbs_status *status = gbs_get_status(gbs);
 	int prev = -1;
+
 	switch (playmode) {
 
 	case PLAYMODE_RANDOM:
-		prev = rand_long(gbs->songs);
+		prev = rand_long(status->songs);
 		break;
 
 	case PLAYMODE_SHUFFLE:
@@ -175,65 +177,67 @@ int get_prev_subsong(struct gbs *gbs)
 		if (subsong_playlist_idx == -1) {
 			free(subsong_playlist);
 			random_seed--;
-			subsong_playlist = setup_playlist(gbs->songs);
-			subsong_playlist_idx = gbs->songs-1;
+			subsong_playlist = setup_playlist(status->songs);
+			subsong_playlist_idx = status->songs-1;
 		}
 		prev = subsong_playlist[subsong_playlist_idx];
 		break;
 
 	case PLAYMODE_LINEAR:
-		prev = gbs->subsong - 1;
+		prev = status->subsong - 1;
 		break;
-	}
-
-	while (gbs->subsong < 0) {
-		gbs->subsong += gbs->songs;
 	}
 
 	return prev;
 }
 
-static void setup_playmode(struct gbs *gbs)
+static long setup_playmode(struct gbs *gbs)
 /* initializes the chosen playmode (set start subsong etc.) */
 {
+	const struct gbs_status *status = gbs_get_status(gbs);
+	long subsong = status->subsong;
+
 	switch (playmode) {
 
 	case PLAYMODE_RANDOM:
-		if (gbs->subsong == -1) {
-			gbs->subsong = get_next_subsong(gbs);
+		if (subsong == -1) {
+			subsong = get_next_subsong(gbs);
 		}
 		break;
 
 	case PLAYMODE_SHUFFLE:
-		subsong_playlist = setup_playlist(gbs->songs);
+		subsong_playlist = setup_playlist(status->songs);
 		subsong_playlist_idx = 0;
-		if (gbs->subsong == -1) {
-			gbs->subsong = subsong_playlist[0];
+		if (subsong == -1) {
+			subsong = subsong_playlist[0];
 		} else {
 			/* randomize playlist until desired start song is first */
 			/* (rotation does not work because this must be reproducible */
 			/* by setting random_seed to the old value */
-			while (subsong_playlist[0] != gbs->subsong) {
+			while (subsong_playlist[0] != subsong) {
 				random_seed++;
-				subsong_playlist = setup_playlist(gbs->songs);
+				subsong_playlist = setup_playlist(status->songs);
 			}
 		}
 		break;
 
 	case PLAYMODE_LINEAR:
-		if (gbs->subsong == -1) {
-			gbs->subsong = gbs->defaultsong - 1;
+		if (subsong == -1) {
+			subsong = status->defaultsong - 1;
 		}
 		break;
 	}
+
+	return subsong;
 }
 
 long nextsubsong_cb(struct gbs *gbs, void *priv)
 {
+	const struct gbs_status *status = gbs_get_status(gbs);
 	long subsong = get_next_subsong(gbs);
 
-	if (gbs->subsong == subsong_stop ||
-	    subsong >= gbs->songs) {
+	if (status->subsong == subsong_stop ||
+	    subsong >= status->songs) {
 		if (loopmode) {
 			subsong = subsong_start;
 			setup_playmode(gbs);
@@ -248,10 +252,10 @@ long nextsubsong_cb(struct gbs *gbs, void *priv)
 	return true;
 }
 
-void update_displaytime(struct displaytime *time, struct gbs *gbs)
+void update_displaytime(struct displaytime *time, const struct gbs_status *status)
 {
-	long played = gbs->ticks / GBHW_CLOCK;
-	long total = gbs->subsong_info[gbs->subsong].len / 1024;
+	long played = status->ticks / GBHW_CLOCK;
+	long total = status->subsong_len / 1024;
 
 	time->played_min = played / 60;
 	time->played_sec = played % 60;
@@ -447,7 +451,8 @@ struct gbs *common_init(int argc, char **argv)
 {
 	char *usercfg;
 	struct gbs *gbs;
-	struct gbhw *gbhw;
+	uint8_t songs;
+	uint8_t initial_subsong;
 
 	i18n_init();
 
@@ -491,45 +496,38 @@ struct gbs *common_init(int argc, char **argv)
 		exit(1);
 	}
 
-	gbhw = &gbs->gbhw;
-
 	if (sound_io)
-		gbhw_setiocallback(gbhw, iocallback, NULL);
+		gbs_set_gbhw_io_callback(gbs, iocallback, NULL);
 	if (sound_write)
-		gbhw_setcallback(gbhw, callback, NULL);
-	gbhw_setrate(gbhw, rate);
-	if (!gbhw_setfilter(gbhw, filter_type)) {
+		gbs_set_sound_callback(gbs, callback, NULL);
+	gbs_configure_output(gbs, &buf, rate);
+	if (!gbs_set_gbhw_filter(gbs, filter_type)) {
 		fprintf(stderr, _("Invalid filter type \"%s\"\n"), filter_type);
 		exit(1);
 	}
 
 	/* sanitize commandline values */
+	songs = gbs_get_status(gbs)->songs;
 	if (subsong_start < -1) {
 		subsong_start = 0;
-	} else if (subsong_start >= gbs->songs) {
-		subsong_start = gbs->songs-1;
+	} else if (subsong_start >= songs) {
+		subsong_start = songs-1;
 	}
 	if (subsong_stop <  0) {
 		subsong_stop = -1;
-	} else if (subsong_stop >= gbs->songs) {
+	} else if (subsong_stop >= songs) {
 		subsong_stop = -1;
 	}
 
-	for (uint8_t ch = 0; ch < 4; ch++) {
-		gbhw->ch[ch].mute = mute_channel[ch];
-	}
+	// FIXME: proper configuration interface to gbs, this is just quickly slapped toghether
+	gbs_configure(gbs, subsong_start, subsong_timeout, silence_timeout, subsong_gap, fadeout);
+	gbs_configure_channels(gbs, mute_channel[0], mute_channel[1], mute_channel[2], mute_channel[3]);
 
-	gbs->subsong = subsong_start;
-	gbs->subsong_timeout = subsong_timeout;
-	gbs->silence_timeout = silence_timeout;
-	gbs->gap = subsong_gap;
-	gbs->fadeout = fadeout;
-	setup_playmode(gbs);
-	gbhw_setbuffer(gbhw, &buf);
 	gbs_set_nextsubsong_cb(gbs, nextsubsong_cb, NULL);
-	gbs_init(gbs, gbs->subsong);
+	initial_subsong = setup_playmode(gbs);
+	gbs_init(gbs, initial_subsong);
 	if (sound_skip)
-		sound_skip(gbs->subsong);
+		sound_skip(initial_subsong);
 	if (verbosity>0) {
 		gbs_printinfo(gbs, 0);
 	}

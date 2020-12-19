@@ -45,6 +45,87 @@
 
 const char *boot_rom_file = ".dmg_rom.bin";
 
+struct gbs_subsong_info {
+	uint32_t len;
+	char *title;
+};
+
+struct gbs {
+	char *buf;
+	uint8_t version;
+	uint8_t songs;
+	uint8_t defaultsong;
+	uint8_t defaultbank;
+	uint16_t load;
+	uint16_t init;
+	uint16_t play;
+	uint16_t stack;
+	uint8_t tma;
+	uint8_t tac;
+	char *title;
+	char *author;
+	char *copyright;
+	unsigned long codelen;
+	char *code;
+	char *exthdr;
+	size_t filesize;
+	uint32_t crc;
+	uint32_t crcnow;
+	struct gbs_subsong_info *subsong_info;
+	char *strings;
+	char v1strings[33*3];
+	uint8_t *rom;
+	unsigned long romsize;
+
+	long long ticks;
+	int16_t lmin, lmax, lvol, rmin, rmax, rvol;
+	long subsong_timeout, silence_timeout, fadeout, gap;
+	long long silence_start;
+	int subsong;
+
+	struct gbs_output_buffer *buffer;
+
+	gbs_sound_cb sound_cb;
+	void *sound_cb_priv;
+
+	gbs_nextsubsong_cb nextsubsong_cb;
+	void *nextsubsong_cb_priv;
+
+	struct gbs_status status;
+	struct gbhw_buffer gbhw_buf;
+	struct gbhw gbhw;
+};
+
+void gbs_configure(struct gbs *gbs, long subsong, long subsong_timeout, long silence_timeout, long subsong_gap, long fadeout)
+{
+	gbs->subsong = subsong;
+	gbs->subsong_timeout = subsong_timeout;
+	gbs->silence_timeout = silence_timeout;
+	gbs->gap = subsong_gap;
+	gbs->fadeout = fadeout;
+}
+
+void gbs_configure_channels(struct gbs *gbs, long mute_0, long mute_1, long mute_2, long mute_3) {
+	gbs->gbhw.ch[0].mute = mute_0;
+	gbs->gbhw.ch[1].mute = mute_1;
+	gbs->gbhw.ch[2].mute = mute_2;
+	gbs->gbhw.ch[3].mute = mute_3;
+}
+
+void gbs_configure_output(struct gbs *gbs, struct gbs_output_buffer *gbs_buf, long rate) {
+	struct gbhw_buffer *gbhw_buf = &gbs->gbhw_buf;
+
+	gbhw_setrate(&gbs->gbhw, rate);
+
+	gbs->buffer = gbs_buf;
+
+	gbhw_buf->data = gbs_buf->data;
+	gbhw_buf->bytes = gbs_buf->bytes;
+	gbhw_buf->pos = gbs_buf->pos;
+
+	gbhw_setbuffer(&gbs->gbhw, gbhw_buf);
+}
+
 long gbs_init(struct gbs *gbs, long subsong)
 {
 	struct gbhw *gbhw = &gbs->gbhw;
@@ -86,10 +167,41 @@ long gbs_init(struct gbs *gbs, long subsong)
 	return 1;
 }
 
+// FIXME: or just include a *ptr to the whole RAM in struct gbs_status?
+uint8_t gbs_io_peek(struct gbs *gbs, uint16_t addr) {
+	return gbhw_io_peek(&gbs->gbhw, addr);
+}
+
 void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv)
 {
 	gbs->nextsubsong_cb = cb;
 	gbs->nextsubsong_cb_priv = priv;
+}
+
+static void wrap_buffer_callback(struct gbs *gbs, void *priv)
+{
+	gbs->buffer->pos = gbs->gbhw_buf.pos;
+	gbs->sound_cb(gbs->buffer, priv);
+}
+
+void gbs_set_sound_callback(struct gbs *gbs, gbs_sound_cb fn, void *priv)
+{
+	gbs->sound_cb = fn;
+	gbhw_setcallback(&gbs->gbhw, wrap_buffer_callback, priv);
+}
+
+long gbs_set_gbhw_filter(struct gbs *gbs, const char *type) {
+	return gbhw_setfilter(&gbs->gbhw, type);
+}
+
+void gbs_set_gbhw_io_callback(struct gbs *gbs, gbhw_iocallback_fn fn, void *priv)
+{
+	gbhw_setiocallback(&gbs->gbhw, fn, priv);
+}
+
+void gbs_set_gbhw_step_callback(struct gbs *gbs, gbhw_stepcallback_fn fn, void *priv)
+{
+	gbhw_setstepcallback(&gbs->gbhw, fn, priv);
 }
 
 static long gbs_nextsubsong(struct gbs *gbs)
@@ -148,6 +260,11 @@ long gbs_step(struct gbs *gbs, long time_to_work)
 		return gbs_nextsubsong(gbs);
 
 	return true;
+}
+
+void gbs_pause(struct gbs *gbs, long new_pause)
+{
+	gbhw_pause(&gbs->gbhw, new_pause);
 }
 
 void gbs_printinfo(struct gbs *gbs, long verbose)
@@ -216,6 +333,56 @@ void gbs_printinfo(struct gbs *gbs, long verbose)
 			}
 		}
 	}
+}
+
+static long chvol(struct gbhw *gbhw, long ch)
+{
+	long v;
+
+	if (gbhw->ch[ch].mute ||
+	    gbhw->ch[ch].master == 0 ||
+	    (gbhw->ch[ch].leftgate == 0 &&
+	     gbhw->ch[ch].rightgate == 0)) return 0;
+
+	if (ch == 2)
+		v = (3-((gbhw->ch[2].env_volume+3)&3)) << 2;
+	else v = gbhw->ch[ch].env_volume;
+
+	return v;
+}
+
+const struct gbs_status* gbs_get_status(struct gbs *gbs) {
+
+	struct gbs_status *status = &gbs->status;
+	struct gbhw *gbhw = &gbs->gbhw;
+
+	// TODO: only update on songchange?
+	status->songtitle = gbs->subsong_info[gbs->subsong].title;
+	if (!status->songtitle) {
+		status->songtitle = _("Untitled");
+	}
+	status->subsong = gbs->subsong;
+	status->subsong_len = gbs->subsong_info[gbs->subsong].len;
+
+	// TODO: only update once
+	status->songs = gbs->songs;
+	status->defaultsong = gbs->defaultsong;
+
+	status->rvol = gbs->rvol;
+	status->lvol = gbs->lvol;
+	status->ticks = gbs->ticks;
+
+	for(long i = 0; i < 4; i++) {
+		status->ch[i].mute = gbhw->ch[i].mute;
+		status->ch[i].vol = chvol(gbhw, i);
+		status->ch[i].div_tc = gbhw->ch[i].div_tc;
+	}
+
+	return status;
+}
+
+long gbs_toggle_mute(struct gbs *gbs, long channel) {
+	return gbs->gbhw.ch[channel].mute ^= 1;
 }
 
 static void gbs_free(struct gbs *gbs)
@@ -809,7 +976,7 @@ static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 	char *buf2;
 
 	memset(gbs, 0, sizeof(struct gbs));
-	gbhw_handle_init(&gbs->gbhw);
+	gbhw_handle_init(&gbs->gbhw, gbs);
 	gbs->silence_timeout = 2;
 	gbs->subsong_timeout = 2*60;
 	gbs->gap = 2;

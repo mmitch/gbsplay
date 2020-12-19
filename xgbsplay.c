@@ -29,14 +29,15 @@ static GC gc;
 
 static void updatetitle(struct gbs *gbs)
 {
+	const struct gbs_status *status = gbs_get_status(gbs);
 	struct displaytime time;
 
-	update_displaytime(&time, gbs);
+	update_displaytime(&time, status);
 
 	snprintf(statustext, STATUSTEXT_LENGTH, /* or use sizeof(statustext) ?? */
 		 "xgbsplay %s %d/%d "
 		 "%02ld:%02ld/%02ld:%02ld",
-		 filename, gbs->subsong+1, gbs->songs,
+		 filename, status->subsong+1, status->songs,
 		 time.played_min, time.played_sec, time.total_min, time.total_sec);
 
 	if (strncmp(statustext, oldstatustext, STATUSTEXT_LENGTH) != 0) {  /* or use sizeof(statustext) ?? or strcmp() ?? */
@@ -117,21 +118,22 @@ static void drawbuttons()
 
 static int handlebutton(XButtonEvent *xev, struct gbs *gbs)
 {
+	uint8_t subsong;
 	XWindowAttributes attrs;
 
 	XGetWindowAttributes(display, window, &attrs);
 
 	switch (xev->x * 4 / attrs.width) {
 	case 0: /* prev */
-		gbs->subsong = get_prev_subsong(gbs);
-		gbs_init(gbs, gbs->subsong);
+		subsong = get_prev_subsong(gbs);
+		gbs_init(gbs, subsong);
 		if (sound_skip)
-			sound_skip(gbs->subsong);
+			sound_skip(subsong);
 		break;
 
 	case 1: /* pause */
 		pause_mode = !pause_mode;
-		gbhw_pause(&gbs->gbhw, pause_mode);
+		gbs_pause(gbs, pause_mode);
 		if (sound_pause) sound_pause(pause_mode);
 		break;
 
@@ -139,10 +141,10 @@ static int handlebutton(XButtonEvent *xev, struct gbs *gbs)
 		return 1;
 
 	case 3: /* next */
-		gbs->subsong = get_next_subsong(gbs);
-		gbs_init(gbs, gbs->subsong);
+		subsong = get_next_subsong(gbs);
+		gbs_init(gbs, subsong);
 		if (sound_skip)
-			sound_skip(gbs->subsong);
+			sound_skip(subsong);
 		break;
 	}
 
