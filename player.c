@@ -30,6 +30,7 @@ long refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
 
 static long *subsong_playlist;
 static long subsong_playlist_idx = 0;
+static long pause_mode = 0;
 
 static unsigned long random_seed;
 
@@ -264,6 +265,18 @@ long nextsubsong_cb(struct gbs *gbs, void *priv)
 
 	play_subsong(gbs, subsong);
 	return true;
+}
+
+long is_running() {
+	return !pause_mode;
+}
+
+void toggle_pause(struct gbs *gbs)
+{
+	pause_mode = !pause_mode;
+	gbs_pause(gbs, pause_mode);
+	if (sound_pause)
+		sound_pause(pause_mode);
 }
 
 void update_displaytime(struct displaytime *time, const struct gbs_status *status)

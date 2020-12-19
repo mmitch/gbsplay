@@ -24,7 +24,6 @@ static const char vols[5] = " -=#%";
 /* global variables */
 
 static long quit = 0;
-static long pause_mode = 0;
 
 /* default values */
 long redraw = false;
@@ -118,9 +117,7 @@ static void handleuserinput(struct gbs *gbs)
 			quit = 1;
 			break;
 		case ' ':
-			pause_mode = !pause_mode;
-			gbs_pause(gbs, pause_mode);
-			if (sound_pause) sound_pause(pause_mode);
+			toggle_pause(gbs);
 			break;
 		case '1':
 		case '2':
@@ -244,7 +241,7 @@ int main(int argc, char **argv)
 		}
 
 		if (redraw) printinfo();
-		if (!pause_mode && verbosity>1) printstatus(gbs);
+		if (is_running() && verbosity>1) printstatus(gbs);
 		handleuserinput(gbs);
 	}
 

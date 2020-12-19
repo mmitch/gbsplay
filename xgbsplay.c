@@ -20,7 +20,6 @@ static char statustext[STATUSTEXT_LENGTH];
 static char oldstatustext[STATUSTEXT_LENGTH];
 
 static long quit = 0;
-static long pause_mode = 0;
 
 static Display *display;
 static Window window;
@@ -128,9 +127,7 @@ static int handlebutton(XButtonEvent *xev, struct gbs *gbs)
 		break;
 
 	case 1: /* pause */
-		pause_mode = !pause_mode;
-		gbs_pause(gbs, pause_mode);
-		if (sound_pause) sound_pause(pause_mode);
+		toggle_pause(gbs);
 		break;
 
 	case 2: /* stop */
@@ -211,7 +208,7 @@ int main(int argc, char **argv)
 			}
 		}
 
-		if (!pause_mode)
+		if (is_running())
 			updatetitle(gbs);
 	}
 
