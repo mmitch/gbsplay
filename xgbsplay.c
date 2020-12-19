@@ -134,7 +134,7 @@ static int handlebutton(XButtonEvent *xev, struct gbs *gbs)
 
 	case 1: /* pause */
 		pause_mode = !pause_mode;
-		gbhw_pause(pause_mode);
+		gbhw_pause(&gbs->gbhw, pause_mode);
 		if (sound_pause) sound_pause(pause_mode);
 		break;
 
