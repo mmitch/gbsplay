@@ -2,6 +2,7 @@
  * gbsplay is a Gameboy sound player
  *
  * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
@@ -109,16 +110,28 @@ typedef union {
 typedef void (*gbcpu_put_fn)(uint32_t addr, uint8_t val);
 typedef uint32_t (*gbcpu_get_fn)(uint32_t addr);
 
-extern gbcpu_regs_u gbcpu_regs;
-extern long gbcpu_halt_at_pc;
-extern long gbcpu_halted;
-extern long gbcpu_if;
+#define GBCPU_LOOKUP_SIZE 256
 
-void gbcpu_addmem(uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn);
-void gbcpu_init(void);
-long gbcpu_step(void);
-void gbcpu_intr(long vec);
-uint8_t gbcpu_mem_get(uint16_t addr);
-void gbcpu_mem_put(uint16_t addr, uint8_t val);
+struct gbcpu {
+	gbcpu_regs_u regs;
+	long halt_at_pc;
+	long halted;
+	long ie;
+
+	long stopped;
+	long cycles;
+	
+	gbcpu_get_fn getlookup[GBCPU_LOOKUP_SIZE];
+	gbcpu_put_fn putlookup[GBCPU_LOOKUP_SIZE];
+};
+
+void gbcpu_handle_init(struct gbcpu *gbcpu);
+
+void gbcpu_addmem(struct gbcpu *gbcpu, uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn);
+void gbcpu_init(struct gbcpu *gbcpu);
+long gbcpu_step(struct gbcpu *gbcpu);
+void gbcpu_intr(struct gbcpu *gbcpu, long vec);
+uint8_t gbcpu_mem_get(struct gbcpu *gbcpu, uint16_t addr);
+void gbcpu_mem_put(struct gbcpu *gbcpu, uint16_t addr, uint8_t val);
 
 #endif
