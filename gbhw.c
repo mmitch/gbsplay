@@ -78,9 +78,11 @@ struct gbhw* gbhw_create() {
 	struct gbhw* gbhw = calloc(1, sizeof(struct gbhw));
 	if (gbhw == NULL) {
 		fprintf(stderr, "%s\n", _("Memory allocation failed!"));
-		return NULL;
 	}
+	return gbhw;
+}
 
+void gbhw_handle_init(struct gbhw *gbhw) {
 	gbhw->rombank = 1;
 	gbhw->apu_on = 1;
 	gbhw->io_written = 0;
@@ -110,8 +112,6 @@ struct gbhw* gbhw_create() {
 	gbhw->last_l_value = 0;
 	gbhw->last_r_value = 0;
 	gbhw->ch3_next_nibble = 0;
-
-	return gbhw;
 }
 
 void gbhw_free(struct gbhw *gbhw) {

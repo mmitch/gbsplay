@@ -131,6 +131,7 @@ struct gbhw {
 };
 
 struct gbhw* gbhw_create();
+void gbhw_handle_init(struct gbhw *gbhw);
 void gbhw_free(struct gbhw *gbhw);
 
 void gbhw_setcallback(struct gbhw *gbhw, gbhw_callback_fn fn, void *priv);
