@@ -107,12 +107,17 @@ typedef union {
 
 #endif
 
-typedef void (*gbcpu_put_fn)(uint32_t addr, uint8_t val);
-typedef uint32_t (*gbcpu_get_fn)(uint32_t addr);
+struct gbhw;
+
+typedef void (*gbcpu_put_fn)(struct gbhw *gbhw, uint32_t addr, uint8_t val);
+typedef uint32_t (*gbcpu_get_fn)(struct gbhw *gbhw, uint32_t addr);
 
 #define GBCPU_LOOKUP_SIZE 256
 
 struct gbcpu {
+	struct gbhw *gbhw; // FIXME: disentangle this circular mess
+	                   // needed for gbcpu_put_fn and gbcpu_get_fn
+
 	gbcpu_regs_u regs;
 	long halt_at_pc;
 	long halted;
@@ -125,7 +130,7 @@ struct gbcpu {
 	gbcpu_put_fn putlookup[GBCPU_LOOKUP_SIZE];
 };
 
-void gbcpu_handle_init(struct gbcpu *gbcpu);
+void gbcpu_handle_init(struct gbcpu *gbcpu, struct gbhw *gbhw);
 
 void gbcpu_addmem(struct gbcpu *gbcpu, uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn);
 void gbcpu_init(struct gbcpu *gbcpu);

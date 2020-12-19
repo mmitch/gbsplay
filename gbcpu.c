@@ -43,37 +43,40 @@ struct opinfo {
 #endif
 };
 
-static uint32_t none_get(uint32_t addr)
+static uint32_t none_get(struct gbhw *gbhw, uint32_t addr)
 {
+	UNUSED(gbhw);
 	UNUSED(addr);
 	return 0xff;
 }
 
-static void none_put(uint32_t addr, uint8_t val)
+static void none_put(struct gbhw *gbhw, uint32_t addr, uint8_t val)
 {
+	UNUSED(gbhw);
 	UNUSED(addr);
 	UNUSED(val);
 }
 
-void gbcpu_handle_init(struct gbcpu *gbcpu) {
+void gbcpu_handle_init(struct gbcpu *gbcpu, struct gbhw *gbhw) {
 	for (uint16_t i = 0; i < GBCPU_LOOKUP_SIZE; i++) {
 		gbcpu->getlookup[i] = &none_get;
 		gbcpu->putlookup[i] = &none_put;
 	}
+	gbcpu->gbhw = gbhw;
 }
 
 static inline uint32_t mem_get(struct gbcpu *gbcpu, uint32_t addr)
 {
 	gbcpu_get_fn fn = gbcpu->getlookup[(addr >> 8) & 0xff];
 	gbcpu->cycles += 4;
-	return fn(addr);
+	return fn(gbcpu->gbhw, addr);
 }
 
 static inline void mem_put(struct gbcpu *gbcpu, uint32_t addr, uint32_t val)
 {
 	gbcpu_put_fn fn = gbcpu->putlookup[(addr >> 8) & 0xff];
 	gbcpu->cycles += 4;
-	fn(addr, val);
+	fn(gbcpu->gbhw, addr, val);
 }
 
 uint8_t gbcpu_mem_get(struct gbcpu *gbcpu, uint16_t addr)

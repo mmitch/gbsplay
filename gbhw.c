@@ -113,7 +113,7 @@ void gbhw_handle_init(struct gbhw *gbhw) {
 	gbhw->last_r_value = 0;
 	gbhw->ch3_next_nibble = 0;
 
-	gbcpu_handle_init(&gbhw->gbcpu);
+	gbcpu_handle_init(&gbhw->gbcpu, gbhw);
 }
 
 void gbhw_free(struct gbhw *gbhw) {
