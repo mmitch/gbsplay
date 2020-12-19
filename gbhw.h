@@ -12,6 +12,7 @@
 
 #include <inttypes.h>
 #include "common.h"
+#include "gbcpu.h"
 
 #define GBHW_CLOCK 4194304
 
@@ -119,6 +120,8 @@ struct gbhw {
 	long ch3pos;
 	long last_l_value, last_r_value;
 	long ch3_next_nibble;
+
+	struct gbcpu gbcpu;
 
 	struct gbhw_channel ch[4];
 

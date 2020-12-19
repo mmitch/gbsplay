@@ -112,6 +112,8 @@ void gbhw_handle_init(struct gbhw *gbhw) {
 	gbhw->last_l_value = 0;
 	gbhw->last_r_value = 0;
 	gbhw->ch3_next_nibble = 0;
+
+	gbcpu_handle_init(&gbhw->gbcpu);
 }
 
 void gbhw_free(struct gbhw *gbhw) {
@@ -968,12 +970,12 @@ void gbhw_init(struct gbhw *gbhw, uint8_t *rombuf, uint32_t size)
 	gbhw->last_l_value = 0;
 	gbhw->last_r_value = 0;
 
-	gbcpu_init();
-	gbcpu_addmem(0x00, 0x3f, rom_put, rom_get);
-	gbcpu_addmem(0x40, 0x7f, rom_put, rombank_get);
-	gbcpu_addmem(0xa0, 0xbf, extram_put, extram_get);
-	gbcpu_addmem(0xc0, 0xfe, intram_put, intram_get);
-	gbcpu_addmem(0xff, 0xff, io_put, io_get);
+	gbcpu_init(&gbhw->gbcpu);
+	gbcpu_addmem(&gbhw->gbcpu, 0x00, 0x3f, rom_put, rom_get);
+	gbcpu_addmem(&gbhw->gbcpu, 0x40, 0x7f, rom_put, rombank_get);
+	gbcpu_addmem(&gbhw->gbcpu, 0xa0, 0xbf, extram_put, extram_get);
+	gbcpu_addmem(&gbhw->gbcpu, 0xc0, 0xfe, intram_put, intram_get);
+	gbcpu_addmem(&gbhw->gbcpu, 0xff, 0xff, io_put, io_get);
 }
 
 void gbhw_enable_bootrom(struct gbhw *gbhw, const uint8_t *rombuf)
@@ -1001,21 +1003,23 @@ uint8_t gbhw_io_peek(struct gbhw *gbhw, uint16_t addr)
 
 void gbhw_check_if(struct gbhw *gbhw)
 {
+	struct gbcpu *gbcpu = &gbhw->gbcpu;
+
 	uint8_t mask = 0x01; /* lowest bit is highest priority irq */
 	uint8_t vec = 0x40;
-	if (!gbcpu_if) {
+	if (!gbcpu->ie) {
 		/* interrupts disabled */
 		if (gbhw->ioregs[REG_IF] & gbhw->ioregs[REG_IE]) {
 			/* but will still exit halt */
-			gbcpu_halted = 0;
+			gbcpu->halted = 0;
 		}
 		return;
 	}
 	while (mask <= 0x10) {
 		if (gbhw->ioregs[REG_IF] & gbhw->ioregs[REG_IE] & mask) {
 			gbhw->ioregs[REG_IF] &= ~mask;
-			gbcpu_halted = 0;
-			gbcpu_intr(vec);
+			gbcpu->halted = 0;
+			gbcpu_intr(gbcpu, vec);
 			break;
 		}
 		vec += 0x08;
@@ -1023,21 +1027,21 @@ void gbhw_check_if(struct gbhw *gbhw)
 	}
 }
 
-static void blargg_debug(void)
+static void blargg_debug(struct gbcpu *gbcpu)
 {
 	long i;
 
 	/* Blargg GB debug output signature. */
-	if (gbcpu_mem_get(0xa001) != 0xde ||
-	    gbcpu_mem_get(0xa002) != 0xb0 ||
-	    gbcpu_mem_get(0xa003) != 0x61) {
+	if (gbcpu_mem_get(gbcpu, 0xa001) != 0xde ||
+	    gbcpu_mem_get(gbcpu, 0xa002) != 0xb0 ||
+	    gbcpu_mem_get(gbcpu, 0xa003) != 0x61) {
 		return;
 	}
 
 	fprintf(stderr, "\nBlargg debug output:\n");
 
 	for (i = 0xa004; i < 0xb000; i++) {
-		uint8_t c = gbcpu_mem_get(i);
+		uint8_t c = gbcpu_mem_get(gbcpu, i);
 		if (c == 0 || c >= 128) {
 			return;
 		}
@@ -1054,6 +1058,7 @@ static void blargg_debug(void)
  */
 long gbhw_step(struct gbhw *gbhw, long time_to_work)
 {
+	struct gbcpu *gbcpu = &gbhw->gbcpu;
 	long cycles_total = 0;
 
 	if (gbhw->pause_output) {
@@ -1078,14 +1083,14 @@ long gbhw_step(struct gbhw *gbhw, long time_to_work)
 		while (cycles < maxcycles && !gbhw->io_written) {
 			long step;
 			gbhw_check_if(gbhw);
-			step = gbcpu_step();
-			if (gbcpu_halted) {
+			step = gbcpu_step(gbcpu);
+			if (gbcpu->halted) {
 				gbhw->halted_noirq_cycles += step;
-				if (gbcpu_if == 0 &&
+				if (gbcpu->ie == 0 &&
 				    (gbhw->ioregs[REG_IE] == 0 ||
 				     gbhw->halted_noirq_cycles > GBHW_CLOCK/10)) {
 					fprintf(stderr, "CPU locked up (halt with interrupts disabled).\n");
-					blargg_debug();
+					blargg_debug(gbcpu);
 					return -1;
 				}
 			} else {
