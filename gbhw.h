@@ -69,19 +69,11 @@ typedef void (*gbhw_iocallback_fn)(long cycles, uint32_t addr, uint8_t valu, voi
 typedef void (*gbhw_stepcallback_fn)(const long cycles, const struct gbhw_channel[], void *priv);
 
 struct gbhw {
-	struct gbhw_channel ch[4];
-
 	uint8_t *rom;
-	uint8_t intram[0x2000];
-	uint8_t extram[0x2000];
-	uint8_t ioregs[GBHW_IOREGS_SIZE];
-	uint8_t hiram[0x80];
 	long rombank;
 	long lastbank;
 	long apu_on;
 	long io_written;
-
-	uint8_t boot_rom[256];
 
 	long lminval, lmaxval, rminval, rmaxval;
 	double filter_constant;
@@ -127,6 +119,15 @@ struct gbhw {
 	long ch3pos;
 	long last_l_value, last_r_value;
 	long ch3_next_nibble;
+
+	struct gbhw_channel ch[4];
+
+	uint8_t hiram[0x80];
+	uint8_t intram[0x2000];
+	uint8_t extram[0x2000];
+	uint8_t ioregs[GBHW_IOREGS_SIZE];
+
+	uint8_t boot_rom[256];
 };
 
 struct gbhw* gbhw_create();
