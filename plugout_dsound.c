@@ -167,7 +167,7 @@ static ssize_t dsound_write(const void* buf, size_t count)
 	return orig_count;
 }
 
-static int dsound_skip(int subsound)
+static int dsound_skip(int subsong)
 {
 	HRESULT hr;
 	LPDIRECTSOUNDBUFFER pDsb = NULL;
