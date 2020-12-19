@@ -103,22 +103,15 @@ static void stepcallback(long cycles, const struct gbhw_channel chan[], void *pr
 
 static void handleuserinput(struct gbs *gbs)
 {
-	long subsong;
 	char c;
 
 	if (get_input(&c)) {
 		switch (c) {
 		case 'p':
-			subsong = get_prev_subsong(gbs);
-			gbs_init(gbs, subsong);
-			if (sound_skip)
-				sound_skip(subsong);
+			play_prev_subsong(gbs);
 			break;
 		case 'n':
-			subsong = get_next_subsong(gbs);
-			gbs_init(gbs, subsong);
-			if (sound_skip)
-				sound_skip(subsong);
+			play_next_subsong(gbs);
 			break;
 		case 'q':
 		case 27:

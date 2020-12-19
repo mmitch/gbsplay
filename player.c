@@ -129,7 +129,7 @@ long *setup_playlist(long songs)
 	return playlist;
 }
 
-long get_next_subsong(struct gbs *gbs)
+static long get_next_subsong(struct gbs *gbs)
 /* returns the number of the subsong that is to be played next */
 {
 	const struct gbs_status *status = gbs_get_status(gbs);
@@ -160,7 +160,7 @@ long get_next_subsong(struct gbs *gbs)
 	return next;
 }
 
-long get_prev_subsong(struct gbs *gbs)
+static long get_prev_subsong(struct gbs *gbs)
 /* returns the number of the subsong that has been played previously */
 {
 	const struct gbs_status *status = gbs_get_status(gbs);
@@ -189,6 +189,22 @@ long get_prev_subsong(struct gbs *gbs)
 	}
 
 	return prev;
+}
+
+static void play_subsong(struct gbs *gbs, long subsong) {
+	gbs_init(gbs, subsong);
+	if (sound_skip)
+		sound_skip(subsong);
+}
+
+void play_next_subsong(struct gbs *gbs)
+{
+	play_subsong(gbs, get_next_subsong(gbs));
+}
+
+void play_prev_subsong(struct gbs *gbs)
+{
+	play_subsong(gbs, get_prev_subsong(gbs));
 }
 
 static long setup_playmode(struct gbs *gbs)
@@ -246,9 +262,7 @@ long nextsubsong_cb(struct gbs *gbs, void *priv)
 		}
 	}
 
-	gbs_init(gbs, subsong);
-	if (sound_skip)
-		sound_skip(subsong);
+	play_subsong(gbs, subsong);
 	return true;
 }
 
@@ -525,9 +539,7 @@ struct gbs *common_init(int argc, char **argv)
 
 	gbs_set_nextsubsong_cb(gbs, nextsubsong_cb, NULL);
 	initial_subsong = setup_playmode(gbs);
-	gbs_init(gbs, initial_subsong);
-	if (sound_skip)
-		sound_skip(initial_subsong);
+	play_subsong(gbs, initial_subsong);
 	if (verbosity>0) {
 		gbs_printinfo(gbs, 0);
 	}

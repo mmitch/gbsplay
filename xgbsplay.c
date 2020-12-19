@@ -118,17 +118,13 @@ static void drawbuttons()
 
 static int handlebutton(XButtonEvent *xev, struct gbs *gbs)
 {
-	uint8_t subsong;
 	XWindowAttributes attrs;
 
 	XGetWindowAttributes(display, window, &attrs);
 
 	switch (xev->x * 4 / attrs.width) {
 	case 0: /* prev */
-		subsong = get_prev_subsong(gbs);
-		gbs_init(gbs, subsong);
-		if (sound_skip)
-			sound_skip(subsong);
+		play_prev_subsong(gbs);
 		break;
 
 	case 1: /* pause */
@@ -141,10 +137,7 @@ static int handlebutton(XButtonEvent *xev, struct gbs *gbs)
 		return 1;
 
 	case 3: /* next */
-		subsong = get_next_subsong(gbs);
-		gbs_init(gbs, subsong);
-		if (sound_skip)
-			sound_skip(subsong);
+		play_next_subsong(gbs);
 		break;
 	}
 
