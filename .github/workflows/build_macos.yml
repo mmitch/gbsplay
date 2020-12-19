@@ -37,3 +37,7 @@ jobs:
     - name: Check build flags
       run: |
         ./check_buildflags.sh ${{ matrix.flags }}
+    - name: Dump configure on error
+      if: ${{ failure() }}
+      run: |
+        bash -x -v configure && cat config.err

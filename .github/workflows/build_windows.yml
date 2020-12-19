@@ -47,14 +47,14 @@ jobs:
       env:
         CONFIGURE_FLAGS: ${{ matrix.flags }}
       run: |
-        make && cat config.err
+        make
     - name: Check activated plugouts
       run: |
         ./check_plugouts.sh ${{ matrix.plugouts }}
+    - name: Check build flags
+      run: |
+        ./check_buildflags.sh --disable-hardening ${{ matrix.flags }}
     - name: Dump configure on error
       if: ${{ failure() }}
       run: |
         bash -x -v configure && cat config.err
-    - name: Check build flags
-      run: |
-        ./check_buildflags.sh --disable-hardening ${{ matrix.flags }}

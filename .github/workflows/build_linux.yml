@@ -43,3 +43,7 @@ jobs:
         # add the sudo here and not inside the script
         # to prevent a mess when somebody runs the script locally
         sudo ./check_install_uninstall.sh
+    - name: Dump configure on error
+      if: ${{ failure() }}
+      run: |
+        bash -x -v configure && cat config.err
