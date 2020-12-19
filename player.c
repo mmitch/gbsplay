@@ -160,11 +160,11 @@ long get_next_subsong(struct gbs *gbs)
 	return next;
 }
 
-int get_prev_subsong(struct gbs *gbs)
+long get_prev_subsong(struct gbs *gbs)
 /* returns the number of the subsong that has been played previously */
 {
 	const struct gbs_status *status = gbs_get_status(gbs);
-	int prev = -1;
+	long prev = -1;
 
 	switch (playmode) {
 
