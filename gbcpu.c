@@ -33,12 +33,12 @@ typedef void (*ex_fn)(uint32_t op, const struct opinfo *oi);
 
 struct opinfo {
 #if DEBUG == 1 || defined(S_SPLINT_S)
-	char *name;
+	const char *name;
 #endif
-	ex_fn fn;
+	const ex_fn fn;
 #if DEBUG == 1
-	char cycles_1;
-	char cycles_2;
+	const char cycles_1;
+	const char cycles_2;
 #endif
 };
 
