@@ -103,6 +103,7 @@ static void stepcallback(long cycles, const struct gbhw_channel chan[], void *pr
 
 static void handleuserinput(struct gbs *gbs)
 {
+	struct gbhw *gbhw = &gbs->gbhw;
 	char c;
 
 	if (get_input(&c)) {
@@ -129,47 +130,48 @@ static void handleuserinput(struct gbs *gbs)
 			break;
 		case ' ':
 			pause_mode = !pause_mode;
-			gbhw_pause(pause_mode);
+			gbhw_pause(gbhw, pause_mode);
 			if (sound_pause) sound_pause(pause_mode);
 			break;
 		case '1':
 		case '2':
 		case '3':
 		case '4':
-			gbhw_ch[c-'1'].mute ^= 1;
+			gbhw->ch[c-'1'].mute ^= 1;
 			break;
 		}
 	}
 }
 
-static char *notestring(long ch)
+// TODO: only pass struct gbhw_channnel instead of struct gbhw?
+static char *notestring(struct gbhw *gbhw, long ch)
 {
 	long n;
 
-	if (gbhw_ch[ch].mute) return "-M-";
+	if (gbhw->ch[ch].mute) return "-M-";
 
-	if (gbhw_ch[ch].env_volume == 0 ||
-	    gbhw_ch[ch].master == 0 ||
-	    (gbhw_ch[ch].leftgate == 0 &&
-	     gbhw_ch[ch].rightgate == 0)) return "---";
+	if (gbhw->ch[ch].env_volume == 0 ||
+	    gbhw->ch[ch].master == 0 ||
+	    (gbhw->ch[ch].leftgate == 0 &&
+	     gbhw->ch[ch].rightgate == 0)) return "---";
 
-	n = getnote(gbhw_ch[ch].div_tc);
+	n = getnote(gbhw->ch[ch].div_tc);
 	if (ch != 3) return &notelookup[4*n];
 	else return "nse";
 }
 
-static long chvol(long ch)
+static long chvol(struct gbhw *gbhw, long ch)
 {
 	long v;
 
-	if (gbhw_ch[ch].mute ||
-	    gbhw_ch[ch].master == 0 ||
-	    (gbhw_ch[ch].leftgate == 0 &&
-	     gbhw_ch[ch].rightgate == 0)) return 0;
+	if (gbhw->ch[ch].mute ||
+	    gbhw->ch[ch].master == 0 ||
+	    (gbhw->ch[ch].leftgate == 0 &&
+	     gbhw->ch[ch].rightgate == 0)) return 0;
 
 	if (ch == 2)
-		v = (3-((gbhw_ch[2].env_volume+3)&3)) << 2;
-	else v = gbhw_ch[ch].env_volume;
+		v = (3-((gbhw->ch[2].env_volume+3)&3)) << 2;
+	else v = gbhw->ch[ch].env_volume;
 
 	return v;
 }
@@ -182,29 +184,30 @@ static char *volstring(long v)
 	return &vollookup[5*v];
 }
 
-static void printregs(void)
+static void printregs(struct gbhw *gbhw)
 {
 	long i;
 	for (i=0; i<5*4; i++) {
 		if (i % 5 == 0)
 			printf("CH%ld:", i/5 + 1);
-		printf(" %02x", gbhw_io_peek(0xff10+i));
+		printf(" %02x", gbhw_io_peek(gbhw, 0xff10+i));
 		if (i % 5 == 4)
 			printf("\n");
 	}
 	printf("MISC:");
 	for (i+=0x10; i<0x27; i++) {
-		printf(" %02x", gbhw_io_peek(0xff00+i));
+		printf(" %02x", gbhw_io_peek(gbhw, 0xff00+i));
 	}
 	printf("\nWAVE: ");
 	for (i=0; i<16; i++) {
-		printf("%02x", gbhw_io_peek(0xff30+i));
+		printf("%02x", gbhw_io_peek(gbhw, 0xff30+i));
 	}
 	printf("\n\033[A\033[A\033[A\033[A\033[A\033[A");
 }
 
 static void printstatus(struct gbs *gbs)
 {
+	struct gbhw *gbhw = &gbs->gbhw;
 	struct displaytime time;
 	char *songtitle;
 
@@ -221,17 +224,17 @@ static void printstatus(struct gbs *gbs)
 	       time.played_min, time.played_sec, time.total_min, time.total_sec);
 	if (verbosity>2) {
 		printf("  %s %s  %s %s  %s %s  %s %s  [%s|%s]\n",
-		       notestring(0), volstring(chvol(0)),
-		       notestring(1), volstring(chvol(1)),
-		       notestring(2), volstring(chvol(2)),
-		       notestring(3), volstring(chvol(3)),
+		       notestring(gbhw, 0), volstring(chvol(gbhw, 0)),
+		       notestring(gbhw, 1), volstring(chvol(gbhw, 1)),
+		       notestring(gbhw, 2), volstring(chvol(gbhw, 2)),
+		       notestring(gbhw, 3), volstring(chvol(gbhw, 3)),
 		       reverse_vol(volstring(gbs->lvol/1024)),
 		       volstring(gbs->rvol/1024));
 	} else {
 		puts("");
 	}
 	if (verbosity>3) {
-		printregs();
+		printregs(gbhw);
 	}
 	fflush(stdout);
 }
@@ -260,7 +263,7 @@ int main(int argc, char **argv)
 
 	/* init additional callbacks */
 	if (sound_step)
-		gbhw_setstepcallback(stepcallback, NULL);
+		gbhw_setstepcallback(&gbs->gbhw, stepcallback, NULL);
 
 	/* precalculate lookup tables */
 	precalc_notes();
