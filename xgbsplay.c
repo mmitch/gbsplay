@@ -124,9 +124,6 @@ static int handlebutton(XButtonEvent *xev, struct gbs *gbs)
 	switch (xev->x * 4 / attrs.width) {
 	case 0: /* prev */
 		gbs->subsong = get_prev_subsong(gbs);
-		while (gbs->subsong < 0) {
-			gbs->subsong += gbs->songs;
-		}
 		gbs_init(gbs, gbs->subsong);
 		if (sound_skip)
 			sound_skip(gbs->subsong);
@@ -143,7 +140,6 @@ static int handlebutton(XButtonEvent *xev, struct gbs *gbs)
 
 	case 3: /* next */
 		gbs->subsong = get_next_subsong(gbs);
-		gbs->subsong %= gbs->songs;
 		gbs_init(gbs, gbs->subsong);
 		if (sound_skip)
 			sound_skip(gbs->subsong);

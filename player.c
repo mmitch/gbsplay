@@ -154,6 +154,9 @@ long get_next_subsong(struct gbs *gbs)
 		next = gbs->subsong + 1;
 		break;
 	}
+
+	gbs->subsong %= gbs->songs;
+
 	return next;
 }
 
@@ -182,6 +185,11 @@ int get_prev_subsong(struct gbs *gbs)
 		prev = gbs->subsong - 1;
 		break;
 	}
+
+	while (gbs->subsong < 0) {
+		gbs->subsong += gbs->songs;
+	}
+
 	return prev;
 }
 

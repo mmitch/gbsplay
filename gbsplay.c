@@ -110,16 +110,12 @@ static void handleuserinput(struct gbs *gbs)
 		switch (c) {
 		case 'p':
 			gbs->subsong = get_prev_subsong(gbs);
-			while (gbs->subsong < 0) {
-				gbs->subsong += gbs->songs;
-			}
 			gbs_init(gbs, gbs->subsong);
 			if (sound_skip)
 				sound_skip(gbs->subsong);
 			break;
 		case 'n':
 			gbs->subsong = get_next_subsong(gbs);
-			gbs->subsong %= gbs->songs;
 			gbs_init(gbs, gbs->subsong);
 			if (sound_skip)
 				sound_skip(gbs->subsong);
