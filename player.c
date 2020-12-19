@@ -55,6 +55,8 @@ static long subsong_start = -1;
 static long subsong_stop = -1;
 static long subsong_timeout = 2*60;
 
+static long mute_channel[4];
+
 static const char cfgfile[] = ".gbsplayrc";
 
 static char *sound_name = PLUGOUT_DEFAULT;
@@ -335,7 +337,7 @@ static void parseopts(int *argc, char ***argv)
 		case '2':
 		case '3':
 		case '4':
-			gbhw_ch[res-'1'].mute ^= 1;
+			mute_channel[res-'1'] ^= 1;
 			break;
 		case 'c':
 			cfg_parse(optarg, options);
@@ -437,6 +439,7 @@ struct gbs *common_init(int argc, char **argv)
 {
 	char *usercfg;
 	struct gbs *gbs;
+	struct gbhw *gbhw;
 
 	i18n_init();
 
@@ -462,16 +465,6 @@ struct gbs *common_init(int argc, char **argv)
 	}
 	buf.data = malloc(buf.bytes);
 
-	if (sound_io)
-		gbhw_setiocallback(iocallback, NULL);
-	if (sound_write)
-		gbhw_setcallback(callback, NULL);
-	gbhw_setrate(rate);
-	if (!gbhw_setfilter(filter_type)) {
-		fprintf(stderr, _("Invalid filter type \"%s\"\n"), filter_type);
-		exit(1);
-	}
-
 	/* options have been parsed, argv[0] is our filename */
 	filename = filename_only(argv[0]);
 
@@ -490,6 +483,18 @@ struct gbs *common_init(int argc, char **argv)
 		exit(1);
 	}
 
+	gbhw = &gbs->gbhw;
+
+	if (sound_io)
+		gbhw_setiocallback(gbhw, iocallback, NULL);
+	if (sound_write)
+		gbhw_setcallback(gbhw, callback, NULL);
+	gbhw_setrate(gbhw, rate);
+	if (!gbhw_setfilter(gbhw, filter_type)) {
+		fprintf(stderr, _("Invalid filter type \"%s\"\n"), filter_type);
+		exit(1);
+	}
+
 	/* sanitize commandline values */
 	if (subsong_start < -1) {
 		subsong_start = 0;
@@ -502,13 +507,17 @@ struct gbs *common_init(int argc, char **argv)
 		subsong_stop = -1;
 	}
 
+	for (uint8_t ch = 0; ch < 4; ch++) {
+		gbhw->ch[ch].mute = mute_channel[ch];
+	}
+
 	gbs->subsong = subsong_start;
 	gbs->subsong_timeout = subsong_timeout;
 	gbs->silence_timeout = silence_timeout;
 	gbs->gap = subsong_gap;
 	gbs->fadeout = fadeout;
 	setup_playmode(gbs);
-	gbhw_setbuffer(&buf);
+	gbhw_setbuffer(gbhw, &buf);
 	gbs_set_nextsubsong_cb(gbs, nextsubsong_cb, NULL);
 	gbs_init(gbs, gbs->subsong);
 	if (sound_skip)
