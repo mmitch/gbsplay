@@ -582,16 +582,36 @@ while [ "${1-}" ]; do
     shift
 done
 
-if {      [ "$BUILDARCH" = "i386"   ] \
-       || [ "$BUILDARCH" = "i486"   ] \
-       || [ "$BUILDARCH" = "i586"   ] \
-       || [ "$BUILDARCH" = "i686"   ] \
-       || [ "$BUILDARCH" = "x86_64" ];\
-   } && [ "$BUILDOS" = "Linux" ]; then
-    setdefault build_test yes
-else
-    setdefault build_test no
-fi
+case "$BUILDOS" in
+    Linux)
+	if {    [ "$BUILDARCH" = "i386"   ]  \
+	     || [ "$BUILDARCH" = "i486"   ]  \
+	     || [ "$BUILDARCH" = "i586"   ]  \
+	     || [ "$BUILDARCH" = "i686"   ]  \
+	     || [ "$BUILDARCH" = "x86_64" ]; \
+	   }; then
+	    setdefault build_test yes
+	else
+	    # expected test failures:
+	    # MD5 sum mismatch due to floating point discrepancies in libimpulse
+	    setdefault build_test no
+	fi
+	;;
+
+    Darwin)
+	setdefault build_test yes
+	;;
+
+    MSYS_*|MINGW32_*|MINGW64_*)
+	# known test failure:
+	# srand(0) in test_shuffle() in util.c gives a different order
+	setdefault build_test no
+	;;
+
+    *)
+	setdefault build_test no
+	;;
+esac
 
 ## more defaults
 setdefault build_xmmsplugin no
