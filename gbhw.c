@@ -71,8 +71,8 @@ static const long msec_cycles = GBHW_CLOCK/1000;
 #define IMPULSE_N (1 << IMPULSE_N_SHIFT)
 #define IMPULSE_N_MASK (IMPULSE_N - 1)
 
-const long main_div_tc = 32;
-const long sweep_div_tc = 256;
+static const long main_div_tc = 32;
+static const long sweep_div_tc = 256;
 
 void gbhw_handle_init(struct gbhw *gbhw, struct gbs *gbs) {
 	gbhw->gbs = gbs;
