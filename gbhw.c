@@ -74,14 +74,6 @@ static const long msec_cycles = GBHW_CLOCK/1000;
 const long main_div_tc = 32;
 const long sweep_div_tc = 32;
 
-struct gbhw* gbhw_create() {
-	struct gbhw* gbhw = calloc(1, sizeof(struct gbhw));
-	if (gbhw == NULL) {
-		fprintf(stderr, "%s\n", _("Memory allocation failed!"));
-	}
-	return gbhw;
-}
-
 void gbhw_handle_init(struct gbhw *gbhw, struct gbs *gbs) {
 	gbhw->gbs = gbs;
 
@@ -116,10 +108,6 @@ void gbhw_handle_init(struct gbhw *gbhw, struct gbs *gbs) {
 	gbhw->ch3_next_nibble = 0;
 
 	gbcpu_handle_init(&gbhw->gbcpu, gbhw);
-}
-
-void gbhw_free(struct gbhw *gbhw) {
-	free(gbhw);
 }
 
 static uint32_t rom_get(struct gbhw *gbhw, uint32_t addr)

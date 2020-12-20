@@ -141,9 +141,7 @@ struct gbhw {
 	uint8_t boot_rom[GBHW_BOOT_ROM_SIZE];
 };
 
-struct gbhw* gbhw_create();
 void gbhw_handle_init(struct gbhw *gbhw, struct gbs *gbs);
-void gbhw_free(struct gbhw *gbhw);
 
 void gbhw_setcallback(struct gbhw *gbhw, gbhw_callback_fn fn, void *priv);
 void gbhw_setiocallback(struct gbhw *gbhw, gbhw_iocallback_fn fn, void *priv);
