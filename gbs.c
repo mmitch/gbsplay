@@ -154,7 +154,7 @@ long gbs_init(struct gbs *gbs, long subsong)
 	REGS16_W(gbcpu->regs, HL, gbcpu->halt_at_pc);
 	gbcpu_mem_put(gbcpu, 0xff80, 0xe5); /* push hl */
 	gbcpu_step(gbcpu);
-	/* clear regs/memory touched by stack etup */
+	/* clear regs/memory touched by stack setup */
 	REGS16_W(gbcpu->regs, HL, 0x0000);
 	gbcpu_mem_put(gbcpu, 0xff80, 0x00);
 
