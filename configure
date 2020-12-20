@@ -582,12 +582,12 @@ while [ "${1-}" ]; do
     shift
 done
 
-if (      [ "$BUILDARCH" = "i386"   ] \
+if {      [ "$BUILDARCH" = "i386"   ] \
        || [ "$BUILDARCH" = "i486"   ] \
        || [ "$BUILDARCH" = "i586"   ] \
        || [ "$BUILDARCH" = "i686"   ] \
-       || [ "$BUILDARCH" = "x86_64" ] \
-   ) && [ "$BUILDOS" = "Linux" ]; then
+       || [ "$BUILDARCH" = "x86_64" ];\
+   } && [ "$BUILDOS" = "Linux" ]; then
     setdefault build_test yes
 else
     setdefault build_test no
