@@ -33,16 +33,16 @@ void shuffle_long(long *array, long elements)
 
 test void test_shuffle()
 {
-	long array[]          = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	long shuffled_array[] = { 2, 8, 9, 1, 6, 4, 5, 3, 7 };
-	long len = sizeof(array) / sizeof(*array);
+	long actual[]   = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	long expected[] = { 2, 8, 9, 1, 6, 4, 5, 3, 7 };
+	long len = sizeof(actual) / sizeof(*actual);
 	int i;
 
 	srand(0);
-	shuffle_long(array, len);
+	shuffle_long(actual, len);
 
 	for (i=0; i<len; i++) {
-		ASSERT_EQUAL("%ld", array[i], shuffled_array[i]);
+		ASSERT_EQUAL("%ld", actual[i], expected[i]);
 	}
 }
 TEST(test_shuffle);
