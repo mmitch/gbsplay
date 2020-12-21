@@ -28,7 +28,7 @@
 
 static const struct timespec ONE_MILLISECOND = {
 	.tv_sec = 0,
-	.tv_nsec = 1000
+	.tv_nsec = 1000000
 };
 
 /* global variables */

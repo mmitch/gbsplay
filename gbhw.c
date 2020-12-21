@@ -1071,7 +1071,7 @@ long gbhw_step(long time_to_work)
 	if (pause_output) {
 		struct timespec waittime = {
 			.tv_sec = 0,
-			.tv_nsec = time_to_work*1000
+			.tv_nsec = time_to_work*1000000
 		};
 		nanosleep(&waittime, NULL);
 		return 0;

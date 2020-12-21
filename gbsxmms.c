@@ -56,7 +56,7 @@ static pthread_mutex_t debug_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static const struct timespec TEN_MILLISECONDS = {
 	.tv_sec = 0,
-	.tv_nsec = 10000
+	.tv_nsec = 10000000
 };
 
 static InputPlugin gbs_ip;
