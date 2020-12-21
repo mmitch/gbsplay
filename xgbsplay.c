@@ -220,7 +220,8 @@ int main(int argc, char **argv)
 			}
 		}
 
-		updatetitle(gbs);
+		if (!pause_mode)
+			updatetitle(gbs);
 	}
 
 	/* stop sound */
