@@ -1,15 +1,16 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2004-2005 (C) by Christian Garbs <mitch@cgarbs.de>
- *                  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
- * Licensed under GNU GPL v1 or, at your option, any later version.
- *
  * NAS sound output plugin
  *
  * Based on the libaudiooss nas backend, which was largely rewritten
  * by me (Tobias Diedrich), I'd dare to say the only function left from
  * the xmms code is nas_find_device, but I did not check that. :-)
+ *
+ * 2004-2020 (C) by Christian Garbs <mitch@cgarbs.de>
+ *                  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ *
+ * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
 #include "common.h"

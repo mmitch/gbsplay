@@ -2,8 +2,9 @@
  * gbsplay is a Gameboy sound player
  * This file contains the player code common to both CLI and X11 frontends.
  *
- * 2003-2005,2008,2018,2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
- *                                 Christian Garbs <mitch@cgarbs.de>
+ * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ *                  Christian Garbs <mitch@cgarbs.de>
+ *
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 

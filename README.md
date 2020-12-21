@@ -9,8 +9,8 @@
 This program emulates the sound hardware of the Nintendo Gameboy.  It
 is able to play the sounds from a Gameboy module dump (.GBS format).
 
-Homepage/Repo:   https://github.com/mmitch/gbsplay/  
-Email contact:   <gbsplay-dev@lists.uguu.de>  
+Homepage/Repo:   https://github.com/mmitch/gbsplay/
+Email contact:   <gbsplay-dev@lists.uguu.de>
 Bug reports:     please send new bugs to the mailing list
                  or use the issue tracker at
                  https://github.com/mmitch/gbsplay/issues
@@ -25,10 +25,32 @@ the following parts:
 ## License
 
 ```
-(C) 2003-2006,2008,2010-2011,2013,2015-2020 by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
-                                               Christian Garbs <mitch@cgarbs.de>
-                                               Maximilian Rehkopf <otakon@gmx.net>
-                                               Vegard Nossum <vegardno@ifi.uio.no>
+(C) 2003-2020 by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+                 Christian Garbs <mitch@cgarbs.de>
+                 Maximilian Rehkopf <otakon@gmx.net>
+                 Vegard Nossum <vegardno@ifi.uio.no>
 
-Licensed under GNU GPL v1 or, at your option, any later version.
+Source Code licensed under GNU GPL v1 or, at your option, any later version.
+
+Individual copyright notices can be found in the file headers.
+The copyright notice for each file should be in the following form:
+
+"(C) 20xx-20yy by List of File Major Contributors"
+
+Where 20xx is the first release year for the file, 20yy is the most
+recent release year for the file.
+
+For detailed author attribution, see the revision history of each file.
+
+Additionally, the following files are included under different licenses:
+
+File:       examples/nightmode.gbs
+Copyright:  Laxity of Dual Crew Shining (Nightmode Demo)
+License:    Public Domain
+Homepage:   http://www.dc-s.com/
+
+File:       crc32.c
+Copyright:  Provided to GNUnet by peter@horizon.com
+License:    Public Domain
+Homepage:   n/a
 ```

@@ -1,10 +1,10 @@
 /*
  * gbsplay is a Gameboy sound player
  *
+ * SDL2 sound output plugin
+ *
  * 2020 (C) by Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL v1 or, at your option, any later version.
- *
- * SDL2 sound output plugin
  */
 
 #include "common.h"

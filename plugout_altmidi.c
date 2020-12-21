@@ -1,15 +1,10 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2006 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
- *
  * alternative MIDI output plugin
  *
- * 2018 (C) by Christian Garbs <mitch@cgarbs.de>
- *
- * based on the MIDI output plugin
-
- * 2008 (C) by Vegard Nossum
+ * 2006-2020 (C) by Christian Garbs <mitch@cgarbs.de>
+ *                  Vegard Nossum
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
