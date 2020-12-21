@@ -148,7 +148,7 @@ static char *notestring(long ch)
 
 	if (gbhw_ch[ch].mute) return "-M-";
 
-	if (gbhw_ch[ch].volume == 0 ||
+	if (gbhw_ch[ch].env_volume == 0 ||
 	    gbhw_ch[ch].master == 0 ||
 	    (gbhw_ch[ch].leftgate == 0 &&
 	     gbhw_ch[ch].rightgate == 0)) return "---";
@@ -168,8 +168,8 @@ static long chvol(long ch)
 	     gbhw_ch[ch].rightgate == 0)) return 0;
 
 	if (ch == 2)
-		v = (3-((gbhw_ch[2].volume+3)&3)) << 2;
-	else v = gbhw_ch[ch].volume;
+		v = (3-((gbhw_ch[2].env_volume+3)&3)) << 2;
+	else v = gbhw_ch[ch].env_volume;
 
 	return v;
 }

@@ -245,6 +245,7 @@ static void apu_reset(void)
 		gbhw_ch[i].len = 0;
 		gbhw_ch[i].len_gate = 0;
 		gbhw_ch[i].volume = 0;
+		gbhw_ch[i].env_volume = 0;
 		gbhw_ch[i].duty_ctr = 4;
 		gbhw_ch[i].div_tc = 1;
 		gbhw_ch[i].master = 1;
@@ -295,7 +296,7 @@ static void sequencer_update_len(long chn)
 		gbhw_ch[chn].len++;
 		gbhw_ch[chn].len &= len_mask[chn];
 		if (gbhw_ch[chn].len == 0) {
-			gbhw_ch[chn].volume = 0;
+			gbhw_ch[chn].env_volume = 0;
 			gbhw_ch[chn].env_tc = 0;
 			gbhw_ch[chn].running = 0;
 			gbhw_ch[chn].len_gate = 0;
@@ -415,6 +416,7 @@ static void io_put(uint32_t addr, uint8_t val)
 
 				gbhw_ch[chn].len_enable = (ioregs[0x14 + 5*chn] & 0x40) > 0;
 				if ((val & 0x80) == 0x80) {
+					gbhw_ch[chn].env_volume = gbhw_ch[chn].volume;
 					if (!gbhw_ch[chn].len_gate) {
 						gbhw_ch[chn].len_gate = 1;
 						if (old_len_enable == 1 &&
@@ -460,7 +462,7 @@ static void io_put(uint32_t addr, uint8_t val)
 		case 0xff1c:
 			{
 				long vol = (ioregs[0x1c] >> 5) & 3;
-				gbhw_ch[2].volume = vol;
+				gbhw_ch[2].env_volume = gbhw_ch[2].volume = vol;
 				break;
 			}
 		case 0xff1f:
@@ -488,6 +490,7 @@ static void io_put(uint32_t addr, uint8_t val)
 
 				if (val & 0x80) {  /* trigger */
 					lfsr = 0xffffffff;
+					gbhw_ch[chn].env_volume = gbhw_ch[chn].volume;
 					if (!gbhw_ch[chn].len_gate) {
 						gbhw_ch[chn].len_gate = 1;
 						if (old_len_enable == 1 &&
@@ -630,11 +633,11 @@ static void sequencer_step(void)
 				gbhw_ch[i].env_ctr = gbhw_ch[i].env_tc;
 				if (gbhw_ch[i].running) {
 					if (!gbhw_ch[i].env_dir) {
-						if (gbhw_ch[i].volume > 0)
-							gbhw_ch[i].volume--;
+						if (gbhw_ch[i].env_volume > 0)
+							gbhw_ch[i].env_volume--;
 					} else {
-						if (gbhw_ch[i].volume < 15)
-						gbhw_ch[i].volume++;
+						if (gbhw_ch[i].env_volume < 15)
+						gbhw_ch[i].env_volume++;
 					}
 				}
 			}
@@ -777,8 +780,8 @@ static void gb_sound(long cycles)
 				long pos = ch3pos++;
 				ch3_next_nibble = GET_NIBBLE(&ioregs[0x30], pos) * 2;
 				gbhw_ch[2].div_ctr = gbhw_ch[2].div_tc*2;
-				if (gbhw_ch[2].volume) {
-					val = val >> (gbhw_ch[2].volume-1);
+				if (gbhw_ch[2].env_volume) {
+					val = val >> (gbhw_ch[2].env_volume-1);
 				} else val = 0;
 				gbhw_ch[2].lvl = val - 15;
 				update_level = 1;
@@ -791,7 +794,7 @@ static void gb_sound(long cycles)
 				long val;
 				gbhw_ch[3].div_ctr = gbhw_ch[3].div_tc;
 				lfsr = (lfsr << 1) | (((lfsr & tap1) > 0) ^ ((lfsr & tap2) > 0));
-				val = gbhw_ch[3].volume * 2 * (!(lfsr & tap1));
+				val = gbhw_ch[3].env_volume * 2 * (!(lfsr & tap1));
 				gbhw_ch[3].lvl = val - 15;
 				update_level = 1;
 			}
@@ -801,7 +804,7 @@ static void gb_sound(long cycles)
 			main_div -= main_div_tc;
 
 			for (i=0; i<2; i++) if (gbhw_ch[i].running) {
-				long val = 2 * gbhw_ch[i].volume;
+				long val = 2 * gbhw_ch[i].env_volume;
 				if (gbhw_ch[i].div_ctr > gbhw_ch[i].duty_tc) {
 					val = 0;
 				}
