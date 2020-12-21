@@ -121,7 +121,7 @@ struct gbcpu {
 	gbcpu_regs_u regs;
 	long halt_at_pc;
 	long halted;
-	long ie;
+	long ime;
 
 	long stopped;
 	long cycles;

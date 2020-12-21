@@ -1078,7 +1078,7 @@ static void op_reti(struct gbcpu *gbcpu, uint32_t op, const struct opinfo *oi)
 	UNUSED(op);
 	UNUSED(oi);
 
-	gbcpu->ie = 1;
+	gbcpu->ime = 1;
 	REGS16_W(gbcpu->regs, PC, pop(gbcpu));
 	DPRINTF(" \t%s", oi->name);
 	// 4 extra cycles.
@@ -1128,7 +1128,7 @@ static void op_di(struct gbcpu *gbcpu, uint32_t op, const struct opinfo *oi)
 	UNUSED(op);
 	UNUSED(oi);
 
-	gbcpu->ie = 0;
+	gbcpu->ime = 0;
 	DPRINTF(" \t%s", oi->name);
 }
 
@@ -1137,7 +1137,7 @@ static void op_ei(struct gbcpu *gbcpu, uint32_t op, const struct opinfo *oi)
 	UNUSED(op);
 	UNUSED(oi);
 
-	gbcpu->ie = 1;
+	gbcpu->ime = 1;
 	DPRINTF(" \t%s", oi->name);
 }
 
@@ -1148,7 +1148,7 @@ static void op_jr(struct gbcpu *gbcpu, uint32_t op, const struct opinfo *oi)
 	UNUSED(op);
 	UNUSED(oi);
 
-	if (ofs == -2 && gbcpu->ie == 0) {
+	if (ofs == -2 && gbcpu->ime == 0) {
 		gbcpu->halted = 1;
 	}
 
@@ -1611,7 +1611,7 @@ void gbcpu_init(struct gbcpu *gbcpu)
 	memset(&gbcpu->regs, 0, sizeof(gbcpu_regs_u));
 	gbcpu->halted = 0;
 	gbcpu->stopped = 0;
-	gbcpu->ie = 0;
+	gbcpu->ime = 0;
 	gbcpu->halt_at_pc = -1;
 	DEB(dump_regs(gbcpu));
 }
@@ -1620,7 +1620,7 @@ void gbcpu_intr(struct gbcpu *gbcpu, long vec)
 {
 	DPRINTF("gbcpu_intr(%04lx)\n", vec);
 	gbcpu->halted = 0;
-	gbcpu->ie = 0;
+	gbcpu->ime = 0;
 	push(gbcpu, REGS16_R(gbcpu->regs, PC));
 	REGS16_W(gbcpu->regs, PC, vec);
 }
@@ -1641,7 +1641,7 @@ long gbcpu_step(struct gbcpu *gbcpu)
 		    REGS16_R(gbcpu->regs, PC) == gbcpu->halt_at_pc) {
 			DPRINTF("halted at PC %04lx\n", gbcpu->halt_at_pc);
 			gbcpu->halted = 1;
-			gbcpu->ie = 1;
+			gbcpu->ime = 1;
 		}
 		return gbcpu->cycles;
 	}

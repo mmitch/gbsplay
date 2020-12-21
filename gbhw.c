@@ -997,7 +997,7 @@ void gbhw_check_if(struct gbhw *gbhw)
 
 	uint8_t mask = 0x01; /* lowest bit is highest priority irq */
 	uint8_t vec = 0x40;
-	if (!gbcpu->ie) {
+	if (!gbcpu->ime) {
 		/* interrupts disabled */
 		if (gbhw->ioregs[REG_IF] & gbhw->ioregs[REG_IE]) {
 			/* but will still exit halt */
@@ -1076,7 +1076,7 @@ long gbhw_step(struct gbhw *gbhw, long time_to_work)
 			step = gbcpu_step(gbcpu);
 			if (gbcpu->halted) {
 				gbhw->halted_noirq_cycles += step;
-				if (gbcpu->ie == 0 &&
+				if (gbcpu->ime == 0 &&
 				    (gbhw->ioregs[REG_IE] == 0 ||
 				     gbhw->halted_noirq_cycles > GBHW_CLOCK/10)) {
 					fprintf(stderr, "CPU locked up (halt with interrupts disabled).\n");
