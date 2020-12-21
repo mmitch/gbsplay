@@ -961,11 +961,11 @@ void gbhw_init(struct gbhw *gbhw, uint8_t *rombuf, uint32_t size)
 	gbhw->last_r_value = 0;
 
 	gbcpu_init(&gbhw->gbcpu);
-	gbcpu_addmem(&gbhw->gbcpu, 0x00, 0x3f, rom_put, rom_get);
-	gbcpu_addmem(&gbhw->gbcpu, 0x40, 0x7f, rom_put, rombank_get);
-	gbcpu_addmem(&gbhw->gbcpu, 0xa0, 0xbf, extram_put, extram_get);
-	gbcpu_addmem(&gbhw->gbcpu, 0xc0, 0xfe, intram_put, intram_get);
-	gbcpu_addmem(&gbhw->gbcpu, 0xff, 0xff, io_put, io_get);
+	gbcpu_add_mem(&gbhw->gbcpu, 0x00, 0x3f, rom_put, rom_get);
+	gbcpu_add_mem(&gbhw->gbcpu, 0x40, 0x7f, rom_put, rombank_get);
+	gbcpu_add_mem(&gbhw->gbcpu, 0xa0, 0xbf, extram_put, extram_get);
+	gbcpu_add_mem(&gbhw->gbcpu, 0xc0, 0xfe, intram_put, intram_get);
+	gbcpu_add_mem(&gbhw->gbcpu, 0xff, 0xff, io_put, io_get);
 }
 
 void gbhw_enable_bootrom(struct gbhw *gbhw, const uint8_t *rombuf)

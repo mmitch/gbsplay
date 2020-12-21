@@ -132,7 +132,7 @@ struct gbcpu {
 
 void gbcpu_handle_init(struct gbcpu *gbcpu, struct gbhw *gbhw);
 
-void gbcpu_addmem(struct gbcpu *gbcpu, uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn);
+void gbcpu_add_mem(struct gbcpu *gbcpu, uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn);
 void gbcpu_init(struct gbcpu *gbcpu);
 long gbcpu_step(struct gbcpu *gbcpu);
 void gbcpu_intr(struct gbcpu *gbcpu, long vec);

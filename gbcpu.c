@@ -1596,7 +1596,7 @@ static void show_reg_diffs(const struct opinfo *oi)
 }
 #endif
 
-void gbcpu_addmem(struct gbcpu *gbcpu, uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn)
+void gbcpu_add_mem(struct gbcpu *gbcpu, uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn)
 {
 	uint32_t i;
 
