@@ -7,7 +7,10 @@
 [![CodeQL status](https://github.com/mmitch/gbsplay/workflows/CodeQL/badge.svg?branch=master)](https://github.com/mmitch/gbsplay/actions?query=workflow%3ACodeQL)
 
 This program emulates the sound hardware of the Nintendo Gameboy.  It
-is able to play the sounds from a Gameboy module dump (.GBS format).
+is able to play the sounds from a Gameboy module dump (.GBS format, as
+well as the older .GBR format), a subset of plain Gameboy rom dumps (.GB
+format; button input and graphics are not supported) and Gameboy Video
+Game Music dumps (.VGM/.VGZ format).
 
 Homepage/Repo:   https://github.com/mmitch/gbsplay/
 Email contact:   <gbsplay-dev@lists.uguu.de>
