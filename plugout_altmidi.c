@@ -268,7 +268,7 @@ static int midi_step(long cycles, const struct gbhw_channel chan[])
 
 	for (c = 0; c < 3; c++) {
 		ch = &chan[c];
-		new_playing = ch->running && ch->master && ch->volume;
+		new_playing = ch->running && ch->master && ch->env_volume;
 
 		if (playing[c]) {
 			if (new_playing) {
