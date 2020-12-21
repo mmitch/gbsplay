@@ -825,19 +825,19 @@ static void gb_sound(struct gbhw *gbhw, long cycles)
 	}
 }
 
-void gbhw_setcallback(struct gbhw *gbhw, gbhw_callback_fn fn, void *priv)
+void gbhw_set_callback(struct gbhw *gbhw, gbhw_callback_fn fn, void *priv)
 {
 	gbhw->callback = fn;
 	gbhw->callbackpriv = priv;
 }
 
-void gbhw_setiocallback(struct gbhw *gbhw, gbhw_iocallback_fn fn, void *priv)
+void gbhw_set_io_callback(struct gbhw *gbhw, gbhw_iocallback_fn fn, void *priv)
 {
 	gbhw->iocallback = fn;
 	gbhw->iocallback_priv = priv;
 }
 
-void gbhw_setstepcallback(struct gbhw *gbhw, gbhw_stepcallback_fn fn, void *priv)
+void gbhw_set_step_callback(struct gbhw *gbhw, gbhw_stepcallback_fn fn, void *priv)
 {
 	gbhw->stepcallback = fn;
 	gbhw->stepcallback_priv = priv;
@@ -852,7 +852,7 @@ static void gbhw_impbuf_reset(struct gbhw *gbhw)
 	memset(gbhw->impbuf->data, 0, gbhw->impbuf->bytes);
 }
 
-void gbhw_setbuffer(struct gbhw *gbhw, struct gbhw_buffer *buffer)
+void gbhw_set_buffer(struct gbhw *gbhw, struct gbhw_buffer *buffer)
 {
 	gbhw->soundbuf = buffer;
 	gbhw->soundbuf->samples = gbhw->soundbuf->bytes / 4;
@@ -876,7 +876,7 @@ static void gbhw_update_filter(struct gbhw *gbhw)
 	gbhw->cap_factor = round(65536.0 * cap_constant);
 }
 
-long gbhw_setfilter(struct gbhw *gbhw, const char *type)
+long gbhw_set_filter(struct gbhw *gbhw, const char *type)
 {
 	if (strcasecmp(type, GBHW_CFG_FILTER_OFF) == 0) {
 		gbhw->filter_enabled = 0;
@@ -896,7 +896,7 @@ long gbhw_setfilter(struct gbhw *gbhw, const char *type)
 	return 1;
 }
 
-void gbhw_setrate(struct gbhw *gbhw, long rate)
+void gbhw_set_rate(struct gbhw *gbhw, long rate)
 {
 	gbhw->sample_rate = rate;
 	gbhw->sound_div_tc = GBHW_CLOCK*SOUND_DIV_MULT/rate;

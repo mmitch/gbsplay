@@ -117,7 +117,7 @@ void gbs_configure_channels(struct gbs *gbs, long mute_0, long mute_1, long mute
 void gbs_configure_output(struct gbs *gbs, struct gbs_output_buffer *gbs_buf, long rate) {
 	struct gbhw_buffer *gbhw_buf = &gbs->gbhw_buf;
 
-	gbhw_setrate(&gbs->gbhw, rate);
+	gbhw_set_rate(&gbs->gbhw, rate);
 
 	gbs->buffer = gbs_buf;
 
@@ -125,7 +125,7 @@ void gbs_configure_output(struct gbs *gbs, struct gbs_output_buffer *gbs_buf, lo
 	gbhw_buf->bytes = gbs_buf->bytes;
 	gbhw_buf->pos = gbs_buf->pos;
 
-	gbhw_setbuffer(&gbs->gbhw, gbhw_buf);
+	gbhw_set_buffer(&gbs->gbhw, gbhw_buf);
 }
 
 long gbs_init(struct gbs *gbs, long subsong)
@@ -192,21 +192,21 @@ void gbs_set_sound_callback(struct gbs *gbs, gbs_sound_cb fn, void *priv)
 {
 	gbs->sound_cb = fn;
 	gbs->sound_cb_priv = priv;
-	gbhw_setcallback(&gbs->gbhw, wrap_buffer_callback, priv);
+	gbhw_set_callback(&gbs->gbhw, wrap_buffer_callback, priv);
 }
 
 long gbs_set_gbhw_filter(struct gbs *gbs, const char *type) {
-	return gbhw_setfilter(&gbs->gbhw, type);
+	return gbhw_set_filter(&gbs->gbhw, type);
 }
 
 void gbs_set_gbhw_io_callback(struct gbs *gbs, gbhw_iocallback_fn fn, void *priv)
 {
-	gbhw_setiocallback(&gbs->gbhw, fn, priv);
+	gbhw_set_io_callback(&gbs->gbhw, fn, priv);
 }
 
 void gbs_set_gbhw_step_callback(struct gbs *gbs, gbhw_stepcallback_fn fn, void *priv)
 {
-	gbhw_setstepcallback(&gbs->gbhw, fn, priv);
+	gbhw_set_step_callback(&gbs->gbhw, fn, priv);
 }
 
 static long gbs_nextsubsong(struct gbs *gbs)

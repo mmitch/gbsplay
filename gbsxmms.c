@@ -257,9 +257,9 @@ static void gbs_play(char *filename)
 	gbs_ip.set_info(title, length, 0, rate, 2);
 
 	gbs_init(gbs, -1);
-	gbhw_setbuffer(&buffer);
-	gbhw_setrate(rate);
-	gbhw_setcallback(callback, NULL);
+	gbhw_set_buffer(&buffer);
+	gbhw_set_rate(rate);
+	gbhw_set_callback(callback, NULL);
 	gbs->subsong_timeout = subsong_timeout;
 	gbs->gap = subsong_gap;
 	gbs->silence_timeout = silence_timeout;

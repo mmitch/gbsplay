@@ -143,12 +143,12 @@ struct gbhw {
 
 void gbhw_handle_init(struct gbhw *gbhw, struct gbs *gbs);
 
-void gbhw_setcallback(struct gbhw *gbhw, gbhw_callback_fn fn, void *priv);
-void gbhw_setiocallback(struct gbhw *gbhw, gbhw_iocallback_fn fn, void *priv);
-void gbhw_setstepcallback(struct gbhw *gbhw, gbhw_stepcallback_fn fn, void *priv);
-long gbhw_setfilter(struct gbhw *gbhw, const char *type);
-void gbhw_setrate(struct gbhw *gbhw, long rate);
-void gbhw_setbuffer(struct gbhw *gbhw, struct gbhw_buffer *buffer);
+void gbhw_set_callback(struct gbhw *gbhw, gbhw_callback_fn fn, void *priv);
+void gbhw_set_io_callback(struct gbhw *gbhw, gbhw_iocallback_fn fn, void *priv);
+void gbhw_set_step_callback(struct gbhw *gbhw, gbhw_stepcallback_fn fn, void *priv);
+long gbhw_set_filter(struct gbhw *gbhw, const char *type);
+void gbhw_set_rate(struct gbhw *gbhw, long rate);
+void gbhw_set_buffer(struct gbhw *gbhw, struct gbhw_buffer *buffer);
 void gbhw_init(struct gbhw *gbhw, uint8_t *rombuf, uint32_t size);
 void gbhw_enable_bootrom(struct gbhw *gbhw, const uint8_t *rombuf);
 void gbhw_pause(struct gbhw *gbhw, long new_pause);
