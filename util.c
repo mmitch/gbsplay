@@ -34,7 +34,11 @@ void shuffle_long(long *array, long elements)
 test void test_shuffle()
 {
 	long actual[]   = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+#ifdef __MSYS__
+	long expected[] = { 7, 8, 9, 2, 6, 3, 4, 5, 1 };
+#else
 	long expected[] = { 2, 8, 9, 1, 6, 4, 5, 3, 7 };
+#endif
 	long len = sizeof(actual) / sizeof(*actual);
 	int i;
 

@@ -602,9 +602,14 @@ case "$BUILDOS" in
 	setdefault build_test yes
 	;;
 
-    MSYS_*|MINGW32_*|MINGW64_*)
+    MSYS_*)
+	setdefault build_test yes
+	;;
+
+    MINGW32_*|MINGW64_*)
 	# known test failure:
-	# srand(0) in test_shuffle() in util.c gives a different order
+	# - util.c does not test-compile properly
+	# - srand(0) in test_shuffle() in util.c gives a different order
 	setdefault build_test no
 	;;
 
