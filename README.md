@@ -25,10 +25,10 @@ the following parts:
 ## License
 
 ```
-(C) 2003-2006,2008 by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
-                      Christian Garbs <mitch@cgarbs.de>
-                      Maximilian Rehkopf <otakon@gmx.net>
-                      Vegard Nossum <vegardno@ifi.uio.no>
+(C) 2003-2006,2008,2010-2011,2013,2015-2020 by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+                                               Christian Garbs <mitch@cgarbs.de>
+                                               Maximilian Rehkopf <otakon@gmx.net>
+                                               Vegard Nossum <vegardno@ifi.uio.no>
 
 Licensed under GNU GPL v1 or, at your option, any later version.
 ```
