@@ -96,6 +96,8 @@ struct gbs {
 	struct gbhw gbhw;
 };
 
+static void update_status_on_subsong_change(struct gbs *gbs);
+
 void gbs_configure(struct gbs *gbs, long subsong, long subsong_timeout, long silence_timeout, long subsong_gap, long fadeout)
 {
 	gbs->subsong = subsong;
@@ -163,6 +165,8 @@ long gbs_init(struct gbs *gbs, long subsong)
 
 	gbs->ticks = 0;
 	gbs->subsong = subsong;
+
+	update_status_on_subsong_change(gbs);
 
 	return 1;
 }
@@ -351,22 +355,24 @@ static long chvol(struct gbhw *gbhw, long ch)
 	return v;
 }
 
-const struct gbs_status* gbs_get_status(struct gbs *gbs) {
-
+static void update_status_on_subsong_change(struct gbs *gbs) {
 	struct gbs_status *status = &gbs->status;
-	struct gbhw *gbhw = &gbs->gbhw;
 
-	// TODO: only update on songchange?
+	status->songs = gbs->songs;
+	status->defaultsong = gbs->defaultsong;
+
 	status->songtitle = gbs->subsong_info[gbs->subsong].title;
 	if (!status->songtitle) {
 		status->songtitle = _("Untitled");
 	}
 	status->subsong = gbs->subsong;
 	status->subsong_len = gbs->subsong_info[gbs->subsong].len;
+}
 
-	// TODO: only update once
-	status->songs = gbs->songs;
-	status->defaultsong = gbs->defaultsong;
+const struct gbs_status* gbs_get_status(struct gbs *gbs) {
+
+	struct gbs_status *status = &gbs->status;
+	struct gbhw *gbhw = &gbs->gbhw;
 
 	status->rvol = gbs->rvol;
 	status->lvol = gbs->lvol;
