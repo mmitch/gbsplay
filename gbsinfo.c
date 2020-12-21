@@ -72,7 +72,7 @@ int main(int argc, char **argv)
         }
 
 	if ((gbs = gbs_open(argv[0])) == NULL) exit(EXIT_FAILURE);
-	gbs_printinfo(gbs, 1);
+	gbs_print_info(gbs, 1);
 	gbs_close(gbs);
 
 	return 0;

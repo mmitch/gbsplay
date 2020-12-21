@@ -272,7 +272,7 @@ void gbs_pause(struct gbs *gbs, long new_pause)
 	gbhw_pause(&gbs->gbhw, new_pause);
 }
 
-void gbs_printinfo(struct gbs *gbs, long verbose)
+void gbs_print_info(struct gbs *gbs, long verbose)
 {
 	printf(_("GBSVersion:       %u\n"
 	         "Title:            \"%s\"\n"

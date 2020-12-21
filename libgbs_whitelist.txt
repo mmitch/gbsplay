@@ -11,7 +11,7 @@ gbs_init
 gbs_io_peek
 gbs_open
 gbs_pause
-gbs_printinfo
+gbs_print_info
 gbs_set_gbhw_filter
 gbs_set_gbhw_io_callback
 gbs_set_gbhw_step_callback

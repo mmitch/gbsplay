@@ -554,7 +554,7 @@ struct gbs *common_init(int argc, char **argv)
 	initial_subsong = setup_playmode(gbs);
 	play_subsong(gbs, initial_subsong);
 	if (verbosity>0) {
-		gbs_printinfo(gbs, 0);
+		gbs_print_info(gbs, 0);
 	}
 
 	return gbs;
