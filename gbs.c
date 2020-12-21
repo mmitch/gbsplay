@@ -191,6 +191,7 @@ static void wrap_buffer_callback(struct gbs *gbs, void *priv)
 void gbs_set_sound_callback(struct gbs *gbs, gbs_sound_cb fn, void *priv)
 {
 	gbs->sound_cb = fn;
+	gbs->sound_cb_priv = priv;
 	gbhw_setcallback(&gbs->gbhw, wrap_buffer_callback, priv);
 }
 
