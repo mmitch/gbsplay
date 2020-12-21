@@ -89,12 +89,20 @@ objs_libgbspic     := gbcpu.lo gbhw.lo gbs.lo cfgparser.lo crc32.lo
 objs_libgbs        := gbcpu.o  gbhw.o  gbs.o  cfgparser.o  crc32.o
 objs_gbsinfo       := gbsinfo.o
 objs_gbsxmms       := gbsxmms.lo
-objs_gbsplay       := gbsplay.o  util.o plugout.o player.o terminal.o
+objs_gbsplay       := gbsplay.o  util.o plugout.o player.o
 objs_xgbsplay      := xgbsplay.o util.o plugout.o player.o
 objs_test_gbs      := test_gbs.o
 objs_gen_impulse_h := gen_impulse_h.ho impulsegen.ho
 
 tests              := util.test impulsegen.test
+
+# terminal handling
+ifeq ($(windows_libprefix),lib)
+# when on MINGW
+objs_gbsplay += terminal_windows.o
+else
+objs_gbsplay += terminal_posix.o
+endif
 
 # gbsplay output plugins
 ifeq ($(plugout_devdsp),yes)
