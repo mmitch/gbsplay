@@ -1,17 +1,5 @@
 .PHONY: all default distclean clean install dist
 
-ifeq ("$(origin V)", "command line")
-  VERBOSE = $(V)
-endif
-ifndef VERBOSE
-  VERBOSE = 0
-endif
-ifeq ($(VERBOSE),1)
-  Q =
-else
-  Q = @
-endif
-
 all: default
 
 noincludes  := $(patsubst distclean,yes,$(MAKECMDGOALS))
@@ -31,6 +19,21 @@ appdir      := $(prefix)/share/applications
 configured := no
 ifneq ($(noincludes),yes)
 -include config.mk
+endif
+
+ifeq ($(use_verbosebuild),yes)
+  VERBOSE = 1
+endif
+ifeq ("$(origin V)", "command line")
+  VERBOSE = $(V)
+endif
+ifndef VERBOSE
+  VERBOSE = 0
+endif
+ifeq ($(VERBOSE),1)
+  Q =
+else
+  Q = @
 endif
 
 generatedeps := no

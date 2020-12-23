@@ -517,6 +517,7 @@ Optional Features:
   --disable-zlib         disable transparent gzip decompression
   --enable-debug         build with debug code
   --enable-sharedlibgbs  build libgbs as a shared library
+  --enable-verbosebuild  give verbose output during build
 
 Optional Modules:
   --with-xmmsplugin      build XMMS input plugin
@@ -558,6 +559,7 @@ OPTS="${OPTS} use_pulse"
 OPTS="${OPTS} use_sdl"
 OPTS="${OPTS} use_sharedlibgbs"
 OPTS="${OPTS} use_stdout"
+OPTS="${OPTS} use_verbosebuild"
 OPTS="${OPTS} use_zlib"
 for OPT in $OPTS; do
     eval "${OPT}="
@@ -1121,6 +1123,7 @@ build_xgbsplay
 have_xgettext
 use_i18n
 use_sharedlibgbs
+use_verbosebuild
 windows_build
 windows_libprefix
 libaudio_flags
@@ -1163,6 +1166,18 @@ __EOF__
 (
     echo "s/%%%VERSION%%%/$VERSION/g"
 ) > config.sed
+
+# show configuration if verbose
+
+if [ "$use_verbosebuild" = yes ]; then
+    for file in config.mk config.h config.sed; do
+	echo
+	echo "content of generated $file:"
+	echo "--------"
+	cat $file
+	echo "--------"
+    done
+fi
 
 ## end
 
