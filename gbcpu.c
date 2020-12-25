@@ -57,7 +57,7 @@ static void none_put(struct gbhw *gbhw, uint32_t addr, uint8_t val)
 	UNUSED(val);
 }
 
-void gbcpu_handle_init(struct gbcpu *gbcpu, struct gbhw *gbhw) {
+void gbcpu_init_struct(struct gbcpu *gbcpu, struct gbhw *gbhw) {
 	for (uint16_t i = 0; i < GBCPU_LOOKUP_SIZE; i++) {
 		gbcpu->getlookup[i] = &none_get;
 		gbcpu->putlookup[i] = &none_put;

@@ -983,7 +983,7 @@ static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 	char *buf2;
 
 	memset(gbs, 0, sizeof(struct gbs));
-	gbhw_handle_init(&gbs->gbhw, gbs);
+	gbhw_init_struct(&gbs->gbhw, gbs);
 	gbs->silence_timeout = 2;
 	gbs->subsong_timeout = 2*60;
 	gbs->gap = 2;

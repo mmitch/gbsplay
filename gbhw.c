@@ -74,7 +74,7 @@ static const long msec_cycles = GBHW_CLOCK/1000;
 static const long main_div_tc = 32;
 static const long sweep_div_tc = 256;
 
-void gbhw_handle_init(struct gbhw *gbhw, struct gbs *gbs) {
+void gbhw_init_struct(struct gbhw *gbhw, struct gbs *gbs) {
 	gbhw->gbs = gbs;
 
 	gbhw->rombank = 1;
@@ -107,7 +107,7 @@ void gbhw_handle_init(struct gbhw *gbhw, struct gbs *gbs) {
 	gbhw->last_r_value = 0;
 	gbhw->ch3_next_nibble = 0;
 
-	gbcpu_handle_init(&gbhw->gbcpu, gbhw);
+	gbcpu_init_struct(&gbhw->gbcpu, gbhw);
 }
 
 static uint32_t rom_get(struct gbhw *gbhw, uint32_t addr)
