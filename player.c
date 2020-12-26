@@ -284,10 +284,9 @@ long is_running() {
 	return !pause_mode;
 }
 
-void toggle_pause(struct gbs *gbs)
+void toggle_pause()
 {
 	pause_mode = !pause_mode;
-	gbs_pause(gbs, pause_mode);
 	if (sound_pause)
 		sound_pause(pause_mode);
 }

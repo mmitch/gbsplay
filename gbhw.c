@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <limits.h>
 #include <assert.h>
 #include <math.h>
@@ -91,7 +90,6 @@ void gbhw_init_struct(struct gbhw *gbhw, struct gbs *gbs) {
 
 	gbhw->timertc = 16;
 
-	gbhw->pause_output = 0;
 	gbhw->rom_lockout = 1;
 
 	gbhw->soundbuf = NULL; /* externally visible output buffer */
@@ -1051,15 +1049,6 @@ long gbhw_step(struct gbhw *gbhw, long time_to_work)
 	struct gbcpu *gbcpu = &gbhw->gbcpu;
 	long cycles_total = 0;
 
-	if (gbhw->pause_output) {
-		struct timespec waittime = {
-			.tv_sec = 0,
-			.tv_nsec = time_to_work*1000000
-		};
-		nanosleep(&waittime, NULL);
-		return 0;
-	}
-
 	time_to_work *= msec_cycles;
 	
 	while (cycles_total < time_to_work) {
@@ -1117,9 +1106,4 @@ long gbhw_step(struct gbhw *gbhw, long time_to_work)
 	}
 
 	return cycles_total;
-}
-
-void gbhw_pause(struct gbhw *gbhw, long new_pause)
-{
-	gbhw->pause_output = new_pause != 0;
 }
