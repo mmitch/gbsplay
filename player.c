@@ -24,6 +24,11 @@
 char *myname;
 char *filename;
 
+/* player modes */
+#define PLAYMODE_LINEAR  1
+#define PLAYMODE_RANDOM  2
+#define PLAYMODE_SHUFFLE 3
+
 #define DEFAULT_REFRESH_DELAY 33
 
 long refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */

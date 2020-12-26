@@ -25,11 +25,6 @@
 
 #define MAXOCTAVE 9
 
-/* player modes */
-#define PLAYMODE_LINEAR  1
-#define PLAYMODE_RANDOM  2
-#define PLAYMODE_SHUFFLE 3
-
 /* global variables */
 extern char *myname;
 extern char *filename;
