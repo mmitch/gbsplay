@@ -12,6 +12,7 @@
 
 #include <inttypes.h>
 #include "common.h"
+#include "libgbs.h"
 #include "gbhw.h"
 #include "libgbs.h"
 

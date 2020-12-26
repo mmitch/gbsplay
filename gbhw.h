@@ -12,13 +12,10 @@
 
 #include <inttypes.h>
 #include "common.h"
+#include "libgbs.h"
 #include "gbcpu.h"
 
 #define GBHW_CLOCK 4194304
-
-#define GBHW_CFG_FILTER_OFF "off"
-#define GBHW_CFG_FILTER_DMG "dmg"
-#define GBHW_CFG_FILTER_CGB "cgb"
 
 #define GBHW_FILTER_CONST_OFF 1.0
 /* From blargg's "Game Boy Sound Operation" doc */
@@ -140,7 +137,7 @@ struct gbhw {
 void gbhw_set_callback(struct gbhw *gbhw, gbhw_callback_fn fn, void *priv);
 void gbhw_set_io_callback(struct gbhw *gbhw, gbhw_iocallback_fn fn, void *priv);
 void gbhw_set_step_callback(struct gbhw *gbhw, gbhw_stepcallback_fn fn, void *priv);
-long gbhw_set_filter(struct gbhw *gbhw, const char *type);
+long gbhw_set_filter(struct gbhw *gbhw, enum gbs_filter_type type);
 void gbhw_set_rate(struct gbhw *gbhw, long rate);
 void gbhw_set_buffer(struct gbhw *gbhw, struct gbhw_buffer *buffer);
 void gbhw_init(struct gbhw *gbhw);

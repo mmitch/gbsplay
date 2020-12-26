@@ -853,19 +853,26 @@ static void gbhw_update_filter(struct gbhw *gbhw)
 	gbhw->cap_factor = round(65536.0 * cap_constant);
 }
 
-long gbhw_set_filter(struct gbhw *gbhw, const char *type)
+long gbhw_set_filter(struct gbhw *gbhw, enum gbs_filter_type type)
 {
-	if (strcasecmp(type, GBHW_CFG_FILTER_OFF) == 0) {
+	switch (type) {
+	case FILTER_OFF:
 		gbhw->filter_enabled = 0;
 		gbhw->filter_constant = GBHW_FILTER_CONST_OFF;
-	} else if (strcasecmp(type, GBHW_CFG_FILTER_DMG) == 0) {
+		break;
+
+	case FILTER_DMG:
 		gbhw->filter_enabled = 1;
 		gbhw->filter_constant = GBHW_FILTER_CONST_DMG;
-	} else if (strcasecmp(type, GBHW_CFG_FILTER_CGB) == 0) {
+		break;
+
+	case FILTER_CGB:
 		gbhw->filter_enabled = 1;
 		gbhw->filter_constant = GBHW_FILTER_CONST_CGB;
-	} else {
-		return 0;
+		break;
+
+	default:
+		return 0; // invalid
 	}
 
 	gbhw_update_filter(gbhw);

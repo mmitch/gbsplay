@@ -24,6 +24,22 @@
 char *myname;
 char *filename;
 
+struct filter_map {
+	char *name;
+	enum gbs_filter_type type;
+};
+
+#define CFG_FILTER_OFF "off"
+#define CFG_FILTER_DMG "dmg"
+#define CFG_FILTER_CGB "cgb"
+
+const struct filter_map FILTERS[] = {
+	{ CFG_FILTER_OFF, FILTER_OFF },
+	{ CFG_FILTER_DMG, FILTER_DMG },
+	{ CFG_FILTER_CGB, FILTER_CGB },
+	{ NULL, -1 },
+};
+
 enum playmode {
 	PLAYMODE_LINEAR  = 1,
 	PLAYMODE_RANDOM  = 2,
@@ -67,7 +83,7 @@ static long mute_channel[4];
 static const char cfgfile[] = ".gbsplayrc";
 
 static char *sound_name = PLUGOUT_DEFAULT;
-static char *filter_type = GBHW_CFG_FILTER_DMG;
+static char *filter_type = CFG_FILTER_DMG;
 static char *sound_description;
 
 static struct gbs_output_buffer buf = {
@@ -497,6 +513,15 @@ static void select_plugin(void)
 	}
 }
 
+static enum gbs_filter_type parse_filter(const char *filter_name) {
+	for (const struct filter_map *filter = FILTERS; filter->name != NULL; filter++) {
+		if (strcasecmp(filter_name, filter->name) == 0) {
+			return filter->type;
+		}
+	}
+	return -1;
+}
+
 struct gbs *common_init(int argc, char **argv)
 {
 	char *usercfg;
@@ -551,7 +576,7 @@ struct gbs *common_init(int argc, char **argv)
 	if (sound_write)
 		gbs_set_sound_callback(gbs, callback, NULL);
 	gbs_configure_output(gbs, &buf, rate);
-	if (!gbs_set_filter(gbs, filter_type)) {
+	if (!gbs_set_filter(gbs, parse_filter(filter_type))) {
 		fprintf(stderr, _("Invalid filter type \"%s\"\n"), filter_type);
 		exit(1);
 	}

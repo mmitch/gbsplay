@@ -50,6 +50,12 @@ struct gbs_status {
 	struct gbs_channel_status ch[4];
 };
 
+enum gbs_filter_type {
+	FILTER_OFF,
+	FILTER_DMG,
+	FILTER_CGB,
+};
+
 struct gbs *gbs_open(const char *name);
 struct gbs *gbs_open_mem(const char *name, char *buf, size_t size);
 void gbs_configure(struct gbs *gbs, long subsong, long subsong_timeout, long silence_timeout, long subsong_gap, long fadeout);
@@ -65,7 +71,7 @@ const struct gbs_status* gbs_get_status(struct gbs *gbs);
 long gbs_step(struct gbs *gbs, long time_to_work);
 void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv);
 void gbs_set_sound_callback(struct gbs *gbs, gbs_sound_cb fn, void *priv);
-long gbs_set_filter(struct gbs *gbs, const char *type);
+long gbs_set_filter(struct gbs *gbs, enum gbs_filter_type type);
 void gbs_print_info(struct gbs *gbs, long verbose);
 long gbs_toggle_mute(struct gbs *gbs, long channel);
 void gbs_close(struct gbs *gbs);
