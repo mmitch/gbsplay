@@ -551,7 +551,7 @@ struct gbs *common_init(int argc, char **argv)
 	if (sound_write)
 		gbs_set_sound_callback(gbs, callback, NULL);
 	gbs_configure_output(gbs, &buf, rate);
-	if (!gbs_set_gbhw_filter(gbs, filter_type)) {
+	if (!gbs_set_filter(gbs, filter_type)) {
 		fprintf(stderr, _("Invalid filter type \"%s\"\n"), filter_type);
 		exit(1);
 	}

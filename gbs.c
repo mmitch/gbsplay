@@ -211,7 +211,7 @@ void gbs_set_sound_callback(struct gbs *gbs, gbs_sound_cb fn, void *priv)
 	gbhw_set_callback(&gbs->gbhw, wrap_buffer_callback, gbs);
 }
 
-long gbs_set_gbhw_filter(struct gbs *gbs, const char *type) {
+long gbs_set_filter(struct gbs *gbs, const char *type) {
 	return gbhw_set_filter(&gbs->gbhw, type);
 }
 
