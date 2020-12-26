@@ -200,12 +200,19 @@ static void play_subsong(struct gbs *gbs, long subsong) {
 
 void play_next_subsong(struct gbs *gbs)
 {
-	play_subsong(gbs, get_next_subsong(gbs));
+	const struct gbs_status *status = gbs_get_status(gbs);
+	long next = get_next_subsong(gbs);
+	next %= status->songs;
+	play_subsong(gbs, next);
 }
 
 void play_prev_subsong(struct gbs *gbs)
 {
-	play_subsong(gbs, get_prev_subsong(gbs));
+	const struct gbs_status *status = gbs_get_status(gbs);
+	long prev = get_prev_subsong(gbs);
+	while (prev < 0)
+		prev += status->songs;
+	play_subsong(gbs, prev);
 }
 
 static long setup_playmode(struct gbs *gbs)
