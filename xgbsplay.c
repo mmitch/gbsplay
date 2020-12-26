@@ -10,6 +10,7 @@
 #include "player.h"
 
 #include <stdlib.h>
+#include <time.h>
 #include <X11/Xlib.h>
 
 #define GRID(s,t,i) ((t * i / s))
@@ -183,9 +184,18 @@ int main(int argc, char **argv)
 
 	/* main loop */
 	while (!quit) {
-		if (!gbs_step(gbs, refresh_delay)) {
-			quit = 1;
-			break;
+		if (is_running()) {
+			if (!gbs_step(gbs, refresh_delay)) {
+				quit = 1;
+				break;
+			}
+			updatetitle(gbs);
+		} else {
+			struct timespec waittime = {
+				.tv_sec = 0,
+				.tv_nsec = refresh_delay*1000000
+			};
+			nanosleep(&waittime, NULL);
 		}
 
 		while (XPending(display)) {
@@ -207,9 +217,6 @@ int main(int argc, char **argv)
 				break;
 			}
 		}
-
-		if (is_running())
-			updatetitle(gbs);
 	}
 
 	/* stop sound */

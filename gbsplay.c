@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <math.h>
+#include <time.h>
 
 #include "terminal.h"
 
@@ -235,13 +236,21 @@ int main(int argc, char **argv)
 
 	/* main loop */
 	while (!quit) {
-		if (!gbs_step(gbs, refresh_delay)) {
-			quit = 1;
-			break;
-		}
+		if (is_running()) {
+			if (!gbs_step(gbs, refresh_delay)) {
+				quit = 1;
+				break;
+			}
 
-		if (redraw) printinfo();
-		if (is_running() && verbosity>1) printstatus(gbs);
+			if (redraw) printinfo();
+			if (verbosity>1) printstatus(gbs);
+		} else {
+			struct timespec waittime = {
+				.tv_sec = 0,
+				.tv_nsec = refresh_delay*1000000
+			};
+			nanosleep(&waittime, NULL);
+		}
 		handleuserinput(gbs);
 	}
 

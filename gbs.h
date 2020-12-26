@@ -61,7 +61,6 @@ void gbs_set_sound_callback(struct gbs *gbs, gbs_sound_cb fn, void *priv);
 long gbs_set_gbhw_filter(struct gbs *gbs, const char *type); // FIXME: don't export gbhw
 void gbs_set_gbhw_io_callback(struct gbs *gbs, gbhw_iocallback_fn fn, void *priv); // FIXME: don't export gbhw
 void gbs_set_gbhw_step_callback(struct gbs *gbs, gbhw_stepcallback_fn fn, void *priv); // FIXME: don't export gbhw
-void gbs_pause(struct gbs *gbs, long new_pause);
 void gbs_print_info(struct gbs *gbs, long verbose);
 long gbs_toggle_mute(struct gbs *gbs, long channel);
 void gbs_close(struct gbs *gbs);

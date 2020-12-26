@@ -103,7 +103,6 @@ struct gbhw {
 
 	long sum_cycles;
 
-	long pause_output;
 	long rom_lockout;
 
 	gbhw_callback_fn callback;
@@ -150,7 +149,6 @@ void gbhw_set_buffer(struct gbhw *gbhw, struct gbhw_buffer *buffer);
 void gbhw_init(struct gbhw *gbhw, uint8_t *rombuf, uint32_t size);
 void gbhw_init_struct(struct gbhw *gbhw, struct gbs *gbs);
 void gbhw_enable_bootrom(struct gbhw *gbhw, const uint8_t *rombuf);
-void gbhw_pause(struct gbhw *gbhw, long new_pause);
 void gbhw_master_fade(struct gbhw *gbhw, long speed, long dstvol);
 void gbhw_getminmax(struct gbhw *gbhw, int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax);
 long gbhw_step(struct gbhw *gbhw, long time_to_work);
