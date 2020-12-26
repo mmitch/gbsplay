@@ -29,8 +29,6 @@
 extern char *myname;
 extern char *filename;
 
-extern long refresh_delay;
-
 /* default values */
 extern long verbosity;
 
@@ -50,6 +48,7 @@ long is_running();
 long nextsubsong_cb(struct gbs *gbs, void *priv);
 void play_next_subsong(struct gbs *gbs);
 void play_prev_subsong(struct gbs *gbs);
+long step_emulation(struct gbs *gbs);
 void toggle_pause();
 void update_displaytime(struct displaytime *time, const struct gbs_status *status);
 struct gbs *common_init(int argc, char **argv);
