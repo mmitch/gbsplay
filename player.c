@@ -24,10 +24,11 @@
 char *myname;
 char *filename;
 
-/* player modes */
-#define PLAYMODE_LINEAR  1
-#define PLAYMODE_RANDOM  2
-#define PLAYMODE_SHUFFLE 3
+enum playmode {
+	PLAYMODE_LINEAR  = 1,
+	PLAYMODE_RANDOM  = 2,
+	PLAYMODE_SHUFFLE = 3,
+};
 
 #define DEFAULT_REFRESH_DELAY 33
 
@@ -50,7 +51,7 @@ plugout_step_fn  sound_step;
 plugout_write_fn sound_write;
 plugout_close_fn sound_close;
 
-static long playmode = PLAYMODE_LINEAR;
+static enum playmode playmode = PLAYMODE_LINEAR;
 static long loopmode = 0;
 static enum plugout_endian endian = PLUGOUT_ENDIAN_NATIVE;
 static long rate = 44100;
