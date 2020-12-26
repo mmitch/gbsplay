@@ -559,7 +559,7 @@ struct gbs *common_init(int argc, char **argv)
 		subsong_stop = -1;
 	}
 
-	// FIXME: proper configuration interface to gbs, this is just quickly slapped toghether
+	// FIXME: proper configuration interface to gbs, this is just quickly slapped together
 	gbs_configure(gbs, subsong_start, subsong_timeout, silence_timeout, subsong_gap, fadeout);
 	gbs_configure_channels(gbs, mute_channel[0], mute_channel[1], mute_channel[2], mute_channel[3]);
 
