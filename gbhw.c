@@ -18,6 +18,11 @@
 #include "gbhw.h"
 #include "impulse.h"
 
+#define FILTER_CONST_OFF 1.0
+/* From blargg's "Game Boy Sound Operation" doc */
+#define FILTER_CONST_DMG 0.999958
+#define FILTER_CONST_CGB 0.998943
+
 #define REG_TIMA 0x05
 #define REG_TMA  0x06
 #define REG_TAC  0x07
@@ -77,7 +82,7 @@ void gbhw_init_struct(struct gbhw *gbhw) {
 	gbhw->apu_on = 1;
 	gbhw->io_written = 0;
 
-	gbhw->filter_constant = GBHW_FILTER_CONST_DMG;
+	gbhw->filter_constant = FILTER_CONST_DMG;
 	gbhw->filter_enabled = 1;
 	gbhw->cap_factor = 0x10000;
 
@@ -858,17 +863,17 @@ long gbhw_set_filter(struct gbhw *gbhw, enum gbs_filter_type type)
 	switch (type) {
 	case FILTER_OFF:
 		gbhw->filter_enabled = 0;
-		gbhw->filter_constant = GBHW_FILTER_CONST_OFF;
+		gbhw->filter_constant = FILTER_CONST_OFF;
 		break;
 
 	case FILTER_DMG:
 		gbhw->filter_enabled = 1;
-		gbhw->filter_constant = GBHW_FILTER_CONST_DMG;
+		gbhw->filter_constant = FILTER_CONST_DMG;
 		break;
 
 	case FILTER_CGB:
 		gbhw->filter_enabled = 1;
-		gbhw->filter_constant = GBHW_FILTER_CONST_CGB;
+		gbhw->filter_constant = FILTER_CONST_CGB;
 		break;
 
 	default:

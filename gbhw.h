@@ -17,11 +17,6 @@
 
 #define GBHW_CLOCK 4194304
 
-#define GBHW_FILTER_CONST_OFF 1.0
-/* From blargg's "Game Boy Sound Operation" doc */
-#define GBHW_FILTER_CONST_DMG 0.999958
-#define GBHW_FILTER_CONST_CGB 0.998943
-
 #define GBHW_INTRAM_SIZE 0x2000
 #define GBHW_INTRAM_MASK (GBHW_INTRAM_SIZE - 1)
 #define GBHW_IOREGS_SIZE 0x80
