@@ -25,6 +25,10 @@ the following parts:
  * `gbsplay`:    a console player
  * `gbsinfo`:    displays information about a gbs file
 
+## Packaging status
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/gbsplay.svg)](https://repology.org/project/gbsplay/versions)
+
 ## License
 
 ```
