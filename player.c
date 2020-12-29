@@ -121,12 +121,12 @@ static void swap_endian(struct gbs_output_buffer *buf)
 	}
 }
 
-static void iocallback(long cycles, uint32_t addr, uint8_t val, void *priv)
+static void iocallback(struct gbs *gbs, long cycles, uint32_t addr, uint8_t value, void *priv)
 {
-	sound_io(cycles, addr, val);
+	sound_io(cycles, addr, value);
 }
 
-static void callback(struct gbs_output_buffer *buf, void *priv)
+static void callback(struct gbs *gbs, struct gbs_output_buffer *buf, void *priv)
 {
 	if ((is_le_machine() && endian == PLUGOUT_ENDIAN_BIG) ||
 	    (is_be_machine() && endian == PLUGOUT_ENDIAN_LITTLE)) {
@@ -572,7 +572,7 @@ struct gbs *common_init(int argc, char **argv)
 	}
 
 	if (sound_io)
-		gbs_set_gbhw_io_callback(gbs, iocallback, NULL);
+		gbs_set_io_callback(gbs, iocallback, NULL);
 	if (sound_write)
 		gbs_set_sound_callback(gbs, callback, NULL);
 	gbs_configure_output(gbs, &buf, rate);

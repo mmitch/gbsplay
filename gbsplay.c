@@ -95,7 +95,7 @@ static void precalc_vols(void)
 	}
 }
 
-static void stepcallback(long cycles, const struct gbhw_channel chan[], void *priv)
+static void stepcallback(struct gbs *gbs, long cycles, const struct gbs_channel_status chan[], void *priv)
 {
 	sound_step(cycles, chan);
 }
@@ -227,7 +227,7 @@ int main(int argc, char **argv)
 
 	/* init additional callbacks */
 	if (sound_step)
-		gbs_set_gbhw_step_callback(gbs, stepcallback, NULL);
+		gbs_set_step_callback(gbs, stepcallback, NULL);
 
 	/* precalculate lookup tables */
 	precalc_notes();

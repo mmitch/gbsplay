@@ -254,16 +254,16 @@ static int pan(long cycles, int channel, int pan)
 	return 0;
 }
 
-static int midi_step(long cycles, const struct gbhw_channel chan[])
+static int midi_step(long cycles, const struct gbs_channel_status chan[])
 {
 	int c;
 	int new_playing;
 	int new_note;
-	const struct gbhw_channel *ch;
+	const struct gbs_channel_status *ch;
 
 	for (c = 0; c < 3; c++) {
 		ch = &chan[c];
-		new_playing = ch->running && ch->master && ch->env_volume;
+		new_playing = ch->playing;
 
 		if (playing[c]) {
 			if (new_playing) {

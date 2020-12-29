@@ -65,7 +65,7 @@ struct gbhw_channel {
 };
 
 typedef void (*gbhw_callback_fn)(void *priv);
-typedef void (*gbhw_iocallback_fn)(long cycles, uint32_t addr, uint8_t valu, void *priv);
+typedef void (*gbhw_iocallback_fn)(long cycles, uint32_t addr, uint8_t value, void *priv);
 typedef void (*gbhw_stepcallback_fn)(const long cycles, const struct gbhw_channel[], void *priv);
 
 struct gbhw {

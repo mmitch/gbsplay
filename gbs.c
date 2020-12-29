@@ -84,13 +84,20 @@ struct gbs {
 
 	struct gbs_output_buffer *buffer;
 
+	gbs_io_cb io_cb;
+	void *io_cb_priv;
+
+	gbs_step_cb step_cb;
+	void *step_cb_priv;
+
 	gbs_sound_cb sound_cb;
 	void *sound_cb_priv;
 
 	gbs_nextsubsong_cb nextsubsong_cb;
 	void *nextsubsong_cb_priv;
 
-	struct gbs_status status;
+	struct gbs_channel_status step_cb_channels[4];
+	struct gbs_status status; // note: this contains a separate gbs_channel_status[] to not interfere with the step callback
 	struct gbhw_buffer gbhw_buf;
 	struct gbhw gbhw;
 	struct mapper *mapper;
@@ -191,38 +198,81 @@ uint8_t gbs_io_peek(struct gbs *gbs, uint16_t addr) {
 	return gbhw_io_peek(&gbs->gbhw, addr);
 }
 
+static long chvol(const struct gbhw_channel channels[], long ch)
+{
+	long v;
+
+	if (channels[ch].mute ||
+	    channels[ch].master == 0 ||
+	    (channels[ch].leftgate == 0 &&
+	     channels[ch].rightgate == 0)) return 0;
+
+	if (ch == 2)
+		v = (3-((channels[2].env_volume+3)&3)) << 2;
+	else v = channels[ch].env_volume;
+
+	return v;
+}
+
+
+static void map_channel_status(const struct gbhw_channel from[], struct gbs_channel_status to[]) {
+	for(long i = 0; i < 4; i++) {
+		to[i].mute = from[i].mute;
+		to[i].vol = chvol(from, i);
+		to[i].div_tc = from[i].div_tc;
+		to[i].playing = from[i].running && from[i].master && from[i].env_volume;
+	}
+}
+
 void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv)
 {
 	gbs->nextsubsong_cb = cb;
 	gbs->nextsubsong_cb_priv = priv;
 }
 
-static void wrap_buffer_callback(void *priv)
+static void wrap_io_callback(long cycles, uint32_t addr, uint8_t value, void *priv)
+{
+	struct gbs *gbs = priv;
+	gbs->io_cb(gbs, cycles, addr, value, gbs->io_cb_priv);
+}
+
+void gbs_set_io_callback(struct gbs *gbs, gbs_io_cb fn, void *priv)
+{
+	gbs->io_cb = fn;
+	gbs->io_cb_priv = priv;
+	gbhw_set_io_callback(&gbs->gbhw, wrap_io_callback, gbs);
+}
+
+static void wrap_step_callback(const long cycles, const struct gbhw_channel ch[], void *priv)
+{
+	struct gbs *gbs = priv;
+	map_channel_status(ch, gbs->step_cb_channels);
+	gbs->step_cb(gbs, cycles, gbs->step_cb_channels, gbs->step_cb_priv);
+}
+
+void gbs_set_step_callback(struct gbs *gbs, gbs_step_cb fn, void *priv)
+{
+	gbs->step_cb = fn;
+	gbs->step_cb_priv = priv;
+	gbhw_set_step_callback(&gbs->gbhw, wrap_step_callback, gbs);
+}
+
+static void wrap_sound_callback(void *priv)
 {
 	struct gbs *gbs = priv;
 	gbs->buffer->pos = gbs->gbhw_buf.pos;
-	gbs->sound_cb(gbs->buffer, gbs->sound_cb_priv);
+	gbs->sound_cb(gbs, gbs->buffer, gbs->sound_cb_priv);
 }
 
 void gbs_set_sound_callback(struct gbs *gbs, gbs_sound_cb fn, void *priv)
 {
 	gbs->sound_cb = fn;
 	gbs->sound_cb_priv = priv;
-	gbhw_set_callback(&gbs->gbhw, wrap_buffer_callback, gbs);
+	gbhw_set_callback(&gbs->gbhw, wrap_sound_callback, gbs);
 }
 
 long gbs_set_filter(struct gbs *gbs, enum gbs_filter_type type) {
 	return gbhw_set_filter(&gbs->gbhw, type);
-}
-
-void gbs_set_gbhw_io_callback(struct gbs *gbs, gbhw_iocallback_fn fn, void *priv)
-{
-	gbhw_set_io_callback(&gbs->gbhw, fn, priv);
-}
-
-void gbs_set_gbhw_step_callback(struct gbs *gbs, gbhw_stepcallback_fn fn, void *priv)
-{
-	gbhw_set_step_callback(&gbs->gbhw, fn, priv);
 }
 
 static long gbs_nextsubsong(struct gbs *gbs)
@@ -327,22 +377,6 @@ void gbs_print_info(struct gbs *gbs, long verbose)
 	printf(_("CRC32:            0x%08lx\n"), (unsigned long)gbs->crcnow);
 }
 
-static long chvol(struct gbhw *gbhw, long ch)
-{
-	long v;
-
-	if (gbhw->ch[ch].mute ||
-	    gbhw->ch[ch].master == 0 ||
-	    (gbhw->ch[ch].leftgate == 0 &&
-	     gbhw->ch[ch].rightgate == 0)) return 0;
-
-	if (ch == 2)
-		v = (3-((gbhw->ch[2].env_volume+3)&3)) << 2;
-	else v = gbhw->ch[ch].env_volume;
-
-	return v;
-}
-
 static void update_status_on_subsong_change(struct gbs *gbs) {
 	struct gbs_status *status = &gbs->status;
 
@@ -366,11 +400,7 @@ const struct gbs_status* gbs_get_status(struct gbs *gbs) {
 	status->lvol = gbs->lvol;
 	status->ticks = gbs->ticks;
 
-	for(long i = 0; i < 4; i++) {
-		status->ch[i].mute = gbhw->ch[i].mute;
-		status->ch[i].vol = chvol(gbhw, i);
-		status->ch[i].div_tc = gbhw->ch[i].div_tc;
-	}
+	map_channel_status(gbhw->ch, status->ch);
 
 	return status;
 }

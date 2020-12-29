@@ -21,10 +21,6 @@
 //        to prevent internal/external namespace clashes?
 
 struct gbs;
-struct gbs_output_buffer;
-
-typedef void (*gbs_sound_cb)(struct gbs_output_buffer *buf, void *priv);
-typedef long (*gbs_nextsubsong_cb)(struct gbs *gbs, void *priv);
 
 struct gbs_output_buffer {
 	int16_t *data;
@@ -36,6 +32,7 @@ struct gbs_channel_status {
 	long mute;
 	long vol;
 	long div_tc;
+	long playing;
 };
 
 struct gbs_status {
@@ -56,6 +53,11 @@ enum gbs_filter_type {
 	FILTER_CGB,
 };
 
+typedef void (*gbs_io_cb)(struct gbs *gbs, long cycles, uint32_t addr, uint8_t value, void *priv);
+typedef void (*gbs_step_cb)(struct gbs *gbs, const long cycles, const struct gbs_channel_status[], void *priv);
+typedef void (*gbs_sound_cb)(struct gbs *gbs, struct gbs_output_buffer *buf, void *priv);
+typedef long (*gbs_nextsubsong_cb)(struct gbs *gbs, void *priv);
+
 struct gbs *gbs_open(const char *name);
 struct gbs *gbs_open_mem(const char *name, char *buf, size_t size);
 void gbs_configure(struct gbs *gbs, long subsong, long subsong_timeout, long silence_timeout, long subsong_gap, long fadeout);
@@ -70,6 +72,8 @@ uint8_t gbs_io_peek(struct gbs *gbs, uint16_t addr);
 const struct gbs_status* gbs_get_status(struct gbs *gbs);
 long gbs_step(struct gbs *gbs, long time_to_work);
 void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv);
+void gbs_set_io_callback(struct gbs *gbs, gbs_io_cb fn, void *priv);
+void gbs_set_step_callback(struct gbs *gbs, gbs_step_cb fn, void *priv);
 void gbs_set_sound_callback(struct gbs *gbs, gbs_sound_cb fn, void *priv);
 long gbs_set_filter(struct gbs *gbs, enum gbs_filter_type type);
 void gbs_print_info(struct gbs *gbs, long verbose);
