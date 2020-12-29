@@ -1,4 +1,4 @@
-.PHONY: all default distclean clean install dist
+.PHONY: all default distclean clean install dist clean-apidoc
 
 all: default
 
@@ -61,6 +61,7 @@ appdir      := $(DESTDIR)$(appdir)
 xmmsdir     := $(DESTDIR)$(XMMSPREFIX)$(XMMS_INPUT_PLUGIN_DIR)
 
 man1dir     := $(mandir)/man1
+man3dir     := $(mandir)/man3
 man5dir     := $(mandir)/man5
 contribdir  := $(docdir)/contrib
 exampledir  := $(docdir)/examples
@@ -87,6 +88,10 @@ examples           := examples/nightmode.gbs examples/gbsplayrc_sample
 
 mans               := man/gbsplay.1    man/gbsinfo.1    man/gbsplayrc.5
 mans_src           := man/gbsplay.in.1 man/gbsinfo.in.1 man/gbsplayrc.in.5
+
+apimans_list       := libgbs.h gbs gbs_channel_status gbs_output_buffer gbs_status
+apidocdir          := apidoc
+apimans            := $(patsubst %,$(apidocdir)/man/man3/%.3,$(apimans_list))
 
 objs_libgbspic     := gbcpu.lo gbhw.lo mapper.lo gbs.lo crc32.lo
 objs_libgbs        := gbcpu.o  gbhw.o  mapper.o  gbs.o  crc32.o
@@ -186,6 +191,12 @@ test_gbsbin       := test_gbs$(binsuffix)
 gen_impulse_h_bin := gen_impulse_h$(binsuffix)
 
 ifeq ($(use_sharedlibgbs),yes)
+
+ifeq ($(have_doxygen),yes)
+EXTRA_INSTALL += install-apidoc
+EXTRA_UNINSTALL += uninstall-apidoc
+endif
+
 GBSLDFLAGS += -L. -lgbs
 objs += $(objs_libgbspic)
 
@@ -303,7 +314,7 @@ distclean: clean
 	find . -regex ".*\.d" -exec rm -f "{}" \;
 	rm -f ./config.mk ./config.h ./config.err ./config.sed
 
-clean: clean-default $(EXTRA_CLEAN)
+clean: clean-default $(EXTRA_CLEAN) clean-apidoc
 
 clean-default:
 	find . -regex ".*\.\([aos]\|ho\|lo\|mo\|pot\|test\(\.exe\)?\|so\(\.[0-9]\)?\|gcda\|gcno\|gcov\)" -exec rm -f "{}" \;
@@ -313,6 +324,9 @@ clean-default:
 	rm -f $(gbsplaybin) $(gbs2gbbin) $(gbsinfobin)
 	rm -f $(test_gbsbin)
 	rm -f $(gen_impulse_h_bin) impulse.h
+
+clean-apidoc:
+	rm -rf $(apidocdir)/
 
 clean-xgbsplay:
 	rm -f $(xgbsplaybin)
@@ -358,6 +372,10 @@ install-xgbsplay:
 	install -m 644 desktop/xgbsplay.desktop $(appdir)
 	-update-desktop-database $(appdir)
 
+install-apidoc:	generate-apidoc
+	install -d $(man3dir)
+	install -m 644 $(apimans) $(man3dir)
+
 uninstall: uninstall-default $(EXTRA_UNINSTALL)
 
 uninstall-default:
@@ -401,6 +419,10 @@ uninstall-xgbsplay:
 	-rmdir -p $(man1dir)
 	-rmdir -p $(appdir)
 
+uninstall-apidoc:
+	rm -f $(patsubst %, $(man3dir)/%.3,$(apimans_list))
+	-rmdir -p $(man3dir)
+
 dist:	distclean
 	install -d ./$(DISTDIR)
 	sed 's/^VERSION=.*/VERSION=$(VERSION)/' < configure > ./$(DISTDIR)/configure
@@ -427,6 +449,9 @@ dist:	distclean
 	install -m 644 desktop/* ./$(DISTDIR)/desktop
 	tar -cvzf ../$(DISTDIR).tar.gz $(DISTDIR)/ 
 	rm -rf ./$(DISTDIR)
+
+generate-apidoc: clean-apidoc
+	doxygen Doxyfile
 
 TESTOPTS := -r 44100 -t 30 -f 0 -g 0 -T 0 -H off
 

@@ -21,3 +21,4 @@ test_gbs
 gen_impulse_h
 impulse.h
 *.ho
+apidoc/

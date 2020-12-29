@@ -882,6 +882,15 @@ EOF
     recheck_use i18n
 fi
 
+printf "checking for doxygen:  "
+if command -v doxygen >/dev/null; then
+    echo "ok"
+    have_doxygen=yes
+else
+    echo "not found"
+    have_doxygen=no
+fi
+
 if [ "$build_xmmsplugin" != "no" ]; then
     ## check for pthread
 
@@ -1158,6 +1167,7 @@ build_contrib
 build_test
 build_xmmsplugin
 build_xgbsplay
+have_doxygen
 have_xgettext
 use_i18n
 use_sharedlibgbs
