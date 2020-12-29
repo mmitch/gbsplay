@@ -120,56 +120,49 @@ objs_gbsplay += terminal_posix.o
 endif
 
 # gbsplay output plugins
+plugout_objs    :=
+plugout_ldflags :=
+
 ifeq ($(plugout_devdsp),yes)
-objs_gbsplay += plugout_devdsp.o
-objs_xgbsplay += plugout_devdsp.o
+plugout_objs +=plugout_devdsp.o
 endif
 ifeq ($(plugout_alsa),yes)
-objs_gbsplay += plugout_alsa.o
-objs_xgbsplay += plugout_alsa.o
-GBSPLAYLDFLAGS += -lasound
-XGBSPLAYLDFLAGS += -lasound
+plugout_objs +=plugout_alsa.o
+plugout_ldflags += -lasound
 endif
 ifeq ($(plugout_nas),yes)
-objs_gbsplay += plugout_nas.o
-objs_xgbsplay += plugout_nas.o
-GBSPLAYLDFLAGS += -laudio $(libaudio_flags)
-XGBSPLAYLDFLAGS += -laudio $(libaudio_flags)
+plugout_objs +=plugout_nas.o
+plugout_ldflags += -laudio $(libaudio_flags)
 endif
 ifeq ($(plugout_sdl),yes)
-objs_gbsplay += plugout_sdl.o
-objs_xgbsplay += plugout_sdl.o
-GBSPLAYLDFLAGS += -lSDL2
-XGBSPLAYLDFLAGS += -lSDL2
+plugout_objs +=plugout_sdl.o
+plugout_ldflags += -lSDL2
 endif
 ifeq ($(plugout_stdout),yes)
-objs_gbsplay += plugout_stdout.o
-objs_xgbsplay += plugout_stdout.o
+plugout_objs +=plugout_stdout.o
 endif
 ifeq ($(plugout_midi),yes)
-objs_gbsplay += plugout_midi.o
-objs_xgbsplay += plugout_midi.o
+plugout_objs +=plugout_midi.o
 endif
 ifeq ($(plugout_altmidi),yes)
-objs_gbsplay += plugout_altmidi.o
-objs_xgbsplay += plugout_altmidi.o
+plugout_objs +=plugout_altmidi.o
 endif
 ifeq ($(plugout_pulse),yes)
-objs_gbsplay += plugout_pulse.o
-objs_xgbsplay += plugout_pulse.o
-GBSPLAYLDFLAGS += -lpulse-simple -lpulse
-XGBSPLAYLDFLAGS += -lpulse-simple -lpulse
+plugout_objs +=plugout_pulse.o
+plugout_ldflags += -lpulse-simple -lpulse
 endif
 ifeq ($(plugout_dsound),yes)
-objs_gbsplay += plugout_dsound.o
-objs_xgbsplay += plugout_dsound.o
-GBSPLAYLDFLAGS += -ldsound $(libdsound_flags)
-XGBSPLAYLDFLAGS += -ldsound $(libdsound_flags)
+plugout_objs +=plugout_dsound.o
+plugout_ldflags += -ldsound $(libdsound_flags)
 endif
 ifeq ($(plugout_iodumper),yes)
-objs_gbsplay += plugout_iodumper.o
-objs_xgbsplay += plugout_iodumper.o
+plugout_objs +=plugout_iodumper.o
 endif
+
+objs_gbsplay +=$(plugout_objs)
+objs_xgbsplay += $(plugout_objs)
+GBSPLAYLDFLAGS += $(plugout_ldflags)
+XGBSPLAYLDFLAGS += $(plugout_ldflags)
 
 # install contrib files?
 ifeq ($(build_contrib),yes)
