@@ -14,20 +14,45 @@
  ***  THIS IS THE OFFICIAL EXTERNAL API, DON'T MAKE ANY INCOMPATIBLE CHANGES!
  ***/
 
+/**
+ * @file libgbs.h
+ * API of libgbs.
+ * This file contains the API definition of libgbs, the Gameboy sound player library.
+ */
+
 #include <inttypes.h>
 #include "common.h"
 
 // FIXME: call everything (structs, enums, types, functions) "libgbs*" instead "gbs*"
 //        to prevent internal/external namespace clashes?
 
+//
+//////  structs
+//
+
+/**
+ * @struct gbs
+ * gbs instance.  Opaque handle to a gbs player instance corresponding
+ * to one gbs file.  Completely encapsulates the current player status
+ * and allows multiple gbs files to be handled simultaneously.
+ */
 struct gbs;
 
+/**
+ * Sound output buffer.  Contains the next bit of calculated sound
+ * output that can be passed to an audio driver or be processed
+ * otherwise.
+ */
 struct gbs_output_buffer {
 	int16_t *data;
 	long bytes;
 	long pos;
 };
 
+/**
+ * Channel status.  Contains information about the current state of
+ * one of the four emulated sound channels.
+ */
 struct gbs_channel_status {
 	long mute;
 	long vol;
@@ -35,6 +60,10 @@ struct gbs_channel_status {
 	long playing;
 };
 
+/**
+ * Player status.  Contains information about the current state of the
+ * player routine.
+ */
 struct gbs_status {
 	char *songtitle;
 	int subsong;
@@ -47,19 +76,102 @@ struct gbs_status {
 	struct gbs_channel_status ch[4];
 };
 
+//
+//////  enums
+//
+
+/**
+ * Filter type.  Enumerates the available audio filters emulating
+ * different hardware variants.
+ */
 enum gbs_filter_type {
-	FILTER_OFF,
-	FILTER_DMG,
-	FILTER_CGB,
+	FILTER_OFF, /**< no filter */
+	FILTER_DMG, /**< Gameboy classic high-pass filter */
+	FILTER_CGB, /**< Gameboy Color high-pass filter */
 };
 
+//
+//////  typedefs
+//
+
+/**
+ * IO callback.  This callback gets executed when a write to an IO
+ * address has happened.
+ *
+ * @param gbs     reference to the gbs instance that executed the IO
+ * @param cycles  hardware cycles since start of current subsong
+ * @param addr    the IO address that was written to
+ * @param value   the value that was writton
+ * @param priv    FIXME: these are all over what for? guarding against extra parameters?
+ */
 typedef void (*gbs_io_cb)(struct gbs *gbs, long cycles, uint32_t addr, uint8_t value, void *priv);
-typedef void (*gbs_step_cb)(struct gbs *gbs, const long cycles, const struct gbs_channel_status[], void *priv);
+
+/**
+ * Step callback.  This callback gets executed when a step of the
+ * emulation has been executed.
+ *
+ * FIXME: What is a step?
+ *
+ * @param gbs       reference to the gbs instance that executed the IO
+ * @param cycles    hardware cycles since start of current subsong
+ * @param channels  current status of all 4 channels
+ * @param priv      FIXME: these are all over what for? guarding against extra parameters?
+ */
+typedef void (*gbs_step_cb)(struct gbs *gbs, const long cycles, const struct gbs_channel_status channels[], void *priv);
+
+/**
+ * Sound callback.  This callback gets executed when the next part of
+ * sound has been rendered into the sound output buffer.  The caller
+ * could for example pass the buffer to a sound driver or write it to
+ * a file.
+ *
+ * @param gbs   reference to the gbs instance that executed the IO
+ * @param buf   the output buffer containing the rendered sound
+ * @param priv  FIXME: these are all over what for? guarding against extra parameters?
+ */
 typedef void (*gbs_sound_cb)(struct gbs *gbs, struct gbs_output_buffer *buf, void *priv);
+
+/**
+ * Next subsong callback.  This callback gets executed when the
+ * current subsong has finished playing.  The caller can for example
+ * decide to start the next subsong via gbs_init() or end the playback
+ * altogether.  The just finished subsong as well as the total number
+ * of subsongs are available via gbs_get_status().
+ *
+ * FIXME: add subsong + songs directly to the callback?
+ *
+ * @param gbs     reference to the gbs instance that executed the IO
+ * @param priv    FIXME: these are all over what for? guarding against extra parameters?
+ */
 typedef long (*gbs_nextsubsong_cb)(struct gbs *gbs, void *priv);
 
+//
+//////  functions
+//
+
+/**
+ * Open GBS file.  The given file is read and the contents are
+ * returned as an initialized @link struct gbs @endlink.
+ *
+ * FIXME: on error what?
+ *
+ * @param name  filename to open (optionally including a path)
+ */
 struct gbs *gbs_open(const char *name);
+
+/**
+ * Open GBS file from memory.  The given buffer is parsed as an gbs
+ * file and contents are returned as an initialized @link struct gbs
+ * @endlink.
+ *
+ * FIXME: on error what?
+ *
+ * @param name  FIXME: why do we need a filename?
+ * @param buf   the buffer to parse
+ * @param size  size of the buffer in bytes
+ */
 struct gbs *gbs_open_mem(const char *name, char *buf, size_t size);
+
 void gbs_configure(struct gbs *gbs, long subsong, long subsong_timeout, long silence_timeout, long subsong_gap, long fadeout);
 void gbs_configure_channels(struct gbs *gbs, long mute_0, long mute_1, long mute_2, long mute_3);
 void gbs_configure_output(struct gbs *gbs, struct gbs_output_buffer *buf, long rate);
