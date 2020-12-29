@@ -1,7 +1,3 @@
-cfg_endian
-cfg_long
-cfg_parse
-cfg_string
 gbs_close
 gbs_configure
 gbs_configure_channels
@@ -14,15 +10,14 @@ gbs_get_title
 gbs_init
 gbs_io_peek
 gbs_open
-gbs_pause
+gbs_open_mem
 gbs_print_info
-gbs_set_gbhw_filter
-gbs_set_gbhw_io_callback
-gbs_set_gbhw_step_callback
+gbs_set_filter
 gbs_set_nextsubsong_cb
+gbs_set_io_callback
+gbs_set_step_callback
 gbs_set_sound_callback
 gbs_step
 gbs_toggle_mute
 gbs_write
 gbs_write_rom
-get_userconfig
