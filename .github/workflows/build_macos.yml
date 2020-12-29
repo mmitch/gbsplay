@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         compiler: [gcc, clang]
-        flags: ['']
+        flags: [--enable-verbosebuild]
 
     steps:
     - uses: actions/checkout@v2
