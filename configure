@@ -485,7 +485,7 @@ fi
 ## generate tmp directory
 
 BASENAME="$(basename "$0")"
-if [ "$(command -v mktemp)" != "" ]; then
+if command -v mktemp >/dev/null; then
     TEMPDIR="$(mktemp -d "$TMPPATH/$BASENAME.XXXXXXXXXX")"
     RESULT=$?
 else
@@ -851,7 +851,7 @@ if [ "$use_i18n" != no ]; then
     printf "checking for gettext tools:  "
     have_xgettext=yes
     for i in xgettext msgmerge msgfmt msgen; do
-        if [ "$(command -v $i)" = "" ]; then
+        if ! command -v $i >/dev/null; then
             test "$have_xgettext" = "yes" && echo "not ok"
             have_xgettext=no
             echo "$i is missing"
