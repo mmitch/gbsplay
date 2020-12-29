@@ -1064,6 +1064,7 @@ setdefault appdir      "$prefix/share/applications"
 setdefault sysconfdir  "/etc"
 
 setdefault use_sharedlibgbs no
+setdefault use_verbosebuild no
 setdefault use_debug no
 
 setdefault use_midi yes
