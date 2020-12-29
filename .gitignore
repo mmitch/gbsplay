@@ -22,3 +22,4 @@ gen_impulse_h
 impulse.h
 *.ho
 apidoc/
+libgbs.pc

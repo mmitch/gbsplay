@@ -46,6 +46,7 @@ localedir=
 mimedir=
 appdir=
 includedir=
+pkgconfigdir=
 sysconfdir=
 buildalias=
 hostalias=
@@ -399,6 +400,9 @@ parseoption()
         ;;
     --includedir=*)
         includedir="${1#--includedir=}"
+        ;;
+    --pkgconfigdir=*)
+        pkgconfigdir="${1#--pkgconfigdir=}"
         ;;
     --sysconfdir=*)
         sysconfdir="${1#--sysconfdir=}"
@@ -1103,16 +1107,17 @@ fi
 
 ## set variables we have no test for to default values if not set
 
-setdefault exec_prefix "$prefix"
-setdefault bindir      "$exec_prefix/bin"
-setdefault libdir      "$exec_prefix/lib"
-setdefault mandir      "$prefix/man"
-setdefault docdir      "$prefix/share/doc/$package"
-setdefault localedir   "$prefix/share/locale"
-setdefault mimedir     "$prefix/share/mime"
-setdefault appdir      "$prefix/share/applications"
-setdefault includedir  "$prefix/include/libgbs"
-setdefault sysconfdir  "/etc"
+setdefault exec_prefix  "$prefix"
+setdefault bindir       "$exec_prefix/bin"
+setdefault libdir       "$exec_prefix/lib"
+setdefault mandir       "$prefix/man"
+setdefault docdir       "$prefix/share/doc/$package"
+setdefault localedir    "$prefix/share/locale"
+setdefault mimedir      "$prefix/share/mime"
+setdefault appdir       "$prefix/share/applications"
+setdefault includedir   "$prefix/include/libgbs"
+setdefault pkgconfigdir "$prefix/share/pkgconfig"
+setdefault sysconfdir   "/etc"
 
 setdefault use_sharedlibgbs no
 setdefault use_verbosebuild no
@@ -1138,6 +1143,17 @@ EXTRA_CFLAGS="$CFLAGS"
 EXTRA_LDFLAGS="$LDFLAGS"
 echo "EXTRA_CFLAGS=$EXTRA_CFLAGS"
 echo "EXTRA_LDFLAGS=$EXTRA_LDFLAGS"
+
+## generate pkg-config configuration
+# can't be done in Makefile because $DESTDIR would show up in the paths
+
+cat > libgbs.pc << __EOF__
+Name: libgbs
+Description: The Gameboy sound player library
+Version: ${VERSION}
+Cflags: -I${includedir}/libgbs
+Libs: -L${libdir} -lgbs -lm
+__EOF__
 
 ## write configuration
 
@@ -1165,6 +1181,7 @@ localedir
 mimedir
 appdir
 includedir
+pkgconfigdir
 sysconfdir
 CC
 BUILDCC
@@ -1224,7 +1241,7 @@ __EOF__
 # show configuration if verbose
 
 if [ "$use_verbosebuild" = yes ]; then
-    for file in config.mk config.h config.sed; do
+    for file in config.mk config.h config.sed libgbs.pc; do
 	echo
 	echo "content of generated $file:"
 	echo "--------"

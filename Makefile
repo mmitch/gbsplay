@@ -8,14 +8,15 @@ noincludes  := $(patsubst distclean,yes,$(MAKECMDGOALS))
 prefix      := /usr/local
 exec_prefix := $(prefix)
 
-bindir      := $(exec_prefix)/bin
-libdir      := $(exec_prefix)/lib
-mandir      := $(prefix)/man
-docdir      := $(prefix)/share/doc/gbsplay
-localedir   := $(prefix)/share/locale
-mimedir     := $(prefix)/share/mime
-appdir      := $(prefix)/share/applications
-includedir  := $(prefix)/include/libgbs
+bindir       := $(exec_prefix)/bin
+libdir       := $(exec_prefix)/lib
+mandir       := $(prefix)/man
+docdir       := $(prefix)/share/doc/gbsplay
+localedir    := $(prefix)/share/locale
+mimedir      := $(prefix)/share/mime
+appdir       := $(prefix)/share/applications
+includedir   := $(prefix)/include/libgbs
+pkgconfigdir := $(prefix)/share/pkgconfig
 
 configured := no
 ifneq ($(noincludes),yes)
@@ -50,15 +51,16 @@ XMMSPREFIX  :=
 DESTDIR     :=
 
 # Update paths with user-provided DESTDIR
-prefix      := $(DESTDIR)$(prefix)
-exec_prefix := $(DESTDIR)$(exec_prefix)
-bindir      := $(DESTDIR)$(bindir)
-mandir      := $(DESTDIR)$(mandir)
-docdir      := $(DESTDIR)$(docdir)
-localedir   := $(DESTDIR)$(localedir)
-mimedir     := $(DESTDIR)$(mimedir)
-appdir      := $(DESTDIR)$(appdir)
-includedir  := $(DESTDIR)$(includedir)
+prefix       := $(DESTDIR)$(prefix)
+exec_prefix  := $(DESTDIR)$(exec_prefix)
+bindir       := $(DESTDIR)$(bindir)
+mandir       := $(DESTDIR)$(mandir)
+docdir       := $(DESTDIR)$(docdir)
+localedir    := $(DESTDIR)$(localedir)
+mimedir      := $(DESTDIR)$(mimedir)
+appdir       := $(DESTDIR)$(appdir)
+includedir   := $(DESTDIR)$(includedir)
+pkgconfigdir := $(DESTDIR)$(pkgconfigdir)
 
 xmmsdir     := $(DESTDIR)$(XMMSPREFIX)$(XMMS_INPUT_PLUGIN_DIR)
 
@@ -196,8 +198,8 @@ gen_impulse_h_bin := gen_impulse_h$(binsuffix)
 
 ifeq ($(use_sharedlibgbs),yes)
 
-EXTRA_INSTALL += install-headers
-EXTRA_UNINSTALL += uninstall-headers
+EXTRA_INSTALL += install-headers install-pkg-config
+EXTRA_UNINSTALL += uninstall-headers uninstall-pkg-config
 
 ifeq ($(have_doxygen),yes)
 EXTRA_INSTALL += install-apidoc
@@ -319,7 +321,7 @@ endif
 
 distclean: clean
 	find . -regex ".*\.d" -exec rm -f "{}" \;
-	rm -f ./config.mk ./config.h ./config.err ./config.sed
+	rm -f ./config.mk ./config.h ./config.err ./config.sed ./libgbs.pc
 
 clean: clean-default $(EXTRA_CLEAN) clean-apidoc
 
@@ -387,6 +389,10 @@ install-headers:
 	install -d $(includedir)
 	install -m 644 $(apiheaders) $(includedir)
 
+install-pkg-config:
+	install -d $(pkgconfigdir)
+	install -m 644 libgbs.pc $(pkgconfigdir)
+
 uninstall: uninstall-default $(EXTRA_UNINSTALL)
 
 uninstall-default:
@@ -437,6 +443,10 @@ uninstall-apidoc:
 uninstall-headers:
 	rm -f $(addprefix $(includedir)/,$(apiheaders))
 	-rmdir -p $(includedir)
+
+uninstall-pkg-config:
+	rm -f $(pkgconfigdir)/libgbs.pc
+	-rmdir -p $(pkgconfigdir)
 
 dist:	distclean
 	install -d ./$(DISTDIR)
