@@ -45,6 +45,7 @@ docdir=
 localedir=
 mimedir=
 appdir=
+includedir=
 sysconfdir=
 buildalias=
 hostalias=
@@ -395,6 +396,9 @@ parseoption()
         ;;
     --appdir=*)
         appdir="${1#--appdir=}"
+        ;;
+    --includedir=*)
+        includedir="${1#--includedir=}"
         ;;
     --sysconfdir=*)
         sysconfdir="${1#--sysconfdir=}"
@@ -1107,6 +1111,7 @@ setdefault docdir      "$prefix/share/doc/$package"
 setdefault localedir   "$prefix/share/locale"
 setdefault mimedir     "$prefix/share/mime"
 setdefault appdir      "$prefix/share/applications"
+setdefault includedir  "$prefix/include/libgbs"
 setdefault sysconfdir  "/etc"
 
 setdefault use_sharedlibgbs no
@@ -1159,6 +1164,7 @@ docdir
 localedir
 mimedir
 appdir
+includedir
 sysconfdir
 CC
 BUILDCC
