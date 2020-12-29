@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         msystem: [MSYS, MINGW64, MINGW32]
-        flags: ['', --enable-sharedlibgbs]
+        flags: ['', '--enable-sharedlibgbs --enable-verbosebuild']
         include:
           - msystem: MSYS
             packages: gcc

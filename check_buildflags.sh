@@ -61,6 +61,7 @@ i18n=yes
 zlib=yes
 harden=yes
 sharedlib=no
+verbosebuild=no
 xgbsplay=no
 prefix=/usr/local
 
@@ -80,6 +81,9 @@ for flag in "$@"; do
 	    ;;
 	--enable-sharedlibgbs)
 	    sharedlib=yes
+	    ;;
+	--enable-verbosebuild)
+	    verbosebuild=yes
 	    ;;
 	--with-xgbsplay)
 	    xgbsplay=yes
@@ -119,6 +123,8 @@ else
 fi
 
 expect_to_contain use_sharedlibgbs "$sharedlib"
+
+expect_to_contain use_verbosebuild "$verbosebuild"
 
 if [ "$xgbsplay" = yes ]; then
     expect_to_contain EXTRA_INSTALL "xgbsplay"
