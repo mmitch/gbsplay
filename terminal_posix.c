@@ -71,5 +71,5 @@ void restore_terminal(void)
 
 long get_input(char *c)
 {
-	return read(STDIN_FILENO, c, 1) != -1;
+	return read(STDIN_FILENO, c, 1) == 1;
 }
