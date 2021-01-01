@@ -13,6 +13,7 @@
 #include <sys/param.h>
 #include <unistd.h>
 #include <string.h>
+#include <assert.h>
 
 #include "gbcpu.h"
 
@@ -1608,7 +1609,8 @@ void gbcpu_add_mem(struct gbcpu *gbcpu, uint32_t start, uint32_t end, gbcpu_put_
 
 void gbcpu_init(struct gbcpu *gbcpu)
 {
-	memset(&gbcpu->regs, 0, sizeof(gbcpu_regs_u));
+	assert(sizeof(gbcpu->regs) == sizeof(gbcpu_regs_u));
+	memset(&gbcpu->regs, 0, sizeof(gbcpu->regs));
 	gbcpu->halted = 0;
 	gbcpu->stopped = 0;
 	gbcpu->ime = 0;
