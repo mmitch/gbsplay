@@ -518,29 +518,32 @@ long gbs_write(struct gbs *gbs, char *name, long version)
 	return 1;
 }
 
-static struct gbs *gb_open(const char *name, char *buf, size_t size)
+static struct gbs *gbs_new(char *buf)
 {
-	int fd;
-	long i, name_len;
-	struct gbs *gbs = malloc(sizeof(struct gbs));
-	char *bootname;
-	uint8_t bootrom[256];
-	char *na_str = _("gb / not available");
-
-	memset(gbs, 0, sizeof(struct gbs));
+	struct gbs *gbs = calloc(sizeof(struct gbs), 1);
+	gbhw_init_struct(&gbs->gbhw, gbs);
 	gbs->silence_timeout = 2*60;
 	gbs->subsong_timeout = 2*60;
 	gbs->gap = 2;
 	gbs->fadeout = 3;
-	gbs->version = 0;
 	gbs->songs = 1;
 	gbs->defaultsong = 1;
 	gbs->defaultbank = 1;
-	gbs->load  = 0;
-	gbs->init  = 0x100;
-	gbs->play = gbs->init;
+	gbs->init = 0x100;
+	gbs->play = 0x100;
 	gbs->stack = 0xfffe;
 	gbs->buf = buf;
+	return gbs;
+}
+
+static struct gbs *gb_open(const char *name, char *buf, size_t size)
+{
+	int fd;
+	long i, name_len;
+	struct gbs *gbs = gbs_new(buf);
+	char *bootname;
+	uint8_t bootrom[256];
+	char *na_str = _("gb / not available");
 
 	/* For accuracy testing purposes, support boot rom. */
 	name_len = strlen(getenv("HOME")) + strlen(boot_rom_file) + 2;
@@ -587,16 +590,11 @@ static struct gbs *gb_open(const char *name, char *buf, size_t size)
 static struct gbs *gbr_open(const char *name, char *buf, size_t size)
 {
 	long i;
-	struct gbs *gbs = malloc(sizeof(struct gbs));
+	struct gbs *gbs = gbs_new(buf);
 	char *na_str = _("gbr / not available");
 	uint16_t vsync_addr;
 	uint16_t timer_addr;
 
-	memset(gbs, 0, sizeof(struct gbs));
-	gbs->silence_timeout = 2;
-	gbs->subsong_timeout = 2*60;
-	gbs->gap = 2;
-	gbs->fadeout = 3;
 	if (strncmp(buf, GBR_MAGIC, 4) != 0) {
 		fprintf(stderr, _("Not a GBR-File: %s\n"), name);
 		gbs_free(gbs);
@@ -612,11 +610,8 @@ static struct gbs *gbr_open(const char *name, char *buf, size_t size)
 		gbs_free(gbs);
 		return NULL;
 	}
-	gbs->version = 0;
 	gbs->songs = 255;
-	gbs->defaultsong = 1;
 	gbs->defaultbank = buf[0x06];
-	gbs->load  = 0;
 	gbs->init  = readint(&buf[0x08], 2);
 	vsync_addr = readint(&buf[0x0a], 2);
 	timer_addr = readint(&buf[0x0c], 2);
@@ -628,7 +623,6 @@ static struct gbs *gbr_open(const char *name, char *buf, size_t size)
 	}
 	gbs->tma = buf[0x0e];
 	gbs->tac = buf[0x0f];
-	gbs->stack = 0xfffe;
 
 	/* Test if this looks like a valid rom header title */
 	for (i=0x0154; i<0x0163; i++) {
@@ -745,7 +739,7 @@ static void gd3_parse(struct gbs **gbs, const char *gd3, long gd3_len)
 
 static struct gbs *vgm_open(const char *name, char *buf, size_t size)
 {
-	struct gbs *gbs = malloc(sizeof(struct gbs));
+	struct gbs *gbs = gbs_new(buf);
 	char *na_str = _("vgm / not available");
 	char *gd3 = NULL;
 	char *data;
@@ -762,12 +756,6 @@ static struct gbs *vgm_open(const char *name, char *buf, size_t size)
 	long addr;
 	long jpaddr;
 
-	memset(gbs, 0, sizeof(struct gbs));
-	gbs->silence_timeout = 2;
-	gbs->subsong_timeout = 2*60;
-	gbs->gap = 2;
-	gbs->fadeout = 3;
-	gbs->buf = buf;
 	if (strncmp(buf, VGM_MAGIC, 4) != 0) {
 		fprintf(stderr, _("Not a VGM-File: %s\n"), name);
 		gbs_free(gbs);
@@ -885,16 +873,11 @@ static struct gbs *vgm_open(const char *name, char *buf, size_t size)
 	/* RST 0x38 */
 	emit(gbs, &code_used, 0xff, 1);
 
-	gbs->version = 0;
-	gbs->songs = 1;
-	gbs->defaultsong = 1;
-	gbs->defaultbank = 1;
 	gbs->load = 0x0400;
 	gbs->init = 0x0440;
 	gbs->play = 0x0404;
 	gbs->tma = 0;
 	gbs->tac = 0;
-	gbs->stack = 0xfffe;
 	gbs->title = na_str;
 	gbs->author = na_str;
 	gbs->copyright = na_str;
@@ -972,18 +955,11 @@ static struct gbs *vgm_open(const char *name, char *buf, size_t size)
 
 static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 {
-	struct gbs *gbs = malloc(sizeof(struct gbs));
+	struct gbs *gbs = gbs_new(buf);
 	long i;
 	long have_ehdr = 0;
 	char *buf2;
 
-	memset(gbs, 0, sizeof(struct gbs));
-	gbhw_init_struct(&gbs->gbhw, gbs);
-	gbs->silence_timeout = 2;
-	gbs->subsong_timeout = 2*60;
-	gbs->gap = 2;
-	gbs->fadeout = 3;
-	gbs->defaultbank = 1;
 	gbs->version = buf[0x03];
 	if (gbs->version != 1) {
 		fprintf(stderr, _("GBS Version %d unsupported.\n"), gbs->version);
