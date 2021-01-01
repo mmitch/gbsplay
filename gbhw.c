@@ -126,11 +126,11 @@ static uint32_t rombank_get(struct gbhw *gbhw, uint32_t addr)
 static uint32_t io_get(struct gbhw *gbhw, uint32_t addr)
 {
 	if (addr >= 0xff80 && addr <= 0xfffe) {
-		return gbhw->hiram[addr & 0x7f];
+		return gbhw->hiram[addr & GBHW_HIRAM_MASK];
 	}
 	if (addr >= 0xff10 &&
 	           addr <= 0xff3f) {
-		uint8_t val = gbhw->ioregs[addr & 0x7f];
+		uint8_t val = gbhw->ioregs[addr & GBHW_IOREGS_MASK];
 		if (addr == 0xff26) {
 			long i;
 			val &= 0xf0;
@@ -140,7 +140,7 @@ static uint32_t io_get(struct gbhw *gbhw, uint32_t addr)
 				}
 			}
 		}
-		val |= ioregs_ormask[addr & 0x7f];
+		val |= ioregs_ormask[addr & GBHW_IOREGS_MASK];
 		DPRINTF("io_get(%04x): %02x\n", addr, val);
 		return val;
 	}
@@ -151,7 +151,7 @@ static uint32_t io_get(struct gbhw *gbhw, uint32_t addr)
 	case 0xff06:  // TMA
 	case 0xff07:  // TAC
 	case 0xff0f:  // IF
-		return gbhw->ioregs[addr & 0x7f];
+		return gbhw->ioregs[addr & GBHW_IOREGS_MASK];
 	case 0xff41: /* LCDC Status */
 		if (gbhw->vblankctr > vblanktc - vblankclocks) {
 			return 0x01;  /* vblank */
@@ -184,13 +184,13 @@ static uint32_t io_get(struct gbhw *gbhw, uint32_t addr)
 static uint32_t intram_get(struct gbhw *gbhw, uint32_t addr)
 {
 //	DPRINTF("intram_get(%04x)\n", addr);
-	return gbhw->intram[addr & 0x1fff];
+	return gbhw->intram[addr & GBHW_INTRAM_MASK];
 }
 
 static uint32_t extram_get(struct gbhw *gbhw, uint32_t addr)
 {
 //	DPRINTF("extram_get(%04x)\n", addr);
-	return gbhw->extram[addr & 0x1fff];
+	return gbhw->extram[addr & GBHW_EXTRAM_MASK];
 }
 
 static void rom_put(struct gbhw *gbhw, uint32_t addr, uint8_t val)
@@ -217,7 +217,7 @@ static void apu_reset(struct gbhw *gbhw)
 	}
 	memset(gbhw->ch, 0, sizeof(struct gbhw_channel) * 4);
 	for (i = 0xff10; i < 0xff26; i++) {
-		gbhw->ioregs[i & 0x7f] = 0;
+		gbhw->ioregs[i & GBHW_IOREGS_MASK] = 0;
 	}
 	for (i = 0; i < 4; i++) {
 		gbhw->ch[i].len = 0;
@@ -304,7 +304,7 @@ static void io_put(struct gbhw *gbhw, uint32_t addr, uint8_t val)
 	long chn = (addr - 0xff10)/5;
 
 	if (addr >= 0xff80 && addr <= 0xfffe) {
-		gbhw->hiram[addr & 0x7f] = val;
+		gbhw->hiram[addr & GBHW_HIRAM_MASK] = val;
 		return;
 	}
 
@@ -316,7 +316,7 @@ static void io_put(struct gbhw *gbhw, uint32_t addr, uint8_t val)
 	if (gbhw->apu_on == 0 && addr >= 0xff10 && addr < 0xff26) {
 		return;
 	}
-	gbhw->ioregs[addr & 0x7f] = val;
+	gbhw->ioregs[addr & GBHW_IOREGS_MASK] = val;
 	DPRINTF(" ([0x%04x]=%02x) ", addr, val);
 	switch (addr) {
 		case 0xff02:
@@ -556,12 +556,12 @@ static void io_put(struct gbhw *gbhw, uint32_t addr, uint8_t val)
 
 static void intram_put(struct gbhw *gbhw, uint32_t addr, uint8_t val)
 {
-	gbhw->intram[addr & 0x1fff] = val;
+	gbhw->intram[addr & GBHW_INTRAM_MASK] = val;
 }
 
 static void extram_put(struct gbhw *gbhw, uint32_t addr, uint8_t val)
 {
-	gbhw->extram[addr & 0x1fff] = val;
+	gbhw->extram[addr & GBHW_EXTRAM_MASK] = val;
 }
 
 static void sequencer_step(struct gbhw *gbhw)
@@ -983,7 +983,7 @@ void gbhw_io_put(struct gbhw *gbhw, uint16_t addr, uint8_t val) {
 uint8_t gbhw_io_peek(struct gbhw *gbhw, uint16_t addr)
 {
 	if (addr >= 0xff10 && addr <= 0xff3f) {
-		return gbhw->ioregs[addr & 0x7f];
+		return gbhw->ioregs[addr & GBHW_IOREGS_MASK];
 	}
 	return 0xff;
 }
