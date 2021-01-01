@@ -391,6 +391,8 @@ static void gbs_free(struct gbs *gbs)
 {
 	if (gbs->buf)
 		free(gbs->buf);
+	if (gbs->rom)
+		free(gbs->rom);
 	if (gbs->subsong_info)
 		free(gbs->subsong_info);
 	free(gbs);
