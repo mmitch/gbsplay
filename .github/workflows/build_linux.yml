@@ -26,6 +26,10 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install libasound2-dev libpulse-dev libaudio-dev libx11-dev libsdl2-dev
+    - name: Install valgrind
+      if: ${{ matrix.flags == '' }}
+      run: |
+        sudo apt-get --no-install-recommends install valgrind
     - name: Build and test
       env:
         CC: ${{ matrix.compiler }}
@@ -38,6 +42,10 @@ jobs:
     - name: Check build flags
       run: |
         ./check_buildflags.sh ${{ matrix.flags }}
+    - name: Check with valgrind
+      if: ${{ matrix.flags == '' }}
+      run: |
+        valgrind --error-exitcode=1 make test
     - name: Check install and uninstall targets
       run: |
         # add the sudo here and not inside the script
