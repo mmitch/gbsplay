@@ -44,40 +44,39 @@ struct opinfo {
 #endif
 };
 
-static uint32_t none_get(struct gbhw *gbhw, uint32_t addr)
+static uint32_t none_get(void *priv, uint32_t addr)
 {
-	UNUSED(gbhw);
+	UNUSED(priv);
 	UNUSED(addr);
 	return 0xff;
 }
 
-static void none_put(struct gbhw *gbhw, uint32_t addr, uint8_t val)
+static void none_put(void *priv, uint32_t addr, uint8_t val)
 {
-	UNUSED(gbhw);
+	UNUSED(priv);
 	UNUSED(addr);
 	UNUSED(val);
 }
 
-void gbcpu_init_struct(struct gbcpu *gbcpu, struct gbhw *gbhw) {
+void gbcpu_init_struct(struct gbcpu *gbcpu) {
 	for (uint16_t i = 0; i < GBCPU_LOOKUP_SIZE; i++) {
-		gbcpu->getlookup[i] = &none_get;
-		gbcpu->putlookup[i] = &none_put;
+		gbcpu->getlookup[i].get = &none_get;
+		gbcpu->putlookup[i].put = &none_put;
 	}
-	gbcpu->gbhw = gbhw;
 }
 
 static inline uint32_t mem_get(struct gbcpu *gbcpu, uint32_t addr)
 {
-	gbcpu_get_fn fn = gbcpu->getlookup[(addr >> 8) & 0xff];
+	struct get_entry *e = &gbcpu->getlookup[(addr >> 8) & 0xff];
 	gbcpu->cycles += 4;
-	return fn(gbcpu->gbhw, addr);
+	return e->get(e->priv, addr);
 }
 
 static inline void mem_put(struct gbcpu *gbcpu, uint32_t addr, uint32_t val)
 {
-	gbcpu_put_fn fn = gbcpu->putlookup[(addr >> 8) & 0xff];
+	struct put_entry *e = &gbcpu->putlookup[(addr >> 8) & 0xff];
 	gbcpu->cycles += 4;
-	fn(gbcpu->gbhw, addr, val);
+	e->put(e->priv, addr, val);
 }
 
 uint8_t gbcpu_mem_get(struct gbcpu *gbcpu, uint16_t addr)
@@ -1595,13 +1594,15 @@ static void show_reg_diffs(struct gbcpu *gbcpu, const struct opinfo *oi)
 }
 #endif
 
-void gbcpu_add_mem(struct gbcpu *gbcpu, uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn)
+void gbcpu_add_mem(struct gbcpu *gbcpu, uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn, void *priv)
 {
 	uint32_t i;
 
 	for (i=start; i<=end; i++) {
-		gbcpu->putlookup[i] = putfn;
-		gbcpu->getlookup[i] = getfn;
+		gbcpu->putlookup[i].put = putfn;
+		gbcpu->putlookup[i].priv = priv;
+		gbcpu->getlookup[i].get = getfn;
+		gbcpu->getlookup[i].priv = priv;
 	}
 }
 

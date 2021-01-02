@@ -103,11 +103,12 @@ void gbhw_init_struct(struct gbhw *gbhw) {
 	gbhw->last_r_value = 0;
 	gbhw->ch3_next_nibble = 0;
 
-	gbcpu_init_struct(&gbhw->gbcpu, gbhw);
+	gbcpu_init_struct(&gbhw->gbcpu);
 }
 
-static uint32_t rom_get(struct gbhw *gbhw, uint32_t addr)
+static uint32_t rom_get(void *priv, uint32_t addr)
 {
+	struct gbhw *gbhw = priv;
 	if ((addr >> 8) == 0 && gbhw->rom_lockout == 0) {
 		return gbhw->boot_rom[addr & 0xff];
 	}
@@ -115,14 +116,16 @@ static uint32_t rom_get(struct gbhw *gbhw, uint32_t addr)
 	return gbhw->rom[addr & 0x3fff];
 }
 
-static uint32_t rombank_get(struct gbhw *gbhw, uint32_t addr)
+static uint32_t rombank_get(void *priv, uint32_t addr)
 {
+	struct gbhw *gbhw = priv;
 //	DPRINTF("rombank_get(%04x)\n", addr);
 	return gbhw->rom[(addr & 0x3fff) + 0x4000*gbhw->rombank];
 }
 
-static uint32_t io_get(struct gbhw *gbhw, uint32_t addr)
+static uint32_t io_get(void *priv, uint32_t addr)
 {
+	struct gbhw *gbhw = priv;
 	if (addr >= 0xff80 && addr <= 0xfffe) {
 		return gbhw->hiram[addr & GBHW_HIRAM_MASK];
 	}
@@ -179,20 +182,23 @@ static uint32_t io_get(struct gbhw *gbhw, uint32_t addr)
 	}
 }
 
-static uint32_t intram_get(struct gbhw *gbhw, uint32_t addr)
+static uint32_t intram_get(void *priv, uint32_t addr)
 {
+	struct gbhw *gbhw = priv;
 //	DPRINTF("intram_get(%04x)\n", addr);
 	return gbhw->intram[addr & GBHW_INTRAM_MASK];
 }
 
-static uint32_t extram_get(struct gbhw *gbhw, uint32_t addr)
+static uint32_t extram_get(void *priv, uint32_t addr)
 {
+	struct gbhw *gbhw = priv;
 //	DPRINTF("extram_get(%04x)\n", addr);
 	return gbhw->extram[addr & GBHW_EXTRAM_MASK];
 }
 
-static void rom_put(struct gbhw *gbhw, uint32_t addr, uint8_t val)
+static void rom_put(void *priv, uint32_t addr, uint8_t val)
 {
+	struct gbhw *gbhw = priv;
 	if (addr >= 0x2000 && addr <= 0x3fff) {
 		val &= 0x1f;
 		gbhw->rombank = val + (val == 0);
@@ -298,8 +304,9 @@ static long sweep_check_overflow(struct gbhw *gbhw)
 	return 1;
 }
 
-static void io_put(struct gbhw *gbhw, uint32_t addr, uint8_t val)
+static void io_put(void *priv, uint32_t addr, uint8_t val)
 {
+	struct gbhw *gbhw = priv;
 	long chn = (addr - 0xff10)/5;
 
 	if (addr >= 0xff80 && addr <= 0xfffe) {
@@ -553,13 +560,15 @@ static void io_put(struct gbhw *gbhw, uint32_t addr, uint8_t val)
 	}
 }
 
-static void intram_put(struct gbhw *gbhw, uint32_t addr, uint8_t val)
+static void intram_put(void *priv, uint32_t addr, uint8_t val)
 {
+	struct gbhw *gbhw = priv;
 	gbhw->intram[addr & GBHW_INTRAM_MASK] = val;
 }
 
-static void extram_put(struct gbhw *gbhw, uint32_t addr, uint8_t val)
+static void extram_put(void *priv, uint32_t addr, uint8_t val)
 {
+	struct gbhw *gbhw = priv;
 	gbhw->extram[addr & GBHW_EXTRAM_MASK] = val;
 }
 
@@ -959,11 +968,11 @@ void gbhw_init(struct gbhw *gbhw, uint8_t *rombuf, uint32_t size)
 	gbhw->last_r_value = 0;
 
 	gbcpu_init(&gbhw->gbcpu);
-	gbcpu_add_mem(&gbhw->gbcpu, 0x00, 0x3f, rom_put, rom_get);
-	gbcpu_add_mem(&gbhw->gbcpu, 0x40, 0x7f, rom_put, rombank_get);
-	gbcpu_add_mem(&gbhw->gbcpu, 0xa0, 0xbf, extram_put, extram_get);
-	gbcpu_add_mem(&gbhw->gbcpu, 0xc0, 0xfe, intram_put, intram_get);
-	gbcpu_add_mem(&gbhw->gbcpu, 0xff, 0xff, io_put, io_get);
+	gbcpu_add_mem(&gbhw->gbcpu, 0x00, 0x3f, rom_put, rom_get, gbhw);
+	gbcpu_add_mem(&gbhw->gbcpu, 0x40, 0x7f, rom_put, rombank_get, gbhw);
+	gbcpu_add_mem(&gbhw->gbcpu, 0xa0, 0xbf, extram_put, extram_get, gbhw);
+	gbcpu_add_mem(&gbhw->gbcpu, 0xc0, 0xfe, intram_put, intram_get, gbhw);
+	gbcpu_add_mem(&gbhw->gbcpu, 0xff, 0xff, io_put, io_get, gbhw);
 }
 
 void gbhw_cleanup(struct gbhw *gbhw)
