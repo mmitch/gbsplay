@@ -473,7 +473,7 @@ long gbs_write(struct gbs *gbs, char *name, long version)
 			writeint(&gbs->exthdr[0x16], stringofs, 2);
 			stringofs += len+1;
 		} else writeint(&gbs->exthdr[0x16], 0xffff, 2);
-		if ((len = strlen(gbs->copyright)) > 30) {
+		if ((len = strlen(gbs->copyright)) > 32) {
 			memcpy(strings+stringofs, gbs->copyright, len+1);
 			writeint(&gbs->exthdr[0x18], stringofs, 2);
 			stringofs += len+1;
@@ -992,7 +992,7 @@ static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 
 	memcpy(gbs->v1strings, &buf[0x10], 32);
 	memcpy(gbs->v1strings+33, &buf[0x30], 32);
-	memcpy(gbs->v1strings+66, &buf[0x50], 30);
+	memcpy(gbs->v1strings+66, &buf[0x50], 32);
 	gbs->title = gbs->v1strings;
 	gbs->author = gbs->v1strings+33;
 	gbs->copyright = gbs->v1strings+66;
