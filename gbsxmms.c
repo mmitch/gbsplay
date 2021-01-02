@@ -318,7 +318,7 @@ static void on_button_save_clicked(GtkButton *button, gpointer user_data)
 
 	g_list_foreach(GTK_TABLE(table2)->children, tableenum, NULL);
 
-	gbs_write(file_info_gbs, file_info_filename, 2);
+	gbs_write(file_info_gbs, file_info_filename);
 }
 
 static void on_button_cancel_clicked(GtkButton *button, gpointer user_data)

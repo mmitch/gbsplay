@@ -38,7 +38,6 @@
 #define HDR_LEN_VGM	0x100
 
 #define GBS_MAGIC		"GBS"
-#define GBS_EXTHDR_MAGIC	"GBSX"
 #define GBR_MAGIC		"GBRF"
 #define GD3_MAGIC		"Gd3 "
 #define VGM_MAGIC		"Vgm "
@@ -68,7 +67,6 @@ struct gbs {
 	char *copyright;
 	unsigned long codelen;
 	char *code;
-	char *exthdr;
 	size_t filesize;
 	uint32_t crc;
 	uint32_t crcnow;
@@ -326,31 +324,7 @@ void gbs_print_info(struct gbs *gbs, long verbose)
 	if (gbs->defaultbank != 1) {
 		printf(_("Bank @0x4000:     %d\n"), gbs->defaultbank);
 	}
-	if (gbs->version == 2) {
-		printf(_("CRC32:            0x%08lx/0x%08lx (%s)\n"),
-		       (unsigned long)gbs->crc, (unsigned long)gbs->crcnow,
-		       gbs->crc == gbs->crcnow ? _("OK") : _("Failed"));
-	} else {
-		printf(_("CRC32:            0x%08lx\n"),
-		       (unsigned long)gbs->crcnow);
-	}
-	if (verbose && gbs->version == 2) {
-		long i;
-		for (i=0; i<gbs->songs; i++) {
-			printf(_("Subsong %03ld:	"), i);
-			if (gbs->subsong_info[i].title) {
-				printf("\"%s\" ", gbs->subsong_info[i].title);
-			} else {
-				printf("%s ", _("untitled"));
-			}
-			if (gbs->subsong_info[i].len) {
-				printf(_("(%ld seconds)\n"),
-				       (long)(gbs->subsong_info[i].len >> GBS_LEN_SHIFT));
-			} else {
-				printf("%s\n", _("no time limit"));
-			}
-		}
-	}
+	printf(_("CRC32:            0x%08lx\n"), (unsigned long)gbs->crcnow);
 }
 
 static long chvol(struct gbhw *gbhw, long ch)
@@ -424,17 +398,6 @@ void gbs_close(struct gbs *gbs)
 	gbs_free(gbs);
 }
 
-static void writeint(char *buf, uint32_t val, long bytes)
-{
-	long shift = 0;
-	long i;
-
-	for (i=0; i<bytes; i++) {
-		buf[i] = (val >> shift) & 0xff;
-		shift += 8;
-	}
-}
-
 static uint32_t readint(char *buf, long bytes)
 {
 	long i;
@@ -449,13 +412,10 @@ static uint32_t readint(char *buf, long bytes)
 	return res;
 }
 
-long gbs_write(struct gbs *gbs, char *name, long version)
+long gbs_write(struct gbs *gbs, char *name)
 {
 	long fd;
-	long codelen = (gbs->codelen + 15) >> 4;
 	char pad[16];
-	char strings[65536];
-	long stringofs = 0;
 	long newlen = gbs->filesize;
 	long namelen = strlen(name);
 	char *tmpname = malloc(namelen + sizeof(".tmp\0"));
@@ -469,64 +429,6 @@ long gbs_write(struct gbs *gbs, char *name, long version)
 		return 0;
 	}
 
-	if (version == 2) {
-		long len,i;
-		long ehdrlen = 32 + 8*gbs->songs;
-		uint32_t hdrcrc;
-
-		newlen = 0x70 + codelen*16 + ehdrlen;
-		gbs->buf[3] = 1;
-		gbs->buf = realloc(gbs->buf, newlen + 65536);
-		gbs->code = gbs->buf + 0x70;
-		gbs->exthdr = gbs->code + codelen*16;
-		writeint(gbs->buf + 0x6e, codelen, 2);
-		memset(&gbs->code[gbs->codelen], 0x00, codelen*16 - gbs->codelen);
-		memset(gbs->exthdr, 0x00, ehdrlen + 65536);
-		memcpy(gbs->exthdr, GBS_EXTHDR_MAGIC, strlen(GBS_EXTHDR_MAGIC));
-		gbs->exthdr[0x1c] = gbs->songs;
-		if ((len = strlen(gbs->title)) > 32) {
-			memcpy(strings+stringofs, gbs->title, len+1);
-			writeint(&gbs->exthdr[0x14], stringofs, 2);
-			stringofs += len+1;
-		} else writeint(&gbs->exthdr[0x14], 0xffff, 2);
-		if ((len = strlen(gbs->author)) > 32) {
-			memcpy(strings+stringofs, gbs->author, len+1);
-			writeint(&gbs->exthdr[0x16], stringofs, 2);
-			stringofs += len+1;
-		} else writeint(&gbs->exthdr[0x16], 0xffff, 2);
-		if ((len = strlen(gbs->copyright)) > 30) {
-			memcpy(strings+stringofs, gbs->copyright, len+1);
-			writeint(&gbs->exthdr[0x18], stringofs, 2);
-			stringofs += len+1;
-		} else writeint(&gbs->exthdr[0x18], 0xffff, 2);
-
-		for (i=0; i<gbs->songs; i++) {
-			writeint(&gbs->exthdr[0x20+8*i],
-			         gbs->subsong_info[i].len, 4);
-			if (gbs->subsong_info[i].title &&
-			    strcmp(gbs->subsong_info[i].title, "") != 0) {
-				len = strlen(gbs->subsong_info[i].title)+1;
-				memcpy(strings+stringofs, gbs->subsong_info[i].title, len);
-				writeint(&gbs->exthdr[0x20+8*i+4],
-				         stringofs, 2);
-				stringofs += len;
-			} else writeint(&gbs->exthdr[0x20+8*i+4], 0xffff, 2);
-		}
-		memcpy(gbs->buf + newlen, strings, stringofs);
-		newlen += stringofs;
-
-		writeint(&gbs->exthdr[0x04], ehdrlen+stringofs-8, 4);
-		writeint(&gbs->exthdr[0x0c], gbs->filesize, 4);
-		gbs->crc = gbs_crc32(0, gbs->buf, gbs->filesize);
-		writeint(&gbs->exthdr[0x10], gbs->crc, 4);
-		hdrcrc = gbs_crc32(0, gbs->exthdr, ehdrlen+stringofs);
-		writeint(&gbs->exthdr[0x08], hdrcrc, 4);
-
-	} else {
-		if (gbs->version == 2) {
-			gbs->buf[3] = 1;
-		}
-	}
 	if (write(fd, gbs->buf, newlen) == newlen) {
 		int ret = 1;
 		close(fd);
@@ -1033,8 +935,6 @@ static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 {
 	struct gbs *gbs = gbs_new(buf);
 	long i, addr, jpaddr;
-	long have_ehdr = 0;
-	char *buf2;
 
 	gbs->version = buf[0x03];
 	if (gbs->version != 1) {
@@ -1066,7 +966,7 @@ static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 
 	memcpy(gbs->v1strings, &buf[0x10], 32);
 	memcpy(gbs->v1strings+33, &buf[0x30], 32);
-	memcpy(gbs->v1strings+66, &buf[0x50], 30);
+	memcpy(gbs->v1strings+66, &buf[0x50], 32);
 	gbs->title = gbs->v1strings;
 	gbs->author = gbs->v1strings+33;
 	gbs->copyright = gbs->v1strings+66;
@@ -1074,66 +974,8 @@ static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 	gbs->filesize = size;
 
 	gbs->subsong_info = calloc(sizeof(struct gbs_subsong_info), gbs->songs);
-	gbs->codelen = (buf[0x6e] + (buf[0x6f] << 8)) << 4;
-	if ((0x70 + gbs->codelen) < (gbs->filesize - 8) &&
-	    strncmp(&buf[0x70 + gbs->codelen], GBS_EXTHDR_MAGIC, 4) == 0) {
-		uint32_t crc, realcrc, ehdrlen;
-
-		gbs->exthdr = gbs->code + gbs->codelen;
-		ehdrlen = readint(&gbs->exthdr[0x04], 4) + 8;
-		crc = readint(&gbs->exthdr[0x08], 4);
-		writeint(&gbs->exthdr[0x08], 0, 4);
-
-		if ((realcrc=gbs_crc32(0, gbs->exthdr, ehdrlen)) == crc) {
-			have_ehdr = 1;
-		} else {
-			fprintf(stderr, _("Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n"),
-			        crc, realcrc);
-		}
-	}
-	if (have_ehdr) {
-		buf2 = gbs->exthdr;
-		gbs->filesize = readint(&buf2[0x0c], 4);
-		gbs->crc = readint(&buf2[0x10], 4);
-		writeint(&buf2[0x10], 0, 4);
-	} else {
-		memcpy(gbs->v1strings+66, &buf[0x50], 32);
-		gbs->codelen = size - 0x70;
-	}
+	gbs->codelen = size - HDR_LEN_GBS;
 	gbs->crcnow = gbs_crc32(0, buf, gbs->filesize);
-	if (have_ehdr) {
-		long gbs_titleex;
-		long gbs_authorex;
-		long gbs_copyex;
-		long entries;
-
-		gbs->version = 2;
-		entries = buf2[0x1c];
-		gbs->strings = gbs->exthdr + 32 + 8*entries;
-
-		gbs_titleex = readint(&buf2[0x14], 2);
-		gbs_authorex = readint(&buf2[0x16], 2);
-		gbs_copyex = readint(&buf2[0x18], 2);
-		if (gbs_titleex != 0xffff)
-			gbs->title = gbs->strings + gbs_titleex;
-		if (gbs_authorex != 0xffff)
-			gbs->author = gbs->strings + gbs_authorex;
-		if (gbs_copyex != 0xffff)
-			gbs->copyright = gbs->strings + gbs_copyex;
-
-		for (i=0; i<entries; i++) {
-			long ofs = readint(&buf2[32 + 8*i + 4], 2);
-			gbs->subsong_info[i].len = readint(&buf2[32 + 8*i], 4);
-			if (ofs == 0xffff)
-				gbs->subsong_info[i].title = NULL;
-			else gbs->subsong_info[i].title = gbs->strings + ofs;
-		}
-
-		if (gbs->crc != gbs->crcnow) {
-			fprintf(stderr, _("Warning: File CRC does not match (0x%08x != 0x%08x).\n"),
-			        gbs->crc, gbs->crcnow);
-		}
-	}
 
 	gbs->romsize = (gbs->codelen + gbs->load + 0x3fff) & ~0x3fff;
 
