@@ -966,6 +966,11 @@ void gbhw_init(struct gbhw *gbhw, uint8_t *rombuf, uint32_t size)
 	gbcpu_add_mem(&gbhw->gbcpu, 0xff, 0xff, io_put, io_get);
 }
 
+void gbhw_cleanup(struct gbhw *gbhw)
+{
+	if (gbhw->impbuf) free(gbhw->impbuf);
+}
+
 void gbhw_enable_bootrom(struct gbhw *gbhw, const uint8_t *rombuf)
 {
 	memcpy(gbhw->boot_rom, rombuf, sizeof(gbhw->boot_rom));

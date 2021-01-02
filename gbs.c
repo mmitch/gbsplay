@@ -390,6 +390,7 @@ long gbs_toggle_mute(struct gbs *gbs, long channel) {
 
 static void gbs_free(struct gbs *gbs)
 {
+	gbhw_cleanup(&gbs->gbhw);
 	if (gbs->buf)
 		free(gbs->buf);
 	if (gbs->rom)

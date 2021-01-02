@@ -149,6 +149,7 @@ void gbhw_set_rate(struct gbhw *gbhw, long rate);
 void gbhw_set_buffer(struct gbhw *gbhw, struct gbhw_buffer *buffer);
 void gbhw_init(struct gbhw *gbhw, uint8_t *rombuf, uint32_t size);
 void gbhw_init_struct(struct gbhw *gbhw);
+void gbhw_cleanup(struct gbhw *gbhw);
 void gbhw_enable_bootrom(struct gbhw *gbhw, const uint8_t *rombuf);
 void gbhw_master_fade(struct gbhw *gbhw, long speed, long dstvol);
 void gbhw_getminmax(struct gbhw *gbhw, int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax);
