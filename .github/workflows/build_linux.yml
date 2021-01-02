@@ -45,7 +45,7 @@ jobs:
     - name: Check with valgrind
       if: ${{ matrix.flags == '' }}
       run: |
-        valgrind --error-exitcode=1 make test
+        make test TEST_WRAPPER="valgrind --error-exitcode=1"
     - name: Check install and uninstall targets
       run: |
         # add the sudo here and not inside the script

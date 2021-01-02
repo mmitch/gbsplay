@@ -16,6 +16,7 @@
 #include <signal.h>
 #include <fcntl.h>
 
+static long terminit;
 static struct termios ots;
 
 void exit_handler(int signum)
@@ -57,19 +58,23 @@ void setup_terminal(void)
 
 	setup_handlers();
 
-	tcgetattr(STDIN_FILENO, &ts);
+	if (tcgetattr(STDIN_FILENO, &ts) == -1)
+		return;
+
 	ots = ts;
 	ts.c_lflag &= ~(ICANON | ECHO | ECHONL);
 	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ts);
 	fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+	terminit = 1;
 }
 
 void restore_terminal(void)
 {
-	tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
+	if (terminit)
+		tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
 }
 
 long get_input(char *c)
 {
-	return read(STDIN_FILENO, c, 1) != -1;
+	return read(STDIN_FILENO, c, 1) == 1;
 }
