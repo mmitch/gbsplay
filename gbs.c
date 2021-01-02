@@ -182,17 +182,18 @@ void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv)
 	gbs->nextsubsong_cb_priv = priv;
 }
 
-static void wrap_buffer_callback(struct gbs *gbs, void *priv)
+static void wrap_buffer_callback(void *priv)
 {
+	struct gbs *gbs = priv;
 	gbs->buffer->pos = gbs->gbhw_buf.pos;
-	gbs->sound_cb(gbs->buffer, priv);
+	gbs->sound_cb(gbs->buffer, gbs->sound_cb_priv);
 }
 
 void gbs_set_sound_callback(struct gbs *gbs, gbs_sound_cb fn, void *priv)
 {
 	gbs->sound_cb = fn;
 	gbs->sound_cb_priv = priv;
-	gbhw_set_callback(&gbs->gbhw, wrap_buffer_callback, priv);
+	gbhw_set_callback(&gbs->gbhw, wrap_buffer_callback, gbs);
 }
 
 long gbs_set_gbhw_filter(struct gbs *gbs, const char *type) {
@@ -523,7 +524,7 @@ long gbs_write(struct gbs *gbs, char *name, long version)
 static struct gbs *gbs_new(char *buf)
 {
 	struct gbs *gbs = calloc(sizeof(struct gbs), 1);
-	gbhw_init_struct(&gbs->gbhw, gbs);
+	gbhw_init_struct(&gbs->gbhw);
 	gbs->silence_timeout = 2*60;
 	gbs->subsong_timeout = 2*60;
 	gbs->gap = 2;

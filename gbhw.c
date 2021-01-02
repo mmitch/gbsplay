@@ -73,9 +73,7 @@ static const long msec_cycles = GBHW_CLOCK/1000;
 static const long main_div_tc = 32;
 static const long sweep_div_tc = 256;
 
-void gbhw_init_struct(struct gbhw *gbhw, struct gbs *gbs) {
-	gbhw->gbs = gbs;
-
+void gbhw_init_struct(struct gbhw *gbhw) {
 	gbhw->rombank = 1;
 	gbhw->apu_on = 1;
 	gbhw->io_written = 0;
@@ -698,7 +696,7 @@ static void gb_flush_buffer(struct gbhw *gbhw)
 	gbhw->soundbuf->l_cap = l_cap;
 	gbhw->soundbuf->r_cap = r_cap;
 
-	if (gbhw->callback != NULL) gbhw->callback(gbhw->gbs, gbhw->callbackpriv);
+	if (gbhw->callback != NULL) gbhw->callback(gbhw->callbackpriv);
 
 	overlap = gbhw->impbuf->samples - gbhw->soundbuf->samples;
 	memmove(gbhw->impbuf->data, gbhw->impbuf->data+(2*gbhw->soundbuf->samples), 4*overlap);

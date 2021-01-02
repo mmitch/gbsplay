@@ -74,14 +74,11 @@ struct gbhw_channel {
 	long duty_ctr;
 };
 
-struct gbs;
-
-typedef void (*gbhw_callback_fn)(struct gbs *gbs, void *priv);
+typedef void (*gbhw_callback_fn)(void *priv);
 typedef void (*gbhw_iocallback_fn)(long cycles, uint32_t addr, uint8_t valu, void *priv);
 typedef void (*gbhw_stepcallback_fn)(const long cycles, const struct gbhw_channel[], void *priv);
 
 struct gbhw {
-	struct gbs *gbs; // FIXME: another circular backreference
 	uint8_t *rom;
 	long rombank;
 	long lastbank;
@@ -151,7 +148,7 @@ long gbhw_set_filter(struct gbhw *gbhw, const char *type);
 void gbhw_set_rate(struct gbhw *gbhw, long rate);
 void gbhw_set_buffer(struct gbhw *gbhw, struct gbhw_buffer *buffer);
 void gbhw_init(struct gbhw *gbhw, uint8_t *rombuf, uint32_t size);
-void gbhw_init_struct(struct gbhw *gbhw, struct gbs *gbs);
+void gbhw_init_struct(struct gbhw *gbhw);
 void gbhw_enable_bootrom(struct gbhw *gbhw, const uint8_t *rombuf);
 void gbhw_master_fade(struct gbhw *gbhw, long speed, long dstvol);
 void gbhw_getminmax(struct gbhw *gbhw, int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax);
