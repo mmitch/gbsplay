@@ -1537,8 +1537,6 @@ static const struct opinfo ops[256] = {
 };
 
 #if DEBUG == 1
-static gbcpu->regs_u oldregs;
-
 static void dump_regs(struct gbcpu *gbcpu)
 {
 	long i;
@@ -1551,22 +1549,22 @@ static void dump_regs(struct gbcpu *gbcpu)
 		DPRINTF("%s=%04x ", regnamech16[i], REGS16_R(gbcpu->regs, i));
 	}
 	DPRINTF("\n");
-	oldregs = gbcpu->regs;
+	gbcpu->oldregs = gbcpu->regs;
 }
 
-static void show_reg_diffs(const struct opinfo *oi)
+static void show_reg_diffs(struct gbcpu *gbcpu, const struct opinfo *oi)
 {
 	long i;
 
 	DPRINTF("\t\t; ");
 	for (i=0; i<3; i++) {
-		if (REGS16_R(gbcpu->regs, i) != REGS16_R(oldregs, i)) {
+		if (REGS16_R(gbcpu->regs, i) != REGS16_R(gbcpu->oldregs, i)) {
 			DPRINTF("%s=%04x ", regnamech16[i], REGS16_R(gbcpu->regs, i));
-			REGS16_W(oldregs, i, REGS16_R(gbcpu->regs, i));
+			REGS16_W(gbcpu->oldregs, i, REGS16_R(gbcpu->regs, i));
 		}
 	}
 	for (i=6; i<8; i++) {
-		if (REGS8_R(gbcpu->regs, i) != REGS8_R(oldregs, i)) {
+		if (REGS8_R(gbcpu->regs, i) != REGS8_R(gbcpu->oldregs, i)) {
 			if (i == 6) { /* Flags */
 				if (gbcpu->regs.rn.f & ZF) DPRINTF("Z");
 				else DPRINTF("z");
@@ -1580,13 +1578,13 @@ static void show_reg_diffs(const struct opinfo *oi)
 			} else {
 				DPRINTF("%c=%02x ", regnames[i], REGS8_R(gbcpu->regs,i));
 			}
-			REGS8_W(oldregs, i, REGS8_R(gbcpu->regs, i));
+			REGS8_W(gbcpu->oldregs, i, REGS8_R(gbcpu->regs, i));
 		}
 	}
 	for (i=4; i<5; i++) {
-		if (REGS16_R(gbcpu->regs, i) != REGS16_R(oldregs, i)) {
+		if (REGS16_R(gbcpu->regs, i) != REGS16_R(gbcpu->oldregs, i)) {
 			DPRINTF("%s=%04x ", regnamech16[i], REGS16_R(gbcpu->regs, i));
-			REGS16_W(oldregs, i, REGS16_R(gbcpu->regs, i));
+			REGS16_W(gbcpu->oldregs, i, REGS16_R(gbcpu->regs, i));
 		}
 	}
 	DPRINTF(" %ld cycles", gbcpu->cycles);
@@ -1637,7 +1635,7 @@ long gbcpu_step(struct gbcpu *gbcpu)
 		DPRINTF("%04x: %02x", gbcpu->regs.rn.pc - 1, op);
 		ops[op].fn(gbcpu, op, &ops[op]);
 
-		DEB(show_reg_diffs(&ops[op]));
+		DEB(show_reg_diffs(gbcpu, &ops[op]));
 
 		if (gbcpu->halt_at_pc != -1 &&
 		    REGS16_R(gbcpu->regs, PC) == gbcpu->halt_at_pc) {

@@ -125,6 +125,10 @@ struct gbcpu {
 
 	long stopped;
 	long cycles;
+
+#if DEBUG == 1
+	gbcpu_regs_u oldregs;
+#endif
 	
 	gbcpu_get_fn getlookup[GBCPU_LOOKUP_SIZE];
 	gbcpu_put_fn putlookup[GBCPU_LOOKUP_SIZE];
