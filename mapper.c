@@ -9,8 +9,6 @@
 #define MAPPER_EXTRAM_SIZE 0x2000
 #define MAPPER_EXTRAM_MASK (MAPPER_EXTRAM_SIZE - 1)
 
-struct mapper;
-
 struct bank {
 	const uint8_t *data;
 	size_t size;
