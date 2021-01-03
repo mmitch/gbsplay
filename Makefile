@@ -88,8 +88,8 @@ examples           := examples/nightmode.gbs examples/gbsplayrc_sample
 mans               := man/gbsplay.1    man/gbsinfo.1    man/gbsplayrc.5
 mans_src           := man/gbsplay.in.1 man/gbsinfo.in.1 man/gbsplayrc.in.5
 
-objs_libgbspic     := gbcpu.lo gbhw.lo gbs.lo cfgparser.lo crc32.lo
-objs_libgbs        := gbcpu.o  gbhw.o  gbs.o  cfgparser.o  crc32.o
+objs_libgbspic     := gbcpu.lo gbhw.lo mapper.lo gbs.lo cfgparser.lo crc32.lo
+objs_libgbs        := gbcpu.o  gbhw.o  mapper.o  gbs.o  cfgparser.o  crc32.o
 objs_gbsinfo       := gbsinfo.o
 objs_gbsxmms       := gbsxmms.lo
 objs_gbsplay       := gbsplay.o  util.o plugout.o player.o

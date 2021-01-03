@@ -18,6 +18,7 @@
 #include <ctype.h>
 
 #include "common.h"
+#include "mapper.h"
 #include "gbhw.h"
 #include "gbcpu.h"
 #include "gbs.h"
@@ -94,6 +95,7 @@ struct gbs {
 	struct gbs_status status;
 	struct gbhw_buffer gbhw_buf;
 	struct gbhw gbhw;
+	struct mapper *mapper;
 };
 
 static void update_status_on_subsong_change(struct gbs *gbs);
@@ -132,8 +134,8 @@ long gbs_init(struct gbs *gbs, long subsong)
 {
 	struct gbhw *gbhw = &gbs->gbhw;
 	struct gbcpu *gbcpu = &gbhw->gbcpu;
-	
-	gbhw_init(gbhw, gbs->rom, gbs->romsize);
+
+	gbhw_init(gbhw);
 
 	if (subsong == -1) subsong = gbs->defaultsong - 1;
 	if (subsong >= gbs->songs) {
@@ -391,6 +393,8 @@ long gbs_toggle_mute(struct gbs *gbs, long channel) {
 static void gbs_free(struct gbs *gbs)
 {
 	gbhw_cleanup(&gbs->gbhw);
+	if (gbs->mapper)
+		mapper_free(gbs->mapper);
 	if (gbs->buf)
 		free(gbs->buf);
 	if (gbs->rom)
@@ -549,18 +553,6 @@ static struct gbs *gb_open(const char *name, char *buf, size_t size)
 	uint8_t bootrom[256];
 	char *na_str = _("gb / not available");
 
-	/* For accuracy testing purposes, support boot rom. */
-	name_len = strlen(getenv("HOME")) + strlen(boot_rom_file) + 2;
-	bootname = malloc(name_len);
-	snprintf(bootname, name_len, "%s/%s", getenv("HOME"), boot_rom_file);
-	if ((fd = open(bootname, O_RDONLY)) != -1) {
-		if (read(fd, bootrom, sizeof(bootrom)) == sizeof(bootrom)) {
-			gbhw_enable_bootrom(&gbs->gbhw, bootrom);
-			gbs->init = 0;
-		}
-	}
-	free(bootname);
-
 	/* Test if this looks like a valid rom header title */
 	for (i=0x0134; i<0x0143; i++) {
 		if (!(isalnum(buf[i]) || isspace(buf[i])))
@@ -586,6 +578,20 @@ static struct gbs *gb_open(const char *name, char *buf, size_t size)
 	gbs->rom = calloc(1, gbs->romsize);
 	memcpy(gbs->rom, buf, gbs->codelen);
 
+	gbs->mapper = mapper_gb(&gbs->gbhw.gbcpu, gbs->rom, gbs->romsize, 0);
+
+	/* For accuracy testing purposes, support boot rom. */
+	name_len = strlen(getenv("HOME")) + strlen(boot_rom_file) + 2;
+	bootname = malloc(name_len);
+	snprintf(bootname, name_len, "%s/%s", getenv("HOME"), boot_rom_file);
+	if ((fd = open(bootname, O_RDONLY)) != -1) {
+		if (read(fd, bootrom, sizeof(bootrom)) == sizeof(bootrom)) {
+			gbhw_enable_bootrom(&gbs->gbhw, bootrom);
+			gbs->init = 0;
+		}
+	}
+	free(bootname);
+
 	close(fd);
 
 	return gbs;
@@ -601,11 +607,6 @@ static struct gbs *gbr_open(const char *name, char *buf, size_t size)
 
 	if (strncmp(buf, GBR_MAGIC, 4) != 0) {
 		fprintf(stderr, _("Not a GBR-File: %s\n"), name);
-		gbs_free(gbs);
-		return NULL;
-	}
-	if (buf[0x05] != 0) {
-		fprintf(stderr, _("Unsupported default bank @0x0000: %d\n"), buf[0x05]);
 		gbs_free(gbs);
 		return NULL;
 	}
@@ -652,6 +653,8 @@ static struct gbs *gbr_open(const char *name, char *buf, size_t size)
 
 	gbs->rom = calloc(1, gbs->romsize);
 	memcpy(gbs->rom, &buf[0x20], gbs->codelen);
+
+	gbs->mapper = mapper_gbr(&gbs->gbhw.gbcpu, gbs->rom, gbs->romsize, buf[5], buf[6]);
 
 	gbs->rom[0x40] = 0xd9; /* reti */
 	gbs->rom[0x50] = 0xd9; /* reti */
@@ -900,6 +903,8 @@ static struct gbs *vgm_open(const char *name, char *buf, size_t size)
 	gbs->rom = calloc(1, gbs->romsize);
 	memcpy(&gbs->rom[0x4000], gbs->code, gbs->codelen);
 
+	gbs->mapper = mapper_gbs(&gbs->gbhw.gbcpu, gbs->rom, gbs->romsize);
+
 	/* 16 + 52 for RST + setup */
 	addr = 0x8;
 	gbs->rom[addr++] = 0xe1; /* 12: pop hl */
@@ -1068,6 +1073,8 @@ static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 
 	gbs->rom = calloc(1, gbs->romsize);
 	memcpy(&gbs->rom[gbs->load], gbs->code, gbs->codelen);
+
+	gbs->mapper = mapper_gbs(&gbs->gbhw.gbcpu, gbs->rom, gbs->romsize);
 
 	for (i=0; i<8; i++) {
 		long addr = gbs->load + 8*i; /* jump address */

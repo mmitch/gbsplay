@@ -10,6 +10,7 @@
 #define _COMMON_H_
 
 #include "config.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
@@ -32,6 +33,9 @@
 	} \
 }
 #define WARN_ONCE(...) WARN_N(1, __VA_ARGS__)
+
+#define CONTAINER_OF(ptr, type, member) \
+	((type *)((void *)(ptr) - offsetof(type, member)))
 
 #define TEXTDOMAIN "gbsplay"
 #define N_(x) x

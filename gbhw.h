@@ -27,8 +27,6 @@
 
 #define GBHW_INTRAM_SIZE 0x2000
 #define GBHW_INTRAM_MASK (GBHW_INTRAM_SIZE - 1)
-#define GBHW_EXTRAM_SIZE 0x2000
-#define GBHW_EXTRAM_MASK (GBHW_EXTRAM_SIZE - 1)
 #define GBHW_IOREGS_SIZE 0x80
 #define GBHW_IOREGS_MASK (GBHW_IOREGS_SIZE - 1)
 #define GBHW_HIRAM_SIZE  0x80
@@ -79,9 +77,6 @@ typedef void (*gbhw_iocallback_fn)(long cycles, uint32_t addr, uint8_t valu, voi
 typedef void (*gbhw_stepcallback_fn)(const long cycles, const struct gbhw_channel[], void *priv);
 
 struct gbhw {
-	uint8_t *rom;
-	long rombank;
-	long lastbank;
 	long apu_on;
 	long io_written;
 
@@ -135,10 +130,11 @@ struct gbhw {
 
 	uint8_t hiram[GBHW_HIRAM_SIZE];
 	uint8_t intram[GBHW_INTRAM_SIZE];
-	uint8_t extram[GBHW_EXTRAM_SIZE];
 	uint8_t ioregs[GBHW_IOREGS_SIZE];
 
 	uint8_t boot_rom[GBHW_BOOT_ROM_SIZE];
+	struct get_entry boot_shadow_get;
+	struct put_entry boot_shadow_put;
 };
 
 void gbhw_set_callback(struct gbhw *gbhw, gbhw_callback_fn fn, void *priv);
@@ -147,7 +143,7 @@ void gbhw_set_step_callback(struct gbhw *gbhw, gbhw_stepcallback_fn fn, void *pr
 long gbhw_set_filter(struct gbhw *gbhw, const char *type);
 void gbhw_set_rate(struct gbhw *gbhw, long rate);
 void gbhw_set_buffer(struct gbhw *gbhw, struct gbhw_buffer *buffer);
-void gbhw_init(struct gbhw *gbhw, uint8_t *rombuf, uint32_t size);
+void gbhw_init(struct gbhw *gbhw);
 void gbhw_init_struct(struct gbhw *gbhw);
 void gbhw_cleanup(struct gbhw *gbhw);
 void gbhw_enable_bootrom(struct gbhw *gbhw, const uint8_t *rombuf);

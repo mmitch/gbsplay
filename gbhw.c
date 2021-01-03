@@ -74,7 +74,6 @@ static const long main_div_tc = 32;
 static const long sweep_div_tc = 256;
 
 void gbhw_init_struct(struct gbhw *gbhw) {
-	gbhw->rombank = 1;
 	gbhw->apu_on = 1;
 	gbhw->io_written = 0;
 
@@ -106,21 +105,21 @@ void gbhw_init_struct(struct gbhw *gbhw) {
 	gbcpu_init_struct(&gbhw->gbcpu);
 }
 
-static uint32_t rom_get(void *priv, uint32_t addr)
+static uint32_t bootrom_get(void *priv, uint32_t addr)
 {
 	struct gbhw *gbhw = priv;
 	if ((addr >> 8) == 0 && gbhw->rom_lockout == 0) {
 		return gbhw->boot_rom[addr & 0xff];
 	}
-//	DPRINTF("rom_get(%04x)\n", addr);
-	return gbhw->rom[addr & 0x3fff];
+	return gbhw->boot_shadow_get.get(
+		gbhw->boot_shadow_get.priv, addr);
 }
 
-static uint32_t rombank_get(void *priv, uint32_t addr)
+static void bootrom_put(void *priv, uint32_t addr, uint8_t val)
 {
 	struct gbhw *gbhw = priv;
-//	DPRINTF("rombank_get(%04x)\n", addr);
-	return gbhw->rom[(addr & 0x3fff) + 0x4000*gbhw->rombank];
+	return gbhw->boot_shadow_put.put(
+		gbhw->boot_shadow_put.priv, addr, val);
 }
 
 static uint32_t io_get(void *priv, uint32_t addr)
@@ -187,28 +186,6 @@ static uint32_t intram_get(void *priv, uint32_t addr)
 	struct gbhw *gbhw = priv;
 //	DPRINTF("intram_get(%04x)\n", addr);
 	return gbhw->intram[addr & GBHW_INTRAM_MASK];
-}
-
-static uint32_t extram_get(void *priv, uint32_t addr)
-{
-	struct gbhw *gbhw = priv;
-//	DPRINTF("extram_get(%04x)\n", addr);
-	return gbhw->extram[addr & GBHW_EXTRAM_MASK];
-}
-
-static void rom_put(void *priv, uint32_t addr, uint8_t val)
-{
-	struct gbhw *gbhw = priv;
-	if (addr >= 0x2000 && addr <= 0x3fff) {
-		val &= 0x1f;
-		gbhw->rombank = val + (val == 0);
-		if (gbhw->rombank > gbhw->lastbank) {
-			WARN_ONCE("Bank %ld out of range (0-%ld)!\n", gbhw->rombank, gbhw->lastbank);
-			gbhw->rombank = gbhw->lastbank;
-		}
-	} else {
-		WARN_ONCE("rom write of %02x to %04x ignored\n", val, addr);
-	}
 }
 
 static void apu_reset(struct gbhw *gbhw)
@@ -566,12 +543,6 @@ static void intram_put(void *priv, uint32_t addr, uint8_t val)
 	gbhw->intram[addr & GBHW_INTRAM_MASK] = val;
 }
 
-static void extram_put(void *priv, uint32_t addr, uint8_t val)
-{
-	struct gbhw *gbhw = priv;
-	gbhw->extram[addr & GBHW_EXTRAM_MASK] = val;
-}
-
 static void sequencer_step(struct gbhw *gbhw)
 {
 	long i;
@@ -926,7 +897,7 @@ void gbhw_getminmax(struct gbhw *gbhw, int16_t *lmin, int16_t *lmax, int16_t *rm
  * so we don't need range checking in rom_get and
  * rombank_get.
  */
-void gbhw_init(struct gbhw *gbhw, uint8_t *rombuf, uint32_t size)
+void gbhw_init(struct gbhw *gbhw)
 {
 	long i;
 
@@ -935,9 +906,6 @@ void gbhw_init(struct gbhw *gbhw, uint8_t *rombuf, uint32_t size)
 
 	if (gbhw->impbuf)
 		gbhw_impbuf_reset(gbhw);
-	gbhw->rom = rombuf;
-	gbhw->lastbank = ((size + 0x3fff) / 0x4000) - 1;
-	gbhw->rombank = 1;
 	gbhw->master_volume = MASTER_VOL_MAX;
 	gbhw->master_fade = 0;
 	gbhw->apu_on = 1;
@@ -951,8 +919,7 @@ void gbhw_init(struct gbhw *gbhw, uint8_t *rombuf, uint32_t size)
 	gbhw->lminval = gbhw->rminval = INT_MAX;
 	gbhw->lmaxval = gbhw->rmaxval = INT_MIN;
 	apu_reset(gbhw);
-	assert(sizeof(gbhw->extram) == GBHW_EXTRAM_SIZE);
-	memset(gbhw->extram, 0, sizeof(gbhw->extram));
+	assert(sizeof(gbhw->intram) == GBHW_INTRAM_SIZE);
 	memset(gbhw->intram, 0, sizeof(gbhw->intram));
 	memset(gbhw->hiram, 0, sizeof(gbhw->hiram));
 	memset(gbhw->ioregs, 0, sizeof(gbhw->ioregs));
@@ -968,9 +935,6 @@ void gbhw_init(struct gbhw *gbhw, uint8_t *rombuf, uint32_t size)
 	gbhw->last_r_value = 0;
 
 	gbcpu_init(&gbhw->gbcpu);
-	gbcpu_add_mem(&gbhw->gbcpu, 0x00, 0x3f, rom_put, rom_get, gbhw);
-	gbcpu_add_mem(&gbhw->gbcpu, 0x40, 0x7f, rom_put, rombank_get, gbhw);
-	gbcpu_add_mem(&gbhw->gbcpu, 0xa0, 0xbf, extram_put, extram_get, gbhw);
 	gbcpu_add_mem(&gbhw->gbcpu, 0xc0, 0xfe, intram_put, intram_get, gbhw);
 	gbcpu_add_mem(&gbhw->gbcpu, 0xff, 0xff, io_put, io_get, gbhw);
 }
@@ -984,6 +948,9 @@ void gbhw_enable_bootrom(struct gbhw *gbhw, const uint8_t *rombuf)
 {
 	memcpy(gbhw->boot_rom, rombuf, sizeof(gbhw->boot_rom));
 	gbhw->rom_lockout = 0;
+	gbhw->boot_shadow_get = gbhw->gbcpu.getlookup[0];
+	gbhw->boot_shadow_put = gbhw->gbcpu.putlookup[0];
+	gbcpu_add_mem(&gbhw->gbcpu, 0x00, 0x00, bootrom_put, bootrom_get, gbhw);
 }
 
 /* internal for gbs.c, not exported from libgbs */
