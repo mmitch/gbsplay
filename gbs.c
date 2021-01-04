@@ -47,7 +47,7 @@
 const char *boot_rom_file = ".dmg_rom.bin";
 
 struct gbs_subsong_info {
-	uint32_t len;
+	uint32_t len;  /* GBS_LEN_DIV (1024) == 1 second */
 	char *title;
 };
 
@@ -899,7 +899,7 @@ static struct gbs *vgm_open(const char *name, char *buf, size_t size)
 
 	gbs->subsong_info = malloc(gbs->songs * sizeof(struct gbs_subsong_info));
 	memset(gbs->subsong_info, 0, gbs->songs * sizeof(struct gbs_subsong_info));
-	gbs->subsong_info[0].len = total_clocks / 4096;
+	gbs->subsong_info[0].len = total_clocks / (GBHW_CLOCK / GBS_LEN_DIV);
 
 	if (gd3_len > 0) {
 		gd3_parse(&gbs, gd3, gd3_len);
