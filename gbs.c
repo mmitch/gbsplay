@@ -578,7 +578,13 @@ static struct gbs *gb_open(const char *name, char *buf, size_t size)
 	gbs->rom = calloc(1, gbs->romsize);
 	memcpy(gbs->rom, buf, gbs->codelen);
 
-	gbs->mapper = mapper_gb(&gbs->gbhw.gbcpu, gbs->rom, gbs->romsize, 0);
+	gbs->mapper = mapper_gb(&gbs->gbhw.gbcpu, gbs->rom, gbs->romsize, buf[0x147], buf[0x148], buf[0x149]);
+	if (!gbs->mapper) {
+		fprintf(stderr, _("Unsupported cartridge type: 0x%02x\n"), buf[0x147]);
+		gbs->buf = NULL;  /* freed in gbs_open */
+		gbs_free(gbs);
+		return NULL;
+	}
 
 	/* For accuracy testing purposes, support boot rom. */
 	name_len = strlen(getenv("HOME")) + strlen(boot_rom_file) + 2;
