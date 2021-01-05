@@ -17,8 +17,6 @@
 
 #include "gbcpu.h"
 
-#define UNUSED(x) (void)(x)
-
 #if DEBUG == 1
 static const char regnames[12] = "BCDEHLFASPPC";
 static const char *regnamech16[6] = {

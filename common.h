@@ -25,6 +25,8 @@
 #define false (!true)
 #endif
 
+#define UNUSED(x) (void)(x)
+
 #define WARN_N(n, ...) { \
 	static long ctr = n; \
 	if (ctr) { \
