@@ -593,12 +593,13 @@ const uint8_t *gbs_get_bootrom()
 	static uint8_t bootrom[256];
 	char *bootname = NULL;
 	size_t name_len;
-	FILE *namef = open_memstream(&bootname, &name_len);
 	FILE *romf;
 
-	fprintf(namef, "%s/%s", getenv("HOME"), boot_rom_file);
-	fclose(namef);
+	name_len = strlen(getenv("HOME")) + strlen(boot_rom_file) + 2;
+	bootname = malloc(name_len);
+	snprintf(bootname, name_len, "%s/%s", getenv("HOME"), boot_rom_file);
 	romf = fopen(bootname, "rb");
+	free(bootname);
 	if (!romf) {
 		return NULL;
 	}
