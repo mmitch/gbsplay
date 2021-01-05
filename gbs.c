@@ -545,7 +545,10 @@ void gbs_write_rom(struct gbs *gbs, FILE *out, const uint8_t *logo_data)
 {
 	if (gbs->rom[0x104] != 0xce) {
 		unsigned long tmp = gbs->romsize;
+		int i;
 		uint8_t rom_size = 0;
+		uint8_t chksum = 0x19;
+
 		while (tmp > 32768) {
 			rom_size++;
 			tmp >>= 1;
@@ -558,6 +561,11 @@ void gbs_write_rom(struct gbs *gbs, FILE *out, const uint8_t *logo_data)
 		gbs->rom[0x147] = 0x02;  /* MBC1+RAM */
 		gbs->rom[0x148] = rom_size;
 		gbs->rom[0x149] = 0x02;  /* 8KiB of RAM */
+
+		for (i = 0x134; i < 0x14c; i++) {
+			chksum += gbs->rom[i];
+		}
+		gbs->rom[0x14d] = -chksum;
 	}
 	fwrite(gbs->rom, 1, gbs->romsize, out);
 }
