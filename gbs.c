@@ -541,6 +541,27 @@ long gbs_write(struct gbs *gbs, char *name, long version)
 	return 1;
 }
 
+void gbs_write_rom(struct gbs *gbs, FILE *out, const uint8_t *logo_data)
+{
+	if (gbs->rom[0x104] != 0xce) {
+		unsigned long tmp = gbs->romsize;
+		uint8_t rom_size = 0;
+		while (tmp > 32768) {
+			rom_size++;
+			tmp >>= 1;
+		}
+		if (rom_size > 8) {
+			fprintf(stderr, _("ROM size above limit (8 MiB)!"));
+		}
+		memcpy(&gbs->rom[0x104], logo_data, 0x30);
+		snprintf((char*)&gbs->rom[0x134], 16, "%s", gbs->title);
+		gbs->rom[0x147] = 0x02;  /* MBC1+RAM */
+		gbs->rom[0x148] = rom_size;
+		gbs->rom[0x149] = 0x02;  /* 8KiB of RAM */
+	}
+	fwrite(gbs->rom, 1, gbs->romsize, out);
+}
+
 static struct gbs *gbs_new(char *buf)
 {
 	struct gbs *gbs = calloc(sizeof(struct gbs), 1);
@@ -559,14 +580,35 @@ static struct gbs *gbs_new(char *buf)
 	return gbs;
 }
 
+const uint8_t *gbs_get_bootrom()
+{
+	static uint8_t bootrom[256];
+	char *bootname = NULL;
+	size_t name_len;
+	FILE *namef = open_memstream(&bootname, &name_len);
+	FILE *romf;
+
+	fprintf(namef, "%s/%s", getenv("HOME"), boot_rom_file);
+	fclose(namef);
+	romf = fopen(bootname, "rb");
+	if (!romf) {
+		return NULL;
+	}
+	if (fread(bootrom, 1, sizeof(bootrom), romf) != sizeof(bootrom)) {
+		fclose(romf);
+		return NULL;
+	}
+	fclose(romf);
+
+	return bootrom;
+}
+
 static struct gbs *gb_open(const char *name, char *buf, size_t size)
 {
-	int fd;
-	long i, name_len;
+	long i;
 	struct gbs *gbs = gbs_new(buf);
-	char *bootname;
-	uint8_t bootrom[256];
 	char *na_str = _("gb / not available");
+	const uint8_t *bootrom = gbs_get_bootrom();
 
 	/* Test if this looks like a valid rom header title */
 	for (i=0x0134; i<0x0143; i++) {
@@ -602,19 +644,10 @@ static struct gbs *gb_open(const char *name, char *buf, size_t size)
 	}
 
 	/* For accuracy testing purposes, support boot rom. */
-	name_len = strlen(getenv("HOME")) + strlen(boot_rom_file) + 2;
-	bootname = malloc(name_len);
-	snprintf(bootname, name_len, "%s/%s", getenv("HOME"), boot_rom_file);
-	if ((fd = open(bootname, O_RDONLY)) != -1) {
-		if (read(fd, bootrom, sizeof(bootrom)) == sizeof(bootrom)) {
-			gbhw_enable_bootrom(&gbs->gbhw, bootrom);
-			gbs->init = 0;
-		}
+	if (bootrom != NULL) {
+		gbhw_enable_bootrom(&gbs->gbhw, bootrom);
+		gbs->init = 0;
 	}
-	free(bootname);
-
-	close(fd);
-
 	return gbs;
 }
 
@@ -959,7 +992,12 @@ static struct gbs *vgm_open(const char *name, char *buf, size_t size)
 	gbs->rom[0x0040] = 0xd9; /* reti */
 	gbs->rom[0x0050] = 0xd9; /* reti */
 
-	addr = 0x440;
+	gbs->rom[0x0100] = 0x00; /* nop */
+	gbs->rom[0x0101] = 0xc3; /* jp */
+	gbs->rom[0x0102] = gbs->init & 0xff;
+	gbs->rom[0x0103] = gbs->init >> 8;
+
+	addr = gbs->init;
 	gbs->rom[addr++] = 0xf3; /* di */
 	gbs->rom[addr++] = 0x3e; /* ld a, 1 */
 	gbs->rom[addr++] = 0x01;

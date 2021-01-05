@@ -90,6 +90,7 @@ mans_src           := man/gbsplay.in.1 man/gbsinfo.in.1 man/gbsplayrc.in.5
 
 objs_libgbspic     := gbcpu.lo gbhw.lo mapper.lo gbs.lo cfgparser.lo crc32.lo
 objs_libgbs        := gbcpu.o  gbhw.o  mapper.o  gbs.o  cfgparser.o  crc32.o
+objs_gbs2gb        := gbs2gb.o
 objs_gbsinfo       := gbsinfo.o
 objs_gbsxmms       := gbsxmms.lo
 objs_gbsplay       := gbsplay.o  util.o plugout.o player.o
@@ -179,6 +180,7 @@ binsuffix         :=
 endif
 gbsplaybin        := gbsplay$(binsuffix)
 xgbsplaybin       := xgbsplay$(binsuffix)
+gbs2gbbin         := gbs2gb$(binsuffix)
 gbsinfobin        := gbsinfo$(binsuffix)
 test_gbsbin       := test_gbs$(binsuffix)
 gen_impulse_h_bin := gen_impulse_h$(binsuffix)
@@ -247,6 +249,7 @@ else
 GBSLDFLAGS += -lm
 objs += $(objs_libgbs)
 objs_gbsplay += libgbs.a
+objs_gbs2gb += libgbs.a
 objs_gbsinfo += libgbs.a
 objs_test_gbs += libgbs.a
 ifeq ($(build_xmmsplugin),yes)
@@ -262,8 +265,8 @@ libgbspic: libgbspic.a
 	touch libgbspic
 endif # use_sharedlibs
 
-objs += $(objs_gbsplay) $(objs_gbsinfo)
-dsts += gbsplay gbsinfo
+objs += $(objs_gbsplay) $(ojbs_gbs2gb) $(objs_gbsinfo)
+dsts += gbsplay gbs2gb gbsinfo
 
 ifeq ($(build_xmmsplugin),yes)
 objs += $(objs_gbsxmms)
@@ -307,7 +310,7 @@ clean-default:
 	find . -name "*~" -exec rm -f "{}" \;
 	rm -f libgbs libgbspic libgbs.def libgbs.so.1.ver
 	rm -f $(mans)
-	rm -f $(gbsplaybin) $(gbsinfobin)
+	rm -f $(gbsplaybin) $(gbs2gbbin) $(gbsinfobin)
 	rm -f $(test_gbsbin)
 	rm -f $(gen_impulse_h_bin) impulse.h
 
@@ -324,7 +327,7 @@ install-default:
 	install -d $(exampledir)
 	install -d $(mimedir)/packages
 	install -d $(appdir)
-	install -m 755 $(gbsplaybin) $(gbsinfobin) $(bindir)
+	install -m 755 $(gbsplaybin) $(gbs2gbbin) $(gbsinfobin) $(bindir)
 	install -m 644 man/gbsplay.1 man/gbsinfo.1 $(man1dir)
 	install -m 644 man/gbsplayrc.5 $(man5dir)
 	install -m 644 mime/gbsplay.xml $(mimedir)/packages
@@ -358,7 +361,7 @@ install-xgbsplay:
 uninstall: uninstall-default $(EXTRA_UNINSTALL)
 
 uninstall-default:
-	rm -f $(bindir)/$(gbsplaybin) $(bindir)/$(gbsinfobin)
+	rm -f $(bindir)/$(gbsplaybin) $(bindir)/$(gbs2gbbin) $(bindir)/$(gbsinfobin)
 	-rmdir -p $(bindir)
 	rm -f $(man1dir)/gbsplay.1 $(man1dir)/gbsinfo.1
 	-rmdir -p $(man1dir)
@@ -460,6 +463,8 @@ libgbspic.a: $(objs_libgbspic)
 	$(AR) r $@ $+
 libgbs.a: $(objs_libgbs)
 	$(AR) r $@ $+
+gbs2gb: $(objs_gbs2gb) libgbs
+	$(BUILDCC) -o $(gbs2gbbin) $(objs_gbs2gb) $(GBSLDFLAGS)
 gbsinfo: $(objs_gbsinfo) libgbs
 	$(BUILDCC) -o $(gbsinfobin) $(objs_gbsinfo) $(GBSLDFLAGS)
 gbsplay: $(objs_gbsplay) libgbs
