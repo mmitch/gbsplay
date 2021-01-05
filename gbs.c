@@ -721,15 +721,17 @@ static struct gbs *gbr_open(const char *name, char *buf, size_t size)
 	gbs->rom[0x50] = 0xd9; /* reti */
 	if (buf[0x07] & 1) {
 		/* V-Blank */
-		gbs->rom[0x40] = 0xc3; /* jp imm16 */
+		gbs->rom[0x40] = 0xcd; /* call imm16 */
 		gbs->rom[0x41] = vsync_addr & 0xff;
 		gbs->rom[0x42] = vsync_addr >> 8;
+		gbs->rom[0x43] = 0xd9; /* reti */
 	}
 	if (buf[0x07] & 2) {
 		/* Timer */
-		gbs->rom[0x50] = 0xc3; /* jp imm16 */
+		gbs->rom[0x50] = 0xcd; /* call imm16 */
 		gbs->rom[0x51] = timer_addr & 0xff;
 		gbs->rom[0x52] = timer_addr >> 8;
+		gbs->rom[0x53] = 0xd9; /* reti */
 	}
 
 	return gbs;
@@ -1148,25 +1150,29 @@ static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 	}
 	if ((gbs->tac & 0x78) == 0x40) { /* ugetab int vector extension */
 		/* V-Blank */
-		gbs->rom[0x40] = 0xc3; /* jp imm16 */
+		gbs->rom[0x40] = 0xcd; /* call imm16 */
 		gbs->rom[0x41] = (gbs->load + 0x40) & 0xff;
 		gbs->rom[0x42] = (gbs->load + 0x40) >> 8;
+		gbs->rom[0x43] = 0xd9; /* reti */
 		/* Timer */
-		gbs->rom[0x50] = 0xc3; /* jp imm16 */
+		gbs->rom[0x50] = 0xcd; /* call imm16 */
 		gbs->rom[0x51] = (gbs->load + 0x48) & 0xff;
 		gbs->rom[0x52] = (gbs->load + 0x48) >> 8;
+		gbs->rom[0x53] = 0xd9; /* reti */
 	} else if (gbs->tac & 0x04) { /* timer enabled */
 		/* V-Blank */
 		gbs->rom[0x40] = 0xd9; /* reti */
 		/* Timer */
-		gbs->rom[0x50] = 0xc3; /* jp imm16 */
+		gbs->rom[0x50] = 0xcd; /* call imm16 */
 		gbs->rom[0x51] = gbs->play & 0xff;
 		gbs->rom[0x52] = gbs->play >> 8;
+		gbs->rom[0x53] = 0xd9; /* reti */
 	} else {
 		/* V-Blank */
-		gbs->rom[0x40] = 0xc3; /* jp imm16 */
+		gbs->rom[0x40] = 0xcd; /* call imm16 */
 		gbs->rom[0x41] = gbs->play & 0xff;
 		gbs->rom[0x42] = gbs->play >> 8;
+		gbs->rom[0x43] = 0xd9; /* reti */
 		/* Timer */
 		gbs->rom[0x50] = 0xd9; /* reti */
 	}
