@@ -626,8 +626,7 @@ static struct gbs *gb_open(const char *name, char *buf, size_t size)
 	gbs->code = buf;
 	gbs->filesize = size;
 
-	gbs->subsong_info = malloc(gbs->songs * sizeof(struct gbs_subsong_info));
-	memset(gbs->subsong_info, 0, gbs->songs * sizeof(struct gbs_subsong_info));
+	gbs->subsong_info = calloc(sizeof(struct gbs_subsong_info), gbs->songs);
 	gbs->codelen = size - 0x20;
 	gbs->crcnow = gbs_crc32(0, buf, gbs->filesize);
 	gbs->romsize = (gbs->codelen + 0x3fff) & ~0x3fff;
@@ -699,8 +698,7 @@ static struct gbs *gbr_open(const char *name, char *buf, size_t size)
 	gbs->code = &buf[0x20];
 	gbs->filesize = size;
 
-	gbs->subsong_info = malloc(gbs->songs * sizeof(struct gbs_subsong_info));
-	memset(gbs->subsong_info, 0, gbs->songs * sizeof(struct gbs_subsong_info));
+	gbs->subsong_info = calloc(sizeof(struct gbs_subsong_info), gbs->songs);
 	gbs->codelen = size - 0x20;
 	gbs->crcnow = gbs_crc32(0, buf, gbs->filesize);
 	gbs->romsize = (gbs->codelen + 0x3fff) & ~0x3fff;
@@ -945,8 +943,7 @@ static struct gbs *vgm_open(const char *name, char *buf, size_t size)
 	gbs->filesize = size;
 	gbs->crcnow = gbs_crc32(0, buf, gbs->filesize);
 
-	gbs->subsong_info = malloc(gbs->songs * sizeof(struct gbs_subsong_info));
-	memset(gbs->subsong_info, 0, gbs->songs * sizeof(struct gbs_subsong_info));
+	gbs->subsong_info = calloc(sizeof(struct gbs_subsong_info), gbs->songs);
 	gbs->subsong_info[0].len = total_clocks / (GBHW_CLOCK / GBS_LEN_DIV);
 
 	if (gd3_len > 0) {
@@ -1065,8 +1062,7 @@ static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 	gbs->code = &buf[0x70];
 	gbs->filesize = size;
 
-	gbs->subsong_info = malloc(gbs->songs * sizeof(struct gbs_subsong_info));
-	memset(gbs->subsong_info, 0, gbs->songs * sizeof(struct gbs_subsong_info));
+	gbs->subsong_info = calloc(sizeof(struct gbs_subsong_info), gbs->songs);
 	gbs->codelen = (buf[0x6e] + (buf[0x6f] << 8)) << 4;
 	if ((0x70 + gbs->codelen) < (gbs->filesize - 8) &&
 	    strncmp(&buf[0x70 + gbs->codelen], GBS_EXTHDR_MAGIC, 4) == 0) {
