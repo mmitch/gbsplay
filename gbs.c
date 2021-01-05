@@ -1032,7 +1032,7 @@ static struct gbs *vgm_open(const char *name, char *buf, size_t size)
 static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 {
 	struct gbs *gbs = gbs_new(buf);
-	long i;
+	long i, addr, jpaddr;
 	long have_ehdr = 0;
 	char *buf2;
 
@@ -1179,6 +1179,56 @@ static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 	gbs->rom[0x48] = 0xd9; /* reti (LCD Stat) */
 	gbs->rom[0x58] = 0xd9; /* reti (Serial) */
 	gbs->rom[0x60] = 0xd9; /* reti (Joypad) */
+
+	/* In case this is dumped as a ROM */
+	gbs->rom[0x0100] = 0x00; /* nop */
+	gbs->rom[0x0101] = 0xc3; /* jp */
+	gbs->rom[0x0102] = 0x150 & 0xff;
+	gbs->rom[0x0103] = 0x150 >> 8;
+
+	addr = 0x150;
+	gbs->rom[addr++] = 0x21;  /* LD hl */
+	gbs->rom[addr++] = gbs->stack & 0xff;
+	gbs->rom[addr++] = gbs->stack >> 8;
+	gbs->rom[addr++] = 0xf9;  /* LD sp, hl */
+
+	gbs->rom[addr++] = 0x3e;  /* LD a, imm8 */
+	gbs->rom[addr++] = gbs->tma;
+	gbs->rom[addr++] = 0xe0;  /* LDH (a8), A */
+	gbs->rom[addr++] = 0x06;  /* TMA reg */
+
+	gbs->rom[addr++] = 0x3e;  /* LD a, imm8 */
+	gbs->rom[addr++] = gbs->tac;
+	gbs->rom[addr++] = 0xe0;  /* LDH (a8), A */
+	gbs->rom[addr++] = 0x07;  /* TAC reg */
+
+	gbs->rom[addr++] = 0x26;  /* LD h, imm8 */
+	gbs->rom[addr++] = 0x20;
+	gbs->rom[addr++] = 0x36;  /* LD (HL), imm8 */
+	gbs->rom[addr++] = gbs->defaultbank;
+
+	/*
+	 * Call init function while interrupts are still disabled,
+	 * otherwise nightmode.gbs breaks. This is per spec:
+	 * "PLAY - Begins after INIT process is complete"
+	 */
+	gbs->rom[addr++] = 0x3e; /* LD a, imm8 */
+	gbs->rom[addr++] = 0x00; /* first song */
+	gbs->rom[addr++] = 0xcd; /* call imm16 */
+	gbs->rom[addr++] = gbs->init & 0xff;
+	gbs->rom[addr++] = gbs->init >> 8;
+
+	/* Enable interrupts now */
+	gbs->rom[addr++] = 0x3e;  /* LD a, imm8 */
+	gbs->rom[addr++] = 0x05;  /* enable vblank + timer */
+	gbs->rom[addr++] = 0xe0;  /* LDH (a8), A */
+	gbs->rom[addr++] = 0xff;  /* IE reg */
+
+	jpaddr = addr;
+	gbs->rom[addr++] = 0x76; /* halt */
+	gbs->rom[addr++] = 0xc3; /* jp @loop */
+	gbs->rom[addr++] = jpaddr & 0xff;
+	gbs->rom[addr++] = jpaddr >> 8;
 
 	return gbs;
 }
