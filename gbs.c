@@ -98,6 +98,21 @@ struct gbs {
 	struct mapper *mapper;
 };
 
+const char *gbs_get_title(struct gbs *gbs)
+{
+	return gbs->title;
+}
+
+const char *gbs_get_author(struct gbs *gbs)
+{
+	return gbs->author;
+}
+
+const char *gbs_get_copyright(struct gbs *gbs)
+{
+	return gbs->copyright;
+}
+
 static void update_status_on_subsong_change(struct gbs *gbs);
 
 void gbs_configure(struct gbs *gbs, long subsong, long subsong_timeout, long silence_timeout, long subsong_gap, long fadeout)

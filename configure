@@ -85,7 +85,7 @@ check_include()
     local include="$1"
     local includedirs="${2-} /usr/local/include /opt/local/include"
     local extraline="${3-}"
-    local includename="$(echo "$include" | sed -e 's@[/\.]@_@g')"
+    local includename="$(echo "$include" | sed -e 's@[/\.-]@_@g')"
     eval "value=\${have_${includename}-}"
     test -z "$value" || return
 
@@ -113,11 +113,12 @@ find_lib()
 {
     local INFILE="$TEMPDIR/fl.c"
     local lib="$1"
+    local libname="$(echo "$lib" | sed -e 's@[/\.-]@_@g')"
     local libdirs="${2-} /usr/local/lib /opt/local/lib"
 
     cat > "$INFILE"
 
-    eval "val=\"\${lib${lib}_path-}\""
+    eval "val=\"\${lib${libname}_path-}\""
     if [ ! -z "$val" ]; then
         return 0
     else
@@ -127,7 +128,7 @@ find_lib()
             test -z "$dir" || msg="$msg in $dir"
             test -z "$dir" || flags="$flags -L$dir"
             if cc_check "$msg" "" "$flags" ok < "$INFILE"; then
-                eval "lib${lib}_path=\"$dir \""
+                eval "lib${libname}_path=\"$dir \""
                 return 0
             fi
         done
@@ -184,6 +185,7 @@ check_libs()
     local INFILE="$TEMPDIR/cl.c"
     local OUTFILE="$TEMPDIR/cl"
     local checklib="$1"
+    local libname="$(echo "$checklib" | sed -e 's@[/\.-]@_@g')"
     local extralibs="${checklib} ${2-}"
     local extralibdirs="${3-}"
     local name="${4-}"
@@ -191,7 +193,7 @@ check_libs()
     local msg="${6-$checklib}"
     local cflags="$CFLAGS $LDFLAGS"
 
-    eval "lib${checklib}_flags="
+    eval "lib${libname}_flags="
 
     cat > "$INFILE"
 
@@ -199,9 +201,10 @@ check_libs()
     test $? -eq 0 && return 0
 
     for extralib in $extralibs; do
+        local libname="$(echo "$extralib" | sed -e 's@[/\.-]@_@g')"
         find_lib "$extralib" "$extralibdirs" < "$INFILE"
         test $? -ne 0 && return 1
-        eval "val=\"\$lib${extralib}_path\""
+        eval "val=\"\$lib${libname}_path\""
         if [ "$val" != " " ]; then
             append_nodupe extraflags "-L$val"
         fi
@@ -226,7 +229,7 @@ check_libs()
         return 1
     fi
 
-    eval "lib${checklib}_flags=\"$extraflags\""
+    eval "lib${libname}_flags=\"$extraflags\""
     return 0
 }
 
@@ -963,20 +966,54 @@ fi
 ## can xgbsplay be built?
 
 if [ "$build_xgbsplay" != "no" ]; then
-    ## check for Xlib
+    ## check for XCB
 
-    check_include X11/Xlib.h "/usr/X11R6/include"
+    check_include xcb/xcb.h \
+    && check_include xcb/xcb_icccm.h "" "#include <xcb/xcb.h>" \
+    && check_include "cairo/cairo-xcb.h"
     retval1=$?
     retval2=1
     if [ $retval1 -eq 0 ]; then
-        check_libs X11 "" "/usr/X11R6/lib /usr/X11/lib /usr/lib/X11" <<EOF
-int main(int argc, char **argv) { return 0; }
+        check_libs xcb <<EOF
+#include <xcb/xcb.h>
+#include <stdio.h>
+int main(int argc, char **argv) {
+  printf("%p\n", xcb_connect);
+  return 0;
+}
 EOF
         retval2=$?
+        check_libs xcb-icccm <<EOF
+#include <xcb/xcb.h>
+#include <xcb/xcb_icccm.h>
+#include <stdio.h>
+int main(int argc, char **argv) {
+  printf("%p\n", xcb_icccm_set_wm_name);
+  return 0;
+}
+EOF
+        retval3=$?
+        check_libs cairo <<EOF
+#include <xcb/xcb.h>
+#include <cairo/cairo-xcb.h>
+#include <stdio.h>
+int main(int argc, char **argv) {
+  printf("%p\n", cairo_create);
+  return 0;
+}
+EOF
+        retval4=$?
+        [ $retval2 -eq 0 -a $retval3 -eq 0 -a $retval4 -eq 0 ] || retval2=1
     fi
-    if [ $retval1 -eq 0 ] && [ $retval2 -eq 0 ]; then
-        if [ "$include_X11_Xlib_h_path" != " " ]; then
-            append_nodupe CFLAGS "-I$include_X11_Xlib_h_path"
+    if [ $retval1 -eq 0 -a $retval2 -eq 0 ]; then
+        if [ "$include_xcb_xcb_h_path" != " " ]; then
+            append_nodupe CFLAGS "-I$include_xcb_xcb_h_path"
+        fi
+        if [ "$include_xcb_xcb_icccm_h_path" != " " ]; then
+            append_nodupe CFLAGS "-I$include_xcb_xcb_icccm_h_path"
+        fi
+        if [ "$include_cairo_cairo_xcb_h_path" != " " ]; then
+            append_nodupe CFLAGS "-I$include_cairo_cairo_xcb_h_path"
         fi
 	EXTRA_INSTALL="$EXTRA_INSTALL xgbsplay"
 	EXTRA_UNINSTALL="$EXTRA_UNINSTALL xgbsplay"

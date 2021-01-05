@@ -74,7 +74,7 @@ GBSLIBLDFLAGS := -lm $(subst -pie,,$(subst -Wl$(comma)-pie,,$(EXTRA_LDFLAGS)))
 # Additional ldflags for the gbsplay executable
 GBSPLAYLDFLAGS :=
 # Additional ldflags for the xgbsplay executable
-XGBSPLAYLDFLAGS := -lX11
+XGBSPLAYLDFLAGS := -lxcb -lxcb-icccm -lcairo
 
 EXTRA_CLEAN :=
 

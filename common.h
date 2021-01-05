@@ -37,6 +37,8 @@
 #define CONTAINER_OF(ptr, type, member) \
 	((type *)((void *)(ptr) - offsetof(type, member)))
 
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof(*(x)))
+
 #define TEXTDOMAIN "gbsplay"
 #define N_(x) x
 
