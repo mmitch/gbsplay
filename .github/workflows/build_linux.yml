@@ -25,7 +25,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install libasound2-dev libpulse-dev libaudio-dev libx11-dev libsdl2-dev
+        sudo apt-get install libasound2-dev libpulse-dev libaudio-dev libxcb1-dev libxcb-icccm4-dev libcairo2-dev libsdl2-dev
     - name: Install valgrind
       if: ${{ matrix.flags == '' }}
       run: |
