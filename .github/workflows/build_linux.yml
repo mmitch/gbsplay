@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         compiler: [gcc, clang]
-        flags: ['', --disable-i18n --disable-zlib --prefix=/tmp/gbsplay, --enable-sharedlibgbs, --with-xgbsplay --enable-verbosebuild]
+        flags: ['', --disable-i18n --disable-zlib --prefix=/tmp/gbsplay, --enable-sharedlibgbs, --with-xgbsplay]
 
     steps:
     - uses: actions/checkout@v2
@@ -33,7 +33,7 @@ jobs:
     - name: Build and test
       env:
         CC: ${{ matrix.compiler }}
-        CONFIGURE_FLAGS: ${{ matrix.flags }}
+        CONFIGURE_FLAGS: ${{ matrix.flags }} --enable-verbosebuild
       run: |
         make
     - name: Check activated plugouts
@@ -41,7 +41,7 @@ jobs:
         ./check_plugouts.sh alsa pulse devdsp nas sdl
     - name: Check build flags
       run: |
-        ./check_buildflags.sh ${{ matrix.flags }}
+        ./check_buildflags.sh ${{ matrix.flags }} --enable-verbosebuild
     - name: Check with valgrind
       if: ${{ matrix.flags == '' }}
       run: |

@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         msystem: [MSYS, MINGW64, MINGW32]
-        flags: ['', '--enable-sharedlibgbs --enable-verbosebuild']
+        flags: ['', '--enable-sharedlibgbs']
         include:
           - msystem: MSYS
             packages: gcc
@@ -45,7 +45,7 @@ jobs:
         update: false
     - name: Build and test
       env:
-        CONFIGURE_FLAGS: ${{ matrix.flags }}
+        CONFIGURE_FLAGS: ${{ matrix.flags }} --enable-verbosebuild
       run: |
         make
     - name: Check activated plugouts
@@ -53,7 +53,7 @@ jobs:
         ./check_plugouts.sh ${{ matrix.plugouts }}
     - name: Check build flags
       run: |
-        ./check_buildflags.sh --disable-hardening ${{ matrix.flags }}
+        ./check_buildflags.sh --disable-hardening ${{ matrix.flags }} --enable-verbosebuild
     - name: Dump configure on error
       if: ${{ failure() }}
       run: |

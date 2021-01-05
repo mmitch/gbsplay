@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         compiler: [gcc, clang]
-        flags: [--enable-verbosebuild]
+        flags: ['']
 
     steps:
     - uses: actions/checkout@v2
@@ -28,7 +28,7 @@ jobs:
     - name: Build and test
       env:
         CC: ${{ matrix.compiler }}
-        CONFIGURE_FLAGS: ${{ matrix.flags }}
+        CONFIGURE_FLAGS: ${{ matrix.flags }} --enable-verbosebuild
       run: |
         make
     - name: Check activated plugouts
@@ -36,7 +36,7 @@ jobs:
         ./check_plugouts.sh sdl
     - name: Check build flags
       run: |
-        ./check_buildflags.sh ${{ matrix.flags }}
+        ./check_buildflags.sh ${{ matrix.flags }} --enable-verbosebuild
     - name: Dump configure on error
       if: ${{ failure() }}
       run: |
