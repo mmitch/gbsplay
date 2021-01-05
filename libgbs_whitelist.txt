@@ -6,6 +6,7 @@ gbs_close
 gbs_configure
 gbs_configure_channels
 gbs_configure_output
+gbs_get_bootrom
 gbs_get_status
 gbs_init
 gbs_io_peek
@@ -20,4 +21,5 @@ gbs_set_sound_callback
 gbs_step
 gbs_toggle_mute
 gbs_write
+gbs_write_rom
 get_userconfig
