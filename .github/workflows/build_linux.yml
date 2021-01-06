@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         compiler: [gcc, clang]
-        flags: ['', --disable-i18n --disable-zlib --prefix=/tmp/gbsplay, --enable-sharedlibgbs, --with-xgbsplay]
+        flags: ['', --disable-i18n --disable-zlib --prefix=/tmp/gbsplay, --enable-sharedlibgbs, --with-xgbsplay --enable-sharedlibgbs]
 
     steps:
     - uses: actions/checkout@v2
