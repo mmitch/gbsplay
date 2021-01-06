@@ -1,7 +1,7 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -89,7 +89,6 @@ static GtkWidget *entry_filename;
 static GtkWidget *entry_game;
 static GtkWidget *entry_artist;
 static GtkWidget *entry_copyright;
-static GtkWidget *table2;
 static GtkWidget *viewport1;
 
 static char *file_info_title;
@@ -279,27 +278,6 @@ static void gbs_play(char *filename)
  * gtk glue code
  ********************************************************************/
 
-static void tableenum(gpointer data, gpointer user_data)
-{
-	long i;
-	GtkTableChild *child = (GtkTableChild*) data;
-
-	i = child->top_attach;
-	if (i>0) switch (child->left_attach) {
-	case 1:
-		file_info_gbs->subsong_info[i-1].title = strdup(
-			gtk_entry_get_text(GTK_ENTRY(child->widget)));
-		break;
-	case 2:
-		{
-			float value = gtk_spin_button_get_value_as_float(GTK_SPIN_BUTTON(child->widget));
-			value *= (float)GBS_LEN_DIV;
-			file_info_gbs->subsong_info[i-1].len = (long) value;
-		}
-		break;
-	}
-}
-
 static void on_button_next_clicked(GtkButton *button, gpointer user_data)
 {
 	next_subsong(1);
@@ -316,8 +294,6 @@ static void on_button_save_clicked(GtkButton *button, gpointer user_data)
 	file_info_gbs->author = strdup(gtk_entry_get_text(GTK_ENTRY(entry_artist)));
 	file_info_gbs->copyright = strdup(gtk_entry_get_text(GTK_ENTRY(entry_copyright)));
 
-	g_list_foreach(GTK_TABLE(table2)->children, tableenum, NULL);
-
 	gbs_write(file_info_gbs, file_info_filename);
 }
 
@@ -326,12 +302,6 @@ static void on_button_cancel_clicked(GtkButton *button, gpointer user_data)
 	if (file_info_gbs) {
 		gbs_close(file_info_gbs);
 		file_info_gbs = NULL;
-		if (table2) {
-			gtk_container_remove (GTK_CONTAINER (viewport1), table2);
-			gtk_widget_unref(GTK_WIDGET(table2));
-			table2 = NULL;
-		}
-
 	}
 	gtk_widget_hide(dialog_fileinfo);
 }
@@ -591,71 +561,6 @@ static void file_info_box(char *filename)
 		gtk_entry_set_text(GTK_ENTRY(entry_game), file_info_gbs->title);
 		gtk_entry_set_text(GTK_ENTRY(entry_artist), file_info_gbs->author);
 		gtk_entry_set_text(GTK_ENTRY(entry_copyright), file_info_gbs->copyright);
-
-		if (table2) {
-			gtk_container_remove (GTK_CONTAINER (viewport1), table2);
-			gtk_widget_unref(GTK_WIDGET(table2));
-		}
-
-		table2 = gtk_table_new (file_info_gbs->songs + 1, 3, FALSE);
-		gtk_widget_ref(table2);
-		gtk_widget_show(table2);
-		gtk_container_add (GTK_CONTAINER (viewport1), table2);
-		gtk_container_set_border_width (GTK_CONTAINER (table2), 5);
-		gtk_table_set_row_spacings (GTK_TABLE (table2), 5);
-		gtk_table_set_col_spacings (GTK_TABLE (table2), 5);
-
-		label = gtk_label_new(_("Subsong"));
-		gtk_widget_show(label);
-		gtk_table_attach(GTK_TABLE(table2), label,
-		                 0, 1, 0, 1,
-		                 (GtkAttachOptions) (GTK_FILL),
-		                 (GtkAttachOptions) (0), 0, 0);
-		label = gtk_label_new(_("Title"));
-		gtk_widget_show(label);
-		gtk_table_attach(GTK_TABLE(table2), label,
-		                 1, 2, 0, 1,
-		                 (GtkAttachOptions) (GTK_FILL),
-		                 (GtkAttachOptions) (0), 0, 0);
-		label = gtk_label_new(_("Length    "));
-		gtk_widget_show(label);
-		gtk_table_attach(GTK_TABLE(table2), label,
-		                 2, 3, 0, 1,
-		                 (GtkAttachOptions) (GTK_FILL),
-		                 (GtkAttachOptions) (0), 0, 0);
-
-		for (i=0; i<file_info_gbs->songs; i++) {
-			char buf[5];
-			GtkWidget *label;
-			GtkWidget *entry = gtk_entry_new();
-			GtkObject *sb_adj = gtk_adjustment_new(
-			                     file_info_gbs->subsong_info[i].len >> GBS_LEN_SHIFT,
-			                     0, 1800, 1, 10, 10);
-			GtkWidget *spinbutton = gtk_spin_button_new(GTK_ADJUSTMENT(sb_adj), 1, 2);
-
-			snprintf(buf, sizeof(buf), "%03ld:", i);
-			label = gtk_label_new(buf);
-
-			if (file_info_gbs->subsong_info[i].title)
-				gtk_entry_set_text(GTK_ENTRY(entry),
-				                   file_info_gbs->subsong_info[i].title);
-			gtk_widget_show(label);
-			gtk_widget_show(entry);
-			gtk_widget_show(spinbutton);
-			gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
-			gtk_table_attach(GTK_TABLE(table2), label,
-			                 0, 1, i+1, i+2,
-			                 (GtkAttachOptions) (GTK_FILL),
-			                 (GtkAttachOptions) (0), 0, 0);
-			gtk_table_attach(GTK_TABLE(table2), entry,
-			                 1, 2, i+1, i+2,
-			                 (GtkAttachOptions) (GTK_EXPAND|GTK_FILL),
-			                 (GtkAttachOptions) (0), 0, 0);
-			gtk_table_attach(GTK_TABLE(table2), spinbutton,
-			                 2, 3, i+1, i+2,
-			                 (GtkAttachOptions) (GTK_FILL),
-			                 (GtkAttachOptions) (0), 0, 0);
-		}
 	}
 
 	gtk_widget_show(dialog_fileinfo);
