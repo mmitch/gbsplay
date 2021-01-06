@@ -67,5 +67,8 @@ void gbs_close(struct gbs *gbs);
 long gbs_write(struct gbs *gbs, char *name);
 void gbs_write_rom(struct gbs *gbs, FILE *out, const uint8_t *logo_data);
 const uint8_t *gbs_get_bootrom();
+const char *gbs_get_title(struct gbs *gbs);
+const char *gbs_get_author(struct gbs *gbs);
+const char *gbs_get_copyright(struct gbs *gbs);
 
 #endif
