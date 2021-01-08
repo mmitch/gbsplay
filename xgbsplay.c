@@ -94,7 +94,7 @@ static long has_status_changed(struct gbs *gbs) {
 	return 0;
 }
 
-static void updatetitle(struct gbs *gbs)
+static void update_title(struct gbs *gbs)
 {
 	const struct gbs_status *status = gbs_get_status(gbs);
 	struct displaytime time;
@@ -574,7 +574,7 @@ int main(int argc, char **argv)
 			screen_modified = 0;
 		}
 		if (is_running() && has_status_changed(gbs)) {
-			updatetitle(gbs);
+			update_title(gbs);
 			screen_dirty = 1;
 		}
 		if (screen_dirty) {
