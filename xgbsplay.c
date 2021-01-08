@@ -77,6 +77,24 @@ static xcb_atom_t atomWmName = XCB_ATOM_NONE;
 
 static const struct gbs_metadata *metadata;
 
+static long last_seconds = -1;
+static long last_subsong = -1;
+
+static long has_status_changed(struct gbs *gbs) {
+	const struct gbs_status *status = gbs_get_status(gbs);
+	struct displaytime time;
+
+	update_displaytime(&time, status); // todo: remove repeated calls of update_displaytime()
+
+	if (time.played_sec != last_seconds || status->subsong != last_subsong) {
+		last_seconds = time.played_sec;
+		last_subsong = status->subsong;
+		return 1;
+	}
+
+	return 0;
+}
+
 static void updatetitle(struct gbs *gbs)
 {
 	const struct gbs_status *status = gbs_get_status(gbs);
@@ -561,7 +579,10 @@ int main(int argc, char **argv)
 			screen_dirty = 1;
 			screen_modified = 0;
 		}
-		if (screen_dirty | is_running()) {
+		if (is_running() && has_status_changed(gbs)) {
+			screen_dirty = 1;
+		}
+		if (screen_dirty) {
 			redraw(gbs);
 			xcb_flush(conn);
 			screen_dirty = 0;
