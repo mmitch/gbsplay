@@ -2,10 +2,8 @@ gbs_close
 gbs_configure
 gbs_configure_channels
 gbs_configure_output
-gbs_get_author
-gbs_get_copyright
+gbs_get_metadata
 gbs_get_status
-gbs_get_title
 gbs_init
 gbs_io_peek
 gbs_open

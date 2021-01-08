@@ -97,6 +97,7 @@ struct gbs {
 	gbs_nextsubsong_cb nextsubsong_cb;
 	void *nextsubsong_cb_priv;
 
+	struct gbs_metadata metadata;
 	struct gbs_channel_status step_cb_channels[4];
 	struct gbs_status status; // note: this contains a separate gbs_channel_status[] to not interfere with the step callback
 	struct gbhw_buffer gbhw_buf;
@@ -104,19 +105,12 @@ struct gbs {
 	struct mapper *mapper;
 };
 
-const char *gbs_get_title(struct gbs *gbs)
+const struct gbs_metadata *gbs_get_metadata(struct gbs *gbs)
 {
-	return gbs->title;
-}
-
-const char *gbs_get_author(struct gbs *gbs)
-{
-	return gbs->author;
-}
-
-const char *gbs_get_copyright(struct gbs *gbs)
-{
-	return gbs->copyright;
+	gbs->metadata.title = gbs->title;
+	gbs->metadata.author = gbs->author;
+	gbs->metadata.copyright = gbs->copyright;
+	return &gbs->metadata;
 }
 
 static void update_status_on_subsong_change(struct gbs *gbs);

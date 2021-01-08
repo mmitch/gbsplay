@@ -46,6 +46,16 @@
 struct gbs;
 
 /**
+ * GBS metadata.  Contains static information about the GBS file like
+ * title and copyright.
+ */
+struct gbs_metadata {
+	const char *title;
+	const char *author;
+	const char *copyright;
+};
+
+/**
  * Sound output buffer.  Contains the next bit of calculated sound
  * output that can be passed to an audio driver or be processed
  * otherwise.
@@ -171,9 +181,7 @@ struct gbs *gbs_open(const char *name);
 void gbs_configure(struct gbs *gbs, long subsong, long subsong_timeout, long silence_timeout, long subsong_gap, long fadeout);
 void gbs_configure_channels(struct gbs *gbs, long mute_0, long mute_1, long mute_2, long mute_3);
 void gbs_configure_output(struct gbs *gbs, struct gbs_output_buffer *buf, long rate);
-const char *gbs_get_title(struct gbs *gbs);
-const char *gbs_get_author(struct gbs *gbs);
-const char *gbs_get_copyright(struct gbs *gbs);
+const struct gbs_metadata *gbs_get_metadata(struct gbs *gbs);
 long gbs_init(struct gbs *gbs, long subsong);
 uint8_t gbs_io_peek(struct gbs *gbs, uint16_t addr);
 const struct gbs_status* gbs_get_status(struct gbs *gbs);

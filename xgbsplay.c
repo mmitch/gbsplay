@@ -210,6 +210,7 @@ static void draw_screen_linef(double vx, double vy, const char *fmt, ...)
 static void draw_screen_content(struct gbs *gbs)
 {
 	const struct gbs_status *status = gbs_get_status(gbs);
+	const struct gbs_metadata *metadata = gbs_get_metadata(gbs);
 	struct displaytime time;
 
 	update_displaytime(&time, status);
@@ -219,9 +220,9 @@ static void draw_screen_content(struct gbs *gbs)
 	cairo_select_font_face(cr, "Biwidth", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 	cairo_set_font_size(cr, 16);
 
-	draw_screen_line(0, 0, gbs_get_title(gbs));
-	draw_screen_line(0, 1, gbs_get_author(gbs));
-	draw_screen_line(0, 2, gbs_get_copyright(gbs));
+	draw_screen_line(0, 0, metadata->title);
+	draw_screen_line(0, 1, metadata->author);
+	draw_screen_line(0, 2, metadata->copyright);
 
 	draw_screen_linef(0, 4, "Song %3d/%3d", status->subsong+1, status->songs);
 	draw_screen_linef(0, 5, "%02ld:%02ld/%02ld:%02ld", time.played_min, time.played_sec, time.total_min, time.total_sec);
