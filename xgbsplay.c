@@ -76,17 +76,18 @@ static xcb_atom_t atomWmName = XCB_ATOM_NONE;
 
 static const struct gbs_metadata *metadata;
 
+static const struct gbs_status *status;
+static struct displaytime displaytime;
 static long last_seconds = -1;
 static long last_subsong = -1;
 
-static long has_status_changed(struct gbs *gbs) {
-	const struct gbs_status *status = gbs_get_status(gbs);
-	struct displaytime time;
+static long has_status_changed(struct gbs *gbs)
+{
+	status = gbs_get_status(gbs);
+	update_displaytime(&displaytime, status);
 
-	update_displaytime(&time, status); // todo: remove repeated calls of update_displaytime()
-
-	if (time.played_sec != last_seconds || status->subsong != last_subsong) {
-		last_seconds = time.played_sec;
+	if (displaytime.played_sec != last_seconds || status->subsong != last_subsong) {
+		last_seconds = displaytime.played_sec;
 		last_subsong = status->subsong;
 		return 1;
 	}
@@ -94,19 +95,15 @@ static long has_status_changed(struct gbs *gbs) {
 	return 0;
 }
 
-static void update_title(struct gbs *gbs)
+static void update_title()
 {
-	const struct gbs_status *status = gbs_get_status(gbs);
-	struct displaytime time;
 	int len;
-
-	update_displaytime(&time, status);
 
 	len = snprintf(statustext, STATUSTEXT_LENGTH, /* or use sizeof(statustext) ?? */
 		 "xgbsplay %s %d/%d "
 		 "%02ld:%02ld/%02ld:%02ld",
 		 filename, status->subsong+1, status->songs,
-		 time.played_min, time.played_sec, time.total_min, time.total_sec);
+		 displaytime.played_min, displaytime.played_sec, displaytime.total_min, displaytime.total_sec);
 
 	xcb_icccm_set_wm_name(conn, window, XCB_ATOM_STRING, XCB_STRING_FORMAT, len, statustext);
 	xcb_flush(conn);
@@ -225,11 +222,6 @@ static void draw_screen_linef(double vx, double vy, const char *fmt, ...)
 
 static void draw_screen_content(struct gbs *gbs)
 {
-	const struct gbs_status *status = gbs_get_status(gbs);
-	struct displaytime time;
-
-	update_displaytime(&time, status);
-
 	// #0b433a
 	cairo_set_source_rgb(cr, 0x0b/255.0, 0x43/255.0, 0x3a/255.0);
 	cairo_select_font_face(cr, "Biwidth", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
@@ -240,7 +232,7 @@ static void draw_screen_content(struct gbs *gbs)
 	draw_screen_line(0, 2, metadata->copyright);
 
 	draw_screen_linef(0, 4, "Song %3d/%3d", status->subsong+1, status->songs);
-	draw_screen_linef(0, 5, "%02ld:%02ld/%02ld:%02ld", time.played_min, time.played_sec, time.total_min, time.total_sec);
+	draw_screen_linef(0, 5, "%02ld:%02ld/%02ld:%02ld", displaytime.played_min, displaytime.played_sec, displaytime.total_min, displaytime.total_sec);
 
 	draw_screen_line(0, 7, "[p]revious/[n]ext subsong   [q]uit");
 	draw_screen_line(0, 8, "[ ] pause/resume   [1-4] mute ch");
@@ -574,7 +566,7 @@ int main(int argc, char **argv)
 			screen_modified = 0;
 		}
 		if (is_running() && has_status_changed(gbs)) {
-			update_title(gbs);
+			update_title();
 			screen_dirty = 1;
 		}
 		if (screen_dirty) {
