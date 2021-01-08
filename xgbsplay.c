@@ -75,6 +75,8 @@ static xcb_atom_t atomWmDeleteWindow = XCB_ATOM_NONE;
 static xcb_atom_t atomWmProtocols = XCB_ATOM_NONE;
 static xcb_atom_t atomWmName = XCB_ATOM_NONE;
 
+static const struct gbs_metadata *metadata;
+
 static void updatetitle(struct gbs *gbs)
 {
 	const struct gbs_status *status = gbs_get_status(gbs);
@@ -210,7 +212,6 @@ static void draw_screen_linef(double vx, double vy, const char *fmt, ...)
 static void draw_screen_content(struct gbs *gbs)
 {
 	const struct gbs_status *status = gbs_get_status(gbs);
-	const struct gbs_metadata *metadata = gbs_get_metadata(gbs);
 	struct displaytime time;
 
 	update_displaytime(&time, status);
@@ -430,6 +431,7 @@ int main(int argc, char **argv)
 	struct sigaction sa;
 
 	gbs = common_init(argc, argv);
+	metadata = gbs_get_metadata(gbs);
 
 	/* init signal handlers */
 	memset(&sa, 0, sizeof(sa));
