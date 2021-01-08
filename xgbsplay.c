@@ -594,7 +594,6 @@ int main(int argc, char **argv)
 				}
 			}
 		}
-		updatetitle(gbs);
 	}
 
 	/* stop sound */
