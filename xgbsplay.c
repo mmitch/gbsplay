@@ -54,7 +54,6 @@
 
 /* global variables */
 static char statustext[STATUSTEXT_LENGTH];
-static char oldstatustext[STATUSTEXT_LENGTH];
 
 static long quit = 0;
 static long screen_dirty = 0;
@@ -109,11 +108,8 @@ static void updatetitle(struct gbs *gbs)
 		 filename, status->subsong+1, status->songs,
 		 time.played_min, time.played_sec, time.total_min, time.total_sec);
 
-	if (strncmp(statustext, oldstatustext, STATUSTEXT_LENGTH) != 0) {  /* or use sizeof(statustext) ?? or strcmp() ?? */
-		strncpy(oldstatustext, statustext, STATUSTEXT_LENGTH);
-		xcb_icccm_set_wm_name(conn, window, XCB_ATOM_STRING, XCB_STRING_FORMAT, len, statustext);
-		xcb_flush(conn);
-	}
+	xcb_icccm_set_wm_name(conn, window, XCB_ATOM_STRING, XCB_STRING_FORMAT, len, statustext);
+	xcb_flush(conn);
 }
 
 void exit_handler(int signum)
@@ -502,8 +498,6 @@ int main(int argc, char **argv)
 			quit = 1;
 			break;
 		}
-		if (is_running())
-			updatetitle(gbs);
 
 		while ((event = xcb_poll_for_event(conn))) {
 			switch (event->response_type & XCB_EVENT_MASK) {
@@ -580,6 +574,7 @@ int main(int argc, char **argv)
 			screen_modified = 0;
 		}
 		if (is_running() && has_status_changed(gbs)) {
+			updatetitle(gbs);
 			screen_dirty = 1;
 		}
 		if (screen_dirty) {
