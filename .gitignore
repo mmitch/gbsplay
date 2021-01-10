@@ -18,6 +18,7 @@ gbsinfo
 gbsplay
 xgbsplay
 test_gbs
+gbs2gb
 gen_impulse_h
 impulse.h
 *.ho
