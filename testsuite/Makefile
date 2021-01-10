@@ -13,6 +13,6 @@ clean:
 %.test: %.c
 	@echo TESTSUITE $<
 # FIXME: create LIBGBSLDFLAGS und libgbs_objs in main Makefile to include here
-	$(Q)$(HOSTCC) -o $@$(binsuffix) $< ../libgbs.a -lm -lz
+	$(Q)$(HOSTCC) $(CFLAGS) -o $@$(binsuffix) $< ../libgbs.a -lm -lz $(LDFLAGS)
 	$(Q)./$@$(binsuffix)
 	$(Q)rm ./$@$(binsuffix)
