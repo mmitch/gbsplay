@@ -9,6 +9,13 @@
 
 #define ASSERT_EQUAL_LONG(actual, expected) do { \
 	if ((actual) != (expected) ) { \
+		fprintf(stderr, "FAIL\nTest failed:\n[%s] actual <%ld> != <%ld> expected [%s]\nat %s:%d\n", #actual, actual, (long) expected, #expected, __FILE__, __LINE__); \
+		exit(1); \
+	} \
+} while (0)
+
+#define ASSERT_EQUAL_INT(actual, expected) do { \
+	if ((actual) != (expected) ) { \
 		fprintf(stderr, "FAIL\nTest failed:\n[%s] actual <%d> != <%d> expected [%s]\nat %s:%d\n", #actual, actual, expected, #expected, __FILE__, __LINE__); \
 		exit(1); \
 	} \
@@ -20,4 +27,3 @@
 		exit(1); \
 	} \
 } while (0)
-

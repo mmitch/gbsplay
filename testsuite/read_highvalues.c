@@ -28,9 +28,9 @@ int main(int argc, char **argv)
 	status = gbs_get_status(gbs);
 
 	ASSERT(status != NULL);
-	ASSERT_EQUAL_LONG(status->songs, 255);
-	ASSERT_EQUAL_LONG(status->defaultsong, 255);
-	ASSERT_EQUAL_LONG(status->subsong, 0);
+	ASSERT_EQUAL_INT(status->songs, 255);
+	ASSERT_EQUAL_INT(status->defaultsong, 255);
+	ASSERT_EQUAL_INT(status->subsong, 0);
 
 	ASSERT_EQUAL_LONG(status->ch[0].mute, 0);
 	ASSERT_EQUAL_LONG(status->ch[1].mute, 0);
