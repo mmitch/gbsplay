@@ -1,4 +1,4 @@
-.PHONY: all default distclean clean install dist clean-apidoc
+.PHONY: all default distclean clean install dist clean-apidoc testsuite
 
 all: default
 
@@ -180,6 +180,8 @@ binsuffix         := .exe
 else
 binsuffix         :=
 endif
+export binsuffix
+
 gbsplaybin        := gbsplay$(binsuffix)
 xgbsplaybin       := xgbsplay$(binsuffix)
 gbs2gbbin         := gbs2gb$(binsuffix)
@@ -518,6 +520,9 @@ gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 
 xgbsplay: $(objs_xgbsplay) libgbs
 	$(BUILDCC) -o $(xgbsplaybin) $(objs_xgbsplay) $(GBSLDFLAGS) $(XGBSPLAYLDFLAGS) -lm
+
+testsuite: libgbs
+	cd testsuite/ && $(MAKE)
 
 # rules for suffixes
 
