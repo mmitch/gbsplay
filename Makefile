@@ -521,7 +521,7 @@ gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
 xgbsplay: $(objs_xgbsplay) libgbs
 	$(BUILDCC) -o $(xgbsplaybin) $(objs_xgbsplay) $(GBSLDFLAGS) $(XGBSPLAYLDFLAGS) -lm
 
-testsuite: libgbs
+testsuite: impulse.h libgbs
 	cd testsuite/ && $(MAKE)
 
 # rules for suffixes
