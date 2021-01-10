@@ -380,9 +380,6 @@ void gbs_print_info(struct gbs *gbs, long verbose)
 static void update_status_on_subsong_change(struct gbs *gbs) {
 	struct gbs_status *status = &gbs->status;
 
-	status->songs = gbs->songs;
-	status->defaultsong = gbs->defaultsong;
-
 	status->songtitle = gbs->subsong_info[gbs->subsong].title;
 	if (!status->songtitle) {
 		status->songtitle = _("Untitled");
@@ -986,6 +983,9 @@ static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 		gbs_free(gbs);
 		return NULL;
 	}
+
+	gbs->status.songs = gbs->songs;
+	gbs->status.defaultsong = gbs->defaultsong;
 
 	gbs->load  = readint(&buf[0x06], 2);
 	gbs->init  = readint(&buf[0x08], 2);
