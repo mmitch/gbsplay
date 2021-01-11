@@ -986,6 +986,7 @@ static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 
 	gbs->status.songs = gbs->songs;
 	gbs->status.defaultsong = gbs->defaultsong;
+	gbs->status.subsong = gbs->defaultsong - 1;
 
 	gbs->load  = readint(&buf[0x06], 2);
 	gbs->init  = readint(&buf[0x08], 2);
