@@ -41,9 +41,7 @@ endif
 generatedeps := no
 ifneq ($(noincludes),yes)
 ifeq ($(configured),yes)
-ifeq ($(wildcard impulse.h),impulse.h)
 generatedeps := yes
-endif
 endif
 endif
 
@@ -301,14 +299,14 @@ include $(shell find . -type f -name "subdir.mk")
 
 ifeq ($(generatedeps),yes)
 # Ready to build deps and everything else
-default: config.mk impulse.h $(objs) $(dsts) $(mans) $(EXTRA_ALL) $(TEST_TARGETS)
+default: config.mk $(objs) $(dsts) $(mans) $(EXTRA_ALL) $(TEST_TARGETS)
 
 # Generate & include the dependency files
 deps := $(patsubst %.o,%.d,$(filter %.o,$(objs)))
 deps += $(patsubst %.lo,%.d,$(filter %.lo,$(objs)))
 -include $(deps)
 else
-# Configure still needs to be run and/or impulse.h is not generated yet
+# Configure still needs to be is not generated yet
 default: config.mk impulse.h
 endif
 
@@ -500,7 +498,7 @@ $(gen_impulse_h_bin): $(objs_gen_impulse_h)
 	$(HOSTCC) -o $(gen_impulse_h_bin) $(objs_gen_impulse_h) -lm
 impulse.h: $(gen_impulse_h_bin)
 	$(Q)./$(gen_impulse_h_bin) > $@
-	$(Q)$(MAKE)
+gbhw.d: impulse.h
 
 libgbspic.a: $(objs_libgbspic)
 	$(AR) r $@ $+
