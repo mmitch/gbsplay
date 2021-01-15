@@ -1106,6 +1106,8 @@ static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 	return gbs;
 }
 
+static struct gbs *gbs_open_mem(const char *name, char *buf, size_t size);
+
 #ifdef USE_ZLIB
 static struct gbs *gzip_open(const char *name, char *buf, size_t size)
 {
