@@ -7,8 +7,6 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
-#include "player.h"
-
 #include <X11/keysymdef.h>
 #include <xcb/xcb.h>
 #include <xcb/xcb_icccm.h>
@@ -18,6 +16,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <inttypes.h>
+
+#include "player.h"
 
 #define XCB_STRING_FORMAT 8 /* 8, 16 or 32 (bits per character?) */
 #define XCB_EVENT_SYNTHETIC 0x80

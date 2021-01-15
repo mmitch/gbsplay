@@ -13,7 +13,7 @@
 
 #include "common.h"
 
-#include "gbs.h"
+#include "libgbs.h"
 #include "plugout.h"
 #include "cfgparser.h"
 

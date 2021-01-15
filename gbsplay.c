@@ -7,13 +7,12 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
-#include "player.h"
-
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <math.h>
 
+#include "player.h"
 #include "terminal.h"
 
 /* lookup tables */

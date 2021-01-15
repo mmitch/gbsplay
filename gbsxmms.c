@@ -26,7 +26,7 @@
 #include "common.h"
 #include "gbhw.h"
 #include "gbcpu.h"
-#include "gbs.h"
+#include "libgbs.h"
 #include "cfgparser.h"
 
 #define GBS_DEBUG 0

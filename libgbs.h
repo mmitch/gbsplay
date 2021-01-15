@@ -27,6 +27,13 @@
 //        to prevent internal/external namespace clashes?
 
 //
+//////  defines
+//
+
+#define GBS_LEN_SHIFT 10
+#define GBS_LEN_DIV   (1 << GBS_LEN_SHIFT)
+
+//
 //////  structs
 //
 
@@ -67,7 +74,7 @@ struct gbs_channel_status {
 struct gbs_status {
 	char *songtitle;
 	int subsong;
-	uint32_t subsong_len;
+	uint32_t subsong_len;  /* GBS_LEN_DIV (1024) == 1 second */
 	uint8_t songs;
 	uint8_t defaultsong;
 	long lvol;

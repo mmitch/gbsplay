@@ -10,11 +10,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 #include "common.h"
 #include "gbhw.h"
 #include "gbcpu.h"
-#include "gbs.h"
+#include "libgbs.h"
 
 /* global variables */
 uint8_t logo_data[0x30];

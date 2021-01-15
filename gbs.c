@@ -21,7 +21,7 @@
 #include "mapper.h"
 #include "gbhw.h"
 #include "gbcpu.h"
-#include "gbs.h"
+#include "libgbs.h"
 #include "crc32.h"
 
 #ifdef USE_ZLIB

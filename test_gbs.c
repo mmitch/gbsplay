@@ -17,7 +17,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "gbs.h"
+#include "libgbs.h"
 #include "util.h"
 
 int main(int argc, char **argv)
