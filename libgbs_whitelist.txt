@@ -10,7 +10,6 @@ gbs_get_title
 gbs_init
 gbs_io_peek
 gbs_open
-gbs_open_mem
 gbs_print_info
 gbs_set_filter
 gbs_set_nextsubsong_cb

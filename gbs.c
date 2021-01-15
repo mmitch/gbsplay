@@ -1150,7 +1150,7 @@ static struct gbs *gzip_open(const char *name, char *buf, size_t size)
 }
 #endif
 
-struct gbs *gbs_open_mem(const char *name, char *buf, size_t size)
+static struct gbs *gbs_open_mem(const char *name, char *buf, size_t size)
 {
 	if (size > HDR_LEN_GZIP && strncmp(buf, GZIP_MAGIC, 3) == 0) {
 		return gzip_open(name, buf, size);

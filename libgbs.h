@@ -159,19 +159,6 @@ typedef long (*gbs_nextsubsong_cb)(struct gbs *gbs, void *priv);
  */
 struct gbs *gbs_open(const char *name);
 
-/**
- * Open GBS file from memory.  The given buffer is parsed as an gbs
- * file and contents are returned as an initialized @link struct gbs
- * @endlink.
- *
- * FIXME: on error what?
- *
- * @param name  FIXME: why do we need a filename?
- * @param buf   the buffer to parse
- * @param size  size of the buffer in bytes
- */
-struct gbs *gbs_open_mem(const char *name, char *buf, size_t size);
-
 void gbs_configure(struct gbs *gbs, long subsong, long subsong_timeout, long silence_timeout, long subsong_gap, long fadeout);
 void gbs_configure_channels(struct gbs *gbs, long mute_0, long mute_1, long mute_2, long mute_3);
 void gbs_configure_output(struct gbs *gbs, struct gbs_output_buffer *buf, long rate);
