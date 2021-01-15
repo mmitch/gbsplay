@@ -1,8 +1,8 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
- *             Christian Garbs <mitch@cgarbs.de>
+ * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
@@ -168,7 +168,6 @@ struct gbs *gbs_open(const char *name);
 void gbs_configure(struct gbs *gbs, long subsong, long subsong_timeout, long silence_timeout, long subsong_gap, long fadeout);
 void gbs_configure_channels(struct gbs *gbs, long mute_0, long mute_1, long mute_2, long mute_3);
 void gbs_configure_output(struct gbs *gbs, struct gbs_output_buffer *buf, long rate);
-const uint8_t *gbs_get_bootrom();
 const char *gbs_get_title(struct gbs *gbs);
 const char *gbs_get_author(struct gbs *gbs);
 const char *gbs_get_copyright(struct gbs *gbs);
@@ -185,6 +184,5 @@ void gbs_print_info(struct gbs *gbs, long verbose);
 long gbs_toggle_mute(struct gbs *gbs, long channel);
 void gbs_close(struct gbs *gbs);
 long gbs_write(struct gbs *gbs, char *name);
-void gbs_write_rom(struct gbs *gbs, FILE *out, const uint8_t *logo_data);
 
 #endif

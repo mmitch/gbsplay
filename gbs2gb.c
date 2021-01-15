@@ -16,6 +16,7 @@
 #include "gbhw.h"
 #include "gbcpu.h"
 #include "libgbs.h"
+#include "gbs_internal.h"
 
 /* global variables */
 uint8_t logo_data[0x30];
@@ -81,7 +82,7 @@ void parseopts(int *argc, char ***argv)
 
 void read_default_template()
 {
-	const uint8_t *bootrom = gbs_get_bootrom();
+	const uint8_t *bootrom = gbs_internal_api.get_bootrom();
 	if (!bootrom) {
 		return;
 	}
@@ -93,6 +94,7 @@ int main(int argc, char **argv)
 	struct gbs *gbs;
 	FILE *out;
 
+	assert_internal_api_valid();
 	i18n_init();
 	read_default_template();
 
@@ -116,7 +118,7 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	gbs_write_rom(gbs, out, logo_data);
+	gbs_internal_api.write_rom(gbs, out, logo_data);
 	gbs_close(gbs);
 	fclose(out);
 

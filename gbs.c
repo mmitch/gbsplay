@@ -22,6 +22,7 @@
 #include "gbhw.h"
 #include "gbcpu.h"
 #include "libgbs.h"
+#include "gbs_internal.h"
 #include "crc32.h"
 
 #ifdef USE_ZLIB
@@ -1206,3 +1207,9 @@ exit_free:
 	fclose(f);
 	return gbs;
 }
+
+struct gbs_internal_api gbs_internal_api = {
+version: GBS_VERSION,
+get_bootrom: gbs_get_bootrom,
+write_rom: gbs_write_rom,
+};

@@ -3,7 +3,6 @@ gbs_configure
 gbs_configure_channels
 gbs_configure_output
 gbs_get_author
-gbs_get_bootrom
 gbs_get_copyright
 gbs_get_status
 gbs_get_title
@@ -19,4 +18,4 @@ gbs_set_sound_callback
 gbs_step
 gbs_toggle_mute
 gbs_write
-gbs_write_rom
+gbs_internal_api
