@@ -109,20 +109,19 @@ enum gbs_filter_type {
  * @param cycles  hardware cycles since start of current subsong
  * @param addr    the IO address that was written to
  * @param value   the value that was writton
- * @param priv    FIXME: these are all over what for? guarding against extra parameters?
+ * @param priv    opaque private context pointer for the callback handler
  */
 typedef void (*gbs_io_cb)(struct gbs *gbs, long cycles, uint32_t addr, uint8_t value, void *priv);
 
 /**
- * Step callback.  This callback gets executed when a step of the
- * emulation has been executed.
+ * Step callback.  This callback gets executed after each machine instruction
  *
- * FIXME: What is a step?
+ * This is "step"ing through machine instructions in the CPU emulation
  *
  * @param gbs       reference to the gbs instance that executed the IO
  * @param cycles    hardware cycles since start of current subsong
  * @param channels  current status of all 4 channels
- * @param priv      FIXME: these are all over what for? guarding against extra parameters?
+ * @param priv      opaque private context pointer for the callback handler
  */
 typedef void (*gbs_step_cb)(struct gbs *gbs, const long cycles, const struct gbs_channel_status channels[], void *priv);
 
@@ -134,7 +133,7 @@ typedef void (*gbs_step_cb)(struct gbs *gbs, const long cycles, const struct gbs
  *
  * @param gbs   reference to the gbs instance that executed the IO
  * @param buf   the output buffer containing the rendered sound
- * @param priv  FIXME: these are all over what for? guarding against extra parameters?
+ * @param priv  opaque private context pointer for the callback handler
  */
 typedef void (*gbs_sound_cb)(struct gbs *gbs, struct gbs_output_buffer *buf, void *priv);
 
@@ -148,7 +147,7 @@ typedef void (*gbs_sound_cb)(struct gbs *gbs, struct gbs_output_buffer *buf, voi
  * FIXME: add subsong + songs directly to the callback?
  *
  * @param gbs     reference to the gbs instance that executed the IO
- * @param priv    FIXME: these are all over what for? guarding against extra parameters?
+ * @param priv    opaque private context pointer for the callback handler
  */
 typedef long (*gbs_nextsubsong_cb)(struct gbs *gbs, void *priv);
 
@@ -160,7 +159,7 @@ typedef long (*gbs_nextsubsong_cb)(struct gbs *gbs, void *priv);
  * Open GBS file.  The given file is read and the contents are
  * returned as an initialized @link struct gbs @endlink.
  *
- * FIXME: on error what?
+ * On error returns NULL.
  *
  * @param name  filename to open (optionally including a path)
  */
