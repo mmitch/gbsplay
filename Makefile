@@ -306,7 +306,7 @@ deps := $(patsubst %.o,%.d,$(filter %.o,$(objs)))
 deps += $(patsubst %.lo,%.d,$(filter %.lo,$(objs)))
 -include $(deps)
 else
-# Configure still needs to be is not generated yet
+# Configure still needs to run
 default: config.mk impulse.h
 endif
 
