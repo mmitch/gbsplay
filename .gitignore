@@ -13,6 +13,8 @@ libgbs
 *.a
 *.dll
 *.so
+*.so.?
+*.so.?.ver
 *.pot
 gbsinfo
 gbsplay
