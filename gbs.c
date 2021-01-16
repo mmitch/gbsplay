@@ -1210,4 +1210,5 @@ struct gbs_internal_api gbs_internal_api = {
 version: GBS_VERSION,
 get_bootrom: gbs_get_bootrom,
 write_rom: gbs_write_rom,
+print_info: gbs_print_info,
 };

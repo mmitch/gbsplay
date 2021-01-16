@@ -22,11 +22,13 @@
 
 typedef const uint8_t* (get_bootrom_fn)(void);
 typedef void (write_rom_fn)(struct gbs *gbs, FILE *out, const uint8_t *logo_data);
+typedef void (print_info_fn)(struct gbs *gbs, long verbose);
 
 struct gbs_internal_api {
 	const char *version;
 	get_bootrom_fn *get_bootrom;
 	write_rom_fn *write_rom;
+	print_info_fn *print_info;
 };
 
 extern struct gbs_internal_api gbs_internal_api;

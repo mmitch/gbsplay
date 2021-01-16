@@ -1,7 +1,7 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -191,7 +191,6 @@ void gbs_set_io_callback(struct gbs *gbs, gbs_io_cb fn, void *priv);
 void gbs_set_step_callback(struct gbs *gbs, gbs_step_cb fn, void *priv);
 void gbs_set_sound_callback(struct gbs *gbs, gbs_sound_cb fn, void *priv);
 long gbs_set_filter(struct gbs *gbs, enum gbs_filter_type type);
-void gbs_print_info(struct gbs *gbs, long verbose); // FIXME: export via metadata, don't access stdout from lib!
 long gbs_toggle_mute(struct gbs *gbs, long channel);
 void gbs_close(struct gbs *gbs);
 long gbs_write(struct gbs *gbs, char *name);
