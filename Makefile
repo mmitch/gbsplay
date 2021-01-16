@@ -307,7 +307,7 @@ deps += $(patsubst %.lo,%.d,$(filter %.lo,$(objs)))
 -include $(deps)
 else
 # Configure still needs to run
-default: config.mk impulse.h
+default: config.mk
 endif
 
 distclean: clean
