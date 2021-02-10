@@ -157,11 +157,14 @@ typedef long (*gbs_nextsubsong_cb)(struct gbs *gbs, void *priv);
 
 /**
  * Open GBS file.  The given file is read and the contents are
- * returned as an initialized @link struct gbs @endlink.
+ * returned as an initialized @link struct gbs @endlink.  gbsplay can
+ * handle multiple files in parallel, so the handle is needed for
+ * nearly all function calls.
  *
  * On error returns NULL.
  *
  * @param name  filename to open (optionally including a path)
+ * @return an opaque @link struct gbs @endlink to be passed to other functions or NULL on error
  */
 struct gbs *gbs_open(const char *name);
 
