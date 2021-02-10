@@ -24,3 +24,6 @@ impulse.h
 *.ho
 apidoc/
 libgbs.pc
+libgbs.so.*
+*#
+.#*
