@@ -173,7 +173,31 @@ typedef long (*gbs_nextsubsong_cb)(struct gbs *gbs, void *priv);
  * handle multiple files in parallel, so the handle is needed for
  * nearly all function calls.
  *
- * On error returns NULL.
+ * On error returns NULL and sets @link gbs_errno @endlink to one of:
+ *
+ * <dl>
+ *  <dt>-1<dt> <dl>could not open file (see libc <code>errno</code> for details)</dl>
+ *  <dt>-2<dt> <dl>could not stat file (see libc <code>errno</code> for details)</dl>
+ *  <dt>-3<dt> <dl>file is too big</dl>
+ *  <dt>-4<dt> <dl>other read error (see libc <code>errno</code> for details)</dl>
+ *  <dt>-5<dt> <dl>file is no GBS file</dl>
+ *  <dt>-6<dt> <dl>unsupported GBS version</dl>
+ *  <dt>-7<dt> <dl>unreasonable number of subsongs</dl>
+ *  <dt>-8<dt> <dl>default subsong out of range</dl>
+ *  <dt>-9<dt> <dl>zlib support is missing</dl>
+ * <dt>-10<dt> <dl>inflateInit2 failed on zlib uncompress</dl>
+ * <dt>-11<dt> <dl>inflate failed on zlib uncompress</dl>
+ * <dt>-12<dt> <dl>file is no GBR file</dl>
+ * <dt>-13<dt> <dl>unsupported timerflag value (GBR)</dl>
+ * <dt>-14<dt> <dl>file is no VGM file</dl>
+ * <dt>-15<dt> <dl>unsupported VGM version</dl>
+ * <dt>-16<dt> <dl>unsupported DMG clock (VGM)</dl>
+ * <dt>-17<dt> <dl>bad file size in header (VGM)</dl>
+ * <dt>-18<dt> <dl>bad GD3 offset (VGM)</dl>
+ * <dt>-19<dt> <dl>bad data length (VGM)</dl>
+ * <dt>-20<dt> <dl>unsupported VGM opcode</dl>
+ * <dt>-21<dt> <dl>unsupported cartridge type (GB)</dl>
+ * </dl>
  *
  * @param name  filename to open (optionally including a path)
  * @return an opaque @link struct gbs @endlink to be passed to other functions or NULL on error

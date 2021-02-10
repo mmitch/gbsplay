@@ -577,7 +577,7 @@ static struct gbs *gb_open(const char *name, char *buf, size_t size)
 
 	gbs->mapper = mapper_gb(&gbs->gbhw.gbcpu, gbs->rom, gbs->romsize, buf[0x147], buf[0x148], buf[0x149]);
 	if (!gbs->mapper) {
-		fprintf(stderr, _("Unsupported cartridge type: 0x%02x\n"), buf[0x147]);
+		gbs_errno = -21;
 		gbs->buf = NULL;  /* freed in gbs_open */
 		gbs_free(gbs);
 		return NULL;
@@ -600,12 +600,12 @@ static struct gbs *gbr_open(const char *name, char *buf, size_t size)
 	uint16_t timer_addr;
 
 	if (strncmp(buf, GBR_MAGIC, 4) != 0) {
-		fprintf(stderr, _("Not a GBR-File: %s\n"), name);
+		gbs_errno = -12;
 		gbs_free(gbs);
 		return NULL;
 	}
 	if (buf[0x07] < 1 || buf[0x07] > 3) {
-		fprintf(stderr, _("Unsupported timerflag value: %d\n"), buf[0x07]);
+		gbs_errno = -13;
 		gbs_free(gbs);
 		return NULL;
 	}
@@ -759,24 +759,24 @@ static struct gbs *vgm_open(const char *name, char *buf, size_t size)
 	long jpaddr;
 
 	if (strncmp(buf, VGM_MAGIC, 4) != 0) {
-		fprintf(stderr, _("Not a VGM-File: %s\n"), name);
+		gbs_errno = -14;
 		gbs_free(gbs);
 		return NULL;
 	}
 	if (buf[0x09] != 1 || buf[0x08] < 0x61) {
-		fprintf(stderr, _("Unsupported VGM version: %d.%02x\n"), buf[0x09], buf[0x08]);
+		gbs_errno = -15;
 		gbs_free(gbs);
 		return NULL;
 	}
 	dmg_clock = le32(&buf[0x80]);
 	if (dmg_clock != 4194304) {
-		fprintf(stderr, _("Unsupported DMG clock: %ldHz\n"), dmg_clock);
+		gbs_errno = -16;
 		gbs_free(gbs);
 		return NULL;
 	}
 	eof_ofs = le32(&buf[0x4]) + 0x4;
 	if (eof_ofs > size) {
-		fprintf(stderr, _("Bad file size in header: %ld\n"), eof_ofs);
+		gbs_errno = -17;
 		gbs_free(gbs);
 		return NULL;
 	}
@@ -788,7 +788,7 @@ static struct gbs *vgm_open(const char *name, char *buf, size_t size)
 		gd3_len = eof_ofs - gd3_ofs;
 		gd3 = &buf[gd3_ofs];
 		if (gd3_len < 4 || strncmp(gd3, GD3_MAGIC, 4) != 0) {
-			fprintf(stderr, _("Bad GD3 offset: %08lx\n"), gd3_ofs);
+			gbs_errno = -18;
 			gbs_free(gbs);
 			return NULL;
 		}
@@ -797,7 +797,7 @@ static struct gbs *vgm_open(const char *name, char *buf, size_t size)
 	data_len = gd3_ofs - data_ofs;
 	data = &buf[data_ofs];
 	if (data_len < 0) {
-		fprintf(stderr, _("Bad data length: %ld\n"), data_len);
+		gbs_errno = -19;
 		gbs_free(gbs);
 		return NULL;
 	}
@@ -810,7 +810,7 @@ static struct gbs *vgm_open(const char *name, char *buf, size_t size)
 	while (!vgm_parsed) {
 		switch ((uint8_t)*data) {
 		default:
-			fprintf(stderr, _("Unsupported VGM opcode: 0x%02x\n"), *data);
+			gbs_errno = -20;
 			gbs_free(gbs);
 			return NULL;
 		case 0x61:  /* Wait n samples */
@@ -968,21 +968,21 @@ static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 
 	gbs->version = buf[0x03];
 	if (gbs->version != 1) {
-		fprintf(stderr, _("GBS Version %d unsupported.\n"), gbs->version);
+		gbs_errno = -6; // FIXME: how to pass gbs->version as parameter?
 		gbs_free(gbs);
 		return NULL;
 	}
 
 	gbs->songs = buf[0x04];
 	if (gbs->songs < 1) {
-		fprintf(stderr, _("Number of subsongs = %d is unreasonable.\n"), gbs->songs);
+		gbs_errno = -7; // FIXME: how to pass gbs->songs as parameter?
 		gbs_free(gbs);
 		return NULL;
 	}
 
 	gbs->defaultsong = buf[0x05];
 	if (gbs->defaultsong < 1 || gbs->defaultsong > gbs->songs) {
-		fprintf(stderr, _("Default subsong %d is out of range [1..%d].\n"), gbs->defaultsong, gbs->songs);
+		gbs_errno = -8; // FIXME: how to pass gbs->defaultsong, gbs->songs as parameters?
 		gbs_free(gbs);
 		return NULL;
 	}
@@ -1130,13 +1130,13 @@ static struct gbs *gzip_open(const char *name, char *buf, size_t size)
 	/* inflate with gzip auto-detect */
 	ret = inflateInit2(&strm, 15|32);
 	if (ret != Z_OK) {
-		fprintf(stderr, _("Could not open %s: inflateInit2: %d\n"), name, ret);
+		gbs_errno = -10; // FIXME: how to pass ret as parameter?
 		return NULL;
 	}
 
 	ret = inflate(&strm, Z_FINISH);
 	if (ret != Z_STREAM_END) {
-		fprintf(stderr, _("Could not open %s: inflate: %d\n"), name, ret);
+		gbs_errno = -11; // FIXME: how to pass ret as parameter?
 		return NULL;
 	}
 	inflateEnd(&strm);
@@ -1150,7 +1150,7 @@ static struct gbs *gzip_open(const char *name, char *buf, size_t size)
 #else
 static struct gbs *gzip_open(const char *name, char *buf, size_t size)
 {
-	fprintf(stderr, _("Could not open %s: %s\n"), name, _("Not compiled with zlib support"));
+	gbs_errno = -9;
 	return NULL;
 }
 #endif
@@ -1172,7 +1172,7 @@ static struct gbs *gbs_open_mem(const char *name, char *buf, size_t size)
 	if (size > HDR_LEN_GB && gbs_crc32(0, &buf[0x104], 48) == 0x46195417) {
 		return gb_open(name, buf, size);
 	}
-	fprintf(stderr, _("Not a GBS-File: %s\n"), name);
+	gbs_errno = -5;
 	return NULL;
 }
 
@@ -1184,20 +1184,20 @@ struct gbs *gbs_open(const char *name)
 	char *buf;
 
 	if ((f = fopen(name, "rb")) == NULL) {
-		fprintf(stderr, _("Could not open %s: %s\n"), name, strerror(errno));
+		gbs_errno = -1;
 		return NULL;
 	}
 	if (fstat(fileno(f), &st) == -1) {
-		fprintf(stderr, _("Could not stat %s: %s\n"), name, strerror(errno));
+		gbs_errno = -2;
 		return NULL;
 	}
 	if (st.st_size > GB_MAX_ROM_SIZE) {
-		fprintf(stderr, _("Could not read %s: %s\n"), name, _("Bigger than allowed maximum (4MiB)"));
+		gbs_errno = -3;
 		return NULL;
 	}
 	buf = malloc(st.st_size);
 	if (fread(buf, 1, st.st_size, f) != st.st_size) {
-		fprintf(stderr, _("Could not read %s: %s\n"), name, strerror(errno));
+		gbs_errno = -4;
 		goto exit_free;
 	}
 
