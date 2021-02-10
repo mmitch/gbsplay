@@ -34,6 +34,18 @@
 #define GBS_LEN_DIV   (1 << GBS_LEN_SHIFT)
 
 //
+//////  globals
+//
+
+/**
+ * @value gbs_errno
+ * Error indicator.  Contains additional error information if the
+ * previously called function can't directly return an error.
+ * Possible error codes are listed with the function.
+ */
+extern __thread int gbs_errno;
+
+//
 //////  structs
 //
 

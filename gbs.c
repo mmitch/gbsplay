@@ -46,6 +46,8 @@
 
 const char *boot_rom_file = ".dmg_rom.bin";
 
+__thread int gbs_errno;
+
 struct gbs_subsong_info {
 	uint32_t len;  /* GBS_LEN_DIV (1024) == 1 second */
 	char *title;
