@@ -210,6 +210,20 @@ void gbs_configure_output(struct gbs *gbs, struct gbs_output_buffer *buf, long r
 const char *gbs_get_title(struct gbs *gbs);
 const char *gbs_get_author(struct gbs *gbs);
 const char *gbs_get_copyright(struct gbs *gbs);
+
+/**
+ * Play GBS subsong.  Start playing the given subsong.
+ *
+ * On error returns 0 and sets @link gbs_errno @endlink to one of:
+ *
+ * <dl>
+ *  <dt>-1<dt> <dl>subsong number is out of range</dl>
+ * </dl>
+ *
+ * @param gbs  opaque  @link struct gbs @endlink handle
+ * @param subsong Number of the subsong to play (zero-based).  -1 will play the default subsong.
+ * @return 1 on success, 0 on error
+ */
 long gbs_init(struct gbs *gbs, long subsong);
 uint8_t gbs_io_peek(struct gbs *gbs, uint16_t addr);
 const struct gbs_status* gbs_get_status(struct gbs *gbs);
