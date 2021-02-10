@@ -99,12 +99,12 @@ apiheaders         := libgbs.h
 
 objs_libgbspic     := gbcpu.lo gbhw.lo mapper.lo gbs.lo crc32.lo
 objs_libgbs        := gbcpu.o  gbhw.o  mapper.o  gbs.o  crc32.o
-objs_gbs2gb        := gbs2gb.o
-objs_gbsinfo       := gbsinfo.o
+objs_gbs2gb        := gbs2gb.o error.o
+objs_gbsinfo       := gbsinfo.o error.o
 objs_gbsxmms       := gbsxmms.lo
-objs_gbsplay       := gbsplay.o  util.o plugout.o player.o cfgparser.o
-objs_xgbsplay      := xgbsplay.o util.o plugout.o player.o cfgparser.o
-objs_test_gbs      := test_gbs.o
+objs_gbsplay       := gbsplay.o  util.o plugout.o player.o cfgparser.o error.o
+objs_xgbsplay      := xgbsplay.o util.o plugout.o player.o cfgparser.o error.o
+objs_test_gbs      := test_gbs.o error.o
 objs_gen_impulse_h := gen_impulse_h.ho impulsegen.ho
 
 tests              := util.test impulsegen.test

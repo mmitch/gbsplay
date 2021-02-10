@@ -17,6 +17,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "error.h"
 #include "libgbs.h"
 #include "util.h"
 
@@ -32,7 +33,8 @@ int main(int argc, char **argv)
 
 	gbs = gbs_open("examples/nightmode.gbs");
 	if (gbs == NULL) {
-		fprintf(stderr, "%s: gbs_open failed\n", argv[0]);
+		fprintf(stderr, "%s: gbs_open failed with error %d\n", argv[0], gbs_errno);
+		print_gbs_open_error(gbs_errno, argv[0]);
 		exit(2);
 	}
 	if (!gbs_write(gbs, argv[1])) {

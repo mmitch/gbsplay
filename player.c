@@ -3,7 +3,7 @@
  *
  * This file contains the player code common to both CLI and X11 frontends.
  *
- * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -15,8 +15,9 @@
 #include <unistd.h>
 #include <time.h>
 
-#include "util.h"
 #include "cfgparser.h"
+#include "error.h"
+#include "util.h"
 
 #include "player.h"
 
@@ -522,6 +523,15 @@ static enum gbs_filter_type parse_filter(const char *filter_name) {
 	return -1;
 }
 
+static struct gbs *open_file(char *name) {
+
+	struct gbs *gbs = gbs_open(name);
+	if (gbs == NULL) {
+		print_gbs_open_error(gbs_errno, name);
+	}
+	return gbs;
+}
+
 struct gbs *common_init(int argc, char **argv)
 {
 	char *usercfg;
@@ -566,7 +576,7 @@ struct gbs *common_init(int argc, char **argv)
 		subsong_stop--;
 	}
 
-	gbs = gbs_open(argv[0]);
+	gbs = open_file(argv[0]);
 	if (gbs == NULL) {
 		exit(1);
 	}

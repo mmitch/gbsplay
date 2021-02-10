@@ -1,7 +1,7 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -13,6 +13,7 @@
 #include <inttypes.h>
 
 #include "common.h"
+#include "error.h"
 #include "gbhw.h"
 #include "gbcpu.h"
 #include "libgbs.h"
@@ -72,7 +73,10 @@ int main(int argc, char **argv)
                 usage(1);
         }
 
-	if ((gbs = gbs_open(argv[0])) == NULL) exit(EXIT_FAILURE);
+	if ((gbs = gbs_open(argv[0])) == NULL) {
+		print_gbs_open_error(gbs_errno, argv[0]);
+		exit(EXIT_FAILURE);
+	}
 	gbs_print_info(gbs, 1);
 	gbs_close(gbs);
 

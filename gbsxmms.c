@@ -239,6 +239,7 @@ static void gbs_play(char *filename)
 	DPRINTF("locking gbs_mutex\n");
 	pthread_mutex_lock(&gbs_mutex);
 	if ((gbs = gbs_open(filename)) == NULL) {
+		DPRINTF("error from gbs_open(): %d\n", gbs_errno);
 		pthread_mutex_unlock(&gbs_mutex);
 		DPRINTF("unlocked gbs_mutex\n");
 		return;
