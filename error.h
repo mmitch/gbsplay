@@ -11,6 +11,7 @@
 #ifndef _ERROR_H_
 #define _ERROR_H_
 
+void print_gbs_init_error(int error);
 void print_gbs_open_error(int error, char* filename);
 
 #endif

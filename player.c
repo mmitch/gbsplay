@@ -218,7 +218,8 @@ static long get_prev_subsong(struct gbs *gbs)
 }
 
 static void play_subsong(struct gbs *gbs, long subsong) {
-	gbs_init(gbs, subsong);
+	if (!gbs_init(gbs, subsong))
+		print_gbs_init_error(gbs_errno);
 	if (sound_skip)
 		sound_skip(subsong);
 }

@@ -15,6 +15,20 @@
 
 #include "error.h"
 
+void print_gbs_init_error(int error) {
+
+	switch (error) {
+	case -1:
+		// fprintf(stderr, _("Subsong number out of range (min=0, max=%d).\n"), (int)gbs->songs - 1); // FIXME: parameter missing
+		fprintf(stderr, _("Subsong number out of range.\n"));
+		return;
+
+	default:
+		fprintf(stderr, _("unhandled gbs_init() error %d\n"), error);
+		return;
+	}
+}
+
 void print_gbs_open_error(int error, char *filename) {
 
 	switch (error) {
