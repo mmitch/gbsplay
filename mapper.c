@@ -109,7 +109,6 @@ static void gbs_rom_put(void *priv, uint32_t addr, uint8_t val)
 	if (addr >= 0x2000 && addr <= 0x3fff) {
 		struct bank *b = priv;
 		struct mapper *m = b->mapper;
-		val &= 0x1f;
 		mapper_map_rom(&m->rom_upper, val + (val == 0));
 	} else {
 		WARN_ONCE("rom write of %02x to %04x ignored\n", val, addr);
