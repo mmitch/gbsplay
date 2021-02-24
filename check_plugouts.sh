@@ -2,7 +2,7 @@
 #
 # Ensure that configure enabled the plugouts as it was expected to.
 #
-# 2020 (C) by Christian Garbs <mitch@cgarbs.de>
+# 2020-2021 (C) by Christian Garbs <mitch@cgarbs.de>
 # Licensed under GNU GPL v1 or, at your option, any later version.
 
 set -e
@@ -51,7 +51,7 @@ echo "checking config.mk"
 
 # check that all expected plugouts are present
 for expected in "${expected_plugouts[@]}"; do
-    echo -n "check expected <$expected> to be enabled .. "
+    printf 'check expected <%s> to be enabled .. ' "$expected"
     if ! is_contained_in "$expected" "${enabled_plugouts[@]}"; then
 	die "expected plugout <$expected> has not been enabled by configure"
     fi
@@ -60,7 +60,7 @@ done
 
 # check that no unexpected plugouts are present
 for enabled in "${enabled_plugouts[@]}"; do
-    echo -n "check enabled <$enabled> to be expected .. "
+    printf 'check enabled <%s> to be expected .. ' "$enabled"
     if ! is_contained_in "$enabled" "${expected_plugouts[@]}" ; then
 	die "unexpected plugout <$enabled> has been enabled by configure"
     fi

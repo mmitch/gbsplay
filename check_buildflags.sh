@@ -2,7 +2,7 @@
 #
 # Ensure that configure enabled the plugouts as it was expected to.
 #
-# 2020 (C) by Christian Garbs <mitch@cgarbs.de>
+# 2020-2021 (C) by Christian Garbs <mitch@cgarbs.de>
 # Licensed under GNU GPL v1 or, at your option, any later version.
 
 set -e
@@ -38,7 +38,7 @@ expect_to_contain()
 {
     local key="$1" expected="$2"
     
-    echo -n "check <$key> to contain <$expected> .. "
+    printf 'check <%s> to contain <%s> .. ' "$key" "$expected"
     if ! key_contains "$key" "$expected"; then
 	die "expected value <$expected> not found in key <$key>"
     fi
@@ -49,7 +49,7 @@ expect_to_not_contain()
 {
     local key="$1" unexpected="$2"
 
-    echo -n "check <$key> to not contain <$unexpected> .. "
+    printf 'check <%s> to not contain <%s> .. ' "$key" "$unexpected"
     if key_contains "$key" "$unexpected"; then
 	die "unexpected value <$unexpected> found in key <$key>"
     fi
