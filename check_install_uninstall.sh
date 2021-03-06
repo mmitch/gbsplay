@@ -38,7 +38,7 @@ expect_content_to_be_equal()
 {
     local file_a="$1" file_b="$2"
 
-    echo -n "compare <$file_a> to <$file_b> .. "
+    printf 'compare <%s> to <%s> .. ' "$file_a" "$file_b"
     if ! cmp --quiet "$file_a" "$file_b"; then
 	echo "ERROR"
 	echo "expected content of <$file_a> and <$file_b> to be equal, but file contents differ:"
@@ -52,7 +52,7 @@ expect_content_to_be_different()
 {
     local file_a="$1" file_b="$2"
 
-    echo -n "compare <$file_a> to <$file_b> .. "
+    printf 'compare <%s> to <%s> .. ' "$file_a" "$file_b"
     if cmp --quiet "$file_a" "$file_b"; then
 	echo "ERROR"
 	echo "expected content of <$file_a> and <$file_b> to be different, but file contents are equal"
