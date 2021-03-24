@@ -10,7 +10,7 @@
 #include "common.h"
 
 #include <time.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "plugout.h"
 

@@ -836,8 +836,23 @@ fi
 
 if [ "$use_sdl" != no ]; then
     remember_use sdl
-    check_include SDL2/SDL.h "" "#define SDL_MAIN_HANDLED"
-    use_sdl="$have_SDL2_SDL_h"
+
+    if command -v sdl2-config >/dev/null; then
+	sdl2_include_path="$(sdl2-config --cflags)"
+	sdl2_include_path="${sdl2_include_path#*-I}"
+	sdl2_include_path="${sdl2_include_path%% -*}"
+    else
+	sdl2_include_path='/usr/include/SDL2 /usr/local/include/SDL2 /opt/local/include/SDL2'
+    fi
+	
+    check_include SDL.h "$sdl2_include_path" "#define SDL_MAIN_HANDLED"
+    if [ "$have_SDL_h" = yes ]; then
+	if [ "$include_SDL_h_path" != ' ' ]; then
+	    append_nodupe CFLAGS "-I$include_SDL_h_path"
+	fi
+	use_sdl=yes
+    fi
+
     recheck_use sdl
 fi
 
