@@ -1148,10 +1148,14 @@ printoptional features use
 
 append_nodupe CFLAGS -Wall -fsigned-char
 
-if [ "$use_debug" = "yes" ]; then
+if [ "$use_debug" = yes ]; then
     append_nodupe CFLAGS -g3
 else
     append_nodupe CFLAGS -Os -pipe -fomit-frame-pointer
+fi
+
+if [ "$use_sharedlibgbs" = yes ]; then
+    append_nodupe CFLAGS -DSHARED_LIBGBS
 fi
 
 EXTRA_CFLAGS="$CFLAGS"

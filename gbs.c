@@ -1,7 +1,7 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -46,7 +46,7 @@
 
 const char *boot_rom_file = ".dmg_rom.bin";
 
-__thread int gbs_errno;
+GBS_ERRNO_T gbs_errno;
 
 struct gbs_subsong_info {
 	uint32_t len;  /* GBS_LEN_DIV (1024) == 1 second */

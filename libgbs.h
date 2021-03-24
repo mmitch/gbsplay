@@ -1,7 +1,7 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -37,13 +37,22 @@
 //////  globals
 //
 
+#if defined(SHARED_LIBGBS) && ( defined(__MSYS__) || defined(__MINGW32__) )
+#define GBS_ERRNO_T int
+#else
+#define GBS_ERRNO_T __thread int
+#endif
+
 /**
  * @value gbs_errno
  * Error indicator.  Contains additional error information if the
  * previously called function can't directly return an error.
  * Possible error codes are listed with the function.
+ *
+ * This is not thread-safe on MSYS, MINGW32 and MINGW64
+ * when used with libgbs as a shared DLL.
  */
-extern __thread int gbs_errno;
+extern GBS_ERRNO_T gbs_errno;
 
 //
 //////  structs
