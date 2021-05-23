@@ -17,12 +17,6 @@
 #include "plugout.h"
 #include "cfgparser.h"
 
-#define LN2 .69314718055994530941
-#define MAGIC 5.78135971352465960412
-#define FREQ(x) (262144 / x)
-/* #define NOTE(x) ((log(FREQ(x))/LN2 - log(55)/LN2)*12 + .2) */
-#define NOTE(x) ((long)((log(FREQ(x))/LN2 - MAGIC)*12 + .2))
-
 #define MAXOCTAVE 9
 
 /* global variables */

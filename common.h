@@ -44,6 +44,11 @@
 #define TEXTDOMAIN "gbsplay"
 #define N_(x) x
 
+#define LN2 .69314718055994530941
+#define MAGIC 5.78135971352465960412
+#define FREQ(x) (262144 / (x))
+#define NOTE(x) ((long)((log(FREQ(x))/LN2 - MAGIC)*12 + .2))
+
 #if USE_I18N == 1
 
 #  include <locale.h>
