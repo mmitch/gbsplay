@@ -37,7 +37,6 @@ jobs:
       run: |
         ./gbsplay -c examples/gbsplayrc_sample -E b -o stdout examples/nightmode.gbs >/dev/null
         gcov *.o
-    - name: Upload coverage
+    - name: Upload coverage to Codecov
       # upload to codecov.io
-      run: |
-        bash <(curl -s https://codecov.io/bash)
+      uses: codecov/codecov-action@v1
