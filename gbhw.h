@@ -129,20 +129,20 @@ struct gbhw {
 	struct put_entry boot_shadow_put;
 };
 
-void gbhw_set_callback(struct gbhw *gbhw, gbhw_callback_fn fn, void *priv);
-void gbhw_set_io_callback(struct gbhw *gbhw, gbhw_iocallback_fn fn, void *priv);
-void gbhw_set_step_callback(struct gbhw *gbhw, gbhw_stepcallback_fn fn, void *priv);
-long gbhw_set_filter(struct gbhw *gbhw, enum gbs_filter_type type);
-void gbhw_set_rate(struct gbhw *gbhw, long rate);
-void gbhw_set_buffer(struct gbhw *gbhw, struct gbhw_buffer *buffer);
-void gbhw_init(struct gbhw *gbhw);
-void gbhw_init_struct(struct gbhw *gbhw);
-void gbhw_cleanup(struct gbhw *gbhw);
-void gbhw_enable_bootrom(struct gbhw *gbhw, const uint8_t *rombuf);
-void gbhw_master_fade(struct gbhw *gbhw, long speed, long dstvol);
-void gbhw_calc_minmax(struct gbhw *gbhw, int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax);
-long gbhw_step(struct gbhw *gbhw, long time_to_work);
-uint8_t gbhw_io_peek(struct gbhw *gbhw, uint16_t addr);  /* unmasked peek */
-void gbhw_io_put(struct gbhw *gbhw, uint16_t addr, uint8_t val);
+void gbhw_set_callback(struct gbhw* const gbhw, gbhw_callback_fn fn, void *priv);
+void gbhw_set_io_callback(struct gbhw* const gbhw, gbhw_iocallback_fn fn, void *priv);
+void gbhw_set_step_callback(struct gbhw* const gbhw, gbhw_stepcallback_fn fn, void *priv);
+long gbhw_set_filter(struct gbhw* const gbhw, enum gbs_filter_type type);
+void gbhw_set_rate(struct gbhw* const gbhw, long rate);
+void gbhw_set_buffer(struct gbhw* const gbhw, struct gbhw_buffer *buffer);
+void gbhw_init(struct gbhw* const gbhw);
+void gbhw_init_struct(struct gbhw* const gbhw);
+void gbhw_cleanup(struct gbhw* const gbhw);
+void gbhw_enable_bootrom(struct gbhw* const gbhw, const uint8_t *rombuf);
+void gbhw_master_fade(struct gbhw* const gbhw, long speed, long dstvol);
+void gbhw_calc_minmax(struct gbhw* const gbhw, int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax);
+long gbhw_step(struct gbhw* const gbhw, long time_to_work);
+uint8_t gbhw_io_peek(const struct gbhw* const gbhw, uint16_t addr);  /* unmasked peek */
+void gbhw_io_put(struct gbhw* const gbhw, uint16_t addr, uint8_t val);
 
 #endif

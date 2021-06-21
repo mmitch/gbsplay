@@ -54,7 +54,7 @@
 typedef void (*test_fn)(void);
 struct test_entry {
 	test_fn func;
-	const char* name;
+	const char* const name;
 };
 
 #define TEST(func) test_entries struct test_entry test_ ## func = { func, #func }
