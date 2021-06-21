@@ -1,7 +1,7 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -140,7 +140,7 @@ void gbhw_init_struct(struct gbhw *gbhw);
 void gbhw_cleanup(struct gbhw *gbhw);
 void gbhw_enable_bootrom(struct gbhw *gbhw, const uint8_t *rombuf);
 void gbhw_master_fade(struct gbhw *gbhw, long speed, long dstvol);
-void gbhw_getminmax(struct gbhw *gbhw, int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax);
+void gbhw_calc_minmax(struct gbhw *gbhw, int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax);
 long gbhw_step(struct gbhw *gbhw, long time_to_work);
 uint8_t gbhw_io_peek(struct gbhw *gbhw, uint16_t addr);  /* unmasked peek */
 void gbhw_io_put(struct gbhw *gbhw, uint16_t addr, uint8_t val);

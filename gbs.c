@@ -302,7 +302,7 @@ long gbs_step(struct gbs *gbs, long time_to_work)
 
 	gbs->ticks += cycles;
 
-	gbhw_getminmax(gbhw, &gbs->lmin, &gbs->lmax, &gbs->rmin, &gbs->rmax);
+	gbhw_calc_minmax(gbhw, &gbs->lmin, &gbs->lmax, &gbs->rmin, &gbs->rmax);
 	gbs->lvol = -gbs->lmin > gbs->lmax ? -gbs->lmin : gbs->lmax;
 	gbs->rvol = -gbs->rmin > gbs->rmax ? -gbs->rmin : gbs->rmax;
 
