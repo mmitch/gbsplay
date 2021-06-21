@@ -1,7 +1,7 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -100,7 +100,7 @@ void plugout_list_plugins(void)
 	(void)puts("");
 }
 
-const struct output_plugin* plugout_select_by_name(const char *name)
+const struct output_plugin* plugout_select_by_name(const char* const name)
 {
 	long idx;
 

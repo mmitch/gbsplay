@@ -1,7 +1,7 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -40,7 +40,7 @@ void version(void)
 	exit(EXIT_SUCCESS);
 }
 
-void read_rom_template(const char *name)
+void read_rom_template(const char* const name)
 {
 	FILE *f = fopen(name, "rb");
 	uint8_t hdr[0x200];

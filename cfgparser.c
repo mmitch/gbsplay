@@ -1,7 +1,7 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -61,7 +61,7 @@ static long nextstate;
 static long c;
 static const char *filename;
 
-static void err_expect(char *s)
+static void err_expect(const char* const s)
 {
 	fprintf(stderr, _("'%s' expected at %s line %ld char %ld.\n"),
 	        s, filename, cfg_line, cfg_char);
@@ -70,7 +70,7 @@ static void err_expect(char *s)
 	nextstate = 1;
 }
 
-void cfg_endian(void *ptr)
+void cfg_endian(void* const ptr)
 {
 	enum plugout_endian *endian = ptr;
 
@@ -91,7 +91,7 @@ void cfg_endian(void *ptr)
 	nextstate = 1;
 }
 
-void cfg_string(void *ptr)
+void cfg_string(void * const ptr)
 {
 	char s[200];
 	unsigned long n = 0;
@@ -113,7 +113,7 @@ void cfg_string(void *ptr)
 	nextstate = 1;
 }
 
-void cfg_long(void *ptr)
+void cfg_long(void* const ptr)
 {
 	char num[20];
 	unsigned long n = 0;
@@ -135,7 +135,7 @@ void cfg_long(void *ptr)
 	nextstate = 1;
 }
 
-void cfg_parse(const char *fname, const struct cfg_option *options)
+void cfg_parse(const char* const fname, const struct cfg_option* const options)
 {
 	char option[200] = "";
 
@@ -204,7 +204,7 @@ void cfg_parse(const char *fname, const struct cfg_option *options)
 	(void)fclose(cfg_file);
 }
 
-char* get_userconfig(const char* cfgfile)
+char* get_userconfig(const char* const cfgfile)
 {
 	char *homedir, *usercfg;
 	long length;

@@ -1,7 +1,7 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -139,12 +139,12 @@ struct gbcpu {
 	struct put_entry putlookup[GBCPU_LOOKUP_SIZE];
 };
 
-void gbcpu_add_mem(struct gbcpu *gbcpu, uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn, void *priv);
-void gbcpu_init(struct gbcpu *gbcpu);
-void gbcpu_init_struct(struct gbcpu *gbcpu);
-long gbcpu_step(struct gbcpu *gbcpu);
-void gbcpu_intr(struct gbcpu *gbcpu, long vec);
-uint8_t gbcpu_mem_get(struct gbcpu *gbcpu, uint16_t addr);
-void gbcpu_mem_put(struct gbcpu *gbcpu, uint16_t addr, uint8_t val);
+void gbcpu_add_mem(struct gbcpu* const gbcpu, uint32_t start, uint32_t end, gbcpu_put_fn putfn, gbcpu_get_fn getfn, void *priv);
+void gbcpu_init(struct gbcpu* const gbcpu);
+void gbcpu_init_struct(struct gbcpu* const gbcpu);
+long gbcpu_step(struct gbcpu* const gbcpu);
+void gbcpu_intr(struct gbcpu* const gbcpu, long vec);
+uint8_t gbcpu_mem_get(struct gbcpu* const gbcpu, uint16_t addr);
+void gbcpu_mem_put(struct gbcpu* const gbcpu, uint16_t addr, uint8_t val);
 
 #endif

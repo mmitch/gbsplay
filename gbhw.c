@@ -617,7 +617,7 @@ static void sequencer_step(struct gbhw *gbhw)
 	}
 }
 
-void gbhw_master_fade(struct gbhw *gbhw, long speed, long dstvol)
+void gbhw_master_fade(struct gbhw* const gbhw, long speed, long dstvol)
 {
 	if (dstvol < MASTER_VOL_MIN) dstvol = MASTER_VOL_MIN;
 	if (dstvol > MASTER_VOL_MAX) dstvol = MASTER_VOL_MAX;
@@ -834,7 +834,7 @@ static void gbhw_impbuf_reset(struct gbhw *gbhw)
 	memset(gbhw->impbuf->data, 0, gbhw->impbuf->bytes);
 }
 
-void gbhw_set_buffer(struct gbhw *gbhw, struct gbhw_buffer *buffer)
+void gbhw_set_buffer(struct gbhw* const gbhw, struct gbhw_buffer *buffer)
 {
 	gbhw->soundbuf = buffer;
 	gbhw->soundbuf->samples = gbhw->soundbuf->bytes / 4;
@@ -858,7 +858,7 @@ static void gbhw_update_filter(struct gbhw *gbhw)
 	gbhw->cap_factor = round(65536.0 * cap_constant);
 }
 
-long gbhw_set_filter(struct gbhw *gbhw, enum gbs_filter_type type)
+long gbhw_set_filter(struct gbhw* const gbhw, enum gbs_filter_type type)
 {
 	switch (type) {
 	case FILTER_OFF:
@@ -885,14 +885,14 @@ long gbhw_set_filter(struct gbhw *gbhw, enum gbs_filter_type type)
 	return 1;
 }
 
-void gbhw_set_rate(struct gbhw *gbhw, long rate)
+void gbhw_set_rate(struct gbhw* const gbhw, long rate)
 {
 	gbhw->sample_rate = rate;
 	gbhw->sound_div_tc = GBHW_CLOCK*SOUND_DIV_MULT/rate;
 	gbhw_update_filter(gbhw);
 }
 
-void gbhw_calc_minmax(struct gbhw *gbhw, int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax)
+void gbhw_calc_minmax(struct gbhw* const gbhw, int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax)
 {
 	if (gbhw->lminval == INT_MAX) return;
 	*lmin = gbhw->lminval;
@@ -909,7 +909,7 @@ void gbhw_calc_minmax(struct gbhw *gbhw, int16_t *lmin, int16_t *lmax, int16_t *
  * so we don't need range checking in rom_get and
  * rombank_get.
  */
-void gbhw_init(struct gbhw *gbhw)
+void gbhw_init(struct gbhw* const gbhw)
 {
 	long i;
 
@@ -951,12 +951,12 @@ void gbhw_init(struct gbhw *gbhw)
 	gbcpu_add_mem(&gbhw->gbcpu, 0xff, 0xff, io_put, io_get, gbhw);
 }
 
-void gbhw_cleanup(struct gbhw *gbhw)
+void gbhw_cleanup(struct gbhw* const gbhw)
 {
 	if (gbhw->impbuf) free(gbhw->impbuf);
 }
 
-void gbhw_enable_bootrom(struct gbhw *gbhw, const uint8_t *rombuf)
+void gbhw_enable_bootrom(struct gbhw* const gbhw, const uint8_t *rombuf)
 {
 	memcpy(gbhw->boot_rom, rombuf, sizeof(gbhw->boot_rom));
 	gbhw->rom_lockout = 0;
@@ -966,14 +966,14 @@ void gbhw_enable_bootrom(struct gbhw *gbhw, const uint8_t *rombuf)
 }
 
 /* internal for gbs.c, not exported from libgbs */
-void gbhw_io_put(struct gbhw *gbhw, uint16_t addr, uint8_t val) {
+void gbhw_io_put(struct gbhw* const gbhw, uint16_t addr, uint8_t val) {
 	if (addr != 0xffff && (addr < 0xff00 || addr > 0xff7f))
 		return;
 	io_put(gbhw, addr, val);
 }
 
 /* unmasked peek used by gbsplay.c to print regs */
-uint8_t gbhw_io_peek(struct gbhw *gbhw, uint16_t addr)
+uint8_t gbhw_io_peek(const struct gbhw* const gbhw, uint16_t addr)
 {
 	if (addr >= 0xff10 && addr <= 0xff3f) {
 		return gbhw->ioregs[addr & GBHW_IOREGS_MASK];
