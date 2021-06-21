@@ -746,7 +746,7 @@ static struct gbs *vgm_open(const char *name, char *buf, size_t size)
 	char *gd3 = NULL;
 	char *data;
 	long dmg_clock;
-	long eof_ofs;
+	uint32_t eof_ofs;
 	long gd3_ofs;
 	long gd3_len;
 	long data_ofs;
