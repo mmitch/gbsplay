@@ -1,7 +1,7 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2020-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
@@ -9,10 +9,12 @@
 #ifndef _GBS_INTERNAL_API_H_
 #define _GBS_INTERNAL_API_H_
 
-#include <stdlib.h>
-#include <string.h>
+#include "common.h"
 
-#include "config.h"
+#include <stdint.h>
+#include <stdlib.h>
+
+#include "libgbs.h"
 
 /***
  ***  THIS IS THE INTERNAL API AND MAY CHANGE FREELY BETWEEN VERSION.
