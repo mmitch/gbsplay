@@ -1,7 +1,7 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
@@ -56,7 +56,7 @@
 
 #  if GBS_PRESERVE_TEXTDOMAIN == 1
 
-static inline char* _(const char *msgid)
+static inline char* _(const char* const msgid)
 {
 	char *olddomain = textdomain(NULL);
 	char *olddir = bindtextdomain(olddomain, NULL);
@@ -71,7 +71,7 @@ static inline char* _(const char *msgid)
 
 #  else
 
-static inline char* _(const char *msgid)
+static inline char* _(const char* const msgid)
 {
 	return gettext(msgid);
 }

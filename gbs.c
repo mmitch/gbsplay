@@ -105,7 +105,7 @@ struct gbs {
 	struct mapper *mapper;
 };
 
-const struct gbs_metadata *gbs_get_metadata(struct gbs *gbs)
+const struct gbs_metadata *gbs_get_metadata(struct gbs* const gbs)
 {
 	gbs->metadata.title = gbs->title;
 	gbs->metadata.author = gbs->author;
@@ -113,9 +113,9 @@ const struct gbs_metadata *gbs_get_metadata(struct gbs *gbs)
 	return &gbs->metadata;
 }
 
-static void update_status_on_subsong_change(struct gbs *gbs);
+static void update_status_on_subsong_change(struct gbs* const gbs);
 
-void gbs_configure(struct gbs *gbs, long subsong, long subsong_timeout, long silence_timeout, long subsong_gap, long fadeout)
+void gbs_configure(struct gbs* const gbs, long subsong, long subsong_timeout, long silence_timeout, long subsong_gap, long fadeout)
 {
 	gbs->subsong = subsong;
 	gbs->subsong_timeout = subsong_timeout;
@@ -124,14 +124,14 @@ void gbs_configure(struct gbs *gbs, long subsong, long subsong_timeout, long sil
 	gbs->fadeout = fadeout;
 }
 
-void gbs_configure_channels(struct gbs *gbs, long mute_0, long mute_1, long mute_2, long mute_3) {
+void gbs_configure_channels(struct gbs* const gbs, long mute_0, long mute_1, long mute_2, long mute_3) {
 	gbs->gbhw.ch[0].mute = mute_0;
 	gbs->gbhw.ch[1].mute = mute_1;
 	gbs->gbhw.ch[2].mute = mute_2;
 	gbs->gbhw.ch[3].mute = mute_3;
 }
 
-void gbs_configure_output(struct gbs *gbs, struct gbs_output_buffer *gbs_buf, long rate) {
+void gbs_configure_output(struct gbs* const gbs, struct gbs_output_buffer *gbs_buf, long rate) {
 	struct gbhw_buffer *gbhw_buf = &gbs->gbhw_buf;
 
 	gbhw_set_rate(&gbs->gbhw, rate);
@@ -145,7 +145,7 @@ void gbs_configure_output(struct gbs *gbs, struct gbs_output_buffer *gbs_buf, lo
 	gbhw_set_buffer(&gbs->gbhw, gbhw_buf);
 }
 
-long gbs_init(struct gbs *gbs, long subsong)
+long gbs_init(struct gbs* const gbs, long subsong)
 {
 	struct gbhw *gbhw = &gbs->gbhw;
 	struct gbcpu *gbcpu = &gbhw->gbcpu;
@@ -189,7 +189,7 @@ long gbs_init(struct gbs *gbs, long subsong)
 }
 
 // FIXME: or just include a *ptr to the whole RAM in struct gbs_status?
-uint8_t gbs_io_peek(struct gbs *gbs, uint16_t addr) {
+uint8_t gbs_io_peek(const struct gbs* const gbs, uint16_t addr) {
 	return gbhw_io_peek(&gbs->gbhw, addr);
 }
 
@@ -219,7 +219,7 @@ static void map_channel_status(const struct gbhw_channel from[], struct gbs_chan
 	}
 }
 
-void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv)
+void gbs_set_nextsubsong_cb(struct gbs* const gbs, gbs_nextsubsong_cb cb, void *priv)
 {
 	gbs->nextsubsong_cb = cb;
 	gbs->nextsubsong_cb_priv = priv;
@@ -231,7 +231,7 @@ static void wrap_io_callback(long cycles, uint32_t addr, uint8_t value, void *pr
 	gbs->io_cb(gbs, cycles, addr, value, gbs->io_cb_priv);
 }
 
-void gbs_set_io_callback(struct gbs *gbs, gbs_io_cb fn, void *priv)
+void gbs_set_io_callback(struct gbs* const gbs, gbs_io_cb fn, void *priv)
 {
 	gbs->io_cb = fn;
 	gbs->io_cb_priv = priv;
@@ -240,12 +240,12 @@ void gbs_set_io_callback(struct gbs *gbs, gbs_io_cb fn, void *priv)
 
 static void wrap_step_callback(const long cycles, const struct gbhw_channel ch[], void *priv)
 {
-	struct gbs *gbs = priv;
+	struct gbs* gbs = priv;
 	map_channel_status(ch, gbs->step_cb_channels);
 	gbs->step_cb(gbs, cycles, gbs->step_cb_channels, gbs->step_cb_priv);
 }
 
-void gbs_set_step_callback(struct gbs *gbs, gbs_step_cb fn, void *priv)
+void gbs_set_step_callback(struct gbs* const gbs, gbs_step_cb fn, void *priv)
 {
 	gbs->step_cb = fn;
 	gbs->step_cb_priv = priv;
@@ -254,23 +254,23 @@ void gbs_set_step_callback(struct gbs *gbs, gbs_step_cb fn, void *priv)
 
 static void wrap_sound_callback(void *priv)
 {
-	struct gbs *gbs = priv;
+	struct gbs* gbs = priv;
 	gbs->buffer->pos = gbs->gbhw_buf.pos;
 	gbs->sound_cb(gbs, gbs->buffer, gbs->sound_cb_priv);
 }
 
-void gbs_set_sound_callback(struct gbs *gbs, gbs_sound_cb fn, void *priv)
+void gbs_set_sound_callback(struct gbs* const gbs, gbs_sound_cb fn, void *priv)
 {
 	gbs->sound_cb = fn;
 	gbs->sound_cb_priv = priv;
 	gbhw_set_callback(&gbs->gbhw, wrap_sound_callback, gbs);
 }
 
-long gbs_set_filter(struct gbs *gbs, enum gbs_filter_type type) {
+long gbs_set_filter(struct gbs* const gbs, enum gbs_filter_type type) {
 	return gbhw_set_filter(&gbs->gbhw, type);
 }
 
-static long gbs_nextsubsong(struct gbs *gbs)
+static long gbs_nextsubsong(struct gbs* const gbs)
 {
 	if (gbs->nextsubsong_cb != NULL) {
 		return gbs->nextsubsong_cb(gbs, gbs->nextsubsong_cb_priv);
@@ -283,7 +283,7 @@ static long gbs_nextsubsong(struct gbs *gbs)
 	return true;
 }
 
-long gbs_step(struct gbs *gbs, long time_to_work)
+long gbs_step(struct gbs* const gbs, long time_to_work)
 {
 	struct gbhw *gbhw = &gbs->gbhw;
 
@@ -328,7 +328,7 @@ long gbs_step(struct gbs *gbs, long time_to_work)
 	return true;
 }
 
-void gbs_print_info(struct gbs *gbs, long verbose)
+void gbs_print_info(const struct gbs* const gbs, long verbose)
 {
 	printf(_("GBSVersion:       %u\n"
 	         "Title:            \"%s\"\n"
@@ -372,7 +372,7 @@ void gbs_print_info(struct gbs *gbs, long verbose)
 	printf(_("CRC32:            0x%08lx\n"), (unsigned long)gbs->crcnow);
 }
 
-static void update_status_on_subsong_change(struct gbs *gbs) {
+static void update_status_on_subsong_change(struct gbs* const gbs) {
 	struct gbs_status *status = &gbs->status;
 
 	status->songtitle = gbs->subsong_info[gbs->subsong].title;
@@ -383,10 +383,10 @@ static void update_status_on_subsong_change(struct gbs *gbs) {
 	status->subsong_len = gbs->subsong_info[gbs->subsong].len;
 }
 
-const struct gbs_status* gbs_get_status(struct gbs *gbs) {
+const struct gbs_status* gbs_get_status(struct gbs* const gbs) {
 
 	struct gbs_status *status = &gbs->status;
-	struct gbhw *gbhw = &gbs->gbhw;
+	const struct gbhw *gbhw = &gbs->gbhw;
 
 	status->rvol = gbs->rvol;
 	status->lvol = gbs->lvol;
@@ -397,11 +397,11 @@ const struct gbs_status* gbs_get_status(struct gbs *gbs) {
 	return status;
 }
 
-long gbs_toggle_mute(struct gbs *gbs, long channel) {
+long gbs_toggle_mute(struct gbs* const gbs, long channel) {
 	return gbs->gbhw.ch[channel].mute ^= 1;
 }
 
-static void gbs_free(struct gbs *gbs)
+static void gbs_free(struct gbs* const gbs)
 {
 	gbhw_cleanup(&gbs->gbhw);
 	if (gbs->mapper)
@@ -415,12 +415,12 @@ static void gbs_free(struct gbs *gbs)
 	free(gbs);
 }
 
-void gbs_close(struct gbs *gbs)
+void gbs_close(struct gbs* const gbs)
 {
 	gbs_free(gbs);
 }
 
-static uint32_t readint(char *buf, long bytes)
+static uint32_t readint(const char* const buf, long bytes)
 {
 	long i;
 	long shift = 0;
@@ -434,7 +434,7 @@ static uint32_t readint(char *buf, long bytes)
 	return res;
 }
 
-long gbs_write(struct gbs *gbs, char *name)
+long gbs_write(const struct gbs* const gbs, const char* const name)
 {
 	long fd;
 	char pad[16];
@@ -465,7 +465,7 @@ long gbs_write(struct gbs *gbs, char *name)
 	return 1;
 }
 
-void gbs_write_rom(struct gbs *gbs, FILE *out, const uint8_t *logo_data)
+void gbs_write_rom(const struct gbs* const gbs, FILE *out, const uint8_t* const logo_data)
 {
 	if (gbs->rom[0x104] != 0xce) {
 		unsigned long tmp = gbs->romsize;
@@ -494,9 +494,9 @@ void gbs_write_rom(struct gbs *gbs, FILE *out, const uint8_t *logo_data)
 	fwrite(gbs->rom, 1, gbs->romsize, out);
 }
 
-static struct gbs *gbs_new(char *buf)
+static struct gbs* gbs_new(char *buf)
 {
-	struct gbs *gbs = calloc(sizeof(struct gbs), 1);
+	struct gbs* gbs = calloc(sizeof(struct gbs), 1);
 	gbhw_init_struct(&gbs->gbhw);
 	gbs->silence_timeout = 2*60;
 	gbs->subsong_timeout = 2*60;
@@ -536,10 +536,10 @@ const uint8_t *gbs_get_bootrom()
 	return bootrom;
 }
 
-static struct gbs *gb_open(const char *name, char *buf, size_t size)
+static struct gbs *gb_open(const char* const name, char *buf, size_t size)
 {
 	long i;
-	struct gbs *gbs = gbs_new(buf);
+	struct gbs* gbs = gbs_new(buf);
 	char *na_str = _("gb / not available");
 	const uint8_t *bootrom = gbs_get_bootrom();
 
@@ -585,10 +585,10 @@ static struct gbs *gb_open(const char *name, char *buf, size_t size)
 	return gbs;
 }
 
-static struct gbs *gbr_open(const char *name, char *buf, size_t size)
+static struct gbs *gbr_open(const char* const name, char *buf, size_t size)
 {
 	long i;
-	struct gbs *gbs = gbs_new(buf);
+	struct gbs* gbs = gbs_new(buf);
 	char *na_str = _("gbr / not available");
 	uint16_t vsync_addr;
 	uint16_t timer_addr;
@@ -663,19 +663,19 @@ static struct gbs *gbr_open(const char *name, char *buf, size_t size)
 	return gbs;
 }
 
-static uint32_t le32(const char *buf)
+static uint32_t le32(const char* const buf)
 {
 	const uint8_t *b = (const uint8_t*)buf;
 	return b[0] | (b[1] << 8) | (b[2] << 16) | (b[3] << 24);
 }
 
-static uint16_t le16(const char *buf)
+static uint16_t le16(const char* const buf)
 {
 	const uint8_t *b = (const uint8_t*)buf;
 	return b[0] | (b[1] << 8);
 }
 
-static void emit(struct gbs *gbs, long *code_used, uint8_t data, long reserve)
+static void emit(struct gbs* const gbs, long* const code_used, uint8_t data, long reserve)
 {
 	long remain = gbs->codelen - *code_used;
 	uint8_t *code = (uint8_t*) &gbs->code[*code_used];
@@ -692,7 +692,7 @@ static void emit(struct gbs *gbs, long *code_used, uint8_t data, long reserve)
 	(*code_used)++;
 }
 
-static void gd3_parse(struct gbs **gbs, const char *gd3, long gd3_len)
+static void gd3_parse(struct gbs **gbs, const char* const gd3, long gd3_len)
 {
 	char *buf;
 	char *s;
@@ -733,9 +733,9 @@ static void gd3_parse(struct gbs **gbs, const char *gd3, long gd3_len)
 	}
 }
 
-static struct gbs *vgm_open(const char *name, char *buf, size_t size)
+static struct gbs *vgm_open(const char* const name, char* const buf, size_t size)
 {
-	struct gbs *gbs = gbs_new(buf);
+	struct gbs* gbs = gbs_new(buf);
 	char *na_str = _("vgm / not available");
 	char *gd3 = NULL;
 	char *data;
@@ -955,9 +955,9 @@ static struct gbs *vgm_open(const char *name, char *buf, size_t size)
 	return gbs;
 }
 
-static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
+static struct gbs* gbs_open_internal(const char* const name, char* const buf, size_t size)
 {
-	struct gbs *gbs = gbs_new(buf);
+	struct gbs* const gbs = gbs_new(buf);
 	long i, addr, jpaddr;
 
 	UNUSED(name);
@@ -1105,12 +1105,12 @@ static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 	return gbs;
 }
 
-static struct gbs *gbs_open_mem(const char *name, char *buf, size_t size);
+static struct gbs* gbs_open_mem(const char* const name, char* const buf, size_t size);
 
 #ifdef USE_ZLIB
-static struct gbs *gzip_open(const char *name, char *buf, size_t size)
+static struct gbs *gzip_open(const char* const name, char* const buf, size_t size)
 {
-	struct gbs *gbs;
+	struct gbs* gbs;
 	int ret;
 	char *out = malloc(GB_MAX_ROM_SIZE);
 	z_stream strm;
@@ -1144,14 +1144,14 @@ static struct gbs *gzip_open(const char *name, char *buf, size_t size)
 	return gbs;
 }
 #else
-static struct gbs *gzip_open(const char *name, char *buf, size_t size)
+static struct gbs *gzip_open(const char* const name, char* const buf, size_t size)
 {
 	fprintf(stderr, _("Could not open %s: %s\n"), name, _("Not compiled with zlib support"));
 	return NULL;
 }
 #endif
 
-static struct gbs *gbs_open_mem(const char *name, char *buf, size_t size)
+static struct gbs* gbs_open_mem(const char* const name, char* const buf, size_t size)
 {
 	if (size > HDR_LEN_GZIP && strncmp(buf, GZIP_MAGIC, 3) == 0) {
 		return gzip_open(name, buf, size);
@@ -1172,9 +1172,9 @@ static struct gbs *gbs_open_mem(const char *name, char *buf, size_t size)
 	return NULL;
 }
 
-struct gbs *gbs_open(const char *name)
+struct gbs* gbs_open(const char* const name)
 {
-	struct gbs *gbs = NULL;
+	struct gbs* gbs = NULL;
 	FILE *f;
 	struct stat st;
 	char *buf;

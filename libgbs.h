@@ -121,7 +121,7 @@ enum gbs_filter_type {
  * @param value   the value that was writton
  * @param priv    opaque private context pointer for the callback handler
  */
-typedef void (*gbs_io_cb)(struct gbs *gbs, long cycles, uint32_t addr, uint8_t value, void *priv);
+typedef void (*gbs_io_cb)(struct gbs* const gbs, long cycles, uint32_t addr, uint8_t value, void *priv);
 
 /**
  * Step callback.  This callback gets executed after each machine instruction
@@ -133,7 +133,7 @@ typedef void (*gbs_io_cb)(struct gbs *gbs, long cycles, uint32_t addr, uint8_t v
  * @param channels  current status of all 4 channels
  * @param priv      opaque private context pointer for the callback handler
  */
-typedef void (*gbs_step_cb)(struct gbs *gbs, const long cycles, const struct gbs_channel_status channels[], void *priv);
+typedef void (*gbs_step_cb)(struct gbs* const gbs, const long cycles, const struct gbs_channel_status channels[], void *priv);
 
 /**
  * Sound callback.  This callback gets executed when the next part of
@@ -145,7 +145,7 @@ typedef void (*gbs_step_cb)(struct gbs *gbs, const long cycles, const struct gbs
  * @param buf   the output buffer containing the rendered sound
  * @param priv  opaque private context pointer for the callback handler
  */
-typedef void (*gbs_sound_cb)(struct gbs *gbs, struct gbs_output_buffer *buf, void *priv);
+typedef void (*gbs_sound_cb)(struct gbs* const gbs, struct gbs_output_buffer *buf, void *priv);
 
 /**
  * Next subsong callback.  This callback gets executed when the
@@ -159,7 +159,7 @@ typedef void (*gbs_sound_cb)(struct gbs *gbs, struct gbs_output_buffer *buf, voi
  * @param gbs     reference to the gbs instance that executed the IO
  * @param priv    opaque private context pointer for the callback handler
  */
-typedef long (*gbs_nextsubsong_cb)(struct gbs *gbs, void *priv);
+typedef long (*gbs_nextsubsong_cb)(struct gbs* const gbs, void *priv);
 
 //
 //////  functions
@@ -176,23 +176,23 @@ typedef long (*gbs_nextsubsong_cb)(struct gbs *gbs, void *priv);
  * @param name  filename to open (optionally including a path)
  * @return an opaque @link struct gbs @endlink to be passed to other functions or NULL on error
  */
-struct gbs *gbs_open(const char *name);
+struct gbs *gbs_open(const char* const name);
 
-void gbs_configure(struct gbs *gbs, long subsong, long subsong_timeout, long silence_timeout, long subsong_gap, long fadeout);
-void gbs_configure_channels(struct gbs *gbs, long mute_0, long mute_1, long mute_2, long mute_3);
-void gbs_configure_output(struct gbs *gbs, struct gbs_output_buffer *buf, long rate);
-const struct gbs_metadata *gbs_get_metadata(struct gbs *gbs);
-long gbs_init(struct gbs *gbs, long subsong);
-uint8_t gbs_io_peek(struct gbs *gbs, uint16_t addr);
-const struct gbs_status* gbs_get_status(struct gbs *gbs);
-long gbs_step(struct gbs *gbs, long time_to_work);
-void gbs_set_nextsubsong_cb(struct gbs *gbs, gbs_nextsubsong_cb cb, void *priv);
-void gbs_set_io_callback(struct gbs *gbs, gbs_io_cb fn, void *priv);
-void gbs_set_step_callback(struct gbs *gbs, gbs_step_cb fn, void *priv);
-void gbs_set_sound_callback(struct gbs *gbs, gbs_sound_cb fn, void *priv);
-long gbs_set_filter(struct gbs *gbs, enum gbs_filter_type type);
-long gbs_toggle_mute(struct gbs *gbs, long channel);
-void gbs_close(struct gbs *gbs);
-long gbs_write(struct gbs *gbs, char *name);
+void gbs_configure(struct gbs* const gbs, long subsong, long subsong_timeout, long silence_timeout, long subsong_gap, long fadeout);
+void gbs_configure_channels(struct gbs* const gbs, long mute_0, long mute_1, long mute_2, long mute_3);
+void gbs_configure_output(struct gbs* const gbs, struct gbs_output_buffer *buf, long rate);
+const struct gbs_metadata *gbs_get_metadata(struct gbs* const gbs);
+long gbs_init(struct gbs* const gbs, long subsong);
+uint8_t gbs_io_peek(const struct gbs* const gbs, uint16_t addr);
+const struct gbs_status* gbs_get_status(struct gbs* const gbs);
+long gbs_step(struct gbs* const gbs, long time_to_work);
+void gbs_set_nextsubsong_cb(struct gbs* const gbs, gbs_nextsubsong_cb cb, void *priv);
+void gbs_set_io_callback(struct gbs* const gbs, gbs_io_cb fn, void *priv);
+void gbs_set_step_callback(struct gbs* const gbs, gbs_step_cb fn, void *priv);
+void gbs_set_sound_callback(struct gbs* const gbs, gbs_sound_cb fn, void *priv);
+long gbs_set_filter(struct gbs* const gbs, enum gbs_filter_type type);
+long gbs_toggle_mute(struct gbs* const gbs, long channel);
+void gbs_close(struct gbs* const gbs);
+long gbs_write(const struct gbs* const gbs, const char* const name);
 
 #endif
