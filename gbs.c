@@ -1,7 +1,7 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -549,6 +549,8 @@ static struct gbs *gb_open(const char *name, char *buf, size_t size)
 	char *na_str = _("gb / not available");
 	const uint8_t *bootrom = gbs_get_bootrom();
 
+	UNUSED(name);
+
 	/* Test if this looks like a valid rom header title */
 	for (i=0x0134; i<0x0143; i++) {
 		if (!(isalnum(buf[i]) || isspace(buf[i])))
@@ -963,6 +965,8 @@ static struct gbs *gbs_open_internal(const char *name, char *buf, size_t size)
 {
 	struct gbs *gbs = gbs_new(buf);
 	long i, addr, jpaddr;
+
+	UNUSED(name);
 
 	gbs->version = buf[0x03];
 	if (gbs->version != 1) {
