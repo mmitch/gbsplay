@@ -1035,9 +1035,13 @@ int main(int argc, char **argv) {
 }
 EOF
         retval4=$?
-        [ $retval2 -eq 0 -a $retval3 -eq 0 -a $retval4 -eq 0 ] || retval2=1
+
+	# combine returncodes for next if block
+        if [ $retval3 -ne 0 ] || [ $retval4 -ne 0 ]; then
+	    retval2=1
+	fi
     fi
-    if [ $retval1 -eq 0 -a $retval2 -eq 0 ]; then
+    if [ $retval1 -eq 0 ] && [ $retval2 -eq 0 ]; then
         if [ "$include_xcb_xcb_h_path" != " " ]; then
             append_nodupe CFLAGS "-I$include_xcb_xcb_h_path"
         fi
