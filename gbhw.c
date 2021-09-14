@@ -123,7 +123,7 @@ static uint32_t bootrom_get(void *priv, uint32_t addr)
 static void bootrom_put(void *priv, uint32_t addr, uint8_t val)
 {
 	struct gbhw *gbhw = priv;
-	return gbhw->boot_shadow_put.put(
+	gbhw->boot_shadow_put.put(
 		gbhw->boot_shadow_put.priv, addr, val);
 }
 
