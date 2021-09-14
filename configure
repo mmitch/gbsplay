@@ -1010,7 +1010,7 @@ if [ "$build_xgbsplay" != "no" ]; then
 #include <xcb/xcb.h>
 #include <stdio.h>
 int main(int argc, char **argv) {
-  printf("%p\n", xcb_connect);
+  printf("%d\n", xcb_connect != NULL);
   return 0;
 }
 EOF
@@ -1020,7 +1020,7 @@ EOF
 #include <xcb/xcb_icccm.h>
 #include <stdio.h>
 int main(int argc, char **argv) {
-  printf("%p\n", xcb_icccm_set_wm_name);
+  printf("%d\n", xcb_icccm_set_wm_name != NULL);
   return 0;
 }
 EOF
@@ -1030,7 +1030,7 @@ EOF
 #include <cairo/cairo-xcb.h>
 #include <stdio.h>
 int main(int argc, char **argv) {
-  printf("%p\n", cairo_create);
+  printf("%d\n", cairo_create != NULL);
   return 0;
 }
 EOF
