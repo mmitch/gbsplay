@@ -24,13 +24,13 @@ uint8_t logo_data[0x30];
 void usage(long exitcode)
 {
 	FILE *out = exitcode ? stderr : stdout;
-	fprintf(out,
-		_("Usage: gbs2gb [option] <gbs-file> <out-file>\n"
-		  "\n"
-		  "Available options are:\n"
-		  "  -t  rom template\n"
-		  "  -h  display this help and exit\n"
-		  "  -V  print version and exit\n"));
+	fputs(_("Usage: gbs2gb [option] <gbs-file> <out-file>\n"
+		"\n"
+		"Available options are:\n"
+		"  -t  rom template\n"
+		"  -h  display this help and exit\n"
+		"  -V  print version and exit\n"),
+	      out);
 	exit(exitcode);
 }
 
@@ -105,7 +105,7 @@ int main(int argc, char **argv)
 	}
 
 	if (logo_data[0] == 0) {
-		fprintf(stderr, _("ROM template data not found!\n"));
+		fputs(_("ROM template data not found!\n"), stderr);
 		usage(EXIT_FAILURE);
 	}
 

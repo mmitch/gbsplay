@@ -478,7 +478,7 @@ void gbs_write_rom(const struct gbs* const gbs, FILE *out, const uint8_t* const 
 			tmp >>= 1;
 		}
 		if (rom_size > 8) {
-			fprintf(stderr, _("ROM size above limit (8 MiB)!"));
+			fputs(_("ROM size above limit (8 MiB)!"), stderr);
 		}
 		memcpy(&gbs->rom[0x104], logo_data, 0x30);
 		snprintf((char*)&gbs->rom[0x134], 16, "%s", gbs->title);
