@@ -162,7 +162,7 @@ struct mapper *mapper_gbs(struct gbcpu *gbcpu, const uint8_t *rom, size_t size) 
 	gbcpu_add_mem(gbcpu, 0x40, 0x7f, gbs_rom_put, bank_get, &m->rom_upper);
 	gbcpu_add_mem(gbcpu, 0xa0, 0xbf, bank_put, bank_get, &m->extram);
 	return m;
-};
+}
 
 struct mapper *mapper_gbr(struct gbcpu *gbcpu, const uint8_t *rom, size_t size, uint8_t bank_lower, uint8_t bank_upper) {
 	struct mapper *m = mapper_new(rom, size, MAPPER_RAMBANK_SIZE);
@@ -173,7 +173,7 @@ struct mapper *mapper_gbr(struct gbcpu *gbcpu, const uint8_t *rom, size_t size, 
 	gbcpu_add_mem(gbcpu, 0x40, 0x7f, gbs_rom_put, bank_get, &m->rom_upper);
 	gbcpu_add_mem(gbcpu, 0xa0, 0xbf, bank_put, bank_get, &m->extram);
 	return m;
-};
+}
 
 struct mapper *mapper_gb(struct gbcpu *gbcpu, const uint8_t *rom, size_t size, uint8_t cart_type, uint8_t rom_type, uint8_t ram_type) {
 	struct mapper *m;
@@ -211,8 +211,8 @@ struct mapper *mapper_gb(struct gbcpu *gbcpu, const uint8_t *rom, size_t size, u
 	}
 
 	return m;
-};
+}
 
 void mapper_free(struct mapper *m) {
 	free(m);
-};
+}
