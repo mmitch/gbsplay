@@ -986,7 +986,7 @@ fi
 
 ## can XMMS be built?
 
-if [ "$build_xmmsplugin" != "no" ] && [ "$GLIB_CFLAGS" ] && [ "$XMMS_CFLAGS" ] && [ "XMMS_INPUT_PLUGIN_DIR" ] && [ "$PTHREAD" ]; then
+if [ "$build_xmmsplugin" != "no" ] && [ "$GLIB_CFLAGS" ] && [ "$XMMS_CFLAGS" ] && [ "$XMMS_INPUT_PLUGIN_DIR" ] && [ "$PTHREAD" ]; then
     append_nodupe CFLAGS $GLIB_CFLAGS $XMMS_CFLAGS
     EXTRA_INSTALL="$EXTRA_INSTALL install-gbsxmms.so"
     EXTRA_UNINSTALL="$EXTRA_UNINSTALL uninstall-gbsxmms.so"
