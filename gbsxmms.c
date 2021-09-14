@@ -646,19 +646,19 @@ static void pause_file(short paused)
 }
 
 static InputPlugin gbs_ip = {
-description:	"GBS Player",
-init:		init,
-about:		about,
-configure:	configure,
-is_our_file:	is_our_file,
-play_file:	play_file,
-stop:		stop,
-pause:		pause_file,
-seek:		seek,
-get_time:	get_time,
-cleanup:	cleanup,
-get_song_info:	get_song_info,
-file_info_box:	file_info_box,
+	.description =	"GBS Player",
+	.init =		init,
+	.about =	about,
+	.configure =	configure,
+	.is_our_file =	is_our_file,
+	.play_file =	play_file,
+	.stop =		stop,
+	.pause =	pause_file,
+	.seek =		seek,
+	.get_time =	get_time,
+	.cleanup =	cleanup,
+	.get_song_info =get_song_info,
+	.file_info_box =file_info_box,
 };
 
 InputPlugin *get_iplugin_info(void)
