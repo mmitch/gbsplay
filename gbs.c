@@ -118,6 +118,7 @@ static void update_status_on_subsong_change(struct gbs* const gbs);
 void gbs_configure(struct gbs* const gbs, long subsong, long subsong_timeout, long silence_timeout, long subsong_gap, long fadeout)
 {
 	gbs->subsong = subsong;
+	update_status_on_subsong_change(gbs);
 	gbs->subsong_timeout = subsong_timeout;
 	gbs->silence_timeout = silence_timeout;
 	gbs->gap = subsong_gap;
