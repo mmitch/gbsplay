@@ -71,6 +71,7 @@ plugout_close_fn sound_close;
 
 static enum playmode playmode = PLAYMODE_LINEAR;
 static long loopmode = 0;
+static long loop_single_mode = 0;
 static enum plugout_endian endian = PLUGOUT_ENDIAN_NATIVE;
 static long rate = 44100;
 static long silence_timeout = 2;
@@ -143,7 +144,7 @@ long *setup_playlist(long songs)
 {
 	long i;
 	long *playlist;
-	
+
 	playlist = (long*) calloc( songs, sizeof(long) );
 	for (i=0; i<songs; i++) {
 		playlist[i] = i;
@@ -182,7 +183,7 @@ static long get_next_subsong(struct gbs *gbs)
 	case PLAYMODE_LINEAR:
 		next = status->subsong + 1;
 		break;
-	}
+    }
 
 	return next;
 }
@@ -284,10 +285,11 @@ static long setup_playmode(struct gbs *gbs)
 long nextsubsong_cb(struct gbs *gbs, void *priv)
 {
 	const struct gbs_status *status = gbs_get_status(gbs);
-	long subsong = get_next_subsong(gbs);
+    long subsong = get_next_subsong(gbs);
 
-	if (status->subsong == subsong_stop ||
-	    subsong >= status->songs) {
+    if (loop_single_mode) {
+        subsong = status->subsong;
+    } else if (status->subsong == subsong_stop || subsong >= status->songs) {
 		if (loopmode) {
 			subsong = subsong_start;
 			setup_playmode(gbs);
@@ -378,7 +380,8 @@ static void usage(long exitcode)
 		  "  -g        set subsong gap (%ld seconds)\n"
 		  "  -h        display this help and exit\n"
 		  "  -H        set output high-pass type (%s)\n"
-		  "  -l        loop mode\n"
+		  "  -l        loop whole playlist mode\n"
+		  "  -L        loop single song mode\n"
 		  "  -o        select output plugin (%s)\n"
 		  "            'list' shows available plugins\n"
 		  "  -q        reduce verbosity\n"
@@ -408,7 +411,7 @@ static void parseopts(int *argc, char ***argv)
 {
 	long res;
 	myname = filename_only(*argv[0]);
-	while ((res = getopt(*argc, *argv, "1234c:E:f:g:hH:lo:qr:R:t:T:vVzZ")) != -1) {
+	while ((res = getopt(*argc, *argv, "1234c:E:f:g:hH:lLo:qr:R:t:T:vVzZ")) != -1) {
 		switch (res) {
 		default:
 			usage(1);
@@ -448,6 +451,9 @@ static void parseopts(int *argc, char ***argv)
 			break;
 		case 'l':
 			loopmode = 1;
+			break;
+		case 'L':
+			loop_single_mode = 1;
 			break;
 		case 'o':
 			sound_name = optarg;
