@@ -183,7 +183,7 @@ static long get_next_subsong(struct gbs *gbs)
 	case PLAYMODE_LINEAR:
 		next = status->subsong + 1;
 		break;
-    }
+	}
 
 	return next;
 }
@@ -285,11 +285,11 @@ static long setup_playmode(struct gbs *gbs)
 long nextsubsong_cb(struct gbs *gbs, void *priv)
 {
 	const struct gbs_status *status = gbs_get_status(gbs);
-    long subsong = get_next_subsong(gbs);
+	long subsong = get_next_subsong(gbs);
 
-    if (loop_single_mode) {
-        subsong = status->subsong;
-    } else if (status->subsong == subsong_stop || subsong >= status->songs) {
+	if (loop_single_mode) {
+		subsong = status->subsong;
+	} else if (status->subsong == subsong_stop || subsong >= status->songs) {
 		if (loopmode) {
 			subsong = subsong_start;
 			setup_playmode(gbs);
