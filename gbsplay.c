@@ -124,6 +124,12 @@ static void handleuserinput(struct gbs *gbs)
 		case '4':
 			gbs_toggle_mute(gbs, c-'1');
 			break;
+		case 'l':
+			toggle_loop_single();
+			break;
+		case 'a':
+			toggle_loop_all();
+			break;
 		}
 	}
 }
@@ -175,15 +181,19 @@ static void printstatus(struct gbs *gbs)
 {
 	const struct gbs_status *status;
 	struct displaytime time;
+	long pausemode, loopmode, loop_single_mode;
 
 	status = gbs_get_status(gbs);
+	pausemode = get_pause(); //TODO This doesn't work, I think because the view doesn't update while paused
+	loopmode = get_loop_all();
+	loop_single_mode = get_loop_single();
 
 	update_displaytime(&time, status);
 
 	printf("\r\033[A\033[A"
-	       "Song %3d/%3d (%s)\033[K\n"
+	       "Song %3d/%3d %s%s(%s)\033[K\n"
 	       "%02ld:%02ld/%02ld:%02ld",
-	       status->subsong+1, status->songs, status->songtitle,
+	       status->subsong+1, status->songs, pausemode ? "[Paused] " : "", loop_single_mode ? "[Loop single] " : (loopmode ? "[Loop all] " : ""), status->songtitle,
 	       time.played_min, time.played_sec, time.total_min, time.total_sec);
 	if (verbosity>2) {
 		printf("  %s %s  %s %s  %s %s  %s %s  [%s|%s]\n",
@@ -205,8 +215,8 @@ static void printstatus(struct gbs *gbs)
 static void printinfo()
 {
 	if (verbosity>0) {
-		puts(_("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player\n" \
-		         "           [ ] pause/resume   [1-4] mute channel"));
+		puts(_("\ncommands:  [p]revious subsong   [n]ext subsong   loop [a]ll    [q]uit player\n" \
+		         "           [ ] pause/resume   [1-4] mute channel [l]oop single"));
 	}
 	if (verbosity>1) {
 		puts("\n\n"); /* additional newlines for the status display */

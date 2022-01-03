@@ -311,6 +311,31 @@ void toggle_pause()
 		sound_pause(pause_mode);
 }
 
+void toggle_loop_single()
+{
+	loop_single_mode = !loop_single_mode;
+}
+
+void toggle_loop_all()
+{
+	loopmode = !loopmode;
+}
+
+long get_pause()
+{
+	return pause_mode;
+}
+
+long get_loop_single()
+{
+	return loop_single_mode;
+}
+
+long get_loop_all()
+{
+	return loopmode;
+}
+
 long step_emulation(struct gbs *gbs) {
 	if (is_running()) {
 		return gbs_step(gbs, refresh_delay);
