@@ -46,6 +46,13 @@
 
 const char *boot_rom_file = ".dmg_rom.bin";
 
+enum filetype {
+	FILETYPE_GBS = 0,
+	FILETYPE_GBR = 1,
+	FILETYPE_GB  = 2,
+	FILETYPE_VGM = 3,
+};
+
 struct gbs_subsong_info {
 	uint32_t len;  /* GBS_LEN_DIV (1024) == 1 second */
 	char *title;
@@ -103,6 +110,8 @@ struct gbs {
 	struct gbhw_buffer gbhw_buf;
 	struct gbhw gbhw;
 	struct mapper *mapper;
+
+	enum filetype filetype;
 };
 
 const struct gbs_metadata *gbs_get_metadata(struct gbs* const gbs)
@@ -119,6 +128,13 @@ void gbs_configure(struct gbs* const gbs, long subsong, long subsong_timeout, lo
 {
 	gbs->subsong = subsong;
 	update_status_on_subsong_change(gbs);
+	if (silence_timeout) {
+		if (gbs->filetype == FILETYPE_GB && silence_timeout < 10) {
+			/* GB ROMs usually have a fairly long silence in the beginning,
+			   enforce a minimum timeout for convenience. */
+			silence_timeout = 10;
+		}
+	}
 	gbs->subsong_timeout = subsong_timeout;
 	gbs->silence_timeout = silence_timeout;
 	gbs->gap = subsong_gap;
@@ -557,6 +573,7 @@ static struct gbs *gb_open(const char* const name, char *buf, size_t size)
 	} else {
 		gbs->title = na_str;
 	}
+	gbs->filetype = FILETYPE_GB;
 	gbs->author = na_str;
 	gbs->copyright = na_str;
 	gbs->code = buf;
@@ -604,6 +621,7 @@ static struct gbs *gbr_open(const char* const name, char *buf, size_t size)
 		gbs_free(gbs);
 		return NULL;
 	}
+	gbs->filetype = FILETYPE_GBR;
 	gbs->songs = 255;
 	gbs->defaultbank = buf[0x06];
 	gbs->init  = readint(&buf[0x08], 2);
@@ -797,6 +815,7 @@ static struct gbs *vgm_open(const char* const name, char* const buf, size_t size
 		return NULL;
 	}
 
+	gbs->filetype = FILETYPE_VGM;
 	gbs->codelen = 0x4000;
 	gbs->code = calloc(1, gbs->codelen);
 	code_used = 0;
