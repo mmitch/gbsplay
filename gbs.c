@@ -984,10 +984,6 @@ static struct gbs* gbs_open_internal(const char* const name, char* const buf, si
 		return NULL;
 	}
 
-	gbs->status.songs = gbs->songs;
-	gbs->status.defaultsong = gbs->defaultsong;
-	gbs->status.subsong = gbs->defaultsong - 1;
-
 	gbs->load  = readint(&buf[0x06], 2);
 	gbs->init  = readint(&buf[0x08], 2);
 	gbs->play  = readint(&buf[0x0a], 2);
@@ -1199,6 +1195,10 @@ struct gbs* gbs_open(const char* const name)
 	}
 
 	gbs = gbs_open_mem(name, buf, st.st_size);
+	gbs->status.songs = gbs->songs;
+	gbs->status.defaultsong = gbs->defaultsong;
+	gbs->status.subsong = gbs->defaultsong - 1;
+
 
 exit_free:
 	if (gbs == NULL || gbs->buf != buf)
