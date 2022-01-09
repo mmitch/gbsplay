@@ -1195,10 +1195,11 @@ struct gbs* gbs_open(const char* const name)
 	}
 
 	gbs = gbs_open_mem(name, buf, st.st_size);
-	gbs->status.songs = gbs->songs;
-	gbs->status.defaultsong = gbs->defaultsong;
-	gbs->status.subsong = gbs->defaultsong - 1;
-
+	if (gbs != NULL) {
+		gbs->status.songs = gbs->songs;
+		gbs->status.defaultsong = gbs->defaultsong;
+		gbs->status.subsong = gbs->defaultsong - 1;
+	}
 
 exit_free:
 	if (gbs == NULL || gbs->buf != buf)
