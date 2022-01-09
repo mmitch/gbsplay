@@ -99,38 +99,6 @@ static void stepcallback(struct gbs *gbs, long cycles, const struct gbs_channel_
 	sound_step(cycles, chan);
 }
 
-static void handleuserinput(struct gbs *gbs)
-{
-	char c;
-
-	if (get_input(&c)) {
-		switch (c) {
-		case 'p':
-			play_prev_subsong(gbs);
-			break;
-		case 'n':
-			play_next_subsong(gbs);
-			break;
-		case 'q':
-		case 27:
-			quit = 1;
-			break;
-		case ' ':
-			toggle_pause(gbs);
-			break;
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-			gbs_toggle_mute(gbs, c-'1');
-			break;
-		case 'l':
-			cycle_loop_mode();
-			break;
-		}
-	}
-}
-
 // TODO: only pass struct gbhw_channnel instead of struct gbhw?
 static char *notestring(const struct gbs_status *status, long ch)
 {
@@ -219,6 +187,40 @@ static void printinfo()
 		puts("\n\n"); /* additional newlines for the status display */
 	}
 	redraw = false;
+}
+
+static void handleuserinput(struct gbs *gbs)
+{
+	char c;
+
+	if (get_input(&c)) {
+		switch (c) {
+		case 'p':
+			play_prev_subsong(gbs);
+			break;
+		case 'n':
+			play_next_subsong(gbs);
+			break;
+		case 'q':
+		case 27:
+			quit = 1;
+			break;
+		case ' ':
+			toggle_pause(gbs);
+			if (redraw) printinfo();
+			if (verbosity>1) printstatus(gbs);
+			break;
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+			gbs_toggle_mute(gbs, c-'1');
+			break;
+		case 'l':
+			cycle_loop_mode();
+			break;
+		}
+	}
 }
 
 int main(int argc, char **argv)
