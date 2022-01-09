@@ -135,6 +135,28 @@ void cfg_long(void* const ptr)
 	nextstate = 1;
 }
 
+void cfg_int(void* const ptr)
+{
+	char num[10];
+	unsigned long n = 0;
+
+	if (!isdigit(c)) {
+		err_expect("[0-9]");
+		return;
+	}
+	do {
+		num[n++] = c;
+		c = nextchar();
+	} while (isdigit(c) &&
+	         n < (sizeof(num)-1));
+	num[n] = 0;
+
+	*((int*)ptr) = atoi(num);
+
+	state = 0;
+	nextstate = 1;
+}
+
 void cfg_parse(const char* const fname, const struct cfg_option* const options)
 {
 	char option[200] = "";

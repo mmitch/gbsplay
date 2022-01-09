@@ -20,6 +20,7 @@ struct cfg_option {
 
 void  cfg_string(void* const ptr);
 void  cfg_long(void* const ptr);
+void  cfg_int(void* const ptr);
 void  cfg_endian(void* const ptr);
 void  cfg_parse(const char* const fname, const struct cfg_option* const options);
 char* get_userconfig(const char* const cfgfile);
