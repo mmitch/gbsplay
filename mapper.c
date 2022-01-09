@@ -153,6 +153,28 @@ static void mbc1_rom_put(void *priv, uint32_t addr, uint8_t val)
 	}
 }
 
+static void mbc3_rom_put(void *priv, uint32_t addr, uint8_t val)
+{
+	/* TODO: RTC registers not supported */
+	struct bank *b = priv;
+	struct mapper *m = b->mapper;
+	uint8_t rombank = 0;
+	uint8_t rambank = 0;
+
+	/* store reg value */
+	m->mbc1.reg[addr / 0x2000] = val;
+
+	/* update MBC3 state */
+	m->extram.enable = m->mbc1.reg[0] == 0x0a;
+	rombank = m->mbc1.reg[1] & 0x7f;
+	rombank += rombank == 0;
+	rambank = m->mbc1.reg[2] & 0x03;
+
+	mapper_map_rom(&m->rom_lower, 0);
+	mapper_map_rom(&m->rom_upper, rombank);
+	mapper_map_ram(&m->extram, rambank);
+}
+
 struct mapper *mapper_gbs(struct gbcpu *gbcpu, const uint8_t *rom, size_t size) {
 	struct mapper *m = mapper_new(rom, size, MAPPER_RAMBANK_SIZE);
 	m->extram.enable = 1;
@@ -179,14 +201,21 @@ struct mapper *mapper_gbr(struct gbcpu *gbcpu, const uint8_t *rom, size_t size, 
 struct mapper *mapper_gb(struct gbcpu *gbcpu, const uint8_t *rom, size_t size, uint8_t cart_type, uint8_t rom_type, uint8_t ram_type) {
 	struct mapper *m;
 	size_t ram_size = 0;
+	gbcpu_put_fn rom_put = mbc1_rom_put;
 
 	switch (cart_type) {
-	case 0x00: break;  /* ROM only */
-	case 0x01: break;  /* MBC1 */
-	case 0x02: break;  /* MBC1+RAM */
-	case 0x03: break;  /* MBC1+RAM+BAT */
-	case 0x08: break;  /* ROM+RAM */
-	case 0x09: break;  /* ROM+RAM+BAT */
+	case 0x00:  /* ROM only */
+	case 0x01:  /* MBC1 */
+	case 0x02:  /* MBC1+RAM */
+	case 0x03:  /* MBC1+RAM+BAT */
+	case 0x08:  /* ROM+RAM */
+	case 0x09:  /* ROM+RAM+BAT */
+		break;
+	case 0x11:  /* MBC3 */
+	case 0x12:  /* MBC3+RAM */
+	case 0x13:  /* MBC3+RAM+BAT (e.g. Pokemon) */
+		rom_put = mbc3_rom_put;
+		break;
 	/* TODO: Implement more mappers */
 	default: return NULL;
 	}
@@ -203,8 +232,8 @@ struct mapper *mapper_gb(struct gbcpu *gbcpu, const uint8_t *rom, size_t size, u
 
 	mapper_map_rom(&m->rom_lower, 0);
 	mapper_map_rom(&m->rom_upper, 1);
-	gbcpu_add_mem(gbcpu, 0x00, 0x3f, mbc1_rom_put, bank_get, &m->rom_lower);
-	gbcpu_add_mem(gbcpu, 0x40, 0x7f, mbc1_rom_put, bank_get, &m->rom_upper);
+	gbcpu_add_mem(gbcpu, 0x00, 0x3f, rom_put, bank_get, &m->rom_lower);
+	gbcpu_add_mem(gbcpu, 0x40, 0x7f, rom_put, bank_get, &m->rom_upper);
 
 	if (ram_size > 0) {
 		mapper_map_ram(&m->extram, 0);
