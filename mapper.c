@@ -155,6 +155,7 @@ static void mbc1_rom_put(void *priv, uint32_t addr, uint8_t val)
 
 struct mapper *mapper_gbs(struct gbcpu *gbcpu, const uint8_t *rom, size_t size) {
 	struct mapper *m = mapper_new(rom, size, MAPPER_RAMBANK_SIZE);
+	m->extram.enable = 1;
 	mapper_map_rom(&m->rom_lower, 0);
 	mapper_map_rom(&m->rom_upper, 1);
 	mapper_map_ram(&m->extram, 0);
