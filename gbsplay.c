@@ -125,10 +125,7 @@ static void handleuserinput(struct gbs *gbs)
 			gbs_toggle_mute(gbs, c-'1');
 			break;
 		case 'l':
-			toggle_loop_single();
-			break;
-		case 'a':
-			toggle_loop_all();
+			cycle_loop_mode();
 			break;
 		}
 	}
@@ -215,8 +212,8 @@ static void printstatus(struct gbs *gbs)
 static void printinfo()
 {
 	if (verbosity>0) {
-		puts(_("\ncommands:  [p]revious subsong   [n]ext subsong   loop [a]ll    [q]uit player\n" \
-		         "           [ ] pause/resume   [1-4] mute channel [l]oop single"));
+		puts(_("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player\n" \
+		         "           [ ] pause/resume   [1-4] mute channel [l]oop none/one/all"));
 	}
 	if (verbosity>1) {
 		puts("\n\n"); /* additional newlines for the status display */

@@ -311,14 +311,21 @@ void toggle_pause()
 		sound_pause(pause_mode);
 }
 
-void toggle_loop_single()
+void cycle_loop_mode()
 {
-	loop_single_mode = !loop_single_mode;
-}
-
-void toggle_loop_all()
-{
-	loopmode = !loopmode;
+	if (loopmode) {
+		// all -> none
+		loop_single_mode = 0;
+		loopmode = 0;
+	} else if (loop_single_mode) {
+		// single -> all
+		loop_single_mode = 0;
+		loopmode = 1;
+	} else {
+		// none -> single
+		loop_single_mode = 1;
+		loopmode = 0;
+	}
 }
 
 long get_pause()
