@@ -48,12 +48,6 @@ enum playmode {
 	PLAYMODE_SHUFFLE = 3,
 };
 
-enum loopmode {
-	LOOPMODE_OFF = 0,
-	LOOPMODE_RANGE = 1,
-	LOOPMODE_SINGLE = 2,
-};
-
 #define DEFAULT_REFRESH_DELAY 33
 
 long refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
@@ -76,7 +70,7 @@ plugout_write_fn sound_write;
 plugout_close_fn sound_close;
 
 static enum playmode playmode = PLAYMODE_LINEAR;
-static enum loopmode loopmode = LOOPMODE_OFF;
+static enum gbs_loop_mode loop_mode = LOOP_OFF;
 static enum plugout_endian endian = PLUGOUT_ENDIAN_NATIVE;
 static long rate = 44100;
 static long silence_timeout = 2;
@@ -107,7 +101,7 @@ const struct cfg_option options[] = {
 	{ "endian", &endian, cfg_endian },
 	{ "fadeout", &fadeout, cfg_long },
 	{ "filter_type", &filter_type, cfg_string },
-	{ "loop", &loopmode, cfg_int },
+	{ "loop", &loop_mode, cfg_int },
 	{ "output_plugin", &sound_name, cfg_string },
 	{ "rate", &rate, cfg_long },
 	{ "refresh_delay", &refresh_delay, cfg_long },
@@ -292,10 +286,10 @@ long nextsubsong_cb(struct gbs *gbs, void *priv)
 	const struct gbs_status *status = gbs_get_status(gbs);
 	long subsong = get_next_subsong(gbs);
 
-	if (loopmode == LOOPMODE_SINGLE) {
+	if (loop_mode == LOOP_SINGLE) {
 		subsong = status->subsong;
 	} else if (status->subsong == subsong_stop || subsong >= status->songs) {
-		if (loopmode == LOOPMODE_OFF) {
+		if (loop_mode == LOOP_OFF) {
 			return false;
 		}
 		subsong = subsong_start;
@@ -454,10 +448,10 @@ static void parseopts(int *argc, char ***argv)
 			filter_type = optarg;
 			break;
 		case 'l':
-			loopmode = LOOPMODE_RANGE;
+			loop_mode = LOOP_RANGE;
 			break;
 		case 'L':
-			loopmode = LOOPMODE_SINGLE;
+			loop_mode = LOOP_SINGLE;
 			break;
 		case 'o':
 			sound_name = optarg;
@@ -611,6 +605,7 @@ struct gbs *common_init(int argc, char **argv)
 
 	// FIXME: proper configuration interface to gbs, this is just quickly slapped together
 	gbs_configure(gbs, subsong_start, subsong_timeout, silence_timeout, subsong_gap, fadeout);
+	gbs_set_loop_mode(gbs, loop_mode);
 	gbs_configure_channels(gbs, mute_channel[0], mute_channel[1], mute_channel[2], mute_channel[3]);
 
 	gbs_set_nextsubsong_cb(gbs, nextsubsong_cb, NULL);

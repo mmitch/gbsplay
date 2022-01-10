@@ -107,6 +107,15 @@ enum gbs_filter_type {
 	FILTER_CGB, /**< Gameboy Color high-pass filter */
 };
 
+/**
+ * Loop mode when playing multiple subsongs.
+ */
+enum gbs_loop_mode {
+	LOOP_OFF = 0,    /* No looping */
+	LOOP_RANGE = 1,  /* Loop selected subsong range */
+	LOOP_SINGLE = 2, /* Loop single subsong */
+};
+
 //
 //////  typedefs
 //
@@ -191,6 +200,7 @@ void gbs_set_io_callback(struct gbs* const gbs, gbs_io_cb fn, void *priv);
 void gbs_set_step_callback(struct gbs* const gbs, gbs_step_cb fn, void *priv);
 void gbs_set_sound_callback(struct gbs* const gbs, gbs_sound_cb fn, void *priv);
 long gbs_set_filter(struct gbs* const gbs, enum gbs_filter_type type);
+void gbs_set_loop_mode(struct gbs* const gbs, enum gbs_loop_mode mode);
 long gbs_toggle_mute(struct gbs* const gbs, long channel);
 void gbs_close(struct gbs* const gbs);
 long gbs_write(const struct gbs* const gbs, const char* const name);

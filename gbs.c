@@ -112,6 +112,7 @@ struct gbs {
 	struct mapper *mapper;
 
 	enum filetype filetype;
+	enum gbs_loop_mode loop_mode;
 };
 
 const struct gbs_metadata *gbs_get_metadata(struct gbs* const gbs)
@@ -139,6 +140,11 @@ void gbs_configure(struct gbs* const gbs, long subsong, long subsong_timeout, lo
 	gbs->silence_timeout = silence_timeout;
 	gbs->gap = subsong_gap;
 	gbs->fadeout = fadeout;
+}
+
+void gbs_set_loop_mode(struct gbs* const gbs, enum gbs_loop_mode mode)
+{
+	gbs->loop_mode = mode;
 }
 
 void gbs_configure_channels(struct gbs* const gbs, long mute_0, long mute_1, long mute_2, long mute_3) {
@@ -325,13 +331,6 @@ long gbs_step(struct gbs* const gbs, long time_to_work)
 		} else gbs->silence_start = 0;
 	}
 
-	if (gbs->fadeout && gbs->subsong_timeout &&
-	    time >= gbs->subsong_timeout - gbs->fadeout - gbs->gap)
-		gbhw_master_fade(gbhw, 128/gbs->fadeout, 0);
-	if (gbs->subsong_timeout &&
-	    time >= gbs->subsong_timeout - gbs->gap)
-		gbhw_master_fade(gbhw, 128*16, 0);
-
 	if (gbs->silence_start &&
 	    (gbs->ticks - gbs->silence_start) / GBHW_CLOCK >= gbs->silence_timeout) {
 		if (gbs->subsong_info[gbs->subsong].len == 0) {
@@ -339,8 +338,16 @@ long gbs_step(struct gbs* const gbs, long time_to_work)
 		}
 		return gbs_nextsubsong(gbs);
 	}
-	if (gbs->subsong_timeout && time >= gbs->subsong_timeout)
-		return gbs_nextsubsong(gbs);
+
+	if (gbs->subsong_timeout && gbs->loop_mode != LOOP_SINGLE) {
+		if (gbs->fadeout &&
+		    time >= gbs->subsong_timeout - gbs->fadeout - gbs->gap)
+			gbhw_master_fade(gbhw, 128/gbs->fadeout, 0);
+		if (time >= gbs->subsong_timeout - gbs->gap)
+			gbhw_master_fade(gbhw, 128*16, 0);
+		if (time >= gbs->subsong_timeout)
+			return gbs_nextsubsong(gbs);
+	}
 
 	return true;
 }
