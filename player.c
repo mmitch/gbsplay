@@ -328,11 +328,13 @@ void update_displaytime(struct displaytime *time, const struct gbs_status *statu
 	time->played_min = played / 60;
 	time->played_sec = played % 60;
 
-	if (total == 0) {
-		total = subsong_timeout;
+	if (total != 0) {
+		time->total_min = total / 60;
+		time->total_sec = total % 60;
+	} else {
+		time->total_min = 99;
+		time->total_sec = 99;
 	}
-	time->total_min = total / 60;
-	time->total_sec = total % 60;
 }
 
 static char *endian_str(long endian)

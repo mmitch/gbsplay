@@ -405,6 +405,9 @@ static void update_status_on_subsong_change(struct gbs* const gbs) {
 	}
 	status->subsong = gbs->subsong;
 	status->subsong_len = gbs->subsong_info[gbs->subsong].len;
+	if (status->subsong_len == 0 && gbs->loop_mode != LOOP_SINGLE) {
+		status->subsong_len = gbs->subsong_timeout * 1024;
+	}
 }
 
 const struct gbs_status* gbs_get_status(struct gbs* const gbs) {
