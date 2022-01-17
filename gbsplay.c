@@ -146,19 +146,20 @@ static void printstatus(struct gbs *gbs)
 {
 	const struct gbs_status *status;
 	struct displaytime time;
-	long pausemode, loopmode, loop_single_mode;
+	enum gbs_loop_mode loop_mode;
+	long pausemode;
 
 	status = gbs_get_status(gbs);
 	pausemode = get_pause(); //TODO This doesn't work, I think because the view doesn't update while paused
-	loopmode = get_loop_all();
-	loop_single_mode = get_loop_single();
+	loop_mode = get_loop_mode();
 
 	update_displaytime(&time, status);
 
+	//TODO "[Loop range]" or "[Loop all]"?
 	printf("\r\033[A\033[A"
 	       "Song %3d/%3d %s%s(%s)\033[K\n"
 	       "%02ld:%02ld/%02ld:%02ld",
-	       status->subsong+1, status->songs, pausemode ? "[Paused] " : "", loop_single_mode ? "[Loop single] " : (loopmode ? "[Loop all] " : ""), status->songtitle,
+	       status->subsong+1, status->songs, pausemode ? "[Paused] " : "", (loop_mode == LOOP_SINGLE) ? "[Loop single] " : ((loop_mode == LOOP_RANGE) ? "[Loop all] " : ""), status->songtitle,
 	       time.played_min, time.played_sec, time.total_min, time.total_sec);
 	if (verbosity>2) {
 		printf("  %s %s  %s %s  %s %s  %s %s  [%s|%s]\n",

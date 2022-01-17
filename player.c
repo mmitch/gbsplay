@@ -313,18 +313,17 @@ void toggle_pause()
 
 void cycle_loop_mode()
 {
-	if (loopmode) {
-		// all -> none
-		loop_single_mode = 0;
-		loopmode = 0;
-	} else if (loop_single_mode) {
-		// single -> all
-		loop_single_mode = 0;
-		loopmode = 1;
-	} else {
-		// none -> single
-		loop_single_mode = 1;
-		loopmode = 0;
+	switch (loop_mode) {
+		case LOOP_OFF:
+			loop_mode = LOOP_SINGLE;
+			break;
+		case LOOP_SINGLE:
+			loop_mode = LOOP_RANGE;
+			break;
+		default:
+		case LOOP_RANGE:
+			loop_mode = LOOP_OFF;
+			break;
 	}
 }
 
@@ -333,14 +332,9 @@ long get_pause()
 	return pause_mode;
 }
 
-long get_loop_single()
+enum gbs_loop_mode get_loop_mode()
 {
-	return loop_single_mode;
-}
-
-long get_loop_all()
-{
-	return loopmode;
+	return loop_mode;
 }
 
 long step_emulation(struct gbs *gbs) {
