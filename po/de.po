@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-12 21:14+0100\n"
+"POT-Creation-Date: 2022-01-21 23:08+0100\n"
 "PO-Revision-Date: 2020-11-12 21:21+0100\n"
 "Last-Translator: Christian Garbs <mitch@cgarbs.de>\n"
 "Language-Team: none\n"
@@ -30,14 +30,20 @@ msgstr ""
 msgid ""
 "\n"
 "commands:  [p]revious subsong   [n]ext subsong   [q]uit player\n"
-"           [ ] pause/resume   [1-4] mute channel"
+"           [ ] pause/resume   [1-4] mute channel   [l]oop mode"
 msgstr ""
 "\n"
 "Befehle:  [p] vorheriger Subsong   [n]ächster Subsong   [q] Player beenden\n"
-"          [ ] Pause/Weiterspielen   [1-4] Kanal stummschalten"
+"          [ ] Pause/Weiterspielen   [1-4] Kanal stummschalten   Wiederho[l]ung"
 
 msgid " + VBlank (ugetab)"
 msgstr " + VBlank (ugetab)"
+
+msgid " [loop range]"
+msgstr " [Ausgewählte]"
+
+msgid " [loop single]"
+msgstr " [Einzeln]"
 
 #, c-format
 msgid ""
@@ -79,10 +85,6 @@ msgstr "%s: Kann den audio flow nicht starten: %s\n"
 msgid "'%s' expected at %s line %ld char %ld.\n"
 msgstr "'%s' erwartet in %s Zeile %ld Spalte %ld.\n"
 
-#, c-format
-msgid "(%ld seconds)\n"
-msgstr "(%ld Sekunden)\n"
-
 msgid "59.7Hz VBlank\n"
 msgstr "59.7Hz VBlank\n"
 
@@ -119,10 +121,6 @@ msgstr "Größer als erlaubtes Maximum (4MiB)"
 msgid "CRC32:            0x%08lx\n"
 msgstr "CRC32:            0x%08lx\n"
 
-#, c-format
-msgid "CRC32:            0x%08lx/0x%08lx (%s)\n"
-msgstr "CRC32:            0x%08lx/0x%08lx (%s)\n"
-
 msgid "Cancel"
 msgstr "Abbrechen"
 
@@ -154,8 +152,16 @@ msgid "Could not open ALSA PCM device '%s': %s\n"
 msgstr "Konnte ALSA-PCM-Gerät '%s' nicht öffnen: %s\n"
 
 #, c-format
+msgid "Could not open ROM template: %s"
+msgstr "Kommte ROM-Template nicht öffnen: %s"
+
+#, c-format
 msgid "Could not open SDL audio device: %s\n"
 msgstr "Konnte SDL-Audiogerät nicht öffnen: %s\n"
+
+#, c-format
+msgid "Could not open output file: %s"
+msgstr "Konnte Ausgabedatei nicht öffnen: %s"
 
 #, c-format
 msgid "Could not open output plugin \"%s\"\n"
@@ -186,9 +192,6 @@ msgstr "Konnte Ausgabemethode nicht öffnen."
 
 msgid "Extended Info"
 msgstr "Erweiterte Informationen"
-
-msgid "Failed"
-msgstr "Fehlgeschlagen"
 
 msgid "File Info"
 msgstr "Dateiinformationen"
@@ -241,9 +244,6 @@ msgstr "Spiel:"
 msgid "Invalid filter type \"%s\"\n"
 msgstr "Ungültiger Filtertyp \"%s\"\n"
 
-msgid "Length    "
-msgstr "Länge    "
-
 msgid "Memory allocation failed!"
 msgstr "Speicherreservierung fehlgeschlagen!"
 
@@ -279,11 +279,14 @@ msgstr "Unterstützung für zlib nicht aktiviert"
 msgid "Number of subsongs = %d is unreasonable.\n"
 msgstr "Anzahl der Subsongs = %d ist unsinnig.\n"
 
-msgid "OK"
-msgstr "Korrekt"
-
 msgid "Prev"
 msgstr "Vorheriger"
+
+msgid "ROM size above limit (8 MiB)!"
+msgstr "ROM size above limit (8 MiB)!"
+
+msgid "ROM template data not found!\n"
+msgstr "ROM template data not found!\n"
 
 #, c-format
 msgid "Requested rate %ldHz, got %dHz.\n"
@@ -291,13 +294,6 @@ msgstr "Samplingrate %ldHz angefordert, %ldHz erhalten.\n"
 
 msgid "Save"
 msgstr "Speichern"
-
-msgid "Subsong"
-msgstr "Subsong"
-
-#, c-format
-msgid "Subsong %03ld:\t"
-msgstr "Subsong %03ld:\t"
 
 #, c-format
 msgid "Subsong number out of range (min=0, max=%d).\n"
@@ -310,9 +306,6 @@ msgstr "Timing:           %2.2fHz timer%s\n"
 #, c-format
 msgid "Timing:           %s\n"
 msgstr "Timing:           %s\n"
-
-msgid "Title"
-msgstr "Titel"
 
 #, c-format
 msgid "Unknown option %s at %s line %ld.\n"
@@ -331,8 +324,8 @@ msgid "Unsupported VGM version: %d.%02x\n"
 msgstr "Nicht unterstützte VGM-Version: %d.%02x\n"
 
 #, c-format
-msgid "Unsupported default bank @0x0000: %d\n"
-msgstr "Nicht unterstützte Standardbank @0x0000: %d\n"
+msgid "Unsupported cartridge type: 0x%02x\n"
+msgstr "Nicht unterstützter Modul-Typ: 0x%02x\n"
 
 #, c-format
 msgid "Unsupported timerflag value: %d\n"
@@ -351,7 +344,8 @@ msgid ""
 "  -g        set subsong gap (%ld seconds)\n"
 "  -h        display this help and exit\n"
 "  -H        set output high-pass type (%s)\n"
-"  -l        loop mode\n"
+"  -l        loop whole playlist mode\n"
+"  -L        loop single song mode\n"
 "  -o        select output plugin (%s)\n"
 "            'list' shows available plugins\n"
 "  -q        reduce verbosity\n"
@@ -373,7 +367,8 @@ msgstr ""
 "  -g        Pause zwischen Subsongs (%ld Sekunden)\n"
 "  -h        Diese Hilfe anzeigen und Programm beenden\n"
 "  -H        Hochpass-filter typ (%s)\n"
-"  -l        Endloswiedergabe\n"
+"  -l        Ganze Playliste wiederholen\n"
+"  -L        Einzelnes Lied wiederholen\n"
 "  -o        Wahl der Ausgabemethode (%s)\n"
 "            'list' zeigt alle Möglichkeiten\n"
 "  -q        Geschwätzigkeit verringern\n"
@@ -401,13 +396,20 @@ msgstr ""
 "  -h  Diese Hilfe anzeigen und Programm beenden\n"
 "  -V  Version anzeigen und Programm beenden\n"
 
-#, c-format
-msgid "Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n"
-msgstr "Warnung: Erweiterter Kopfbereich gefunden, aber die Prüfsumme stimmt nicht (0x%08x != 0x%08x).\n"
-
-#, c-format
-msgid "Warning: File CRC does not match (0x%08x != 0x%08x).\n"
-msgstr "Warnung: Dateiprüfsumme stimmt nicht überein (0x%08x != 0x%08x).\n"
+msgid ""
+"Usage: gbs2gb [option] <gbs-file> <out-file>\n"
+"\n"
+"Available options are:\n"
+"  -t  rom template\n"
+"  -h  display this help and exit\n"
+"  -V  print version and exit\n"
+msgstr ""
+"Benutzung: gbs2gb [Option] <GBS-Datei> <Ausgabe-Datei>\n"
+"\n"
+"Verfügbare Optionen sind:\n"
+"  -t  ROM-Vorlage\n"
+"  -h  Diese Hilfe anzeigen und Programm beenden\n"
+"  -V  Version anzeigen und Programm beenden\n"
 
 #, c-format
 msgid "fcntl(F_GETFL) failed: %s\n"
@@ -422,6 +424,10 @@ msgstr "gb / nicht verfügbar"
 
 msgid "gbr / not available"
 msgstr "gbr / nicht verfügbar"
+
+#, c-format
+msgid "ioctl(fd, SNDCTL_DSP_GETBLKSIZE) failed: %s\n"
+msgstr "ioctl(fd, SNDCTL_DSP_GETBLKSIZE) fehlgeschlagen: %s\n"
 
 #, c-format
 msgid "ioctl(fd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"
@@ -439,9 +445,6 @@ msgstr "ioctl(fd, SNDCTL_DSP_SPEED, %ld) fehlgeschlagen: %s\n"
 msgid "ioctl(fd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
 msgstr "ioctl(fd, SNDCTL_DSP_STEREO, %d) fehlgeschlagen: %s\n"
 
-msgid "no time limit"
-msgstr "Kein Zeitlimit"
-
 #, c-format
 msgid "snd_pcm_hw_params failed: %s\n"
 msgstr "snd_pcm_hw_params fehlgeschlagen: %s\n"
@@ -455,8 +458,8 @@ msgid "snd_pcm_hw_params_set_access failed: %s\n"
 msgstr "snd_pcm_hw_params_set_access fehlgeschlagen: %s\n"
 
 #, c-format
-msgid "snd_pcm_hw_params_set_buffer_size failed: %s\n"
-msgstr "snd_pcm_hw_params_set_buffer_size fehlgeschlagen: %s\n"
+msgid "snd_pcm_hw_params_set_buffer_size_near failed: %s\n"
+msgstr "snd_pcm_hw_params_set_buffer_size_near fehlgeschlagen: %s\n"
 
 #, c-format
 msgid "snd_pcm_hw_params_set_channels failed: %s\n"
@@ -467,8 +470,8 @@ msgid "snd_pcm_hw_params_set_format failed: %s\n"
 msgstr "snd_pcm_hw_params_set_format fehlgeschlagen: %s\n"
 
 #, c-format
-msgid "snd_pcm_hw_params_set_periods failed: %s\n"
-msgstr "snd_pcm_hw_params_set_periods fehlgeschlagen: %s\n"
+msgid "snd_pcm_hw_params_set_period_size_near failed: %s\n"
+msgstr "snd_pcm_hw_params_set_period_size_near fehlgeschlagen: %s\n"
 
 #, c-format
 msgid "snd_pcm_hw_params_set_rate_near failed: %s\n"
@@ -478,8 +481,6 @@ msgstr "snd_pcm_hw_params_set_rate_near fehlgeschlagen: %s\n"
 msgid "snd_pcm_writei failed: %s\n"
 msgstr "snd_pcm_writei fehlgeschlagen: %s\n"
 
-msgid "untitled"
-msgstr "Unbenannt"
-
 msgid "vgm / not available"
 msgstr "vgm / nicht verfügbar"
+

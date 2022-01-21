@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-12 21:14+0100\n"
+"POT-Creation-Date: 2022-01-21 23:08+0100\n"
 "PO-Revision-Date: 2015-07-18 22:22+0200\n"
 "Last-Translator: Tobias Diedrich <ranma+gbsplay@tdiedrich.de>\n"
 "Language-Team: none\n"
@@ -29,14 +29,20 @@ msgstr ""
 msgid ""
 "\n"
 "commands:  [p]revious subsong   [n]ext subsong   [q]uit player\n"
-"           [ ] pause/resume   [1-4] mute channel"
+"           [ ] pause/resume   [1-4] mute channel   [l]oop mode"
 msgstr ""
 "\n"
 "commands:  [p]revious subsong   [n]ext subsong   [q]uit player\n"
-"           [ ] pause/resume   [1-4] mute channel"
+"           [ ] pause/resume   [1-4] mute channel   [l]oop mode"
 
 msgid " + VBlank (ugetab)"
 msgstr " + VBlank (ugetab)"
+
+msgid " [loop range]"
+msgstr " [loop range]"
+
+msgid " [loop single]"
+msgstr " [loop single]"
 
 #, c-format
 msgid ""
@@ -78,10 +84,6 @@ msgstr "%s: Can't start audio flow: %s\n"
 msgid "'%s' expected at %s line %ld char %ld.\n"
 msgstr "'%s' expected at %s line %ld char %ld.\n"
 
-#, c-format
-msgid "(%ld seconds)\n"
-msgstr "(%ld seconds)\n"
-
 msgid "59.7Hz VBlank\n"
 msgstr "59.7Hz VBlank\n"
 
@@ -118,10 +120,6 @@ msgstr "Bigger than allowed maximum (4MiB)"
 msgid "CRC32:            0x%08lx\n"
 msgstr "CRC32:            0x%08lx\n"
 
-#, c-format
-msgid "CRC32:            0x%08lx/0x%08lx (%s)\n"
-msgstr "CRC32:            0x%08lx/0x%08lx (%s)\n"
-
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -153,8 +151,16 @@ msgid "Could not open ALSA PCM device '%s': %s\n"
 msgstr "Could not open ALSA PCM device '%s': %s\n"
 
 #, c-format
+msgid "Could not open ROM template: %s"
+msgstr "Could not open ROM template: %s"
+
+#, c-format
 msgid "Could not open SDL audio device: %s\n"
 msgstr "Could not open SDL audio device: %s\n"
+
+#, c-format
+msgid "Could not open output file: %s"
+msgstr "Could not open output file: %s"
 
 #, c-format
 msgid "Could not open output plugin \"%s\"\n"
@@ -185,9 +191,6 @@ msgstr "Error opening output plugin."
 
 msgid "Extended Info"
 msgstr "Extended Info"
-
-msgid "Failed"
-msgstr "Failed"
 
 msgid "File Info"
 msgstr "File Info"
@@ -240,9 +243,6 @@ msgstr "Game:"
 msgid "Invalid filter type \"%s\"\n"
 msgstr "Invalid filter type \"%s\"\n"
 
-msgid "Length    "
-msgstr "Length    "
-
 msgid "Memory allocation failed!"
 msgstr "Memory allocation failed!"
 
@@ -278,11 +278,14 @@ msgstr "Not compiled with zlib support"
 msgid "Number of subsongs = %d is unreasonable.\n"
 msgstr "Number of subsongs = %d is unreasonable.\n"
 
-msgid "OK"
-msgstr "OK"
-
 msgid "Prev"
 msgstr "Prev"
+
+msgid "ROM size above limit (8 MiB)!"
+msgstr "ROM size above limit (8 MiB)!"
+
+msgid "ROM template data not found!\n"
+msgstr "ROM template data not found!\n"
 
 #, c-format
 msgid "Requested rate %ldHz, got %dHz.\n"
@@ -290,13 +293,6 @@ msgstr "Requested rate %ldHz, got %dHz.\n"
 
 msgid "Save"
 msgstr "Save"
-
-msgid "Subsong"
-msgstr "Subsong"
-
-#, c-format
-msgid "Subsong %03ld:\t"
-msgstr "Subsong %03ld:\t"
 
 #, c-format
 msgid "Subsong number out of range (min=0, max=%d).\n"
@@ -309,9 +305,6 @@ msgstr "Timing:           %2.2fHz timer%s\n"
 #, c-format
 msgid "Timing:           %s\n"
 msgstr "Timing:           %s\n"
-
-msgid "Title"
-msgstr "Title"
 
 #, c-format
 msgid "Unknown option %s at %s line %ld.\n"
@@ -330,8 +323,8 @@ msgid "Unsupported VGM version: %d.%02x\n"
 msgstr "Unsupported VGM version: %d.%02x\n"
 
 #, c-format
-msgid "Unsupported default bank @0x0000: %d\n"
-msgstr "Unsupported default bank @0x0000: %d\n"
+msgid "Unsupported cartridge type: 0x%02x\n"
+msgstr "Unsupported cartridge type: 0x%02x\n"
 
 #, c-format
 msgid "Unsupported timerflag value: %d\n"
@@ -350,7 +343,8 @@ msgid ""
 "  -g        set subsong gap (%ld seconds)\n"
 "  -h        display this help and exit\n"
 "  -H        set output high-pass type (%s)\n"
-"  -l        loop mode\n"
+"  -l        loop whole playlist mode\n"
+"  -L        loop single song mode\n"
 "  -o        select output plugin (%s)\n"
 "            'list' shows available plugins\n"
 "  -q        reduce verbosity\n"
@@ -372,7 +366,8 @@ msgstr ""
 "  -g        set subsong gap (%ld seconds)\n"
 "  -h        display this help and exit\n"
 "  -H        set output high-pass type (%s)\n"
-"  -l        loop mode\n"
+"  -l        loop whole playlist mode\n"
+"  -L        loop single song mode\n"
 "  -o        select output plugin (%s)\n"
 "            'list' shows available plugins\n"
 "  -q        reduce verbosity\n"
@@ -400,13 +395,20 @@ msgstr ""
 "  -h  display this help and exit\n"
 "  -V  print version and exit\n"
 
-#, c-format
-msgid "Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n"
-msgstr "Warning: Extended header found, but CRC does not match (0x%08x != 0x%08x).\n"
-
-#, c-format
-msgid "Warning: File CRC does not match (0x%08x != 0x%08x).\n"
-msgstr "Warning: File CRC does not match (0x%08x != 0x%08x).\n"
+msgid ""
+"Usage: gbs2gb [option] <gbs-file> <out-file>\n"
+"\n"
+"Available options are:\n"
+"  -t  rom template\n"
+"  -h  display this help and exit\n"
+"  -V  print version and exit\n"
+msgstr ""
+"Usage: gbs2gb [option] <gbs-file> <out-file>\n"
+"\n"
+"Available options are:\n"
+"  -t  rom template\n"
+"  -h  display this help and exit\n"
+"  -V  print version and exit\n"
 
 #, c-format
 msgid "fcntl(F_GETFL) failed: %s\n"
@@ -421,6 +423,10 @@ msgstr "gb / not available"
 
 msgid "gbr / not available"
 msgstr "gbr / not available"
+
+#, c-format
+msgid "ioctl(fd, SNDCTL_DSP_GETBLKSIZE) failed: %s\n"
+msgstr "ioctl(fd, SNDCTL_DSP_GETBLKSIZE) failed: %s\n"
 
 #, c-format
 msgid "ioctl(fd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"
@@ -438,9 +444,6 @@ msgstr "ioctl(fd, SNDCTL_DSP_SPEED, %ld) failed: %s\n"
 msgid "ioctl(fd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
 msgstr "ioctl(fd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
 
-msgid "no time limit"
-msgstr "no time limit"
-
 #, c-format
 msgid "snd_pcm_hw_params failed: %s\n"
 msgstr "snd_pcm_hw_params failed: %s\n"
@@ -454,8 +457,8 @@ msgid "snd_pcm_hw_params_set_access failed: %s\n"
 msgstr "snd_pcm_hw_params_set_access failed: %s\n"
 
 #, c-format
-msgid "snd_pcm_hw_params_set_buffer_size failed: %s\n"
-msgstr "snd_pcm_hw_params_set_buffer_size failed: %s\n"
+msgid "snd_pcm_hw_params_set_buffer_size_near failed: %s\n"
+msgstr "snd_pcm_hw_params_set_buffer_size_near failed: %s\n"
 
 #, c-format
 msgid "snd_pcm_hw_params_set_channels failed: %s\n"
@@ -466,8 +469,8 @@ msgid "snd_pcm_hw_params_set_format failed: %s\n"
 msgstr "snd_pcm_hw_params_set_format failed: %s\n"
 
 #, c-format
-msgid "snd_pcm_hw_params_set_periods failed: %s\n"
-msgstr "snd_pcm_hw_params_set_periods failed: %s\n"
+msgid "snd_pcm_hw_params_set_period_size_near failed: %s\n"
+msgstr "snd_pcm_hw_params_set_period_size_near failed: %s\n"
 
 #, c-format
 msgid "snd_pcm_hw_params_set_rate_near failed: %s\n"
@@ -476,9 +479,6 @@ msgstr "snd_pcm_hw_params_set_rate_near failed: %s\n"
 #, c-format
 msgid "snd_pcm_writei failed: %s\n"
 msgstr "snd_pcm_writei failed: %s\n"
-
-msgid "untitled"
-msgstr "untitled"
 
 msgid "vgm / not available"
 msgstr "vgm / not available"

@@ -78,6 +78,15 @@ struct gbs_channel_status {
 };
 
 /**
+ * Loop mode when playing multiple subsongs.
+ */
+enum gbs_loop_mode {
+	LOOP_OFF = 0,    /* No looping */
+	LOOP_RANGE = 1,  /* Loop selected subsong range */
+	LOOP_SINGLE = 2, /* Loop single subsong */
+};
+
+/**
  * Player status.  Contains information about the current state of the
  * player routine.
  */
@@ -90,6 +99,7 @@ struct gbs_status {
 	long lvol;
 	long rvol;
 	long long ticks;
+	enum gbs_loop_mode loop_mode;
 	struct gbs_channel_status ch[4];
 };
 
@@ -105,15 +115,6 @@ enum gbs_filter_type {
 	FILTER_OFF, /**< no filter */
 	FILTER_DMG, /**< Gameboy classic high-pass filter */
 	FILTER_CGB, /**< Gameboy Color high-pass filter */
-};
-
-/**
- * Loop mode when playing multiple subsongs.
- */
-enum gbs_loop_mode {
-	LOOP_OFF = 0,    /* No looping */
-	LOOP_RANGE = 1,  /* Loop selected subsong range */
-	LOOP_SINGLE = 2, /* Loop single subsong */
 };
 
 //
@@ -201,6 +202,7 @@ void gbs_set_step_callback(struct gbs* const gbs, gbs_step_cb fn, void *priv);
 void gbs_set_sound_callback(struct gbs* const gbs, gbs_sound_cb fn, void *priv);
 long gbs_set_filter(struct gbs* const gbs, enum gbs_filter_type type);
 void gbs_set_loop_mode(struct gbs* const gbs, enum gbs_loop_mode mode);
+void gbs_cycle_loop_mode(struct gbs* const gbs);
 long gbs_toggle_mute(struct gbs* const gbs, long channel);
 void gbs_close(struct gbs* const gbs);
 long gbs_write(const struct gbs* const gbs, const char* const name);

@@ -112,7 +112,6 @@ struct gbs {
 	struct mapper *mapper;
 
 	enum filetype filetype;
-	enum gbs_loop_mode loop_mode;
 };
 
 const struct gbs_metadata *gbs_get_metadata(struct gbs* const gbs)
@@ -144,7 +143,19 @@ void gbs_configure(struct gbs* const gbs, long subsong, long subsong_timeout, lo
 
 void gbs_set_loop_mode(struct gbs* const gbs, enum gbs_loop_mode mode)
 {
-	gbs->loop_mode = mode;
+	gbs->status.loop_mode = mode;
+	/* Remaining time clamping may change based on loop_mode */
+	update_status_on_subsong_change(gbs);
+}
+
+void gbs_cycle_loop_mode(struct gbs* const gbs)
+{
+	switch (gbs->status.loop_mode) {
+	default:
+	case LOOP_OFF:    gbs_set_loop_mode(gbs, LOOP_RANGE);  break;
+	case LOOP_RANGE:  gbs_set_loop_mode(gbs, LOOP_SINGLE); break;
+	case LOOP_SINGLE: gbs_set_loop_mode(gbs, LOOP_OFF);    break;
+	}
 }
 
 void gbs_configure_channels(struct gbs* const gbs, long mute_0, long mute_1, long mute_2, long mute_3) {
@@ -339,7 +350,7 @@ long gbs_step(struct gbs* const gbs, long time_to_work)
 		return gbs_nextsubsong(gbs);
 	}
 
-	if (gbs->subsong_timeout && gbs->loop_mode != LOOP_SINGLE) {
+	if (gbs->subsong_timeout && gbs->status.loop_mode != LOOP_SINGLE) {
 		if (gbs->fadeout &&
 		    time >= gbs->subsong_timeout - gbs->fadeout - gbs->gap)
 			gbhw_master_fade(gbhw, 128/gbs->fadeout, 0);
@@ -405,7 +416,7 @@ static void update_status_on_subsong_change(struct gbs* const gbs) {
 	}
 	status->subsong = gbs->subsong;
 	status->subsong_len = gbs->subsong_info[gbs->subsong].len;
-	if (status->subsong_len == 0 && gbs->loop_mode != LOOP_SINGLE) {
+	if (status->subsong_len == 0 && gbs->status.loop_mode != LOOP_SINGLE) {
 		status->subsong_len = gbs->subsong_timeout * 1024;
 	}
 }

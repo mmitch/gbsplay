@@ -118,6 +118,9 @@ static void handleuserinput(struct gbs *gbs)
 		case ' ':
 			toggle_pause(gbs);
 			break;
+		case 'l':
+			gbs_cycle_loop_mode(gbs);
+			break;
 		case '1':
 		case '2':
 		case '3':
@@ -148,6 +151,16 @@ static char *volstring(long v)
 	if (v > 15) v = 15;
 
 	return &vollookup[5*v];
+}
+
+static char *loopmodestring(const struct gbs_status *status)
+{
+	switch (status->loop_mode) {
+	default:
+	case LOOP_OFF:    return "";
+	case LOOP_RANGE:  return _(" [loop range]");
+	case LOOP_SINGLE: return _(" [loop single]");
+	}
 }
 
 static void printregs(struct gbs *gbs)
@@ -181,9 +194,10 @@ static void printstatus(struct gbs *gbs)
 	update_displaytime(&time, status);
 
 	printf("\r\033[A\033[A"
-	       "Song %3d/%3d (%s)\033[K\n"
+	       "Song %3d/%3d%s (%s)\033[K\n"
 	       "%02ld:%02ld/%02ld:%02ld",
-	       status->subsong+1, status->songs, status->songtitle,
+	       status->subsong+1, status->songs,
+	       loopmodestring(status), status->songtitle,
 	       time.played_min, time.played_sec, time.total_min, time.total_sec);
 	if (verbosity>2) {
 		printf("  %s %s  %s %s  %s %s  %s %s  [%s|%s]\n",
@@ -206,7 +220,7 @@ static void printinfo()
 {
 	if (verbosity>0) {
 		puts(_("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player\n" \
-		         "           [ ] pause/resume   [1-4] mute channel"));
+		         "           [ ] pause/resume   [1-4] mute channel   [l]oop mode"));
 	}
 	if (verbosity>1) {
 		puts("\n\n"); /* additional newlines for the status display */
