@@ -115,7 +115,7 @@ const struct cfg_option options[] = {
 
 static void swap_endian(struct gbs_output_buffer *buf)
 {
-	long i;
+	unsigned long i;
 
 	for (i=0; i<buf->bytes/sizeof(short); i++) {
 		short x = buf->data[i];
