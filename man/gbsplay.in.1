@@ -44,10 +44,14 @@ Valid values are
 Default value is dmg.
 .TP
 .B -l
-Enable loop mode.
-After the last subsong has been played,
-playback starts again with the first subsong.
-Default is no loop.
+Set loop mode to
+.B range
+(see \fILOOP MODES\fP below).
+.TP
+.B -L
+Set loop mode to
+.B single
+(see \fILOOP MODES\fP below).
 .TP
 .BI -o " plugin"
 Select sound output plugin \fIplugin\fP.
@@ -122,12 +126,8 @@ unless shuffle (\fI-z\fP) or random mode (\fI-Z\fP) are active.
 An out\-of\-bounds number will be clipped to the possible range of subsongs.
 .TP
 .I stop\-subsong
-.B gbsplay
-exits after this subsong has been played.
-If not specified or out\-of\-bounds,
-.B gbsplay
-will exit after playing the last subsong,
-unless in loop mode (\fI-l\fP).
+The last subsong to be played.
+See \fILOOP MODES\fP below for further details.
 .SH "KEYBOARD CONTROL"
 .B gbsplay
 supports basic keyboard control.
@@ -156,6 +156,57 @@ Mute/unmute channel 3.
 .TP
 .B 4
 Mute/unmute channel 4.
+.SH "LOOP MODES"
+.B gbsplay
+supports different loop modes that govern what happens when a subsong has finished playing.
+The default loop mode is
+.BR none .
+When multiple loop modes are set,
+the last mode set wins.
+The term
+.I first subsong
+refers to the parameter
+.I start\-subsong
+if it is set,
+or the first subsong in the file otherwise.
+The term
+.I next subsong
+refers to next subsong in numerical order
+unless shuffle mode
+.RI ( -z )
+or random mode
+.RI ( -Z )
+are active.
+The term
+.I last subsong
+refers to the parameter
+.I stop\-subsong
+if it is set and not out-of-bounds,
+or the last subsong in the file otherwise.
+.TP
+.B none
+When a subsong has finished playing,
+the next subsong will start to play.
+When the last subsong has finished playing,
+.B gbsplay
+will exit.
+.TP
+.B range
+When a subsong has finished playing,
+the next subsong will start to play.
+When the last subsong has finished playing,
+the fist subsong will start to play again.
+.TP
+.B single
+When a subsong has finished playing,
+the same subsong will start to play again.
+The
+.I stop\-subsong
+parameter will be ignored as no subsong change can occur.
+The 
+.I subsong\-timeout
+parameter will be ignored as well,
+allowing the selected subsong to play endlessly without any forced restarts.
 .SH "OUTPUT PLUGINS"
 Output plugins are sometimes called \fIplugouts\fP because that's shorter,
 so don't be confused.
