@@ -3,7 +3,7 @@
  *
  * This file contains the player code common to both CLI and X11 frontends.
  *
- * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2022 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -125,11 +125,17 @@ static void swap_endian(struct gbs_output_buffer *buf)
 
 static void iocallback(struct gbs *gbs, long cycles, uint32_t addr, uint8_t value, void *priv)
 {
+	UNUSED(gbs);
+	UNUSED(priv);
+
 	sound_io(cycles, addr, value);
 }
 
 static void callback(struct gbs *gbs, struct gbs_output_buffer *buf, void *priv)
 {
+	UNUSED(gbs);
+	UNUSED(priv);
+
 	if ((is_le_machine() && endian == PLUGOUT_ENDIAN_BIG) ||
 	    (is_be_machine() && endian == PLUGOUT_ENDIAN_LITTLE)) {
 		swap_endian(buf);
@@ -285,6 +291,8 @@ long nextsubsong_cb(struct gbs *gbs, void *priv)
 {
 	const struct gbs_status *status = gbs_get_status(gbs);
 	long subsong = get_next_subsong(gbs);
+
+	UNUSED(priv);
 
 	if (loop_mode == LOOP_SINGLE) {
 		subsong = status->subsong;
