@@ -44,6 +44,7 @@ void play_next_subsong(struct gbs *gbs);
 void play_prev_subsong(struct gbs *gbs);
 long step_emulation(struct gbs *gbs);
 void toggle_pause();
+long get_pause();
 void update_displaytime(struct displaytime *time, const struct gbs_status *status);
 struct gbs *common_init(int argc, char **argv);
 void common_cleanup(struct gbs *gbs);
