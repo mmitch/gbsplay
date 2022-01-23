@@ -125,7 +125,9 @@ static void handleuserinput(struct gbs *gbs)
 			if (verbosity>1) printstatus(gbs);
 			break;
 		case 'l':
+			//TODO Merge the loop_mode variables so there's one source of truth
 			gbs_cycle_loop_mode(gbs);
+			cycle_loop_mode();
 			break;
 		case '1':
 		case '2':

@@ -324,6 +324,16 @@ long get_pause()
 	return pause_mode;
 }
 
+void cycle_loop_mode()
+{
+	switch (loop_mode) {
+	default:
+	case LOOP_OFF:    loop_mode = LOOP_RANGE;  break;
+	case LOOP_RANGE:  loop_mode = LOOP_SINGLE; break;
+	case LOOP_SINGLE: loop_mode = LOOP_OFF;    break;
+	}
+}
+
 long step_emulation(struct gbs *gbs) {
 	if (is_running()) {
 		return gbs_step(gbs, refresh_delay);
