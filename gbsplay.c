@@ -27,6 +27,10 @@ static long quit = 0;
 /* default values */
 long redraw = false;
 
+/* forward declarations */
+static void printstatus(struct gbs *gbs);
+static void printinfo();
+
 static long getnote(long div)
 {
 	long n = 0;
@@ -117,6 +121,8 @@ static void handleuserinput(struct gbs *gbs)
 			break;
 		case ' ':
 			toggle_pause(gbs);
+			if (redraw) printinfo();
+			if (verbosity>1) printstatus(gbs);
 			break;
 		case 'l':
 			gbs_cycle_loop_mode(gbs);
@@ -188,15 +194,17 @@ static void printstatus(struct gbs *gbs)
 {
 	const struct gbs_status *status;
 	struct displaytime time;
+	long pausemode;
 
 	status = gbs_get_status(gbs);
+	pausemode = get_pause();
 
 	update_displaytime(&time, status);
 
 	printf("\r\033[A\033[A"
-	       "Song %3d/%3d%s (%s)\033[K\n"
+	       "Song %3d/%3d%s%s (%s)\033[K\n"
 	       "%02ld:%02ld/%02ld:%02ld",
-	       status->subsong+1, status->songs,
+	       status->subsong+1, status->songs, pausemode ? " [Paused]" : "",
 	       loopmodestring(status), status->songtitle,
 	       time.played_min, time.played_sec, time.total_min, time.total_sec);
 	if (verbosity>2) {

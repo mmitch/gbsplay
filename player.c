@@ -319,6 +319,11 @@ void toggle_pause()
 		sound_pause(pause_mode);
 }
 
+long get_pause()
+{
+	return pause_mode;
+}
+
 long step_emulation(struct gbs *gbs) {
 	if (is_running()) {
 		return gbs_step(gbs, refresh_delay);
