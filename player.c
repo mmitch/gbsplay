@@ -294,10 +294,10 @@ long nextsubsong_cb(struct gbs *gbs, void *priv)
 
 	UNUSED(priv);
 
-	if (loop_mode == LOOP_SINGLE) {
+	if (status->loop_mode == LOOP_SINGLE) {
 		subsong = status->subsong;
 	} else if (status->subsong == subsong_stop || subsong >= status->songs) {
-		if (loop_mode == LOOP_OFF) {
+		if (status->loop_mode == LOOP_OFF) {
 			return false;
 		}
 		subsong = subsong_start;
