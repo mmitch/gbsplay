@@ -131,7 +131,7 @@ enum gbs_filter_type {
  * @param value   the value that was writton
  * @param priv    opaque private context pointer for the callback handler
  */
-typedef void (*gbs_io_cb)(struct gbs* const gbs, long cycles, uint32_t addr, uint8_t value, void *priv);
+typedef void (*gbs_io_cb)(struct gbs* const gbs, cycles_t cycles, uint32_t addr, uint8_t value, void *priv);
 
 /**
  * Step callback.  This callback gets executed after each machine instruction
@@ -143,7 +143,7 @@ typedef void (*gbs_io_cb)(struct gbs* const gbs, long cycles, uint32_t addr, uin
  * @param channels  current status of all 4 channels
  * @param priv      opaque private context pointer for the callback handler
  */
-typedef void (*gbs_step_cb)(struct gbs* const gbs, const long cycles, const struct gbs_channel_status channels[], void *priv);
+typedef void (*gbs_step_cb)(struct gbs* const gbs, const cycles_t cycles, const struct gbs_channel_status channels[], void *priv);
 
 /**
  * Sound callback.  This callback gets executed when the next part of

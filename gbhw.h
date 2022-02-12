@@ -35,7 +35,7 @@ struct gbhw_buffer {
 	long r_cap;
 	long bytes;
 	long samples;
-	long cycles;
+	cycles_t cycles;
 };
 
 struct gbhw_channel {
@@ -65,8 +65,8 @@ struct gbhw_channel {
 };
 
 typedef void (*gbhw_callback_fn)(void *priv);
-typedef void (*gbhw_iocallback_fn)(long cycles, uint32_t addr, uint8_t value, void *priv);
-typedef void (*gbhw_stepcallback_fn)(const long cycles, const struct gbhw_channel[], void *priv);
+typedef void (*gbhw_iocallback_fn)(cycles_t cycles, uint32_t addr, uint8_t value, void *priv);
+typedef void (*gbhw_stepcallback_fn)(const cycles_t cycles, const struct gbhw_channel[], void *priv);
 
 struct gbhw {
 	long apu_on;
@@ -83,13 +83,13 @@ struct gbhw {
 	long sample_rate;
 	long update_level;
 	long sequence_ctr;
-	long halted_noirq_cycles;
+	cycles_t halted_noirq_cycles;
 
 	long vblankctr;
 	long timertc;
 	long timerctr;
 
-	long sum_cycles;
+	cycles_t sum_cycles;
 
 	long rom_lockout;
 
@@ -141,7 +141,7 @@ void gbhw_cleanup(struct gbhw* const gbhw);
 void gbhw_enable_bootrom(struct gbhw* const gbhw, const uint8_t *rombuf);
 void gbhw_master_fade(struct gbhw* const gbhw, long speed, long dstvol);
 void gbhw_calc_minmax(struct gbhw* const gbhw, int16_t *lmin, int16_t *lmax, int16_t *rmin, int16_t *rmax);
-long gbhw_step(struct gbhw* const gbhw, long time_to_work);
+cycles_t gbhw_step(struct gbhw* const gbhw, long time_to_work);
 uint8_t gbhw_io_peek(const struct gbhw* const gbhw, uint16_t addr);  /* unmasked peek */
 void gbhw_io_put(struct gbhw* const gbhw, uint16_t addr, uint8_t val);
 

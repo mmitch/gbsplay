@@ -32,7 +32,7 @@ static FILE *file = NULL;
 static long track_length;
 static long track_length_offset;
 
-static long cycles_prev = 0;
+static cycles_t cycles_prev = 0;
 
 static int note[4] = {0, 0, 0, 0};
 
@@ -85,7 +85,7 @@ static int midi_write_varlen(unsigned long x)
 	return 0;
 }
 
-static int midi_write_event(long cycles, const uint8_t *s, unsigned int n)
+static int midi_write_event(cycles_t cycles, const uint8_t *s, unsigned int n)
 {
 	if (midi_write_varlen((cycles - cycles_prev) >> 14))
 		return 1;
@@ -198,7 +198,7 @@ static int midi_skip(int subsong)
 	return midi_open_track(subsong);
 }
 
-static int note_on(long cycles, int channel, int new_note, int velocity)
+static int note_on(cycles_t cycles, int channel, int new_note, int velocity)
 {
 	uint8_t event[3];
 
@@ -214,7 +214,7 @@ static int note_on(long cycles, int channel, int new_note, int velocity)
 	return 0;
 }
 
-static int note_off(long cycles, int channel)
+static int note_off(cycles_t cycles, int channel)
 {
 	uint8_t event[3];
 
@@ -233,7 +233,7 @@ static int note_off(long cycles, int channel)
 	return 0;
 }
 
-static int pan(long cycles, int channel, int pan)
+static int pan(cycles_t cycles, int channel, int pan)
 {
 	uint8_t event[3];
 
@@ -247,7 +247,7 @@ static int pan(long cycles, int channel, int pan)
 	return 0;
 }
 
-static int midi_io(long cycles, uint32_t addr, uint8_t val)
+static int midi_io(cycles_t cycles, uint32_t addr, uint8_t val)
 {
 	static long div[4] = {0, 0, 0, 0};
 	static int volume[4] = {0, 0, 0, 0};

@@ -10,10 +10,13 @@
 #define _COMMON_H_
 
 #include "config.h"
+#include <inttypes.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+
+typedef uint64_t cycles_t;
 
 /* mingw64 also defines __MINGW32__ in addition to __MINGW64__ */
 #ifdef __MINGW32__

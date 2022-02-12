@@ -98,7 +98,7 @@ static void precalc_vols(void)
 	}
 }
 
-static void stepcallback(struct gbs *gbs, long cycles, const struct gbs_channel_status chan[], void *priv)
+static void stepcallback(struct gbs *gbs, cycles_t cycles, const struct gbs_channel_status chan[], void *priv)
 {
 	sound_step(cycles, chan);
 }

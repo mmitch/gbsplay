@@ -259,7 +259,7 @@ void gbs_set_nextsubsong_cb(struct gbs* const gbs, gbs_nextsubsong_cb cb, void *
 	gbs->nextsubsong_cb_priv = priv;
 }
 
-static void wrap_io_callback(long cycles, uint32_t addr, uint8_t value, void *priv)
+static void wrap_io_callback(cycles_t cycles, uint32_t addr, uint8_t value, void *priv)
 {
 	struct gbs *gbs = priv;
 	gbs->io_cb(gbs, cycles, addr, value, gbs->io_cb_priv);
@@ -272,7 +272,7 @@ void gbs_set_io_callback(struct gbs* const gbs, gbs_io_cb fn, void *priv)
 	gbhw_set_io_callback(&gbs->gbhw, wrap_io_callback, gbs);
 }
 
-static void wrap_step_callback(const long cycles, const struct gbhw_channel ch[], void *priv)
+static void wrap_step_callback(const cycles_t cycles, const struct gbhw_channel ch[], void *priv)
 {
 	struct gbs* gbs = priv;
 	map_channel_status(ch, gbs->step_cb_channels);
@@ -321,7 +321,7 @@ long gbs_step(struct gbs* const gbs, long time_to_work)
 {
 	struct gbhw *gbhw = &gbs->gbhw;
 
-	long cycles = gbhw_step(gbhw, time_to_work);
+	cycles_t cycles = gbhw_step(gbhw, time_to_work);
 	long time;
 
 	if (cycles < 0) {

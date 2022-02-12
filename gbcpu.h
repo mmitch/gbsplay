@@ -129,7 +129,7 @@ struct gbcpu {
 	long ime;
 
 	long stopped;
-	long cycles;
+	cycles_t cycles;
 
 #if DEBUG == 1
 	gbcpu_regs_u oldregs;

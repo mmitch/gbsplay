@@ -16,7 +16,7 @@
 #include "plugout.h"
 
 static FILE *file;
-static long cycles_prev = 0;
+static cycles_t cycles_prev = 0;
 
 static long iodumper_open(enum plugout_endian endian, long rate, long *buffer_bytes)
 {
@@ -40,7 +40,7 @@ static int iodumper_skip(int subsong)
 	return 0;
 }
 
-static int iodumper_io(long cycles, uint32_t addr, uint8_t val)
+static int iodumper_io(cycles_t cycles, uint32_t addr, uint8_t val)
 {
 	long cycle_diff = cycles - cycles_prev;
 

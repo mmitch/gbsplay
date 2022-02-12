@@ -722,7 +722,7 @@ static void gb_change_level(struct gbhw *gbhw, long l_ofs, long r_ofs)
 	gbhw->impbuf->r_lvl += r_ofs*256;
 }
 
-static void gb_sound(struct gbhw *gbhw, long cycles)
+static void gb_sound(struct gbhw *gbhw, cycles_t cycles)
 {
 	long i, j;
 	long l_lvl = 0, r_lvl = 0;
@@ -1037,16 +1037,16 @@ static void blargg_debug(struct gbcpu *gbcpu)
  * @param time_to_work  emulated time in milliseconds
  * @return  elapsed cpu cycles
  */
-long gbhw_step(struct gbhw *gbhw, long time_to_work)
+cycles_t gbhw_step(struct gbhw *gbhw, long time_to_work)
 {
 	struct gbcpu *gbcpu = &gbhw->gbcpu;
-	long cycles_total = 0;
+	cycles_t cycles_total = 0;
 
 	time_to_work *= msec_cycles;
 	
 	while (cycles_total < time_to_work) {
 		long maxcycles = time_to_work - cycles_total;
-		long cycles = 0;
+		cycles_t cycles = 0;
 
 		if (gbhw->vblankctr > 0 && gbhw->vblankctr < maxcycles) maxcycles = gbhw->vblankctr;
 		if (gbhw->timerctr > 0 && gbhw->timerctr < maxcycles) maxcycles = gbhw->timerctr;

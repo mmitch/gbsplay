@@ -123,7 +123,7 @@ static void swap_endian(struct gbs_output_buffer *buf)
 	}
 }
 
-static void iocallback(struct gbs *gbs, long cycles, uint32_t addr, uint8_t value, void *priv)
+static void iocallback(struct gbs *gbs, cycles_t cycles, uint32_t addr, uint8_t value, void *priv)
 {
 	UNUSED(gbs);
 	UNUSED(priv);
