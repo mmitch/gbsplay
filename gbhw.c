@@ -923,6 +923,9 @@ void gbhw_calc_minmax(struct gbhw* const gbhw, int16_t *lmin, int16_t *lmax, int
 void gbhw_init(struct gbhw* const gbhw)
 {
 	long i;
+	gbhw_iocallback_fn saved_callback = gbhw->iocallback;
+	/* Disable IO callback to hide memory pokes done in gbhw_init. */
+	gbhw->iocallback = NULL;
 
 	gbhw->vblankctr = vblanktc;
 	gbhw->timerctr = 0;
@@ -961,6 +964,8 @@ void gbhw_init(struct gbhw* const gbhw)
 	gbcpu_init(&gbhw->gbcpu);
 	gbcpu_add_mem(&gbhw->gbcpu, 0xc0, 0xfe, intram_put, intram_get, gbhw);
 	gbcpu_add_mem(&gbhw->gbcpu, 0xff, 0xff, io_put, io_get, gbhw);
+
+	gbhw->iocallback = saved_callback;  /* restore IO callback */
 }
 
 void gbhw_cleanup(struct gbhw* const gbhw)

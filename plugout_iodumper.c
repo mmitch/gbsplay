@@ -34,6 +34,7 @@ static long iodumper_open(enum plugout_endian endian, long rate, long *buffer_by
 
 static int iodumper_skip(int subsong)
 {
+	cycles_prev = 0;
 	fprintf(file, "\nsubsong %d\n", subsong);
 	fprintf(stderr, "dumping subsong %d\n", subsong);
 

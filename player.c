@@ -225,9 +225,16 @@ static long get_prev_subsong(struct gbs *gbs)
 }
 
 static void play_subsong(struct gbs *gbs, long subsong) {
-	gbs_init(gbs, subsong);
+	/*
+	 * sound_skip notifies the plugout we are preparing to play the next
+	 * subsong.
+	 */
 	if (sound_skip)
 		sound_skip(subsong);
+	/*
+	 * Now that the plugout is notified we can re-initialize the GBS state.
+	 */
+	gbs_init(gbs, subsong);
 }
 
 void play_next_subsong(struct gbs *gbs)

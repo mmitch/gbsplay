@@ -33,12 +33,19 @@ enum plugout_endian {
 	PLUGOUT_ENDIAN_NATIVE
 };
 
+/* Initial open of plugout. */
 typedef long    (*plugout_open_fn )(enum plugout_endian endian, long rate, long *buffer_bytes);
+/* Notification when next subsong is about to start. */
 typedef int     (*plugout_skip_fn )(int subsong);
+/* Notification the the player is paused/resumed. */
 typedef void    (*plugout_pause_fn)(int pause);
+/* Callback for monitoring IO in dumpers. Cycles restarts at 0 when the subsong is changed. */
 typedef int     (*plugout_io_fn   )(cycles_t cycles, uint32_t addr, uint8_t val);
+/* Callback for monitoring inferred channel status. */
 typedef int     (*plugout_step_fn )(const cycles_t cycles, const struct gbs_channel_status[]);
+/* Callback for writing sample data. */
 typedef ssize_t (*plugout_write_fn)(const void *buf, size_t count);
+/* Close called on player exit. */
 typedef void    (*plugout_close_fn)(void);
 
 #define PLUGOUT_USES_STDOUT	1
