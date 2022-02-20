@@ -473,6 +473,16 @@ TESTOPTS := -r 44100 -t 30 -f 0 -g 0 -T 0 -H off
 
 test: gbsplay $(tests) test_gbs
 	@echo Verifying output correctness for examples/nightmode.gbs:
+	$(Q)MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -o iodumper $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | (md5sum || md5 -r) | cut -f1 -d\ `; \
+	EXPECT="9e7595c3cd5c37a6a7793d1adb1c0741"; \
+	if [ "$$MD5" = "$$EXPECT" ]; then \
+		echo "iodumper output ok"; \
+	else \
+		echo "iodumper output failed"; \
+		echo "  Expected: $$EXPECT"; \
+		echo "  Got:      $$MD5" ; \
+		exit 1; \
+	fi
 	$(Q)MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -E b -o stdout $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | (md5sum || md5 -r) | cut -f1 -d\ `; \
 	EXPECT="441da0b6219b1c0701f56471f9e669c0"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
