@@ -153,6 +153,9 @@ static uint32_t io_get(void *priv, uint32_t addr)
 	switch (addr) {
 	case 0xff00:  // P1
 		return 0;
+	case 0xff04:  // DIV
+		// DIV increments at 16384Hz
+		return ((gbhw->sum_cycles >> 8) + gbhw->divoffset) & 0xff;
 	case 0xff05:  // TIMA
 	case 0xff06:  // TMA
 	case 0xff07:  // TAC
@@ -312,6 +315,10 @@ static void io_put(void *priv, uint32_t addr, uint8_t val)
 			if (val & 0x80) {
 				linkport_write(gbhw->ioregs[1]);
 			}
+			break;
+		case 0xff04:  // DIV
+			// Writing DIV sets it to 0
+			gbhw->divoffset = -(gbhw->sum_cycles >> 8);
 			break;
 		case 0xff05:  // TIMA
 		case 0xff06:  // TMA
@@ -919,6 +926,7 @@ void gbhw_init(struct gbhw* const gbhw)
 
 	gbhw->vblankctr = vblanktc;
 	gbhw->timerctr = 0;
+	gbhw->divoffset = 0;
 
 	if (gbhw->impbuf)
 		gbhw_impbuf_reset(gbhw);

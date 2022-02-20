@@ -89,6 +89,7 @@ struct gbhw {
 	long vblankctr;
 	long timertc;
 	long timerctr;
+	long divoffset;
 
 	cycles_t sum_cycles;
 
