@@ -649,8 +649,8 @@ static void gb_flush_buffer(struct gbhw *gbhw)
 	r_cap = gbhw->soundbuf->r_cap;
 	for (i=0; i<gbhw->soundbuf->samples; i++) {
 		long l_out, r_out;
-		l_smpl = l_smpl + gbhw->impbuf->data[i*2  ];
-		r_smpl = r_smpl + gbhw->impbuf->data[i*2+1];
+		l_smpl = l_smpl + gbhw->impbuf->data32[i*2  ];
+		r_smpl = r_smpl + gbhw->impbuf->data32[i*2+1];
 		if (gbhw->filter_enabled && gbhw->cap_factor <= 0x10000) {
 			/*
 			 * RC High-pass & DC decoupling filter. Gameboy
@@ -659,14 +659,14 @@ static void gb_flush_buffer(struct gbhw *gbhw)
 			 * CPU output and amplifier input, which gives a
 			 * cutoff frequency of 15.14Hz.
 			 */
-			l_out = l_smpl - (l_cap >> 16);
-			r_out = r_smpl - (r_cap >> 16);
+			l_out = (l_smpl - l_cap) >> 16;
+			r_out = (r_smpl - r_cap) >> 16;
 			/* cap factor is 0x10000 for a factor of 1.0 */
-			l_cap = (l_smpl << 16) - l_out * gbhw->cap_factor;
-			r_cap = (r_smpl << 16) - r_out * gbhw->cap_factor;
+			l_cap = l_smpl - l_out * gbhw->cap_factor;
+			r_cap = r_smpl - r_out * gbhw->cap_factor;
 		} else {
-			l_out = l_smpl;
-			r_out = r_smpl;
+			l_out = l_smpl >> 16;
+			r_out = r_smpl >> 16;
 		}
 		gbhw->soundbuf->data[i*2  ] = l_out * gbhw->master_volume / MASTER_VOL_MAX;
 		gbhw->soundbuf->data[i*2+1] = r_out * gbhw->master_volume / MASTER_VOL_MAX;
@@ -684,9 +684,9 @@ static void gb_flush_buffer(struct gbhw *gbhw)
 	if (gbhw->callback != NULL) gbhw->callback(gbhw->callbackpriv);
 
 	overlap = gbhw->impbuf->samples - gbhw->soundbuf->samples;
-	memmove(gbhw->impbuf->data, gbhw->impbuf->data+(2*gbhw->soundbuf->samples), 4*overlap);
-	memset(gbhw->impbuf->data + 2*overlap, 0, gbhw->impbuf->bytes - 4*overlap);
-	assert(gbhw->impbuf->bytes == gbhw->impbuf->samples*4);
+	memmove(gbhw->impbuf->data32, gbhw->impbuf->data32+(2*gbhw->soundbuf->samples), 8*overlap);
+	memset(gbhw->impbuf->data32 + 2*overlap, 0, gbhw->impbuf->bytes - 8*overlap);
+	assert(gbhw->impbuf->bytes == gbhw->impbuf->samples*8);
 	assert(gbhw->soundbuf->bytes == gbhw->soundbuf->samples*4);
 	memset(gbhw->soundbuf->data, 0, gbhw->soundbuf->bytes);
 	gbhw->soundbuf->pos = 0;
@@ -701,7 +701,7 @@ static void gb_change_level(struct gbhw *gbhw, long l_ofs, long r_ofs)
 	long imp_l = -IMPULSE_WIDTH/2;
 	long imp_r = IMPULSE_WIDTH/2;
 	long i;
-	const short *ptr = base_impulse;
+	const int32_t *ptr = base_impulse;
 
 	assert(gbhw->impbuf != NULL);
 	pos = (long)(gbhw->impbuf->cycles * SOUND_DIV_MULT / gbhw->sound_div_tc);
@@ -714,8 +714,8 @@ static void gb_change_level(struct gbhw *gbhw, long l_ofs, long r_ofs)
 	for (i=imp_l; i<imp_r; i++) {
 		long bufi = pos + i;
 		long impi = i + IMPULSE_WIDTH/2;
-		gbhw->impbuf->data[bufi*2  ] += ptr[impi] * l_ofs;
-		gbhw->impbuf->data[bufi*2+1] += ptr[impi] * r_ofs;
+		gbhw->impbuf->data32[bufi*2  ] += ptr[impi] * l_ofs;
+		gbhw->impbuf->data32[bufi*2+1] += ptr[impi] * r_ofs;
 	}
 
 	gbhw->impbuf->l_lvl += l_ofs*256;
@@ -831,24 +831,27 @@ static void gbhw_impbuf_reset(struct gbhw *gbhw)
 	gbhw->impbuf->cycles = (long)(gbhw->sound_div_tc * IMPULSE_WIDTH/2 / SOUND_DIV_MULT);
 	gbhw->impbuf->l_lvl = 0;
 	gbhw->impbuf->r_lvl = 0;
-	memset(gbhw->impbuf->data, 0, gbhw->impbuf->bytes);
+	memset(gbhw->impbuf->data32, 0, gbhw->impbuf->bytes);
 }
 
 void gbhw_set_buffer(struct gbhw* const gbhw, struct gbhw_buffer *buffer)
 {
+	long impbuf_bytes;
+
 	gbhw->soundbuf = buffer;
 	gbhw->soundbuf->samples = gbhw->soundbuf->bytes / 4;
 
 	if (gbhw->impbuf) free(gbhw->impbuf);
-	gbhw->impbuf = malloc(sizeof(*gbhw->impbuf) + (gbhw->soundbuf->samples + IMPULSE_WIDTH + 1) * 4);
+	impbuf_bytes = (gbhw->soundbuf->samples + IMPULSE_WIDTH + 1) * 8;
+	gbhw->impbuf = malloc(sizeof(*gbhw->impbuf) + impbuf_bytes);
 	if (gbhw->impbuf == NULL) {
 		fprintf(stderr, "%s", _("Memory allocation failed!\n"));
 		return;
 	}
 	memset(gbhw->impbuf, 0, sizeof(*gbhw->impbuf));
-	gbhw->impbuf->data = (void*)(gbhw->impbuf+1);
-	gbhw->impbuf->samples = gbhw->soundbuf->samples + IMPULSE_WIDTH + 1;
-	gbhw->impbuf->bytes = gbhw->impbuf->samples * 4;
+	gbhw->impbuf->data32 = (void*)(gbhw->impbuf+1);
+	gbhw->impbuf->bytes = impbuf_bytes;
+	gbhw->impbuf->samples = impbuf_bytes / 8;
 	gbhw_impbuf_reset(gbhw);
 }
 

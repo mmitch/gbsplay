@@ -9,8 +9,8 @@
 #ifndef _IMPULSEGEN_H_
 #define _IMPULSEGEN_H_
 
-#define IMPULSE_HEIGHT 256.0
+#define IMPULSE_HEIGHT (double)(1 << 24)
 
-short *gen_impulsetab(long w_shift, long n_shift, double cutoff);
+int32_t *gen_impulsetab(long w_shift, long n_shift, double cutoff);
 
 #endif /* _IMPULSEGEN_H_ */

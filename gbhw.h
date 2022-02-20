@@ -27,7 +27,8 @@
 #define GBHW_BOOT_ROM_SIZE 256
 
 struct gbhw_buffer {
-	int16_t *data;
+	int16_t *data;   /* only for soundbuf */
+	int32_t *data32; /* only for impbuf */
 	long pos;
 	long l_lvl;
 	long r_lvl;

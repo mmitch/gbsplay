@@ -22,7 +22,7 @@
 
 int main(int argc, char **argv)
 {
-	short *impulsetab = gen_impulsetab(IMPULSE_W_SHIFT, IMPULSE_N_SHIFT, IMPULSE_CUTOFF);
+	int32_t *impulsetab = gen_impulsetab(IMPULSE_W_SHIFT, IMPULSE_N_SHIFT, IMPULSE_CUTOFF);
 	int n = (1 << IMPULSE_N_SHIFT) * (1 << IMPULSE_W_SHIFT);
 	int i;
 
@@ -33,12 +33,12 @@ int main(int argc, char **argv)
 
 	printf("#define IMPULSE_N_SHIFT %d\n", IMPULSE_N_SHIFT);
 	printf("#define IMPULSE_W_SHIFT %d\n", IMPULSE_W_SHIFT);
-	printf("static const short base_impulse[] = {");
+	printf("static const int32_t base_impulse[] = {");
 	for (i=0; i<n; i++) {
 		if ((i & IMPULSE_W_MASK) == 0) {
 			printf("\n\t");
 		}
-		printf("%6d,", impulsetab[i]);
+		printf("%9d,", impulsetab[i]);
 	}
 	printf("\n};\n");
 
