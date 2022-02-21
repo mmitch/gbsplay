@@ -21,7 +21,14 @@ static void ch1_trigger(long val)
 	NR14 = 0x80 | ((val >> 8) & 7);
 }
 
-void main(void)
+void gbs_init(void)
+{
+	/* prologue from crt0.s */
+	__asm__("di");
+	__asm__("call gsinit");
+}
+
+void gbs_play(void)
 {
 	NR52 = 0x80;  /* Enable audio block */
 	NR51 = 0xff;  /* Route all channels to both left and right outputs */
@@ -37,4 +44,10 @@ void main(void)
 		ch1_trigger(FREQ_VAL(220));
 		delay(500);
 	}
+}
+
+void main(void)
+{
+	gbs_init();
+	gbs_play();
 }

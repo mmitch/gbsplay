@@ -1,14 +1,20 @@
 SDCC ?= sdcc
 MAKEBIN ?= makebin
-SDCCFLAGS := -mgbz80 --opt-code-size
+SDCCFLAGS := -mgbz80 --code-loc 0x400 --opt-code-size
 
-all: test.rom
+all: test.gb test.gbs
 
 clean:
-	rm *.ihx *.map *.rel *.noi *.rom *.sym *.lk *.lst *.asm
+	rm -f *.ihx *.map *.rel *.noi *.gb *.gbs *.sym *.lk *.lst *.asm
 
 %.ihx: %.c
 	$(SDCC) $(SDCCFLAGS) $<
 
-%.rom: %.ihx
+%.gb: %.ihx
 	$(MAKEBIN) -Z -yn TEST $< $@
+
+%.img: %.ihx
+	$(MAKEBIN) -Z -p -yn TEST $< $@
+
+%.gbs: %.img
+	./makegbs.py -r $< -s $(subst .img,.noi,$<) -o $@
