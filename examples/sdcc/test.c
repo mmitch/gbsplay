@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "gb.h"
 
 #define BASE_FREQ (HZ / 32)
@@ -21,6 +23,13 @@ static void ch1_trigger(long val)
 	NR14 = 0x80 | ((val >> 8) & 7);
 }
 
+int putchar(int c)
+{
+	SB = c;
+	SC = 0x80;
+	return c;
+}
+
 void gbs_init(void)
 {
 	/* prologue from crt0.s */
@@ -37,6 +46,8 @@ void gbs_play(void)
 	NR10 = 0x00;  /* Sweep off */
 	NR11 = 0x80;  /* Max length, 50% duty */
 	NR12 = 0xf0;  /* Volume 15 */
+
+	printf("Hello world!\n\n\n");
 
 	while (1) {
 		ch1_trigger(FREQ_VAL(440));
