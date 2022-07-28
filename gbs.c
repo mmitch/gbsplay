@@ -393,7 +393,7 @@ void gbs_print_info(const struct gbs* const gbs, long verbose)
 	       gbs->songs,
 	       gbs->defaultsong);
 	if (gbs->tac & 0x04) {
-        const unsigned int rate = tac_rate(gbs->tac);
+        const unsigned long rate = tac_rate(gbs->tac);
 		long timertc = (256-gbs->tma) * rate;
 		if (gbs->tac & 0x80)
 			timertc /= 2;
