@@ -44,6 +44,8 @@
 #define VGM_MAGIC		"Vgm "
 #define GZIP_MAGIC		"\037\213\010"
 
+const unsigned int tac_rate(const unsigned int);
+
 const char *boot_rom_file = ".dmg_rom.bin";
 
 enum filetype {
@@ -391,7 +393,8 @@ void gbs_print_info(const struct gbs* const gbs, long verbose)
 	       gbs->songs,
 	       gbs->defaultsong);
 	if (gbs->tac & 0x04) {
-		long timertc = (256-gbs->tma) * (16 << (((gbs->tac+3) & 3) << 1));
+        const unsigned int rate = tac_rate(gbs->tac);
+		long timertc = (256-gbs->tma) * rate;
 		if (gbs->tac & 0x80)
 			timertc /= 2;
 		printf(_("Timing:           %2.2fHz timer%s\n"),
@@ -405,6 +408,22 @@ void gbs_print_info(const struct gbs* const gbs, long verbose)
 		printf(_("Bank @0x4000:     %d\n"), gbs->defaultbank);
 	}
 	printf(_("CRC32:            0x%08lx\n"), (unsigned long)gbs->crcnow);
+}
+
+const unsigned int tac_rate(const unsigned int tac) {
+    const unsigned int result = tac & 0x3;
+    if (result == 0) {
+        return 16; // 16 * 256 = 4096
+    }
+    else if (result == 1) {
+        return 16 << 6; // 256 * 1024 = 262144
+    }
+    else if (result == 2) {
+        return 16 << 4; // 256^2 = 65536
+    }
+    else { // result == 3
+        return 16 << 2; // 256 * 64 = 16384
+    }
 }
 
 static void update_status_on_subsong_change(struct gbs* const gbs) {
