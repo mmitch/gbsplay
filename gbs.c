@@ -1140,18 +1140,6 @@ static struct gbs* gbs_open_internal(const char* const name, char* const buf, si
 	gbs->rom[addr++] = 0xe0;  /* LDH (a8), A */
 	gbs->rom[addr++] = 0xff;  /* IE reg */
 
-	if ((gbs->tac & 0x78) == 0x40) { /* ugetab int vector extension */
-		/*
-		 * Note: ugetab extension is not well-spec'ed, guesswork here.
-		 * With ugetab the play address is not otherwise called,
-		 * so call it once after init has returned.
-		 */
-		gbs->rom[addr++] = 0xcd; /* call imm16 */
-		gbs->rom[addr++] = gbs->play & 0xff;
-		gbs->rom[addr++] = gbs->play >> 8;
-	}
-
-
 	jpaddr = addr;
 	gbs->rom[addr++] = 0x76; /* halt */
 	gbs->rom[addr++] = 0xc3; /* jp @loop */
