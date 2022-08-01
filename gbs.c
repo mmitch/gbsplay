@@ -392,11 +392,8 @@ void gbs_print_info(const struct gbs* const gbs, long verbose)
 	       gbs->songs,
 	       gbs->defaultsong);
 	if (gbs->tac & 0x04) {
-		long timertc = (256-gbs->tma) * (16 << (((gbs->tac+3) & 3) << 1));
-		if (gbs->tac & 0x80)
-			timertc /= 2;
 		printf(_("Timing:           %2.2fHz timer%s\n"),
-		       GBHW_CLOCK / (float)timertc,
+		       gbhw_calc_timer_hz(gbs->tac, gbs->tma),
 		       (gbs->tac & 0x78) == 0x40 ? _(" + VBlank (ugetab)") : "");
 	} else {
 		printf(_("Timing:           %s\n"),

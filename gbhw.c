@@ -79,6 +79,20 @@ static const long msec_cycles = GBHW_CLOCK/1000;
 static const long main_div_tc = 32;
 static const long sweep_div_tc = 256;
 
+static inline long timertc_from_tac(uint8_t tac)
+{
+	static const long tac_to_cycles[4] = {
+		/* As formula: 16 << (((tac + 3) & 3) << 1) */
+		GBHW_CLOCK / 4096,    /* 1024 CPU cycles per TIMA tick */
+		GBHW_CLOCK / 262144,  /*   16 CPU cycles per TIMA tick */
+		GBHW_CLOCK / 65536,   /*   64 CPU cycles per TIMA tick */
+		GBHW_CLOCK / 16384,   /*  256 CPU cycles per TIMA tick */
+	};
+	long timertc = tac_to_cycles[tac&3];
+	if ((tac & 0xf0) == 0x80) timertc /= 2; /* emulate GBC mode */
+	return timertc;
+}
+
 void gbhw_init_struct(struct gbhw *gbhw) {
 	gbhw->apu_on = 1;
 	gbhw->io_written = 0;
@@ -324,8 +338,7 @@ static void io_put(void *priv, uint32_t addr, uint8_t val)
 		case 0xff06:  // TMA
 			break;
 		case 0xff07:  // TAC
-			gbhw->timertc = 16 << (((val+3) & 3) << 1);
-			if ((val & 0xf0) == 0x80) gbhw->timertc /= 2;
+			gbhw->timertc = timertc_from_tac(val);
 			if (gbhw->timerctr > gbhw->timertc) {
 				gbhw->timerctr = 0;
 			}
@@ -912,6 +925,12 @@ void gbhw_calc_minmax(struct gbhw* const gbhw, int16_t *lmin, int16_t *lmax, int
 	*rmax = gbhw->rmaxval;
 	gbhw->lminval = gbhw->rminval = INT_MAX;
 	gbhw->lmaxval = gbhw->rmaxval = INT_MIN;
+}
+
+float gbhw_calc_timer_hz(uint8_t tac, uint8_t tma)
+{
+	long timertc = timertc_from_tac(tac);
+	return GBHW_CLOCK / timertc / (float)(256 - tma);
 }
 
 /*
