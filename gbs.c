@@ -1062,7 +1062,15 @@ static struct gbs* gbs_open_internal(const char* const name, char* const buf, si
 		gbs->rom[0x40] = 0xcd; /* call imm16 */
 		gbs->rom[0x41] = (gbs->load + 0x40) & 0xff;
 		gbs->rom[0x42] = (gbs->load + 0x40) >> 8;
-		gbs->rom[0x43] = 0xd9; /* reti */
+		/*
+		 * ugetab is not well-spec'd, it is unclear where you
+		 * have to call play from. Calling it from vblank
+		 * seems to work.
+		 */
+		gbs->rom[0x43] = 0xcd; /* call imm16 */
+		gbs->rom[0x44] = gbs->play & 0xff;
+		gbs->rom[0x45] = gbs->play >> 8;
+		gbs->rom[0x46] = 0xd9; /* reti */
 		/* Timer */
 		gbs->rom[0x50] = 0xcd; /* call imm16 */
 		gbs->rom[0x51] = (gbs->load + 0x48) & 0xff;
@@ -1126,18 +1134,36 @@ static struct gbs* gbs_open_internal(const char* const name, char* const buf, si
 	gbs->rom[addr++] = 0xcd; /* call imm16 */
 	gbs->rom[addr++] = gbs->init & 0xff;
 	gbs->rom[addr++] = gbs->init >> 8;
-
 	/* Enable interrupts now */
 	gbs->rom[addr++] = 0x3e;  /* LD a, imm8 */
 	gbs->rom[addr++] = 0x05;  /* enable vblank + timer */
 	gbs->rom[addr++] = 0xe0;  /* LDH (a8), A */
 	gbs->rom[addr++] = 0xff;  /* IE reg */
 
+	if ((gbs->tac & 0x78) == 0x40) { /* ugetab int vector extension */
+		/*
+		 * Note: ugetab extension is not well-spec'ed, guesswork here.
+		 * With ugetab the play address is not otherwise called,
+		 * so call it once after init has returned.
+		 */
+		gbs->rom[addr++] = 0xcd; /* call imm16 */
+		gbs->rom[addr++] = gbs->play & 0xff;
+		gbs->rom[addr++] = gbs->play >> 8;
+	}
+
+
 	jpaddr = addr;
 	gbs->rom[addr++] = 0x76; /* halt */
 	gbs->rom[addr++] = 0xc3; /* jp @loop */
 	gbs->rom[addr++] = jpaddr & 0xff;
 	gbs->rom[addr++] = jpaddr >> 8;
+
+	if (gbs->load < addr) {
+		fprintf(stderr, _("Load address %04x overlaps with replayer end %04x.\n"),
+			gbs->load, addr);
+		gbs_free(gbs);
+		return NULL;
+	}
 
 	gbs->buf_owned = 1;
 	return gbs;
