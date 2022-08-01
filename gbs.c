@@ -60,6 +60,7 @@ struct gbs_subsong_info {
 
 struct gbs {
 	char *buf;
+	int buf_owned;
 	uint8_t version;
 	uint8_t songs;
 	uint8_t defaultsong;
@@ -444,7 +445,7 @@ static void gbs_free(struct gbs* const gbs)
 	gbhw_cleanup(&gbs->gbhw);
 	if (gbs->mapper)
 		mapper_free(gbs->mapper);
-	if (gbs->buf)
+	if (gbs->buf && gbs->buf_owned)
 		free(gbs->buf);
 	if (gbs->rom)
 		free(gbs->rom);
@@ -611,7 +612,6 @@ static struct gbs *gb_open(const char* const name, char *buf, size_t size)
 	gbs->mapper = mapper_gb(&gbs->gbhw.gbcpu, gbs->rom, gbs->romsize, buf[0x147], buf[0x148], buf[0x149]);
 	if (!gbs->mapper) {
 		fprintf(stderr, _("Unsupported cartridge type: 0x%02x\n"), buf[0x147]);
-		gbs->buf = NULL;  /* freed in gbs_open */
 		gbs_free(gbs);
 		return NULL;
 	}
@@ -621,6 +621,7 @@ static struct gbs *gb_open(const char* const name, char *buf, size_t size)
 		gbhw_enable_bootrom(&gbs->gbhw, bootrom);
 		gbs->init = 0;
 	}
+	gbs->buf_owned = 1;
 	return gbs;
 }
 
@@ -700,6 +701,7 @@ static struct gbs *gbr_open(const char* const name, char *buf, size_t size)
 		gbs->rom[0x53] = 0xd9; /* reti */
 	}
 
+	gbs->buf_owned = 1;
 	return gbs;
 }
 
@@ -993,6 +995,7 @@ static struct gbs *vgm_open(const char* const name, char* const buf, size_t size
 	gbs->rom[addr++] = jpaddr & 0xff;
 	gbs->rom[addr++] = jpaddr >> 8;
 
+	gbs->buf_owned = 1;
 	return gbs;
 }
 
@@ -1139,6 +1142,7 @@ static struct gbs* gbs_open_internal(const char* const name, char* const buf, si
 	gbs->rom[addr++] = jpaddr & 0xff;
 	gbs->rom[addr++] = jpaddr >> 8;
 
+	gbs->buf_owned = 1;
 	return gbs;
 }
 
@@ -1147,7 +1151,7 @@ static struct gbs* gbs_open_mem(const char* const name, char* const buf, size_t 
 #ifdef USE_ZLIB
 static struct gbs *gzip_open(const char* const name, char* const buf, size_t size)
 {
-	struct gbs* gbs;
+	struct gbs* gbs = NULL;
 	int ret;
 	char *out = malloc(GB_MAX_ROM_SIZE);
 	z_stream strm;
@@ -1164,20 +1168,21 @@ static struct gbs *gzip_open(const char* const name, char* const buf, size_t siz
 	ret = inflateInit2(&strm, 15|32);
 	if (ret != Z_OK) {
 		fprintf(stderr, _("Could not open %s: inflateInit2: %d\n"), name, ret);
-		return NULL;
+		goto exit_free;
 	}
 
 	ret = inflate(&strm, Z_FINISH);
 	if (ret != Z_STREAM_END) {
 		fprintf(stderr, _("Could not open %s: inflate: %d\n"), name, ret);
-		return NULL;
+		goto exit_free;
 	}
 	inflateEnd(&strm);
 	gbs = gbs_open_mem(name, out, GB_MAX_ROM_SIZE - strm.avail_out);
-	if (gbs == NULL) {
+
+exit_free:
+	if (gbs == NULL || gbs->buf != out) {
 		free(out);
 	}
-
 	return gbs;
 }
 #else
@@ -1222,11 +1227,11 @@ struct gbs* gbs_open(const char* const name)
 	}
 	if (fstat(fileno(f), &st) == -1) {
 		fprintf(stderr, _("Could not stat %s: %s\n"), name, strerror(errno));
-		return NULL;
+		goto exit_close;
 	}
 	if (st.st_size > GB_MAX_ROM_SIZE) {
 		fprintf(stderr, _("Could not read %s: %s\n"), name, _("Bigger than allowed maximum (4MiB)"));
-		return NULL;
+		goto exit_close;
 	}
 	buf = malloc(st.st_size);
 	if (fread(buf, 1, st.st_size, f) != st.st_size) {
@@ -1244,6 +1249,7 @@ struct gbs* gbs_open(const char* const name)
 exit_free:
 	if (gbs == NULL || gbs->buf != buf)
 		free(buf);
+exit_close:
 	fclose(f);
 	return gbs;
 }
