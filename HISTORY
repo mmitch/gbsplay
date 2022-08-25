@@ -33,6 +33,7 @@ Enhancements:
   - basic VGM file support
   - remove unneeded dsound3d dependency from dsound plugin
   - add WAV writer plugout
+  - support channel mute in MIDI output plugins
 
 - xgbsplay:
   - add simple X11 frontend; use configure --with-xgbsplay

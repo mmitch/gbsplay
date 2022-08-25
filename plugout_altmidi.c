@@ -3,7 +3,7 @@
  *
  * alternative MIDI output plugin
  *
- * 2006-2020 (C) by Christian Garbs <mitch@cgarbs.de>
+ * 2006-2022 (C) by Christian Garbs <mitch@cgarbs.de>
  *                  Vegard Nossum
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -38,6 +38,7 @@ static cycles_t cycles_prev = 0;
 static int note[4] = {0, 0, 0, 0};
 static int volume[4] = {0, 0, 0, 0};
 static int playing[4] = {0, 0, 0, 0};
+static long mute[4] = {0, 0, 0, 0};
 
 static int midi_write_u32(uint32_t x)
 {
@@ -205,6 +206,9 @@ static int note_on(cycles_t cycles, int channel, int new_note)
 {
 	uint8_t event[3];
 
+	if (mute[channel])
+		return 0;
+
 	event[0] = 0x90 | channel;
 	event[1] = new_note;
 	event[2] = volume[channel];
@@ -240,6 +244,9 @@ static int pan(cycles_t cycles, int channel, int pan)
 {
 	uint8_t event[3];
 
+	if (mute[channel])
+		return 0;
+
 	event[0] = 0xb0 | channel;
 	event[1] = 0x0a;
 	event[2] = pan;
@@ -260,6 +267,7 @@ static int midi_step(cycles_t cycles, const struct gbs_channel_status chan[])
 	for (c = 0; c < 3; c++) {
 		ch = &chan[c];
 		new_playing = ch->playing;
+		mute[c] = ch->mute;
 
 		if (playing[c]) {
 			if (new_playing) {
