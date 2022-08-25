@@ -3,7 +3,7 @@
  *
  * MIDI output plugin
  *
- * 2008-2020 (C) by Vegard Nossum
+ * 2008-2022 (C) by Vegard Nossum
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -24,6 +24,10 @@
 
 static long midi_open(enum plugout_endian endian, long rate, long *buffer_bytes)
 {
+	UNUSED(endian);
+	UNUSED(rate);
+	UNUSED(buffer_bytes);
+
 	return 0;
 }
 
@@ -35,6 +39,7 @@ static long track_length_offset;
 static cycles_t cycles_prev = 0;
 
 static int note[4] = {0, 0, 0, 0};
+static long mute[4] = {0, 0, 0, 0};
 
 static int midi_write_u32(uint32_t x)
 {
@@ -202,6 +207,9 @@ static int note_on(cycles_t cycles, int channel, int new_note, int velocity)
 {
 	uint8_t event[3];
 
+	if (mute[channel])
+		return 0;
+
 	event[0] = 0x90 | channel;
 	event[1] = new_note;
 	event[2] = velocity;
@@ -236,6 +244,9 @@ static int note_off(cycles_t cycles, int channel)
 static int pan(cycles_t cycles, int channel, int pan)
 {
 	uint8_t event[3];
+
+	if (mute[channel])
+		return 0;
 
 	event[0] = 0xb0 | channel;
 	event[1] = 0x0a;
@@ -403,6 +414,17 @@ static int midi_io(cycles_t cycles, uint32_t addr, uint8_t val)
 	return 0;
 }
 
+static int midi_step(cycles_t cycles, const struct gbs_channel_status status[]) {
+	int chan;
+
+	UNUSED(cycles);
+
+	for (chan = 0; chan < 4; chan++)
+		mute[chan] = status[chan].mute;
+
+	return 0;
+}
+
 static void midi_close(void)
 {
 	int chan;
@@ -422,6 +444,7 @@ const struct output_plugin plugout_midi = {
 	.description = "MIDI file writer",
 	.open = midi_open,
 	.skip = midi_skip,
+	.step = midi_step,
 	.io = midi_io,
 	.close = midi_close,
 };
