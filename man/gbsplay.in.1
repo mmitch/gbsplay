@@ -279,7 +279,8 @@ where \fI%d\fP is replaced with the subsong number.
 The files are created in the current working directory
 and existing files are silently overwritten.
 The output is always encoded as stereo (2 channels), 16 bit signed PCM
-in big endian.  Sample rate can be set via \fI-r\fP.
+in little endian (the \fI-E\fP switch is ignored).
+Sample rate can be set via \fI-r\fP.
 .SH "FILES"
 .TP
 .I /etc/gbsplayrc
