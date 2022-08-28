@@ -4,7 +4,7 @@
 #
 # generate config.mk for gbsplay Makefile
 #
-# 2003-2021 (C) by Christian Garbs <mitch@cgarbs.de>
+# 2003-2022 (C) by Christian Garbs <mitch@cgarbs.de>
 #                  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
 #
 # Licensed under GNU GPL v1 or, at your option, any later version.
@@ -547,6 +547,7 @@ Output Plugins:
   --disable-pulse        omit PulseAudio sound output plugin
   --disable-sdl          omit SDL sound output plugin
   --disable-stdout       omit stdout file writer plugin
+  --disable-wav          omit WAV file writer plugin
 EOF
     exit "$1"
 }
@@ -570,6 +571,7 @@ OPTS="${OPTS} use_pulse"
 OPTS="${OPTS} use_sdl"
 OPTS="${OPTS} use_sharedlibgbs"
 OPTS="${OPTS} use_stdout"
+OPTS="${OPTS} use_wav"
 OPTS="${OPTS} use_verbosebuild"
 OPTS="${OPTS} use_zlib"
 for OPT in $OPTS; do
@@ -1178,6 +1180,7 @@ setdefault use_debug no
 setdefault use_midi yes
 setdefault use_altmidi yes
 setdefault use_stdout yes
+setdefault use_wav yes
 setdefault use_iodumper yes
 
 printoptional modules build
@@ -1261,6 +1264,7 @@ __EOF__
     echo plugout_pulse := $use_pulse
     echo plugout_sdl := $use_sdl
     echo plugout_stdout := $use_stdout
+    echo plugout_wav := $use_wav
     echo configured := yes
 ) > config.mk
 
@@ -1280,6 +1284,7 @@ __EOF__
     plugout_x PULSE
     plugout_x STDOUT
     plugout_x SDL
+    plugout_x WAV
     use_x I18N
     use_x ZLIB
     have_x ESTRPIPE

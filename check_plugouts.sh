@@ -2,7 +2,7 @@
 #
 # Ensure that configure enabled the plugouts as it was expected to.
 #
-# 2020-2021 (C) by Christian Garbs <mitch@cgarbs.de>
+# 2020-2022 (C) by Christian Garbs <mitch@cgarbs.de>
 # Licensed under GNU GPL v1 or, at your option, any later version.
 
 set -e
@@ -30,7 +30,7 @@ is_contained_in()
 }
 
 # these don't have dependencies and should always be built
-declare -a expected_plugouts=( iodumper midi altmidi stdout )
+declare -a expected_plugouts=( iodumper midi altmidi stdout wav )
 
 # additional plugouts are given as commandline parameters
 expected_plugouts+=( $* )

@@ -156,6 +156,9 @@ endif
 ifeq ($(plugout_iodumper),yes)
 plugout_objs +=plugout_iodumper.o
 endif
+ifeq ($(plugout_wav),yes)
+plugout_objs +=plugout_wav.o
+endif
 
 objs_gbsplay +=$(plugout_objs)
 objs_xgbsplay += $(plugout_objs)

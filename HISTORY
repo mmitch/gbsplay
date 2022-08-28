@@ -32,6 +32,7 @@ Enhancements:
   - transparent decompression of gzip-compressed files
   - basic VGM file support
   - remove unneeded dsound3d dependency from dsound plugin
+  - add WAV writer plugout
 
 - xgbsplay:
   - add simple X11 frontend; use configure --with-xgbsplay
