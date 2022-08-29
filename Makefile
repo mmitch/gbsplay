@@ -140,10 +140,10 @@ ifeq ($(plugout_stdout),yes)
 plugout_objs +=plugout_stdout.o
 endif
 ifeq ($(plugout_midi),yes)
-plugout_objs +=plugout_midi.o
+plugout_objs +=plugout_midi.o midifile.o
 endif
 ifeq ($(plugout_altmidi),yes)
-plugout_objs +=plugout_altmidi.o
+plugout_objs +=plugout_altmidi.o midifile.o
 endif
 ifeq ($(plugout_pulse),yes)
 plugout_objs +=plugout_pulse.o
@@ -159,6 +159,9 @@ endif
 ifeq ($(plugout_wav),yes)
 plugout_objs +=plugout_wav.o
 endif
+
+# dedupe (and finalize) plugout_objs; order is irrelevant, sorting is ok
+plugout_objs := $(sort $(plugout_objs))
 
 objs_gbsplay +=$(plugout_objs)
 objs_xgbsplay += $(plugout_objs)
