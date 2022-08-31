@@ -122,39 +122,39 @@ plugout_objs    :=
 plugout_ldflags :=
 
 ifeq ($(plugout_devdsp),yes)
-plugout_objs +=plugout_devdsp.o
+plugout_objs += plugout_devdsp.o
 endif
 ifeq ($(plugout_alsa),yes)
-plugout_objs +=plugout_alsa.o
+plugout_objs += plugout_alsa.o
 plugout_ldflags += -lasound
 endif
 ifeq ($(plugout_nas),yes)
-plugout_objs +=plugout_nas.o
+plugout_objs += plugout_nas.o
 plugout_ldflags += -laudio $(libaudio_flags)
 endif
 ifeq ($(plugout_sdl),yes)
-plugout_objs +=plugout_sdl.o
+plugout_objs += plugout_sdl.o
 plugout_ldflags += -lSDL2
 endif
 ifeq ($(plugout_stdout),yes)
-plugout_objs +=plugout_stdout.o
+plugout_objs += plugout_stdout.o
 endif
 ifeq ($(plugout_midi),yes)
-plugout_objs +=plugout_midi.o midifile.o
+plugout_objs += plugout_midi.o midifile.o
 endif
 ifeq ($(plugout_altmidi),yes)
-plugout_objs +=plugout_altmidi.o midifile.o
+plugout_objs += plugout_altmidi.o midifile.o
 endif
 ifeq ($(plugout_pulse),yes)
-plugout_objs +=plugout_pulse.o
+plugout_objs += plugout_pulse.o
 plugout_ldflags += -lpulse-simple -lpulse
 endif
 ifeq ($(plugout_dsound),yes)
-plugout_objs +=plugout_dsound.o
+plugout_objs += plugout_dsound.o
 plugout_ldflags += -ldsound $(libdsound_flags)
 endif
 ifeq ($(plugout_iodumper),yes)
-plugout_objs +=plugout_iodumper.o
+plugout_objs += plugout_iodumper.o
 endif
 ifeq ($(plugout_wav),yes)
 plugout_objs +=plugout_wav.o
@@ -163,7 +163,7 @@ endif
 # dedupe (and finalize) plugout_objs; order is irrelevant, sorting is ok
 plugout_objs := $(sort $(plugout_objs))
 
-objs_gbsplay +=$(plugout_objs)
+objs_gbsplay += $(plugout_objs)
 objs_xgbsplay += $(plugout_objs)
 GBSPLAYLDFLAGS += $(plugout_ldflags)
 XGBSPLAYLDFLAGS += $(plugout_ldflags)
