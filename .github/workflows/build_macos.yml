@@ -34,6 +34,9 @@ jobs:
     - name: Check activated plugouts
       run: |
         ./check_plugouts.sh sdl
+    - name: Check WAV plugout
+      run: |
+        ./check_plugout_wav.sh
     - name: Check build flags
       run: |
         ./check_buildflags.sh ${{ matrix.flags }} --enable-verbosebuild
