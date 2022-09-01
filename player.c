@@ -117,8 +117,8 @@ static void swap_endian(struct gbs_output_buffer *buf)
 {
 	unsigned long i;
 
-	for (i=0; i<buf->bytes/sizeof(short); i++) {
-		short x = buf->data[i];
+	for (i=0; i<buf->bytes/sizeof(uint16_t); i++) {
+		uint16_t x = buf->data[i];
 		buf->data[i] = ((x & 0xff) << 8) | (x >> 8);
 	}
 }
