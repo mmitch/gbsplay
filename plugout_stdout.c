@@ -3,22 +3,37 @@
  *
  * STDOUT file writer output plugin
  *
- * 2004-2020 (C) by Christian Garbs <mitch@cgarbs.de>
+ * 2004-2022 (C) by Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
 #include "common.h"
 
+#include <fcntl.h>
 #include <unistd.h>
 
 #include "plugout.h"
 
 int fd;
 
+static int set_fd_to_binmode()
+{
+	// skip this on POSIX, as there are no text and binary modes
+#ifdef HAVE_SETMODE
+	if (setmode(fd, O_BINARY) == -1)
+		return -1;
+#endif
+	return 0;
+}
+
 static long stdout_open(enum plugout_endian endian,
                         long rate, long *buffer_bytes)
 {
+	UNUSED(endian);
+	UNUSED(rate);
+	UNUSED(buffer_bytes);
+
 	/*
 	 * clone and close STDOUT_FILENO
 	 * to make sure nobody else can write to stdout
@@ -26,6 +41,9 @@ static long stdout_open(enum plugout_endian endian,
 	fd = dup(STDOUT_FILENO);
 	if (fd == -1) return -1;
 	(void)close(STDOUT_FILENO);
+
+	if (set_fd_to_binmode() == -1)
+		return -1;
 
 	return 0;
 }

@@ -856,6 +856,39 @@ if [ "$use_sdl" != no ]; then
     recheck_use sdl
 fi
 
+# plugout_stdout produces garbage if stdout writes in text mode and converts LF to CRLF
+if [ "$use_stdout" != no ]; then
+    remember_use stdout
+    printf "checking if stdout converts line endings:  "
+    cc_check "" "" <<EOF
+#include <stdio.h>
+int main(int argc, char **argv) {
+    fputs("\n", stdout);
+    return 0;
+}
+EOF
+    bytes_written="$("$TEMPDIR/cc" | wc -c)"
+    if [ "$bytes_written" -eq 1 ]; then
+	echo "no"
+    else
+	echo "yes"
+	# LF/CRLF conversion should only happen on Windows and setmode() should be available to fix it
+	if cc_check "checking for setmode() in fcntl.h" have_setmode <<EOF; then
+#include <fcntl.h>
+#include <unistd.h>
+int main(int argc, char **argv) {
+    return setmode(STDOUT_FILENO, O_BINARY);
+}
+EOF
+            have_setmode=yes
+	else
+	    have_setmode=no
+	    use_stdout=no
+	fi
+    fi
+    recheck_use stdout
+fi
+
 if [ "$use_i18n" != no ]; then
     remember_use i18n
     check_include locale.h
@@ -1250,6 +1283,7 @@ __EOF__
     use_x I18N
     use_x ZLIB
     have_x ESTRPIPE
+    have_x SETMODE
     echo "#endif"
 ) > config.h
 
