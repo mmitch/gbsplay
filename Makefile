@@ -484,7 +484,7 @@ test: gbsplay $(tests) test_gbs
 		exit 1; \
 	fi
 	$(Q)MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -E b -o stdout $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | (md5sum || md5 -r) | cut -f1 -d\ `; \
-	EXPECT="441da0b6219b1c0701f56471f9e669c0"; \
+	EXPECT="26c2514e6f28f4e24c09063950366584"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "Bigendian output ok"; \
 	else \
