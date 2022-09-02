@@ -598,38 +598,38 @@ done
 
 case "$BUILDOS" in
     Linux)
-	if {    [ "$BUILDARCH" = "i386"   ]  \
-	     || [ "$BUILDARCH" = "i486"   ]  \
-	     || [ "$BUILDARCH" = "i586"   ]  \
-	     || [ "$BUILDARCH" = "i686"   ]  \
-	     || [ "$BUILDARCH" = "x86_64" ]; \
-	   }; then
-	    setdefault build_test yes
-	else
-	    # expected test failures:
-	    # MD5 sum mismatch due to floating point discrepancies in libimpulse
-	    setdefault build_test no
-	fi
-	;;
+        if {    [ "$BUILDARCH" = "i386"   ]  \
+             || [ "$BUILDARCH" = "i486"   ]  \
+             || [ "$BUILDARCH" = "i586"   ]  \
+             || [ "$BUILDARCH" = "i686"   ]  \
+             || [ "$BUILDARCH" = "x86_64" ]; \
+           }; then
+            setdefault build_test yes
+        else
+            # expected test failures:
+            # MD5 sum mismatch due to floating point discrepancies in libimpulse
+            setdefault build_test no
+        fi
+        ;;
 
     Darwin)
-	setdefault build_test yes
-	;;
+        setdefault build_test yes
+        ;;
 
     MSYS_*)
-	setdefault build_test yes
-	;;
+        setdefault build_test yes
+        ;;
 
     MINGW32_*|MINGW64_*)
-	# known test failure:
-	# - util.c does not test-compile properly
-	# - srand(0) in test_shuffle() in util.c gives a different order
-	setdefault build_test no
-	;;
+        # known test failure:
+        # - util.c does not test-compile properly
+        # - srand(0) in test_shuffle() in util.c gives a different order
+        setdefault build_test no
+        ;;
 
     *)
-	setdefault build_test no
-	;;
+        setdefault build_test no
+        ;;
 esac
 
 ## more defaults
@@ -838,19 +838,19 @@ if [ "$use_sdl" != no ]; then
     remember_use sdl
 
     if command -v sdl2-config >/dev/null; then
-	sdl2_include_path="$(sdl2-config --cflags)"
-	sdl2_include_path="${sdl2_include_path#*-I}"
-	sdl2_include_path="${sdl2_include_path%% -*}"
+        sdl2_include_path="$(sdl2-config --cflags)"
+        sdl2_include_path="${sdl2_include_path#*-I}"
+        sdl2_include_path="${sdl2_include_path%% -*}"
     else
-	sdl2_include_path='/usr/include/SDL2 /usr/local/include/SDL2 /opt/local/include/SDL2'
+        sdl2_include_path='/usr/include/SDL2 /usr/local/include/SDL2 /opt/local/include/SDL2'
     fi
-	
+        
     check_include SDL.h "$sdl2_include_path" "#define SDL_MAIN_HANDLED"
     if [ "$have_SDL_h" = yes ]; then
-	if [ "$include_SDL_h_path" != ' ' ]; then
-	    append_nodupe CFLAGS "-I$include_SDL_h_path"
-	fi
-	use_sdl=yes
+        if [ "$include_SDL_h_path" != ' ' ]; then
+            append_nodupe CFLAGS "-I$include_SDL_h_path"
+        fi
+        use_sdl=yes
     fi
 
     recheck_use sdl
@@ -885,7 +885,7 @@ if [ "$use_i18n" != no ]; then
             EXTRA_I18NFLAGS="$EXTRA_I18NFLAGS -I$include_libintl_h_path"
         fi
 
-	check_libs intl "" "" "" "$EXTRA_I18NFLAGS" <<EOF
+        check_libs intl "" "" "" "$EXTRA_I18NFLAGS" <<EOF
 #include <libintl.h>
 int main(int argc, char **argv)
 {
@@ -895,12 +895,12 @@ int main(int argc, char **argv)
     return 0;
 }
 EOF
-	if [ $? -eq 0 ]; then
+        if [ $? -eq 0 ]; then
             use_i18n=yes
-	    if [ "$libintl_flags" != "" ]; then
-		append_nodupe LDFLAGS "$libintl_flags"
-	    fi
-	fi
+            if [ "$libintl_flags" != "" ]; then
+                append_nodupe LDFLAGS "$libintl_flags"
+            fi
+        fi
     fi
     recheck_use i18n
 fi
@@ -1036,10 +1036,10 @@ int main(int argc, char **argv) {
 EOF
         retval4=$?
 
-	# combine returncodes for next if block
+        # combine returncodes for next if block
         if [ $retval3 -ne 0 ] || [ $retval4 -ne 0 ]; then
-	    retval2=1
-	fi
+            retval2=1
+        fi
     fi
     if [ $retval1 -eq 0 ] && [ $retval2 -eq 0 ]; then
         if [ "$include_xcb_xcb_h_path" != " " ]; then
@@ -1051,10 +1051,10 @@ EOF
         if [ "$include_cairo_cairo_xcb_h_path" != " " ]; then
             append_nodupe CFLAGS "-I$include_cairo_cairo_xcb_h_path"
         fi
-	EXTRA_INSTALL="$EXTRA_INSTALL xgbsplay"
-	EXTRA_UNINSTALL="$EXTRA_UNINSTALL xgbsplay"
+        EXTRA_INSTALL="$EXTRA_INSTALL xgbsplay"
+        EXTRA_UNINSTALL="$EXTRA_UNINSTALL xgbsplay"
     else
-	build_xgbsplay=no
+        build_xgbsplay=no
     fi
 fi
 
@@ -1261,11 +1261,11 @@ __EOF__
 
 if [ "$use_verbosebuild" = yes ]; then
     for file in config.mk config.h config.sed libgbs.pc; do
-	echo
-	echo "content of generated $file:"
-	echo "--------"
-	cat $file
-	echo "--------"
+        echo
+        echo "content of generated $file:"
+        echo "--------"
+        cat $file
+        echo "--------"
     done
 fi
 
