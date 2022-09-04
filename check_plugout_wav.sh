@@ -130,6 +130,8 @@ BEGIN_TEST "WAV header should be as expected"
 ) > gbsplay-1.wav.header.expected
 assert_that_file_equals gbsplay-1.wav.header gbsplay-1.wav.header.expected
 
+TEST_OK
+
 ###
 
 BEGIN_TEST "WAV audio data should ignore endian setting"
