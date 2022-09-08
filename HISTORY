@@ -9,8 +9,10 @@ Bugfixes:
 
 - gbsplay:
   - fix off-by-one error in gbhw_io_peek (fixes verbose WAVE display)
+  - fix sign extension bug in byte swapping (fixes endian change via -E)
   - fix Windows builds on MSYS2, MINGW32 and MINGW64
   - fix buffer handling in dsound plugout (fixes choppy and too fast playback)
+  - fix newline conversion of binary data (fixes stdout plugout on MINGW)
   - fix typos in manpage
 
 - build process:
