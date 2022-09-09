@@ -159,6 +159,9 @@ endif
 ifeq ($(plugout_wav),yes)
 plugout_objs +=plugout_wav.o filewriter.o
 endif
+ifeq ($(plugout_vgm),yes)
+plugout_objs += plugout_vgm.o filewriter.o
+endif
 
 # dedupe (and finalize) plugout_objs; order is irrelevant, sorting is ok
 plugout_objs := $(sort $(plugout_objs))

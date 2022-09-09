@@ -45,6 +45,9 @@ extern const struct output_plugin plugout_sdl;
 #ifdef PLUGOUT_STDOUT
 extern const struct output_plugin plugout_stdout;
 #endif
+#ifdef PLUGOUT_VGM
+extern const struct output_plugin plugout_vgm;
+#endif
 #ifdef PLUGOUT_WAV
 extern const struct output_plugin plugout_wav;
 #endif
@@ -82,6 +85,9 @@ static output_plugin_const_t plugouts[] = {
 #endif
 #ifdef PLUGOUT_SDL
 	&plugout_sdl,
+#endif
+#ifdef PLUGOUT_VGM
+	&plugout_vgm,
 #endif
 #ifdef PLUGOUT_WAV
 	&plugout_wav,

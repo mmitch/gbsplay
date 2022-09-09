@@ -547,6 +547,7 @@ Output Plugins:
   --disable-pulse        omit PulseAudio sound output plugin
   --disable-sdl          omit SDL sound output plugin
   --disable-stdout       omit stdout file writer plugin
+  --disable-vgm          omit VGM file writer plugin
   --disable-wav          omit WAV file writer plugin
 EOF
     exit "$1"
@@ -571,6 +572,7 @@ OPTS="${OPTS} use_pulse"
 OPTS="${OPTS} use_sdl"
 OPTS="${OPTS} use_sharedlibgbs"
 OPTS="${OPTS} use_stdout"
+OPTS="${OPTS} use_vgm"
 OPTS="${OPTS} use_wav"
 OPTS="${OPTS} use_verbosebuild"
 OPTS="${OPTS} use_zlib"
@@ -1180,6 +1182,7 @@ setdefault use_debug no
 setdefault use_midi yes
 setdefault use_altmidi yes
 setdefault use_stdout yes
+setdefault use_vgm yes
 setdefault use_wav yes
 setdefault use_iodumper yes
 
@@ -1264,6 +1267,7 @@ __EOF__
     echo plugout_pulse := $use_pulse
     echo plugout_sdl := $use_sdl
     echo plugout_stdout := $use_stdout
+    echo plugout_vgm := $use_vgm
     echo plugout_wav := $use_wav
     echo configured := yes
 ) > config.mk
@@ -1284,6 +1288,7 @@ __EOF__
     plugout_x PULSE
     plugout_x STDOUT
     plugout_x SDL
+    plugout_x VGM
     plugout_x WAV
     use_x I18N
     use_x ZLIB

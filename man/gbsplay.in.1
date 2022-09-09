@@ -272,6 +272,13 @@ because stdout is used for the dumped data.
 The raw audio is always stereo (2 channels), 16 bit signed PCM.
 Sample rate and endianness can be set via \fI-r\fP and \fI-E\fP.
 .TP
+.B vgm
+Write separate VGM files for every subsong.
+The files are called \fIgbsplay-%d.vgm\fP,
+where \fI%d\fP is replaced with the subsong number.
+The files are created in the current working directory
+and existing files are silently overwritten.
+.TP
 .B wav
 Write separate WAV files (RIFF WAVE) for every subsong.
 The files are called \fIgbsplay-%d.wav\fP,

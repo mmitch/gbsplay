@@ -32,9 +32,10 @@ Enhancements:
 - gbsplay:
   - add SDL2 plugout
   - transparent decompression of gzip-compressed files
-  - basic VGM file support
+  - basic VGM file playback support
   - remove unneeded dsound3d dependency from dsound plugin
   - add WAV writer plugout
+  - add VGM writer plugout
   - support channel mute in MIDI output plugins
 
 - xgbsplay:
