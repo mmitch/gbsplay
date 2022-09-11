@@ -8,7 +8,9 @@
  */
 
 #ifdef APPLE
-#define _DARWIN_C_SOURCE /* for memset_pattern4() (bug on macOS when _POSIX_C_SOURCE is set) */
+#include <stddef.h>
+/* memset_pattern4() (declaratinon missing on macOS when _POSIX_C_SOURCE is set) */
+void memset_pattern4(void *__b, const void *__pattern4, size_t __len);
 #endif
 
 #include <time.h>
