@@ -102,47 +102,26 @@ static inline void i18n_init(void) {}
 
 #endif
 
-#ifndef BYTE_ORDER
-
-#  define BIG_ENDIAN 1
-#  define LITTLE_ENDIAN 2
-
-#  if __BYTE_ORDER == __BIG_ENDIAN
-#    define BYTE_ORDER BIG_ENDIAN
-#  elif __BYTE_ORDER == __LITTLE_ENDIAN
-#    define BYTE_ORDER LITTLE_ENDIAN
-#  else
-#    error Unsupported byte order
-#  endif
-
-#endif /* BYTE_ORDER */
-
-#if !BYTE_ORDER || !BIG_ENDIAN || !LITTLE_ENDIAN
-#  error endian defines missing
-#endif
-
-#if BYTE_ORDER == BIG_ENDIAN
-
-static inline long is_le_machine() {
-	return false;
-}
-
-static inline long is_be_machine() {
-	return true;
-}
-
-#elif BYTE_ORDER == LITTLE_ENDIAN
-
-static inline long is_le_machine() {
-	return true;
-}
-
-static inline long is_be_machine() {
-	return false;
-}
-
+#if (defined(_WIN32) || defined(_WIN64)) && !defined(__CYGWIN__)
+#  include <winsock2.h>
+#elif defined(__APPLE__)
+#  include <libkern/OSByteOrder.h>
 #else
-#error Bug in endian detection
+#  include <endian.h>
 #endif
+
+#if defined(__BYTE_ORDER) && !defined(BYTE_ORDER)
+#  define BYTE_ORDER    __BYTE_ORDER
+#  define BIG_ENDIAN    __BIG_ENDIAN
+#  define LITTLE_ENDIAN __LITTLE_ENDIAN
+#endif
+
+static inline long is_le_machine() {
+	return BYTE_ORDER == LITTLE_ENDIAN;
+}
+
+static inline long is_be_machine() {
+	return BYTE_ORDER == BIG_ENDIAN;
+}
 
 #endif
