@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
+#include <strings.h>
 
 #include "common.h"
 #include "util.h"

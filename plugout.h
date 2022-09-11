@@ -10,6 +10,7 @@
 #define _PLUGOUT_H_
 
 #include <stdint.h>
+#include <unistd.h>
 
 #include "config.h"
 #include "common.h"

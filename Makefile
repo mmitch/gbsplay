@@ -76,7 +76,7 @@ exampledir  := $(docdir)/examples
 
 DISTDIR := gbsplay-$(VERSION)
 
-GBSCFLAGS  := $(EXTRA_CFLAGS)
+GBSCFLAGS  := -D_XOPEN_SOURCE=500 -D_POSIX_C_SOURCE=200809L $(EXTRA_CFLAGS)
 GBSLDFLAGS := $(EXTRA_LDFLAGS)
 comma := ,
 GBSLIBLDFLAGS := -lm $(subst -pie,,$(subst -Wl$(comma)-pie,,$(EXTRA_LDFLAGS)))

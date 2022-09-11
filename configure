@@ -1093,6 +1093,17 @@ EOF
     fi
 fi
 
+## enable a slightly more modern c dialect (C11 or C17)
+
+if cc_has_flag "-std=c17"; then
+    # C17 only has bugfixes and is otherwise identical to C11
+    append_nodupe CFLAGS "-std=c17"
+else
+    if cc_has_flag "-std=c11"; then
+        append_nodupe CFLAGS "-std=c11"
+    fi
+fi
+
 ## check compiler features
 
 if cc_has_flag "-Wdeclaration-after-statement"; then

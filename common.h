@@ -102,19 +102,19 @@ static inline void i18n_init(void) {}
 
 #endif
 
-#include <sys/param.h>
+#include <endian.h>
 
 #ifndef BYTE_ORDER
 
 #  define BIG_ENDIAN 1
 #  define LITTLE_ENDIAN 2
 
-#  ifdef _BIG_ENDIAN
+#  if __BYTE_ORDER == __BIG_ENDIAN
 #    define BYTE_ORDER BIG_ENDIAN
-#  endif
-
-#  ifdef _LITTLE_ENDIAN
+#  elif __BYTE_ORDER == __LITTLE_ENDIAN
 #    define BYTE_ORDER LITTLE_ENDIAN
+#  else
+#    error Unsupported byte order
 #  endif
 
 #endif /* BYTE_ORDER */
