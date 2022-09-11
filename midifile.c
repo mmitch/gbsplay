@@ -9,13 +9,11 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
-#include "common.h"
-
 #include <stdlib.h>
 
+#include "common.h"
 #include "filewriter.h"
 #include "plugout.h"
-
 #include "midifile.h"
 
 static long track_length_offset;

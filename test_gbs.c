@@ -7,8 +7,6 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
-#include "common.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -17,6 +15,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "common.h"
 #include "libgbs.h"
 #include "util.h"
 

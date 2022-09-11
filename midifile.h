@@ -12,7 +12,6 @@
 #define _MIDIFILE_H_
 
 #include "common.h"
-
 #include "plugout.h"
 
 extern int note[4];

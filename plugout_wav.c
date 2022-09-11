@@ -8,15 +8,13 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
-#include "common.h"
-
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "common.h"
 #include "filewriter.h"
-
 #include "plugout.h"
 
 static long chunk_size_offset;

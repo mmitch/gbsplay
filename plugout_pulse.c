@@ -6,8 +6,6 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
-#include "common.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -18,6 +16,7 @@
 #include <pulse/error.h>
 #include <pulse/simple.h>
 
+#include "common.h"
 #include "plugout.h"
 
 pa_simple *pulse_handle;

@@ -7,11 +7,10 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
-#include "common.h"
-
 #include <time.h>
 #include <SDL.h>
 
+#include "common.h"
 #include "plugout.h"
 
 #define PLAYBACK_MODE      0

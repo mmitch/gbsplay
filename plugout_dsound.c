@@ -10,14 +10,16 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
-#include <initguid.h>
-#include "common.h"
-#include "plugout.h"
-#include <windows.h>
-#include <dsound.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <assert.h>
+
+#include <initguid.h>
+#include <windows.h>
+#include <dsound.h>
+
+#include "common.h"
+#include "plugout.h"
 
 static LPDIRECTSOUND8 dsound_device;
 static LPDIRECTSOUNDBUFFER8 dsound_buffer;

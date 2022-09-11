@@ -11,6 +11,7 @@
 #define _GBCPU_H_
 
 #include <inttypes.h>
+
 #include "common.h"
 
 #define ZF	0x80

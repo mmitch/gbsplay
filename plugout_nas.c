@@ -13,8 +13,6 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
-#include "common.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,6 +20,7 @@
 
 #include <audio/audiolib.h>
 
+#include "common.h"
 #include "plugout.h"
 
 #define NAS_BUFFER_SAMPLES 8192

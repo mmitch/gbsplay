@@ -7,6 +7,7 @@
  **/
 
 #include <unistd.h>
+
 #include "common.h"
 
 #define POLYNOMIAL (unsigned long)0xedb88320

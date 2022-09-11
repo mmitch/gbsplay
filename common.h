@@ -9,12 +9,13 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
-#include "config.h"
 #include <inttypes.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+
+#include "config.h"
 
 typedef uint64_t cycles_t;
 

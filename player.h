@@ -12,7 +12,6 @@
 #define _PLAYER_H_
 
 #include "common.h"
-
 #include "libgbs.h"
 #include "plugout.h"
 #include "cfgparser.h"

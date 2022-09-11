@@ -7,9 +7,9 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <fcntl.h>
 #include <ctype.h>
 #include <string.h>

@@ -6,13 +6,12 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
-#include "common.h"
-#include "terminal.h"
-
 #include <unistd.h>
 #include <stdlib.h>
-
 #include <windows.h>
+
+#include "common.h"
+#include "terminal.h"
 
 HANDLE hStdin = INVALID_HANDLE_VALUE;
 HANDLE hStdout = INVALID_HANDLE_VALUE;

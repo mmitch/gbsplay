@@ -7,9 +7,9 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <inttypes.h>
 #include <string.h>
 #include <limits.h>
 #include <assert.h>

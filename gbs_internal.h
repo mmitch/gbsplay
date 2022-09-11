@@ -9,11 +9,10 @@
 #ifndef _GBS_INTERNAL_API_H_
 #define _GBS_INTERNAL_API_H_
 
-#include "common.h"
-
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "common.h"
 #include "libgbs.h"
 
 /***

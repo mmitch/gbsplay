@@ -7,16 +7,17 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
-#include <X11/keysymdef.h>
-#include <xcb/xcb.h>
-#include <xcb/xcb_icccm.h>
-#include <cairo/cairo-xcb.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include <inttypes.h>
+
+#include <X11/keysymdef.h>
+#include <xcb/xcb.h>
+#include <xcb/xcb_icccm.h>
+#include <cairo/cairo-xcb.h>
 
 #include "player.h"
 

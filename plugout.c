@@ -7,12 +7,11 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
-#include "common.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "common.h"
 #include "plugout.h"
 
 #ifdef PLUGOUT_ALSA

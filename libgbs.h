@@ -21,6 +21,7 @@
  */
 
 #include <inttypes.h>
+
 #include "common.h"
 
 // FIXME: call everything (structs, enums, types, functions) "libgbs*" instead "gbs*"

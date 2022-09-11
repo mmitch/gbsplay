@@ -8,11 +8,10 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
-#include "common.h"
-
-#include <fcntl.h>
 #include <unistd.h>
+#include <fcntl.h>
 
+#include "common.h"
 #include "plugout.h"
 
 int fd;

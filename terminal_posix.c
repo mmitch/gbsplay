@@ -6,15 +6,14 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
-#include "common.h"
-#include "terminal.h"
-
 #include <unistd.h>
 #include <stdlib.h>
-
 #include <termios.h>
 #include <signal.h>
 #include <fcntl.h>
+
+#include "common.h"
+#include "terminal.h"
 
 static long terminit;
 static struct termios ots;

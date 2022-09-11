@@ -9,10 +9,9 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
-#include "common.h"
-
 #include <math.h>
 
+#include "common.h"
 #include "midifile.h"
 #include "plugout.h"
 
