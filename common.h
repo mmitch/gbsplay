@@ -131,7 +131,7 @@ static inline long is_be_machine() {
 	return true;
 }
 
-#else
+#elif BYTE_ORDER == LITTLE_ENDIAN
 
 static inline long is_le_machine() {
 	return true;
@@ -141,6 +141,8 @@ static inline long is_be_machine() {
 	return false;
 }
 
+#else
+#error Bug in endian detection
 #endif
 
 #endif
