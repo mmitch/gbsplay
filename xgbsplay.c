@@ -13,6 +13,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <inttypes.h>
+#include <signal.h>
 
 #include <X11/keysymdef.h>
 #include <xcb/xcb.h>
