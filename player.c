@@ -70,7 +70,8 @@ plugout_close_fn sound_close;
 
 static enum playmode playmode = PLAYMODE_LINEAR;
 static enum gbs_loop_mode loop_mode = LOOP_OFF;
-static enum plugout_endian endian = PLUGOUT_ENDIAN_NATIVE;
+static enum plugout_endian requested_endian = PLUGOUT_ENDIAN_AUTOSELECT;
+static enum plugout_endian actual_endian = PLUGOUT_ENDIAN_AUTOSELECT;
 static long rate = 44100;
 static long silence_timeout = 2;
 static long fadeout = 3;
@@ -97,7 +98,7 @@ static struct timespec pause_wait_time;
 
 /* configuration directives */
 const struct cfg_option options[] = {
-	{ "endian", &endian, cfg_endian },
+	{ "endian", &requested_endian, cfg_endian },
 	{ "fadeout", &fadeout, cfg_long },
 	{ "filter_type", &filter_type, cfg_string },
 	{ "loop", &loop_mode, cfg_int },
@@ -135,8 +136,7 @@ static void callback(struct gbs *gbs, struct gbs_output_buffer *buf, void *priv)
 	UNUSED(gbs);
 	UNUSED(priv);
 
-	if ((is_le_machine() && endian == PLUGOUT_ENDIAN_BIG) ||
-	    (is_be_machine() && endian == PLUGOUT_ENDIAN_LITTLE)) {
+	if (actual_endian != PLUGOUT_ENDIAN_NATIVE) {
 		swap_endian(buf);
 	}
 	sound_write(buf->data, buf->pos*2*sizeof(int16_t));
@@ -361,7 +361,7 @@ static char *endian_str(long endian)
 	switch (endian) {
 	case PLUGOUT_ENDIAN_BIG: return "big";
 	case PLUGOUT_ENDIAN_LITTLE: return "little";
-	case PLUGOUT_ENDIAN_NATIVE: return "native";
+	case PLUGOUT_ENDIAN_AUTOSELECT: return "default";
 	default: return "invalid";
 	}
 }
@@ -414,7 +414,7 @@ static void usage(long exitcode)
 		  "  -Z        play subsongs in random mode (repetitions possible)\n"
 		  "  -1 to -4  mute a channel on startup\n"),
 		myname,
-		endian_str(endian),
+		endian_str(requested_endian),
 		fadeout,
 		subsong_gap,
 		_(filter_type),
@@ -446,11 +446,11 @@ static void parseopts(int *argc, char ***argv)
 			break;
 		case 'E':
 			if (strcasecmp(optarg, "b") == 0) {
-				endian = PLUGOUT_ENDIAN_BIG;
+				requested_endian = PLUGOUT_ENDIAN_BIG;
 			} else if (strcasecmp(optarg, "l") == 0) {
-				endian = PLUGOUT_ENDIAN_LITTLE;
+				requested_endian = PLUGOUT_ENDIAN_LITTLE;
 			} else if (strcasecmp(optarg, "n") == 0) {
-				endian = PLUGOUT_ENDIAN_NATIVE;
+				requested_endian = PLUGOUT_ENDIAN_NATIVE;
 			} else {
 				printf(_("\"%s\" is not a valid endian.\n\n"), optarg);
 				usage(1);
@@ -573,8 +573,19 @@ struct gbs *common_init(int argc, char **argv)
 		usage(1);
 	}
 
-	if (sound_open(endian, rate, &buf.bytes) != 0) {
+	if (requested_endian == PLUGOUT_ENDIAN_AUTOSELECT) {
+		actual_endian = PLUGOUT_ENDIAN_NATIVE;
+	} else {
+		actual_endian = requested_endian;
+	}
+	if (sound_open(&actual_endian, rate, &buf.bytes) != 0) {
 		fprintf(stderr, _("Could not open output plugin \"%s\"\n"),
+		        sound_name);
+		exit(1);
+	}
+	if (requested_endian != PLUGOUT_ENDIAN_AUTOSELECT &&
+	    actual_endian != requested_endian) {
+		fprintf(stderr, _("Unsupported endian for output plugin \"%s\"\n"),
 		        sound_name);
 		exit(1);
 	}

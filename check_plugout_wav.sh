@@ -139,17 +139,16 @@ BEGIN_TEST "WAV audio data should ignore endian setting"
 mv gbsplay-1.wav.header gbsplay-1.wav.header.orig
 mv gbsplay-1.wav.audio  gbsplay-1.wav.audio.orig
 
-log "render as wav with explicit -Eb option"
-run_gbsplay -Eb -o wav
-split_result_wav
-assert_that_file_equals gbsplay-1.wav.header gbsplay-1.wav.header.orig
-assert_that_file_equals gbsplay-1.wav.audio  gbsplay-1.wav.audio.orig
-
 log "render as wav with explicit -El option"
 run_gbsplay -El -o wav
 split_result_wav
 assert_that_file_equals gbsplay-1.wav.header gbsplay-1.wav.header.orig
 assert_that_file_equals gbsplay-1.wav.audio  gbsplay-1.wav.audio.orig
+
+log "explicit -Eb option should fail"
+if run_gbsplay -Eb -o wav; then
+    die "Expected command to fail"
+fi
 
 TEST_OK
 

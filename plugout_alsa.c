@@ -28,7 +28,7 @@ snd_pcm_t *pcm_handle;
 #define SND_PCM_FORMAT_S16_NE SND_PCM_FORMAT_S16_BE
 #endif
 
-static long alsa_open(enum plugout_endian endian, long rate, long *buffer_bytes)
+static long alsa_open(enum plugout_endian *endian, long rate, long *buffer_bytes)
 {
 	const char *pcm_name = "default";
 	int fmt, err;
@@ -37,11 +37,10 @@ static long alsa_open(enum plugout_endian endian, long rate, long *buffer_bytes)
 	snd_pcm_uframes_t buffer_frames = *buffer_bytes / 4;
 	snd_pcm_uframes_t period_frames;
 
-	switch (endian) {
-	case PLUGOUT_ENDIAN_BIG: fmt = SND_PCM_FORMAT_S16_BE; break;
+	switch (*endian) {
+	case PLUGOUT_ENDIAN_BIG:    fmt = SND_PCM_FORMAT_S16_BE; break;
 	case PLUGOUT_ENDIAN_LITTLE: fmt = SND_PCM_FORMAT_S16_LE; break;
-	default:
-	case PLUGOUT_ENDIAN_NATIVE: fmt = SND_PCM_FORMAT_S16_NE; break;
+	default:                    fmt = SND_PCM_FORMAT_S16_NE; break;
 	}
 
 	snd_pcm_hw_params_alloca(&hwparams);

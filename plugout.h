@@ -31,11 +31,17 @@
 enum plugout_endian {
 	PLUGOUT_ENDIAN_BIG,
 	PLUGOUT_ENDIAN_LITTLE,
-	PLUGOUT_ENDIAN_NATIVE
+	PLUGOUT_ENDIAN_AUTOSELECT,
 };
 
+#if GBS_BYTE_ORDER == GBS_ORDER_LITTLE_ENDIAN
+#define PLUGOUT_ENDIAN_NATIVE PLUGOUT_ENDIAN_LITTLE
+#else
+#define PLUGOUT_ENDIAN_NATIVE PLUGOUT_ENDIAN_BIG
+#endif
+
 /* Initial open of plugout. */
-typedef long    (*plugout_open_fn )(enum plugout_endian endian, long rate, long *buffer_bytes);
+typedef long    (*plugout_open_fn )(enum plugout_endian *endian, long rate, long *buffer_bytes);
 /* Notification when next subsong is about to start. */
 typedef int     (*plugout_skip_fn )(int subsong);
 /* Notification the the player is paused/resumed. */

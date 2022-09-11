@@ -22,14 +22,14 @@
 pa_simple *pulse_handle;
 pa_sample_spec pulse_spec;
 
-static long pulse_open(enum plugout_endian endian, long rate, long *buffer_bytes)
+static long pulse_open(enum plugout_endian *endian, long rate, long *buffer_bytes)
 {
 	int err;
 
-	switch (endian) {
-	case PLUGOUT_ENDIAN_BIG: pulse_spec.format = PA_SAMPLE_S16BE; break;
+	switch (*endian) {
+	case PLUGOUT_ENDIAN_BIG:    pulse_spec.format = PA_SAMPLE_S16BE; break;
 	case PLUGOUT_ENDIAN_LITTLE: pulse_spec.format = PA_SAMPLE_S16LE; break;
-	case PLUGOUT_ENDIAN_NATIVE: pulse_spec.format = PA_SAMPLE_S16NE; break;
+	default:                    pulse_spec.format = PA_SAMPLE_S16NE; break;
 	}
 	pulse_spec.rate = rate;
 	pulse_spec.channels = 2;

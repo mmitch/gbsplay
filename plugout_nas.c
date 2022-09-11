@@ -35,7 +35,7 @@ static AuServer *nas_server;
 static AuFlowID             nas_flow;
 
 /* forward function declarations */
-static long    nas_open(enum plugout_endian endian, long rate, long *buffer_bytes);
+static long    nas_open(enum plugout_endian *endian, long rate, long *buffer_bytes);
 static ssize_t nas_write(const void *buf, size_t count);
 static void    nas_close();
 
@@ -96,7 +96,7 @@ static AuDeviceID nas_find_device(AuServer *aud)
  *                      value update to actual buffer_size.
  * @return  0 on success
  */
-static long nas_open(enum plugout_endian endian, long rate, long *buffer_bytes)
+static long nas_open(enum plugout_endian *endian, long rate, long *buffer_bytes)
 {
 	char *text = "";
 	unsigned char nas_format;
@@ -104,7 +104,7 @@ static long nas_open(enum plugout_endian endian, long rate, long *buffer_bytes)
 	AuStatus  status = AuBadValue;
 	AuDeviceID nas_device;
 
-	switch (endian) {
+	switch (*endian) {
 	case PLUGOUT_ENDIAN_BIG:
 		nas_format = AuFormatLinearSigned16MSB;
 		break;

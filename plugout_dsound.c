@@ -30,15 +30,11 @@ static DWORD writeMax;       // Maximum amount we can write at once.
 static WAVEFORMATEX wfx;
 static DSBUFFERDESC dsbdesc;
 
-static long dsound_open(enum plugout_endian endian, long rate, long *buffer_bytes)
+static long dsound_open(enum plugout_endian *endian, long rate, long *buffer_bytes)
 {
 	HRESULT hr;
 
-	if (endian != PLUGOUT_ENDIAN_NATIVE)
-	{
-		fprintf(stderr, "Currently only native endianness is supported.");
-		return -1;
-	}
+	*endian = PLUGOUT_ENDINA_NATIVE;
 
 	hr = DirectSoundCreate8(NULL, &dsound_device, NULL);
 

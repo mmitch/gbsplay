@@ -26,7 +26,7 @@
 int device;
 SDL_AudioSpec obtained;
 
-static long sdl_open(enum plugout_endian endian, long rate, long *buffer_bytes)
+static long sdl_open(enum plugout_endian *endian, long rate, long *buffer_bytes)
 {
 	SDL_AudioSpec desired;
 	if (SDL_Init(SDL_INIT_AUDIO) != 0) {
@@ -40,10 +40,10 @@ static long sdl_open(enum plugout_endian endian, long rate, long *buffer_bytes)
 	desired.samples = 1024;
 	desired.callback = NULL;
 
-	switch (endian) {
+	switch (*endian) {
 	case PLUGOUT_ENDIAN_BIG:    desired.format = AUDIO_S16MSB; break;
 	case PLUGOUT_ENDIAN_LITTLE: desired.format = AUDIO_S16LSB; break;
-	case PLUGOUT_ENDIAN_NATIVE: desired.format = AUDIO_S16SYS; break;
+	default:                    desired.format = AUDIO_S16SYS; break;
 	}
 
 	device = SDL_OpenAudioDevice(NULL, PLAYBACK_MODE, &desired, &obtained, SDL_FLAGS);

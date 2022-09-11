@@ -214,7 +214,7 @@ int midi_pan(cycles_t cycles, int channel, int pan)
 	return 0;
 }
 
-long midi_open(enum plugout_endian endian, long rate, long *buffer_bytes)
+long midi_open(enum plugout_endian *endian, long rate, long *buffer_bytes)
 {
 	UNUSED(endian);
 	UNUSED(rate);

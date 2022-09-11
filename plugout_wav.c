@@ -21,8 +21,6 @@ static long chunk_size_offset;
 static long data_subchunk_size_offset;
 static long sample_rate;
 static FILE* file = NULL;
-static int swap_audio_endianess;
-static uint8_t *swap_buffer = NULL;
 
 static int wav_write_riff_header() {
 	const char* riff_chunk_id = "RIFF";
@@ -139,23 +137,12 @@ static int wav_close_file() {
 	return result;
 }
 
-static long wav_open(const enum plugout_endian endian,
+static long wav_open(enum plugout_endian *endian,
 		     const long rate, long *buffer_bytes)
 {
 	sample_rate = rate;
 
-	switch (endian) {
-	case PLUGOUT_ENDIAN_BIG:    swap_audio_endianess = true; break;
-	case PLUGOUT_ENDIAN_LITTLE: swap_audio_endianess = false; break;
-	default:
-	case PLUGOUT_ENDIAN_NATIVE: swap_audio_endianess = is_be_machine(); break;
-	}
-
-	if (swap_audio_endianess) {
-		swap_buffer = malloc(*buffer_bytes);
-		if (swap_buffer == NULL)
-			return -1;
-	}
+	*endian = PLUGOUT_ENDIAN_LITTLE;
 
 	return 0;
 }
@@ -171,27 +158,13 @@ static int wav_skip(const int subsong)
 
 static ssize_t wav_write(const void *buf, const size_t count)
 {
-	size_t i;
-
-	if (!swap_audio_endianess) {
-		return file_write_bytes(file, buf, count);
-	}
-
-	// BE->LE: swap all 16bit values in *buf
-	for (i=0; i<count; i+=2) {
-		swap_buffer[i]   = ((uint8_t*) buf)[i+1];
-		swap_buffer[i+1] = ((uint8_t*) buf)[i];
-	}
-	return file_write_bytes(file, swap_buffer, count);
+	return file_write_bytes(file, buf, count);
 }
 
 static void wav_close()
 {
 	if (file != NULL)
 		wav_close_file();
-
-	if (swap_buffer != NULL)
-		free(swap_buffer);
 
 	return;
 }

@@ -24,7 +24,7 @@
 
 static int fd;
 
-static long devdsp_open(enum plugout_endian endian, long rate, long *buffer_bytes)
+static long devdsp_open(enum plugout_endian *endian, long rate, long *buffer_bytes)
 {
 	int c;
 	int flags;
@@ -39,10 +39,10 @@ static long devdsp_open(enum plugout_endian endian, long rate, long *buffer_byte
 		fprintf(stderr, _("fcntl(F_SETFL, flags&~O_NONBLOCK) failed: %s\n"), strerror(errno));
 	}
 
-	switch (endian) {
-	case PLUGOUT_ENDIAN_BIG: c = AFMT_S16_BE; break;
-	case PLUGOUT_ENDIAN_LITTLE: c = AFMT_S16_LE; break;
-	case PLUGOUT_ENDIAN_NATIVE: c = AFMT_S16_NE; break;
+	switch (*endian) {
+	case PLUGOUT_ENDIAN_BIG:        c = AFMT_S16_BE; break;
+	case PLUGOUT_ENDIAN_LITTLE:     c = AFMT_S16_LE; break;
+	case PLUGOUT_ENDIAN_AUTOSELECT: c = AFMT_S16_NE; break;
 	}
 	if ((ioctl(fd, SNDCTL_DSP_SETFMT, &c)) == -1) {
 		fprintf(stderr, _("ioctl(fd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"), c, strerror(errno));

@@ -26,7 +26,7 @@ static int set_fd_to_binmode()
 	return 0;
 }
 
-static long stdout_open(enum plugout_endian endian,
+static long stdout_open(enum plugout_endian *endian,
                         long rate, long *buffer_bytes)
 {
 	UNUSED(endian);
