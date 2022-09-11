@@ -7,6 +7,10 @@
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
+#ifdef APPLE
+#define _DARWIN_C_SOURCE /* for memset_pattern4() (bug on macOS when _POSIX_C_SOURCE is set) */
+#endif
+
 #include <time.h>
 #include <SDL.h>
 
