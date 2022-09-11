@@ -102,8 +102,6 @@ static inline void i18n_init(void) {}
 
 #endif
 
-#include <endian.h>
-
 #ifndef BYTE_ORDER
 
 #  define BIG_ENDIAN 1
