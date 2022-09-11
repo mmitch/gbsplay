@@ -1,3 +1,8 @@
+MAKEFLAGS += --warn-undefined-variables
+.DELETE_ON_ERROR:
+SHELL := bash
+.SHELLFLAGS := -eu -o pipefail -c
+
 .PHONY: all default distclean clean install dist clean-apidoc
 
 all: default
@@ -45,6 +50,7 @@ generatedeps := yes
 endif
 endif
 
+TEST_WRAPPER =
 XMMSPREFIX  :=
 DESTDIR     :=
 
@@ -479,7 +485,7 @@ TESTOPTS := -r 44100 -t 30 -f 0 -g 0 -T 0 -H off
 
 test: gbsplay $(tests) test_gbs
 	@echo Verifying output correctness for examples/nightmode.gbs:
-	$(Q)MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -o iodumper $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | (md5sum || md5 -r) | cut -f1 -d\ `; \
+	$(Q)MD5=`LD_LIBRARY_PATH=.:$${LD_LIBRARY_PATH-} $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -o iodumper $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | (md5sum || md5 -r) | cut -f1 -d\ `; \
 	EXPECT="9e7595c3cd5c37a6a7793d1adb1c0741"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "iodumper output ok"; \
@@ -489,7 +495,7 @@ test: gbsplay $(tests) test_gbs
 		echo "  Got:      $$MD5" ; \
 		exit 1; \
 	fi
-	$(Q)MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -E b -o stdout $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | (md5sum || md5 -r) | cut -f1 -d\ `; \
+	$(Q)MD5=`LD_LIBRARY_PATH=.:$${LD_LIBRARY_PATH-} $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -E b -o stdout $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | (md5sum || md5 -r) | cut -f1 -d\ `; \
 	EXPECT="26c2514e6f28f4e24c09063950366584"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "Bigendian output ok"; \
@@ -499,7 +505,7 @@ test: gbsplay $(tests) test_gbs
 		echo "  Got:      $$MD5" ; \
 		exit 1; \
 	fi
-	$(Q)MD5=`LD_LIBRARY_PATH=.:$$LD_LIBRARY_PATH $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -E l -o stdout $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | (md5sum || md5 -r) | cut -f1 -d\ `; \
+	$(Q)MD5=`LD_LIBRARY_PATH=.:$${LD_LIBRARY_PATH-} $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -E l -o stdout $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | (md5sum || md5 -r) | cut -f1 -d\ `; \
 	EXPECT="fa8f25171eac0d3c04ef7a9e443872b1"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "Littleendian output ok"; \
