@@ -48,7 +48,7 @@ assert_that_file_equals() {
 run_gbsplay() {
     # - play only one second, use additional arguments
     # - include current directory in LD_LIBRARY_PATH for shared lib builds
-    LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH ./gbsplay -qqq -t 1 -f 1 "$@" examples/nightmode.gbs 1 1
+    LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH ./gbsplay -qqq -c examples/gbsplayrc_sample -t 1 -f 1 "$@" examples/nightmode.gbs 1 1
 }
 
 split_result_wav() {
@@ -119,8 +119,8 @@ BEGIN_TEST "WAV header should be as expected"
     write_uint32_t_le 16    # subchunk size
     write_uint16_t_le 1     # PCM, linear, uncompressed
     write_uint16_t_le 2     # stereo
-    write_uint32_t_le 44100 # samplerate
-    write_uint32_t_le $(( 44100 * 2 * 16 / 8 )) # byte rate
+    write_uint32_t_le 48000 # samplerate
+    write_uint32_t_le $(( 48000 * 2 * 16 / 8 )) # byte rate
     write_uint16_t_le $(( 2 * 16 / 8 ))         # bytes per sample (all channels)
     write_uint16_t_le 16    # bits per sample (single channel)
 
