@@ -157,10 +157,12 @@ TEST_OK
 
 BEGIN_TEST "halving the sample rate should halve audio length"
 
-log "render as wav in 22050kHz"
-run_gbsplay -r 22050 -o wav
+log "render as wav in 24000kHz"
+run_gbsplay -El -r 24000 -o stdout > gbsplay-1.raw
+set_file_length raw_length_24000 gbsplay-1.raw
+run_gbsplay -El -r 24000 -o wav
 split_result_wav
-set_file_length audio_length_22050 gbsplay-1.wav.audio
-assert_that_equals "audio length" "$audio_length_22050"  $(( audio_length / 2 ))
+set_file_length audio_length_24000 gbsplay-1.wav.audio
+assert_that_equals "audio length" "$audio_length_24000" "$raw_length_24000"
 
 TEST_OK
