@@ -22,7 +22,7 @@
 /* Handle for the PCM device */
 snd_pcm_t *pcm_handle;
 
-#if BYTE_ORDER == LITTLE_ENDIAN
+#if GBS_BYTE_ORDER == GBS_ORDER_LITTLE_ENDIAN
 #define SND_PCM_FORMAT_S16_NE SND_PCM_FORMAT_S16_LE
 #else
 #define SND_PCM_FORMAT_S16_NE SND_PCM_FORMAT_S16_BE
