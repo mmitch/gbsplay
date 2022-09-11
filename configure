@@ -616,6 +616,7 @@ case "$BUILDOS" in
 
     Darwin)
         setdefault build_test yes
+        append_nodupe CFLAGS "-D_DARWIN_C_SOURCE=1"
         ;;
 
     MSYS_*)
