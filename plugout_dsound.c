@@ -34,7 +34,7 @@ static long dsound_open(enum plugout_endian *endian, long rate, long *buffer_byt
 {
 	HRESULT hr;
 
-	*endian = PLUGOUT_ENDINA_NATIVE;
+	*endian = PLUGOUT_ENDIAN_NATIVE;
 
 	hr = DirectSoundCreate8(NULL, &dsound_device, NULL);
 
