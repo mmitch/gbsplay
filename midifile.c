@@ -65,14 +65,19 @@ static int midi_write_varlen(unsigned long value)
 
 static int midi_write_event(cycles_t cycles, const uint8_t *data, unsigned int length)
 {
-	unsigned long timestamp_delta = (cycles - cycles_prev) >> 14;
+	cycles_t cycles_delta = cycles - cycles_prev;
+	unsigned long timestamp_delta = (cycles_delta) >> 14;
+
 	if (midi_write_varlen(timestamp_delta))
 		return 1;
 
 	if (file_write_bytes(file, data, length))
 		return 1;
 
-	cycles_prev = cycles;
+	// only advance as far as the timestamp resolution allows, so we don't
+	// accumulate errors from repeatedly throwing away the lower bits
+	cycles_prev += timestamp_delta << 14;
+
 	return 0;
 }
 
