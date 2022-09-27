@@ -144,7 +144,7 @@ static int midi_close_track()
 		goto error;
 
 	track_length = track_end_offset - track_start_offset;
-	if (file_write_32bit_le_at(file, track_length, track_length_offset) == -1)
+	if (file_write_32bit_be_at(file, track_length, track_length_offset) == -1)
 		goto error;
 
 	/* Close the file */
