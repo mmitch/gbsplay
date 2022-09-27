@@ -60,7 +60,7 @@ static void vgm_finalize(void) {
 	file_write_32bit_le_at(vgmfile, (uint32_t)samples_total, VGM_HDR_NUMSAMPLES);
 }
 
-static long vgm_open(enum plugout_endian endian, long rate, long *buffer_bytes) {
+static long vgm_open(enum plugout_endian *endian, long rate, long *buffer_bytes) {
 	return 0;
 }
 
