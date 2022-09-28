@@ -3,7 +3,7 @@
  *
  * common code of MIDI output plugins
  *
- * 2006-2022 (C) by Christian Garbs <mitch@cgarbs.de>
+ * 2006-2024 (C) by Christian Garbs <mitch@cgarbs.de>
  *                  Vegard Nossum
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -17,8 +17,52 @@
 #include "plugout.h"
 #include "midifile.h"
 
-#define TRACK_LENGTH_OFFSET 18
-#define TRACK_START_OFFSET 22
+/*
+ * The hardware emulation runs at 4194304 Hz and provides an exact
+ * cycle counter.  Because ~4 MHz are outside of the possible MIDI
+ * time resolution, we introduce an arbitrary lower resolution of 256
+ * Hz by shifting the cycle counter 14 bits to the right.
+ *
+ * This lower resolution (#FIXME: which needs a nice name) is
+ *
+ *  4194304 Hz / 2^14 == 1/256 Hz == 3906 ms
+ */
+static const uint8_t CYCLE_RESOLUTION_BIT_SHIFT = 14;
+
+/*
+ * Now we need to make a single MIDI tick match the 3906ms from above.
+ * 
+ * In MIDI, the Time Division use to define the length of a MIDI tick.
+ * It is a 16 bit value with two possible calculation modes:
+ * Top bit == 0 selects PPQ (Pulses per quarter note)
+ * Top bit == 1 selects Frames per Second
+ *
+ * When using PPQ (pulses per quarter note) mode, the length of a
+ * single MIDI tick is calculated as:
+ *
+ *  1 tick = TEMPO / TIME_DIVISION
+ *
+ * TEMPO is measured in ms/beat (1 beat == 1 quarter note)
+ * and can be set by the tempo command.
+ *
+ * A nicely matching pair of values would be:
+ *
+ *  TEMPO         = 499968 ms / beat
+ *  TIME_DIVISION = 128
+ *
+ * so that
+ *
+ *  1 tick = 499968 ms / 128 == 3906 ms == 2^14 hardware cycles
+ *
+ * exactly matches our reduced resolution from before.
+ */
+static const uint32_t TEMPO = 499968;
+static const uint32_t TIME_DIVISION =
+	(0 << 16) // select PPQ mode in highest bit
+	+ 128;    // actual value as calculated above
+
+static const long TRACK_LENGTH_OFFSET = 18;
+static const long TRACK_START_OFFSET = 22;
 
 static long mute[4] = {0, 0, 0, 0};
 static FILE* file = NULL;
@@ -64,14 +108,27 @@ static void midi_write_varlen(uint32_t value)
 static void midi_write_event(cycles_t cycles, const uint8_t *data, unsigned int length)
 {
 	cycles_t cycles_delta = cycles - cycles_prev;
-	unsigned long timestamp_delta = (cycles_delta) >> 14;
+	unsigned long timestamp_delta = (cycles_delta) >> CYCLE_RESOLUTION_BIT_SHIFT;
 
 	midi_write_varlen(timestamp_delta);
 	fwrite(data, length, 1, file);
 
 	// only advance as far as the timestamp resolution allows, so we don't
 	// accumulate errors from repeatedly throwing away the lower bits
-	cycles_prev += timestamp_delta << 14;
+	cycles_prev += timestamp_delta << CYCLE_RESOLUTION_BIT_SHIFT;
+}
+
+static void midi_set_tempo(uint32_t tempo)
+{
+	uint8_t meta_message[6];
+	meta_message[0] = 0xff;
+	meta_message[1] = 0x51;
+	meta_message[2] = 0x03;
+	meta_message[3] = tempo >> 16 & 0xff;
+	meta_message[4] = tempo >>  8 & 0xff;
+	meta_message[5] = tempo       & 0xff;
+
+	midi_write_event(0, meta_message, 6);
 }
 
 static int midi_open_track(int subsong)
@@ -85,13 +142,16 @@ static int midi_open_track(int subsong)
 		0, /* format */
 		1, /* tracks */
 		/* TODO: Do some real calculation instead of this magic number :-) */
-		124 /* division */);
+		TIME_DIVISION /* division */);
 
 	/* Track header */
 	fpack(file, ">{MTrk}d", 0 /* length placeholder */);
 
 	if (ferror(file))
 		goto error;
+
+	/* Set tempo in track */
+	midi_set_tempo(TEMPO);
 
 	return 0;
 
@@ -202,4 +262,3 @@ void midi_close(void)
 
 	midi_close_track();
 }
-
