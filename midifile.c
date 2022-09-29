@@ -63,22 +63,24 @@ static int midi_write_varlen(unsigned long value)
 	return file_write_bytes(file, data + 4 - i, i);
 }
 
-static int midi_write_event(cycles_t cycles, const uint8_t *data, unsigned int length)
+static int midi_write_event_rel(unsigned long timestamp_delta, const uint8_t *data, unsigned int length)
 {
-	cycles_t cycles_delta = cycles - cycles_prev;
-	unsigned long timestamp_delta = (cycles_delta) >> 14;
-
 	if (midi_write_varlen(timestamp_delta))
 		return 1;
 
-	if (file_write_bytes(file, data, length))
-		return 1;
+	return (file_write_bytes(file, data, length));
+}
+
+static int midi_write_event_abs(cycles_t cycles, const uint8_t *data, unsigned int length)
+{
+	cycles_t cycles_delta = cycles - cycles_prev;
+	unsigned long timestamp_delta = (cycles_delta) >> 14;
 
 	// only advance as far as the timestamp resolution allows, so we don't
 	// accumulate errors from repeatedly throwing away the lower bits
 	cycles_prev += timestamp_delta << 14;
 
-	return 0;
+	return midi_write_event_rel(timestamp_delta, data, length);;
 }
 
 static int midi_open_track(int subsong)
@@ -140,7 +142,7 @@ static int midi_close_track()
 	event[1] = 0x2f;
 	event[2] = 0x00;
 
-	if (midi_write_event(cycles_prev, event, 3))
+	if (midi_write_event_abs(cycles_prev, event, 3))
 		goto error;
 
 	/* Update length in header */
@@ -175,7 +177,7 @@ int midi_note_on(cycles_t cycles, int channel, int new_note, int velocity)
 	event[1] = new_note;
 	event[2] = velocity;
 
-	if (midi_write_event(cycles, event, 3))
+	if (midi_write_event_abs(cycles, event, 3))
 		return 1;
 
 	note[channel] = new_note;
@@ -194,7 +196,7 @@ int midi_note_off(cycles_t cycles, int channel)
 	event[1] = note[channel];
 	event[2] = 0;
 
-	if (midi_write_event(cycles, event, 3))
+	if (midi_write_event_abs(cycles, event, 3))
 		return 1;
 
 	note[channel] = 0;
@@ -213,7 +215,7 @@ int midi_pan(cycles_t cycles, int channel, int pan)
 	event[1] = 0x0a;
 	event[2] = pan;
 
-	if (midi_write_event(cycles, event, 3))
+	if (midi_write_event_abs(cycles, event, 3))
 		return 1;
 
 	return 0;
