@@ -14,106 +14,37 @@
 #include <unistd.h>
 
 #include "common.h"
+#include "util.h"
 #include "filewriter.h"
 #include "plugout.h"
 
-static long chunk_size_offset;
-static long data_subchunk_size_offset;
+static uint8_t blank_hdr[44] = { 0 };
+
 static long sample_rate;
 static FILE* file = NULL;
 
-static int wav_write_riff_header() {
-	const char* riff_chunk_id = "RIFF";
-	const char* wave_format = "WAVE";
-
-	if (file_write_string(file, riff_chunk_id))
-		return -1;
-
-	if ((chunk_size_offset = file_write_32bit_placeholder(file)) == -1)
-		return -1;
-
-	if (file_write_string(file, wave_format))
-		return -1;
-
-	return 0;
-}
-
-static int wav_write_fmt_subchunk() {
-	const char* fmt_subchunk_id = "fmt ";
+static int wav_write_header() {
 	const uint32_t fmt_subchunk_length = 16;
-
 	const uint16_t audio_format_uncompressed_pcm = 1;
 	const uint16_t num_channels = 2;
 	const uint16_t bits_per_sample = 16;
 	const uint32_t byte_rate = sample_rate * num_channels * bits_per_sample / 8;
 	const uint16_t block_align = num_channels * bits_per_sample / 8;
 
-	if (file_write_string(file, fmt_subchunk_id))
+	long filesize = ftell(file);
+	if (filesize < 0 || filesize > 0xffffffff)
 		return -1;
 
-	if (file_write_32bit_le(file, fmt_subchunk_length))
-		return -1;
-
-	if (file_write_16bit_le(file, audio_format_uncompressed_pcm))
-		return -1;
-
-	if (file_write_16bit_le(file, num_channels))
-		return -1;
-
-	if (file_write_32bit_le(file, sample_rate))
-		return -1;
-
-	if (file_write_32bit_le(file, byte_rate))
-		return -1;
-
-	if (file_write_16bit_le(file, block_align))
-		return -1;
-
-	if (file_write_16bit_le(file, bits_per_sample))
-		return -1;
-
-	return 0;
-}
-
-static int wav_write_data_subchunk_header() {
-	const char* data_subchunk_id = "data";
-
-	if (file_write_string(file, data_subchunk_id))
-		return -1;
-
-	if ((data_subchunk_size_offset = file_write_32bit_placeholder(file)) == -1)
-		return -1;
-
-	return 0;
-}
-
-static int wav_write_header() {
-	if (wav_write_riff_header())
-		return -1;
-
-	if (wav_write_fmt_subchunk())
-		return -1;
-
-	if (wav_write_data_subchunk_header())
-		return -1;
-
-	return 0;
-}
-
-static int wav_update_header() {
-	const long filesize = file_get_position(file);
-	if (filesize == -1)
-		return -1;
-
-	// chunk_size = total size - 8 bytes (RIFF reader + chunk size)
-	if (file_write_32bit_le_at(file, filesize - 8, chunk_size_offset))
-		return -1;
-
-	// data subchunk size = total size - 44 bytes:
-	// data subchunk size is written to bytes 40-43 and contains the length of data subchunk (that is everything until the the end of the file)
-	if (file_write_32bit_le_at(file, filesize - 44, data_subchunk_size_offset))
-		return -1;
-
+	fpackat(file, 0, "<{RIFF}d{WAVE}<{fmt }dwwddww{data}d",
+	        (uint32_t)filesize - 8,
+	        fmt_subchunk_length,
+	        audio_format_uncompressed_pcm,
+	        num_channels,
+	        sample_rate,
+	        byte_rate,
+	        block_align,
+	        bits_per_sample,
+	        (uint32_t)filesize - 44);
 	return 0;
 }
 
@@ -121,18 +52,18 @@ static int wav_open_file(const int subsong) {
 	if ((file = file_open("wav", subsong)) == NULL)
 		return -1;
 
-	if (wav_write_header() == -1)
-		return -1;
+	fwrite(blank_hdr, sizeof(blank_hdr), 1, file);
 	
 	return 0;
 }
 
 static int wav_close_file() {
 	int result;
-	if (wav_update_header())
+
+	if (wav_write_header())
 		return -1;
 
-	result = file_close(file);
+	result = fclose(file);
 	file = NULL;
 	return result;
 }
@@ -158,7 +89,7 @@ static int wav_skip(const int subsong)
 
 static ssize_t wav_write(const void *buf, const size_t count)
 {
-	return file_write_bytes(file, buf, count);
+	return fwrite(buf, count, 1, file);
 }
 
 static void wav_close()

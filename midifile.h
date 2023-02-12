@@ -16,12 +16,13 @@
 
 extern int note[4];
 
+extern int  midi_file_error();
 extern int  midi_file_is_closed();
 extern void midi_update_mute(const struct gbs_channel_status status[]);
 
-extern int  midi_note_on(cycles_t cycles, int channel, int new_note, int velocity);
-extern int  midi_note_off(cycles_t cycles, int channel);
-extern int  midi_pan(cycles_t cycles, int channel, int pan);
+extern void midi_note_on(cycles_t cycles, int channel, int new_note, int velocity);
+extern void midi_note_off(cycles_t cycles, int channel);
+extern void midi_pan(cycles_t cycles, int channel, int pan);
 
 extern long midi_open(enum plugout_endian *endian, long rate, long *buffer_bytes);
 extern int  midi_skip(int subsong);

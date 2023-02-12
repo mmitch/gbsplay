@@ -11,5 +11,7 @@
 
 long rand_long(long max);
 void shuffle_long(long *array, long elements);
+int fpack(FILE *f, const char *fmt, ...);
+int fpackat(FILE *f, long offset, const char *fmt, ...);
 
 #endif

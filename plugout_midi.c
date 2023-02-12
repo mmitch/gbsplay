@@ -35,8 +35,7 @@ static int midi_io(cycles_t cycles, uint32_t addr, uint8_t val)
 		master[chan] = (val & 0xf8) != 0;
 		if (!master[chan] && running[chan]) {
 			/* DAC turned off, disable channel */
-			if (midi_note_off(cycles, chan))
-				return 1;
+			midi_note_off(cycles, chan);
 			running[chan] = 0;
 		}
 		if (volume[chan]) {
@@ -45,13 +44,11 @@ static int midi_io(cycles_t cycles, uint32_t addr, uint8_t val)
 				new_note = NOTE(2048 - div[chan]) + 21;
 				if (new_note < 0 || new_note >= 0x80)
 					break;
-				if (midi_note_on(cycles, chan, new_note, volume[chan]))
-					return 1;
+				midi_note_on(cycles, chan, new_note, volume[chan]);
 			}
 		} else {
 			/* volume set to 0, stop note (if any) */
-			if (midi_note_off(cycles, chan))
-				return 1;
+			midi_note_off(cycles, chan);
 		}
 		break;
 	case 0xff13:
@@ -65,14 +62,12 @@ static int midi_io(cycles_t cycles, uint32_t addr, uint8_t val)
 
 			if (new_note != note[chan]) {
 				/* portamento: retrigger with new note */
-				if (midi_note_off(cycles, chan))
-					return 1;
+				midi_note_off(cycles, chan);
 
 				if (new_note < 0 || new_note >= 0x80)
 					break;
 
-				if (midi_note_on(cycles, chan, new_note, volume[chan]))
-					return 1;
+				midi_note_on(cycles, chan, new_note, volume[chan]);
 			}
 		}
 
@@ -87,29 +82,25 @@ static int midi_io(cycles_t cycles, uint32_t addr, uint8_t val)
 
 		/* Channel start trigger */
 		if ((val & 0x80) == 0x80) {
-			if (midi_note_off(cycles, chan))
-				return 1;
+			midi_note_off(cycles, chan);
 
 			if (new_note < 0 || new_note >= 0x80)
 				break;
 
 			if (master[chan]) {
-				if (midi_note_on(cycles, chan, new_note, volume[chan]))
-					return 1;
+				midi_note_on(cycles, chan, new_note, volume[chan]);
 				running[chan] = 1;
 			}
 		} else {
 			if (running[chan]) {
 				if (new_note != note[chan]) {
 					/* portamento: retrigger with new note */
-					if (midi_note_off(cycles, chan))
-						return 1;
+					midi_note_off(cycles, chan);
 
 					if (new_note < 0 || new_note >= 0x80)
 						break;
 
-					if (midi_note_on(cycles, chan, new_note, volume[chan]))
-						return 1;
+					midi_note_on(cycles, chan, new_note, volume[chan]);
 				}
 			}
 		}
@@ -119,8 +110,7 @@ static int midi_io(cycles_t cycles, uint32_t addr, uint8_t val)
 		master[2] = (val & 0x80) == 0x80;
 		if (!master[2] && running[2]) {
 			/* DAC turned off, disable channel */
-			if (midi_note_off(cycles, 2))
-				return 1;
+			midi_note_off(cycles, 2);
 			running[2] = 0;
 		}
 		break;
@@ -132,13 +122,11 @@ static int midi_io(cycles_t cycles, uint32_t addr, uint8_t val)
 				new_note = NOTE(2048 - div[chan]) + 21;
 				if (new_note < 0 || new_note >= 0x80)
 					break;
-				if (midi_note_on(cycles, 2, new_note, volume[2]))
-					return 1;
+				midi_note_on(cycles, 2, new_note, volume[2]);
 			}
 		} else {
 			/* volume set to 0, stop note (if any) */
-			if (midi_note_off(cycles, 2))
-				return 1;
+			midi_note_off(cycles, 2);
 		}
 		break;
 	case 0xff25:
@@ -161,14 +149,13 @@ static int midi_io(cycles_t cycles, uint32_t addr, uint8_t val)
 				volume[chan] = 0;
 				running[chan] = 0;
 				master[chan] = 1;
-				if (midi_note_off(cycles, 2))
-					return 1;
+				midi_note_off(cycles, 2);
 			}
 		}
 		break;
 	}
 
-	return 0;
+	return midi_file_error();
 }
 
 static int midi_step(cycles_t cycles, const struct gbs_channel_status status[]) {

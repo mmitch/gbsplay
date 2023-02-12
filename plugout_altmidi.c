@@ -35,16 +35,13 @@ static int midi_step(cycles_t cycles, const struct gbs_channel_status status[])
 			if (new_playing) {
 				new_note = NOTE(ch->div_tc) + 21;
 				if (new_note != note[c]) {
-					if (midi_note_off(cycles, c))
-						return 1;
+					midi_note_off(cycles, c);
 					if (new_note < 0 || new_note >= 0x80)
 						continue;
-					if (midi_note_on(cycles, c, new_note, volume[c]))
-						return 1;
+					midi_note_on(cycles, c, new_note, volume[c]);
 				}
 			} else {
-				if (midi_note_off(cycles, c))
-					return 1;
+				midi_note_off(cycles, c);
 				playing[c] = 0;
 			}
 		} else {
@@ -52,15 +49,14 @@ static int midi_step(cycles_t cycles, const struct gbs_channel_status status[])
 				new_note = NOTE(ch->div_tc) + 21;
 				if (new_note < 0 || new_note >= 0x80)
 					continue;
-				if (midi_note_on(cycles, c, new_note, volume[c]))
-					return 1;
+				midi_note_on(cycles, c, new_note, volume[c]);
 				playing[c] = 1;
 			}
 		}
 		
 	}
-	
-	return 0;
+
+	return midi_file_error();
 }
 
 static int midi_io(cycles_t cycles, uint32_t addr, uint8_t val)
@@ -81,8 +77,7 @@ static int midi_io(cycles_t cycles, uint32_t addr, uint8_t val)
 	case 0xff1e:
 		/* Channel start trigger */
 		if ((val & 0x80) == 0x80) {
-			if (midi_note_off(cycles, chan))
-				return 1;
+			midi_note_off(cycles, chan);
 			playing[chan] = 0;
 		}
 		break;
@@ -107,7 +102,7 @@ static int midi_io(cycles_t cycles, uint32_t addr, uint8_t val)
 		
 	}
 
-	return 0;
+	return midi_file_error();
 }
 
 const struct output_plugin plugout_altmidi = {
