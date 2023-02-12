@@ -66,7 +66,7 @@ static long vgm_open(enum plugout_endian *endian, long rate, long *buffer_bytes)
 static int vgm_open_file(int subsong) {
 	vgmfile = file_open("vgm", subsong);
 
-	if(vgmfile == NULL) {
+	if (vgmfile == NULL) {
 		fprintf(stderr, "Can't open output file: %s\n", strerror(errno));
 		return -1;
 	}
@@ -88,8 +88,8 @@ static int vgm_close_file(void) {
 }
 
 static int vgm_skip(int subsong) {
-	if(vgmfile) {
-		if(vgm_close_file()) {
+	if (vgmfile) {
+		if (vgm_close_file()) {
 			return 1;
 		};
 	}
@@ -115,8 +115,8 @@ static int vgm_io(cycles_t cycles, uint32_t addr, uint8_t val) {
 
 	/* write calculated sample delay commands in chunks of <= 65535 samples.
 	   use single-byte delay shortcut command on 1..16 sample delays. */
-	while(vgm_sample_diff > 0) {
-		if(vgm_sample_diff < 17) {
+	while (vgm_sample_diff > 0) {
+		if (vgm_sample_diff < 17) {
 			fputc(VGM_CMD_WAITSAMPLES_SHORT | (vgm_sample_diff - 1), vgmfile);
 		} else {
 			fpack(vgmfile, "<bw",
@@ -129,7 +129,7 @@ static int vgm_io(cycles_t cycles, uint32_t addr, uint8_t val) {
 	}
 
 	/* dump the register write if register is valid for VGM dump. */
-	if(addr >= 0xff10) {
+	if (addr >= 0xff10) {
 		vgmreg = addr - 0xff10;
 
 		fpack(vgmfile, "<bbb", VGM_CMD_DMGWRITE, vgmreg, val);
@@ -141,7 +141,7 @@ static int vgm_io(cycles_t cycles, uint32_t addr, uint8_t val) {
 }
 
 static void vgm_close(void) {
-	if(vgmfile) {
+	if (vgmfile) {
 		vgm_close_file();
 	}
 }

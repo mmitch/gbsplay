@@ -18,7 +18,7 @@
 #include "filewriter.h"
 #include "plugout.h"
 
-static uint8_t blank_hdr[44] = { 0 };
+static const uint8_t blank_hdr[44];
 
 static long sample_rate;
 static FILE* file = NULL;

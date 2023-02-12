@@ -246,7 +246,7 @@ static long chvol(const struct gbhw_channel channels[], long ch)
 
 
 static void map_channel_status(const struct gbhw_channel from[], struct gbs_channel_status to[]) {
-	for(long i = 0; i < 4; i++) {
+	for (long i = 0; i < 4; i++) {
 		to[i].mute = from[i].mute;
 		to[i].vol = chvol(from, i);
 		to[i].div_tc = from[i].div_tc;
