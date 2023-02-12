@@ -518,6 +518,49 @@ test: gbsplay $(tests) test_gbs
 		echo "  Got:      $$MD5" ; \
 		exit 1; \
 	fi
+	$(Q)MD5=`LD_LIBRARY_PATH=.:$${LD_LIBRARY_PATH-} $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -E l -o wav $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null; cat gbsplay-1.wav | (md5sum || md5 -r) | cut -f1 -d\ `; \
+	EXPECT="2a23becdf414e387e6b84cfbf5528136"; \
+	if [ "$$MD5" = "$$EXPECT" ]; then \
+		echo "WAV output ok"; \
+	else \
+		echo "WAV output failed"; \
+		echo "  Expected: $$EXPECT"; \
+		echo "  Got:      $$MD5" ; \
+		exit 1; \
+	fi
+	$(Q)rm gbsplay-1.wav
+	$(Q)MD5=`LD_LIBRARY_PATH=.:$${LD_LIBRARY_PATH-} $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -E l -o vgm $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null; cat gbsplay-1.vgm | (md5sum || md5 -r) | cut -f1 -d\ `; \
+	EXPECT="d00e08025048d6831caffafa3d5b88c6"; \
+	if [ "$$MD5" = "$$EXPECT" ]; then \
+		echo "VGM output ok"; \
+	else \
+		echo "VGM output failed"; \
+		echo "  Expected: $$EXPECT"; \
+		echo "  Got:      $$MD5" ; \
+		exit 1; \
+	fi
+	$(Q)rm gbsplay-1.vgm
+	$(Q)MD5=`LD_LIBRARY_PATH=.:$${LD_LIBRARY_PATH-} $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -E l -o midi $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null; cat gbsplay-1.mid | (md5sum || md5 -r) | cut -f1 -d\ `; \
+	EXPECT="d750af6c0b50a32802fb0bab67b8892f"; \
+	if [ "$$MD5" = "$$EXPECT" ]; then \
+		echo "MIDI output ok"; \
+	else \
+		echo "MIDI output failed"; \
+		echo "  Expected: $$EXPECT"; \
+		echo "  Got:      $$MD5" ; \
+		exit 1; \
+	fi
+	$(Q)MD5=`LD_LIBRARY_PATH=.:$${LD_LIBRARY_PATH-} $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -E l -o altmidi $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null; cat gbsplay-1.mid | (md5sum || md5 -r) | cut -f1 -d\ `; \
+	EXPECT="d750af6c0b50a32802fb0bab67b8892f"; \
+	if [ "$$MD5" = "$$EXPECT" ]; then \
+		echo "alternate MIDI output ok"; \
+	else \
+		echo "alterante MIDI output failed"; \
+		echo "  Expected: $$EXPECT"; \
+		echo "  Got:      $$MD5" ; \
+		exit 1; \
+	fi
+	$(Q)rm gbsplay-1.mid
 
 $(gen_impulse_h_bin): $(objs_gen_impulse_h)
 	$(HOSTCC) -o $(gen_impulse_h_bin) $(objs_gen_impulse_h) -lm
