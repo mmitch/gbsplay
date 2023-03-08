@@ -149,7 +149,7 @@ static int midi_io(cycles_t cycles, uint32_t addr, uint8_t val)
 				volume[chan] = 0;
 				running[chan] = 0;
 				master[chan] = 1;
-				midi_note_off(cycles, 2);
+				midi_note_off(cycles, chan);
 			}
 		}
 		break;
