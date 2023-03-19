@@ -48,10 +48,10 @@ typedef uint64_t cycles_t;
 #define TEXTDOMAIN "gbsplay"
 #define N_(x) x
 
-#define LN2 .69314718055994530941
-#define MAGIC 5.78135971352465960412
-#define FREQ(x) (262144 / (x))
-#define NOTE(x) ((long)((log(FREQ(x))/LN2 - MAGIC)*12 + .2))
+#define A1HZ 55.
+#define A1MIDI 33
+#define FREQ(x) (65536. / (x))
+#define NOTE(x) (lround(log2(FREQ(x)/A1HZ)*12)+A1MIDI)
 
 #if USE_I18N == 1
 

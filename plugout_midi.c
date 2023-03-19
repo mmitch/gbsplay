@@ -41,7 +41,7 @@ static int midi_io(cycles_t cycles, uint32_t addr, uint8_t val)
 		if (volume[chan]) {
 			/* volume set to >0, restart current note */
 			if (running[chan] && !note[chan]) {
-				new_note = NOTE(2048 - div[chan]) + 21;
+				new_note = NOTE(2048 - div[chan]);
 				if (new_note < 0 || new_note >= 0x80)
 					break;
 				midi_note_on(cycles, chan, new_note, volume[chan]);
@@ -58,7 +58,7 @@ static int midi_io(cycles_t cycles, uint32_t addr, uint8_t val)
 		div[chan] |= val;
 
 		if (running[chan]) {
-			new_note = NOTE(2048 - div[chan]) + 21;
+			new_note = NOTE(2048 - div[chan]);
 
 			if (new_note != note[chan]) {
 				/* portamento: retrigger with new note */
@@ -78,7 +78,7 @@ static int midi_io(cycles_t cycles, uint32_t addr, uint8_t val)
 		div[chan] &= 0x00ff;
 		div[chan] |= ((long) (val & 7)) << 8;
 
-		new_note = NOTE(2048 - div[chan]) + 21;
+		new_note = NOTE(2048 - div[chan]);
 
 		/* Channel start trigger */
 		if ((val & 0x80) == 0x80) {
@@ -119,7 +119,7 @@ static int midi_io(cycles_t cycles, uint32_t addr, uint8_t val)
 		if (volume[2]) {
 			/* volume set to >0, restart current note */
 			if (running[2] && !note[2]) {
-				new_note = NOTE(2048 - div[chan]) + 21;
+				new_note = NOTE(2048 - div[chan]);
 				if (new_note < 0 || new_note >= 0x80)
 					break;
 				midi_note_on(cycles, 2, new_note, volume[2]);

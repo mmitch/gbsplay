@@ -36,7 +36,7 @@ static long getnote(long div)
 	long n = 0;
 
 	if (div>0) {
-		n = NOTE(div);
+		n = NOTE(div) - 9;
 	}
 
 	if (n < 0) {
