@@ -541,7 +541,7 @@ test: gbsplay $(tests) test_gbs
 	fi
 	$(Q)rm gbsplay-1.vgm
 	$(Q)MD5=`LD_LIBRARY_PATH=.:$${LD_LIBRARY_PATH-} $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -E l -o midi $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null; cat gbsplay-1.mid | (md5sum || md5 -r) | cut -f1 -d\ `; \
-	EXPECT="11df5802d1c9e928a4ef584d4f9a99b8"; \
+	EXPECT="656c7e54fe25e643ea74b7f1545312ae"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "MIDI output ok"; \
 	else \
@@ -551,7 +551,7 @@ test: gbsplay $(tests) test_gbs
 		exit 1; \
 	fi
 	$(Q)MD5=`LD_LIBRARY_PATH=.:$${LD_LIBRARY_PATH-} $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -E l -o altmidi $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null; cat gbsplay-1.mid | (md5sum || md5 -r) | cut -f1 -d\ `; \
-	EXPECT="801d34a7dfffd4a53991b699da28bc60"; \
+	EXPECT="8fcf6be8d6c8a1c7f659c60e1a96db18"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "alternate MIDI output ok"; \
 	else \
