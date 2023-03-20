@@ -33,7 +33,7 @@ static int midi_step(cycles_t cycles, const struct gbs_channel_status status[])
 
 		if (playing[c]) {
 			if (new_playing) {
-				new_note = NOTE(ch->div_tc);
+				new_note = NOTE(ch->div_tc, c);
 				if (new_note != note[c]) {
 					midi_note_off(cycles, c);
 					if (new_note < 0 || new_note >= 0x80)
@@ -46,7 +46,7 @@ static int midi_step(cycles_t cycles, const struct gbs_channel_status status[])
 			}
 		} else {
 			if (new_playing) {
-				new_note = NOTE(ch->div_tc);
+				new_note = NOTE(ch->div_tc, c);
 				if (new_note < 0 || new_note >= 0x80)
 					continue;
 				midi_note_on(cycles, c, new_note, volume[c]);

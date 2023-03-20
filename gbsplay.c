@@ -31,12 +31,12 @@ long redraw = false;
 static void printstatus(struct gbs *gbs);
 static void printinfo();
 
-static long getnote(long div)
+static long getnote(long div, long ch)
 {
 	long n = 0;
 
 	if (div>0) {
-		n = NOTE(div) - 9;
+		n = NOTE(div, ch);
 	}
 
 	if (n < 0) {
@@ -148,7 +148,7 @@ static char *notestring(const struct gbs_status *status, long ch)
 
 	if (status->ch[ch].vol == 0) return "---";
 
-	n = getnote(status->ch[ch].div_tc);
+	n = getnote(status->ch[ch].div_tc, ch);
 	if (ch != 3) return &notelookup[4*n];
 	else return "nse";
 }
