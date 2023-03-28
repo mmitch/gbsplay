@@ -140,7 +140,7 @@ plugout_ldflags += -laudio $(libaudio_flags)
 endif
 ifeq ($(plugout_sdl),yes)
 plugout_objs += plugout_sdl.o
-plugout_ldflags += -lSDL2
+plugout_ldflags += $(libSDL2_flags)
 endif
 ifeq ($(plugout_stdout),yes)
 plugout_objs += plugout_stdout.o

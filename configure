@@ -847,14 +847,25 @@ if [ "$use_sdl" != no ]; then
         sdl2_include_path="${sdl2_include_path#*-I}"
         sdl2_include_path="${sdl2_include_path%% -*}"
     else
-        sdl2_include_path='/usr/include/SDL2 /usr/local/include/SDL2 /opt/local/include/SDL2'
+        sdl2_include_path='/usr/include/SDL2 /usr/local/include/SDL2 /opt/local/include/SDL2 /opt/homebrew/include/SDL2'
     fi
-        
+
     check_include SDL.h "$sdl2_include_path" "#define SDL_MAIN_HANDLED"
     if [ "$have_SDL_h" = yes ]; then
         if [ "$include_SDL_h_path" != ' ' ]; then
             append_nodupe CFLAGS "-I$include_SDL_h_path"
         fi
+        if command -v sdl2-config >/dev/null; then
+            sdl2_lib_path="$(sdl2-config --libs)"
+            sdl2_lib_path="${sdl2_lib_path#*-L}"
+            sdl2_lib_path="${sdl2_lib_path%% -*}"
+        else
+            sdl2_lib_path="/usr/lib /usr/local/lib /opt/local/lib /opt/homebrew/lib"
+        fi
+        check_libs SDL2 "" "$sdl2_lib_path" <<EOF
+#include <SDL.h>
+int main(int argc, char **argv) { SDL_Init(0); return 0; }
+EOF
         use_sdl=yes
     fi
 
@@ -1268,6 +1279,7 @@ use_verbosebuild
 windows_build
 windows_libprefix
 libaudio_flags
+libSDL2_flags
 __EOF__
     echo plugout_alsa := $use_alsa
     echo plugout_devdsp := $use_devdsp
