@@ -159,6 +159,62 @@ void gbs_cycle_loop_mode(struct gbs* const gbs)
 	}
 }
 
+static int wave_autocorrelate(uint8_t wave[32], int ofs)
+{
+	int i, sum = 0;
+
+	for (i=0; i<32; i++) {
+		sum += (int)wave[i] * (int)wave[(i+ofs) % 32];
+	}
+
+	return sum;
+}
+
+static int wave_scalefactor(const struct gbs* const gbs)
+{
+	static const uint8_t offsets[] = {
+		31, /* offset 1 instead of direct self-correlation, this simplifies the algorithm */
+		16, /* best correlation offset if pattern repeats two times */
+		8,  /* test for pattern repeating four times */
+		4,  /* eight times */
+		2,  /* sixteen times */
+		/* thirty-two would be a DC voltage */
+	};
+	uint8_t wave[32];
+	int i, imax = 0, summax = 0;
+	/* Read waveform ram */
+	for (i=0; i<16; i++) {
+		uint8_t b = gbs_io_peek(gbs, 0xff30+i);
+		wave[2*i] = b >> 4;
+		wave[2*i+1] = b & 0xf;
+	}
+	/* Find best autocorrelation, most likely one of the first two */
+	for (i=0; i<ARRAY_SIZE(offsets); i++) {
+		int sum = wave_autocorrelate(wave, offsets[i]);
+		if (sum > summax) {
+			imax = i;
+			summax = sum;
+		}
+	}
+	return imax;
+}
+
+
+/* FIXME: Clean up the api and make public? */
+static int gbs_midi_note(const struct gbs* const gbs, long div_tc, int ch)
+{
+	int note = NOTE(div_tc, ch);
+	if (ch == 2) {
+		// Scale by scalefactor octaves:
+		// 0: no repetitions, keep as is
+		// 1: repeated twice, one octave higher
+		// 2: repeated four times, two octaves higher
+		// ...
+		note += wave_scalefactor(gbs) * 12;
+	}
+	return note;
+}
+
 void gbs_configure_channels(struct gbs* const gbs, long mute_0, long mute_1, long mute_2, long mute_3) {
 	gbs->gbhw.ch[0].mute = mute_0;
 	gbs->gbhw.ch[1].mute = mute_1;
@@ -1270,4 +1326,5 @@ struct gbs_internal_api gbs_internal_api = {
 	.get_bootrom = gbs_get_bootrom,
 	.write_rom = gbs_write_rom,
 	.print_info = gbs_print_info,
+	.midi_note = gbs_midi_note,
 };

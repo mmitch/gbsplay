@@ -15,6 +15,7 @@
 
 #include "player.h"
 #include "terminal.h"
+#include "gbs_internal.h"
 
 /* lookup tables */
 static char notelookup[4*MAXOCTAVE*12];
@@ -31,20 +32,6 @@ long redraw = false;
 /* forward declarations */
 static void printstatus(struct gbs *gbs);
 static void printinfo();
-
-/* Returns the current note, offset from midi note so that 0 is C0 */
-static long getnote(long div, long ch)
-{
-	long n = 0;
-
-	if (div>0) {
-		n = NOTE(div, ch) - C0MIDI;
-	}
-
-	/* range checking is done in notestring below */
-
-	return n;
-}
 
 /* Pre-generates "tracker-style" 3-character representations of the
  * note that is playing, covering everying from "C-0" to "B-9". */
@@ -142,8 +129,9 @@ static void handleuserinput(struct gbs *gbs)
 }
 
 // TODO: only pass struct gbhw_channnel instead of struct gbhw?
-static char *notestring(const struct gbs_status *status, long ch)
+static char *notestring(struct gbs *gbs, long ch)
 {
+	const struct gbs_status *status = gbs_get_status(gbs);
 	long idx;
 
 	if (status->ch[ch].mute) return "-M-";
@@ -152,7 +140,7 @@ static char *notestring(const struct gbs_status *status, long ch)
 
 	if (ch == 3) return "nse";
 
-	idx = 4*getnote(status->ch[ch].div_tc, ch);
+	idx = 4*(gbs_internal_api.midi_note(gbs, status->ch[ch].div_tc, ch) - C0MIDI);
 	if (idx < 0 || idx >= sizeof(notelookup)) return "rge";
 
 	return &notelookup[idx];
@@ -216,10 +204,10 @@ static void printstatus(struct gbs *gbs)
 	       time.played_min, time.played_sec, time.total_min, time.total_sec);
 	if (verbosity>2) {
 		printf("  %s %s  %s %s  %s %s  %s %s  [%s|%s]\n",
-		       notestring(status, 0), volstring(status->ch[0].vol),
-		       notestring(status, 1), volstring(status->ch[1].vol),
-		       notestring(status, 2), volstring(status->ch[2].vol),
-		       notestring(status, 3), volstring(status->ch[3].vol),
+		       notestring(gbs, 0), volstring(status->ch[0].vol),
+		       notestring(gbs, 1), volstring(status->ch[1].vol),
+		       notestring(gbs, 2), volstring(status->ch[2].vol),
+		       notestring(gbs, 3), volstring(status->ch[3].vol),
 		       reverse_vol(volstring(status->lvol/1024)),
 		       volstring(status->rvol/1024));
 	} else {
