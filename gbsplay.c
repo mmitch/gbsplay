@@ -31,12 +31,12 @@ long redraw = false;
 static void printstatus(struct gbs *gbs);
 static void printinfo();
 
-static long getnote(long div)
+static long getnote(long div, long ch)
 {
 	long n = 0;
 
 	if (div>0) {
-		n = NOTE(div);
+		n = NOTE(div, ch);
 	}
 
 	if (n < 0) {
@@ -55,13 +55,15 @@ static void precalc_notes(void)
 		char *s = notelookup + 4*i;
 		long n = i % 12;
 
-		s[2] = '0' + i / 12;
-		n += (n > 2) + (n > 7);
-		s[0] = 'A' + (n >> 1);
-		if (n & 1) {
+		// lowest possible frequency is 2^17/((2^11-1)*2)Hz,
+		// i.e. C1; far from producing octave '/'
+		s[2] = '0' + i / 12 - 1;
+		n += (n > 4);
+		s[0] = 'A' + (((n >> 1) + 'C' - 'A') % ('H' - 'A'));
+		if (n % 2) {
 			s[1] = '#';
 		} else {
-			s[1] = '-';
+			s[1] = ' ';
 		}
 	}
 }
@@ -146,7 +148,7 @@ static char *notestring(const struct gbs_status *status, long ch)
 
 	if (status->ch[ch].vol == 0) return "---";
 
-	n = getnote(status->ch[ch].div_tc);
+	n = getnote(status->ch[ch].div_tc, ch);
 	if (ch != 3) return &notelookup[4*n];
 	else return "nse";
 }
