@@ -32,6 +32,7 @@ long redraw = false;
 static void printstatus(struct gbs *gbs);
 static void printinfo();
 
+/* Returns the current note, offset from midi note so that 0 is C0 */
 static long getnote(long div, long ch)
 {
 	long n = 0;
@@ -46,7 +47,7 @@ static long getnote(long div, long ch)
 }
 
 /* Pre-generates "tracker-style" 3-character representations of the
- * note that is playing, covering everying from "A-0" to "G#9". */
+ * note that is playing, covering everying from "C-0" to "B-9". */
 static void precalc_notes(void)
 {
 	long i;
