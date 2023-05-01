@@ -36,35 +36,33 @@ static long getnote(long div, long ch)
 	long n = 0;
 
 	if (div>0) {
-		n = NOTE(div, ch);
+		n = NOTE(div, ch) - C0MIDI;
 	}
 
-	if (n < 0) {
-		n = 0;
-	} else if (n >= MAXOCTAVE*12) {
-		n = MAXOCTAVE-1;
-	}
+	/* range checking is done in notestring below */
 
 	return n;
 }
 
+/* Pre-generates "tracker-style" 3-character representations of the
+ * note that is playing, covering everying from "A-0" to "G#9". */
 static void precalc_notes(void)
 {
 	long i;
 	for (i=0; i<MAXOCTAVE*12; i++) {
 		char *s = notelookup + 4*i;
+		static const char basenote[] = "C-C#D-D#E-F-F#G-G#A-A#B-";
 		long n = i % 12;
 
-		// lowest possible frequency is 2^17/((2^11-1)*2)Hz,
-		// i.e. C1; far from producing octave '/'
-		s[2] = '0' + i / 12 - 1;
-		n += (n > 4);
-		s[0] = 'A' + (((n >> 1) + 'C' - 'A') % ('H' - 'A'));
-		if (n % 2) {
-			s[1] = '#';
-		} else {
-			s[1] = ' ';
-		}
+		// The lowest possible frequency is 2^17/((2^11-1)*2)Hz,
+		// i.e. 32.02Hz (a bit below C1), so there is no risk of
+		// underflowing the octave character to below 0 here.
+		// We would overflow from '9' into ':' above note B-9.
+		// Since this note is above human hearing at 15804Hz
+		// we don't care too much here...
+		s[0] = basenote[2*n];
+		s[1] = basenote[2*n+1];
+		s[2] = '0' + i / 12;
 	}
 }
 
@@ -142,15 +140,18 @@ static void handleuserinput(struct gbs *gbs)
 // TODO: only pass struct gbhw_channnel instead of struct gbhw?
 static char *notestring(const struct gbs_status *status, long ch)
 {
-	long n;
+	long idx;
 
 	if (status->ch[ch].mute) return "-M-";
 
 	if (status->ch[ch].vol == 0) return "---";
 
-	n = getnote(status->ch[ch].div_tc, ch);
-	if (ch != 3) return &notelookup[4*n];
-	else return "nse";
+	if (ch == 3) return "nse";
+
+	idx = 4*getnote(status->ch[ch].div_tc, ch);
+	if (idx < 0 || idx >= sizeof(notelookup)) return "rge";
+
+	return &notelookup[idx];
 }
 
 static char *volstring(long v)

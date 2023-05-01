@@ -50,9 +50,10 @@ typedef uint64_t cycles_t;
 
 #define A1HZ 55.
 #define A1MIDI 33
+#define C0MIDI 12 /* 16.35Hz */
 /* wave channel produces half the frequency */
-#define FREQ(x,c) (131072. / ((x)<<((c)>1)))
-#define NOTE(x,c) (lround(log2(FREQ(x,c)/A1HZ)*12)+A1MIDI)
+#define FREQ(x,ch) (131072. / ((x)<<((ch)>1)))
+#define NOTE(x,ch) (lround(log2(FREQ(x,ch)/A1HZ)*12)+A1MIDI)
 
 #if USE_I18N == 1
 
