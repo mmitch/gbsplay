@@ -51,8 +51,8 @@ static long getnote(long div, long ch)
 static void precalc_notes(void)
 {
 	long i;
-	assert(FREQTONOTE(A1HZ) == A1MIDI);
 	assert(FREQTONOTE(C0HZ) == C0MIDI);
+	assert(NOTE(C6GB, 0) == C6MIDI);
 	for (i=0; i<MAXOCTAVE*12; i++) {
 		char *s = notelookup + 4*i;
 		static const char basenote[] = "C-C#D-D#E-F-F#G-G#A-A#B-";

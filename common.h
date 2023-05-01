@@ -48,13 +48,14 @@ typedef uint64_t cycles_t;
 #define TEXTDOMAIN "gbsplay"
 #define N_(x) x
 
-#define A1HZ 55.
-#define A1MIDI 33
 #define C0HZ 16.35
 #define C0MIDI 12
+#define C6GBRAW 1923 /* First note in gameboy startup sound, 1048.576Hz (3.4 cents too high) */
+#define C6GB (2048 - C6GBRAW)
+#define C6MIDI 84 /* 1046.50Hz in equal temperament */
 /* wave channel produces half the frequency */
-#define FREQ(x,ch) (65536. / ((x)<<((ch)>1)))
-#define FREQTONOTE(f) (lround(log2((f)/A1HZ)*12)+A1MIDI)
+#define FREQ(x,ch) (131072. / ((x)<<((ch)>1)))
+#define FREQTONOTE(f) (lround(log2((f)/C0HZ)*12)+C0MIDI)
 #define NOTE(x,ch) FREQTONOTE(FREQ(x,ch))
 
 #if USE_I18N == 1
