@@ -21,6 +21,7 @@
 #define ASSERT_ARRAY_EQUAL(fmt, a, b) do { \
 	int pass = 1; \
 	int i; \
+	char *cmp; \
 	for (i=0; i<sizeof(a)/sizeof(*(a)); i++) { \
 		if ((a)[i] == (b)[i]) \
 			continue; \
@@ -31,9 +32,11 @@
 		return; \
 	fprintf(stderr, "FAIL\nTest failed at %s:%d\n", __FILE__, __LINE__); \
 	for (i=0; i<sizeof(a)/sizeof(*(a)); i++) { \
-		/* if ((a)[i] == (b)[i]) \
-			continue; */ \
-		fprintf(stderr, "%d: "fmt" != "fmt"\n", i, (a)[i], (b)[i]); \
+		if ((a)[i] == (b)[i]) \
+			cmp = "=="; \
+		else \
+			cmp = "!="; \
+		fprintf(stderr, "%4d: "fmt" %s "fmt"\n", i, (a)[i], cmp, (b)[i]); \
 	} \
 	exit(1); \
 } while(0)

@@ -102,7 +102,7 @@ test void test_gen_impulsetab()
 	};
 	int32_t *pulsetab = gen_impulsetab(w_shift, n_shift, cutoff);
 
-	ASSERT_ARRAY_EQUAL("%d", reference, pulsetab);
+	ASSERT_ARRAY_EQUAL("%8d", reference, pulsetab);
 }
 TEST(test_gen_impulsetab);
 TEST_EOF;

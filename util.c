@@ -137,7 +137,7 @@ test void test_spack()
 
 	int l = spack(got, "{ }<bwdq{1}>bwdq", b, w, d, q, b, w, d, q);
 
-	ASSERT_ARRAY_EQUAL("%d", want, got);
+	ASSERT_ARRAY_EQUAL("%2d", want, got);
 	ASSERT_EQUAL("%d", (int)sizeof(want), l);
 }
 TEST(test_spack);
