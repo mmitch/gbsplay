@@ -39,7 +39,7 @@ jobs:
             cygwin: true
             packages: gcc-core
             plugouts: dsound devdsp
-            shell: C:\cygwin\bin\bash.exe '{0}'
+            shell: C:\cygwin\bin\bash.exe -o igncr '{0}'
 
     defaults:
       run:
@@ -52,7 +52,7 @@ jobs:
       uses: msys2/setup-msys2@v2
       with:
         msystem: ${{ matrix.type }}
-        install: git base-devel ${{ matrix.packages }} libintl gettext-devel zlib-devel
+        install: git base-devel ${{ matrix.packages }} libintl gettext-devel zlib-devel dos2unix
         release: false
         update: false
     - if: ${{ matrix.cygwin }}
@@ -60,6 +60,10 @@ jobs:
       uses: cygwin/cygwin-install-action@master
       with:
         packages: git make ${{ matrix.packages }} gettext-devel zlib-devel
+    - if: ${{ matrix.cygwin }}
+      name: Fix linefeeds under Cygwin
+      run: |
+        dos2unix Makefile configure *.sh
     - name: Build and test
       env:
         CONFIGURE_FLAGS: ${{ matrix.flags }} --enable-verbosebuild
