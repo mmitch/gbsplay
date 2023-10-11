@@ -17,32 +17,49 @@ jobs:
 
     strategy:
       matrix:
-        msystem: [MSYS, MINGW64, MINGW32]
+        type: [MSYS, MINGW64, MINGW32, CYGWIN]
         flags: ['', '--enable-sharedlibgbs']
         include:
-          - msystem: MSYS
+          - type: MSYS
+            msystem: true
             packages: gcc
             plugouts: dsound devdsp
-          - msystem: MINGW64
+            shell: msys2 {0}
+          - type: MINGW64
+            msystem: true
             packages: mingw-w64-x86_64-toolchain mingw-w64-x86_64-SDL2
             plugouts: dsound sdl
-          - msystem: MINGW32
+            shell: msys2 {0}
+          - type: MINGW32
+            msystem: true
             packages: mingw-w64-i686-toolchain mingw-w64-i686-SDL2
             plugouts: dsound sdl
+            shell: msys2 {0}
+          - type: CYGWIN
+            cygwin: true
+            packages: gcc-core
+            plugouts: dsound devdsp
+            shell: C:\cygwin\bin\bash.exe '{0}'
 
     defaults:
       run:
-        shell: msys2 {0}
+        shell: ${{ matrix.shell }}
 
     steps:
     - uses: actions/checkout@v4
-    - name: Setup MSYS2
+    - if: ${{ matrix.msystem }}
+      name: Setup MSYS2
       uses: msys2/setup-msys2@v2
       with:
-        msystem: ${{ matrix.msystem }}
+        msystem: ${{ matrix.type }}
         install: git base-devel ${{ matrix.packages }} libintl gettext-devel zlib-devel
         release: false
         update: false
+    - if: ${{ matrix.cygwin }}
+      name: Setup Cygwin
+      uses: cygwin/cygwin-install-action@master
+      with:
+        packages: git make ${{ matrix.packages }} gettext-devel zlib-devel
     - name: Build and test
       env:
         CONFIGURE_FLAGS: ${{ matrix.flags }} --enable-verbosebuild
