@@ -131,9 +131,9 @@ test void test_spack()
 	                   0x31, 1, 0, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 4 };
 	uint8_t got[sizeof(want)] = { 0 };
 	uint8_t b = 1;
-	uint8_t w = 2;
-	uint8_t d = 3;
-	uint8_t q = 4;
+	uint16_t w = 2;
+	uint32_t d = 3;
+	uint64_t q = 4;
 
 	int l = spack(got, "{ }<bwdq{1}>bwdq", b, w, d, q, b, w, d, q);
 
