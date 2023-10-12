@@ -51,7 +51,6 @@ endif
 endif
 
 TEST_WRAPPER =
-XMMSPREFIX  :=
 DESTDIR     :=
 
 # Update paths with user-provided DESTDIR
@@ -65,8 +64,6 @@ mimedir      := $(DESTDIR)$(mimedir)
 appdir       := $(DESTDIR)$(appdir)
 includedir   := $(DESTDIR)$(includedir)
 pkgconfigdir := $(DESTDIR)$(pkgconfigdir)
-
-xmmsdir     := $(DESTDIR)$(XMMSPREFIX)$(XMMS_INPUT_PLUGIN_DIR)
 
 man1dir     := $(mandir)/man1
 man3dir     := $(mandir)/man3
@@ -107,7 +104,6 @@ objs_libgbspic     := gbcpu.lo gbhw.lo mapper.lo gbs.lo crc32.lo
 objs_libgbs        := gbcpu.o  gbhw.o  mapper.o  gbs.o  crc32.o
 objs_gbs2gb        := gbs2gb.o
 objs_gbsinfo       := gbsinfo.o
-objs_gbsxmms       := gbsxmms.lo
 objs_gbsplay       := gbsplay.o  util.o plugout.o player.o cfgparser.o
 objs_xgbsplay      := xgbsplay.o util.o plugout.o player.o cfgparser.o
 objs_test_gbs      := test_gbs.o
@@ -278,10 +274,6 @@ objs_gbsplay += libgbs.a
 objs_gbs2gb += libgbs.a
 objs_gbsinfo += libgbs.a
 objs_test_gbs += libgbs.a
-ifeq ($(build_xmmsplugin),yes)
-objs += $(objs_libgbspic)
-objs_gbsxmms += libgbspic.a
-endif # build_xmmsplugin
 objs_xgbsplay += libgbs.a
 
 libgbs: libgbs.a
@@ -293,11 +285,6 @@ endif # use_sharedlibs
 
 objs += $(objs_gbsplay) $(ojbs_gbs2gb) $(objs_gbsinfo)
 dsts += gbsplay gbs2gb gbsinfo
-
-ifeq ($(build_xmmsplugin),yes)
-objs += $(objs_gbsxmms)
-dsts += gbsxmms.so
-endif
 
 ifeq ($(build_xgbsplay),yes)
 objs += $(objs_xgbsplay)
@@ -375,10 +362,6 @@ install-contrib:
 	install -d $(contribdir)
 	install -m 644 $(contribs) $(contribdir)
 
-install-gbsxmms.so:
-	install -d $(xmmsdir)
-	install -m 644 gbsxmms.so $(xmmsdir)/gbsxmms.so
-
 install-xgbsplay:
 	install -d $(bindir)
 	install -d $(man1dir)
@@ -428,10 +411,6 @@ uninstall-default:
 uninstall-contrib:
 	rm -rf $(contribdir)
 	-rmdir -p $(contribdir)
-
-uninstall-gbsxmms.so:
-	rm -f $(xmmsdir)/gbsxmms.so
-	-rmdir -p $(xmmsdir)
 
 uninstall-xgbsplay:
 	rm -f $(bindir)/$(xgbsplaybin)
@@ -580,9 +559,6 @@ gbsplay: $(objs_gbsplay) libgbs
 	$(BUILDCC) -o $(gbsplaybin) $(objs_gbsplay) $(GBSLDFLAGS) $(GBSPLAYLDFLAGS) -lm
 test_gbs: $(objs_test_gbs) libgbs
 	$(BUILDCC) -o $(test_gbsbin) $(objs_test_gbs) $(GBSLDFLAGS)
-
-gbsxmms.so: $(objs_gbsxmms) libgbspic gbsxmms.so.ver
-	$(BUILDCC) -shared -fpic -Wl,--version-script,$@.ver -o $@ $(objs_gbsxmms) $(GBSLDFLAGS) $(PTHREAD)
 
 xgbsplay: $(objs_xgbsplay) libgbs
 	$(BUILDCC) -o $(xgbsplaybin) $(objs_xgbsplay) $(GBSLDFLAGS) $(XGBSPLAYLDFLAGS) -lm
