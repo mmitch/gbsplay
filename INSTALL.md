@@ -1,0 +1,31 @@
+
+# gbsplay INSTALL instructions
+
+## BASIC INSTRUCTIONS
+
+Run `make`.  This should autoconfigure and build all files.
+
+Run `make install` (as root) to install everything to your system.
+Run`make uninstall` (as root) to remove it afterwards.
+
+Be aware that you need a GNU make!
+So on FreeBSD, you need to run `gmake` instead of `make`.
+
+Note to Solaris users:  
+Solaris `/bin/sh` is not POSIX compatible (`${foo#bar}` and `${foo%bar}` are
+not supported), please change the first line of configure to from `/bin/sh`
+to `/usr/bin/ksh`.
+
+
+### CUSTOMIZING THE INSTALLATION TARGET
+
+To change the installation target, run the configure script manually
+and pass some parameters (see `./configure --help` for a list):
+
+```
+./configure --prefix=/tmp/GBSPLAY
+$ make
+$ make install
+```
+
+Remember to use the same prefix on uninstall!
