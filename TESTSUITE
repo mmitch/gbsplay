@@ -60,30 +60,15 @@ pass index  content
 [ ]  2.3.1      check german translation
 
 
-***  3      xmmsgbs
-
-     3.1      player
-[ ]  3.1.1      check playing
-[ ]  3.1.2      check quit
-[ ]  3.1.3      check pause
-[ ]  3.1.4      check subsong changes
-
-     3.2      track info
-[ ]  3.2.1      check display
-[ ]  3.2.2      check next
-[ ]  3.2.3      check prev
-[ ]  3.2.4      check save
+***  3      build
+[ ]  3.1      check build on i386
+[ ]  3.2      check build on amd_64
+[ ]  3.3      check build on Cygwin
 
 
-***  4      build
-[ ]  4.1      check build on i386
-[ ]  4.2      check build on amd_64
-[ ]  4.3      check build on Cygwin
-
-
-***  5      other
-[ ]  5.1      check HISTORY
-[ ]  5.2      check for git tag
+***  4      other
+[ ]  4.1      check HISTORY
+[ ]  4.2      check for git tag
 
 ---------------------------------------------------------------
 

@@ -22,7 +22,6 @@ EXTRA_INSTALL=
 EXTRA_SRCS=
 EXTRA_UNINSTALL=
 EXTRA_I18NFLAGS=
-XMMS_INPUT_PLUGIN_DIR=
 CC="${CC-gcc}" # use gcc by default
 CONFIGURE_FLAGS="${CONFIGURE_FLAGS- }"
 CFLAGS="${CFLAGS-}"
@@ -531,7 +530,6 @@ Optional Features:
   --enable-verbosebuild  give verbose output during build
 
 Optional Modules:
-  --with-xmmsplugin      build XMMS input plugin
   --with-xgbsplay        build graphical frontend xgbsplay
   --without-contrib      don't install contrib scripts
   --without-test         don't test gbsplay output during build
@@ -556,7 +554,6 @@ EOF
 OPTS=""
 OPTS="${OPTS} build_contrib"
 OPTS="${OPTS} build_test"
-OPTS="${OPTS} build_xmmsplugin"
 OPTS="${OPTS} build_xgbsplay"
 OPTS="${OPTS} use_alsa"
 OPTS="${OPTS} use_debug"
@@ -638,7 +635,6 @@ case "$BUILDOS" in
 esac
 
 ## more defaults
-setdefault build_xmmsplugin no
 setdefault build_xgbsplay no
 setdefault build_contrib yes
 ## disable test when cross-compiling
@@ -969,87 +965,6 @@ else
     have_doxygen=no
 fi
 
-if [ "$build_xmmsplugin" != "no" ]; then
-    ## check for pthread
-
-    PTHREAD=
-    check_include pthread.h
-    if [ "$have_pthread_h" = "yes" ]; then
-        cc_check "checking for Linux flavoured pthread" have_pthread "-lpthread" found no <<EOF
-#include <pthread.h>
-int main(int argc, char **argv)
-{
-    pthread_self();
-    return 0;
-}
-EOF
-        if [ $? -eq 0 ]; then
-            PTHREAD="-lpthread"
-        else
-            cc_check "checking FreeBSD-flavoured pthread" have_pthread "-pthread" found no <<EOF
-#include <pthread.h>
-int main(int argc, char **argv)
-{
-    pthread_self();
-    return 0;
-}
-EOF
-            if [ $? -eq 0 ]; then
-                PTHREAD="-pthread"
-            else
-                echo "no known pthread implementation found!"
-            fi
-        fi
-    fi
-
-    ## check for glib development files
-
-    printf "checking for glib-dev:  "
-    GLIB_CFLAGS=
-    if CONFIG=$(command -v glib-config); then
-        if GLIB_CFLAGS=$(glib-config --cflags); then
-            echo "ok"
-        else
-            echo "error running glib-config --cflags!"
-        fi
-    else
-        echo "glib-config not found!"
-    fi
-
-    ## check for xmms development files
-
-    printf "checking for xmms-dev:  "
-    XMMS_CFLAGS=
-    if CONFIG=$(command -v xmms-config); then
-        if XMMS_CFLAGS=$(xmms-config --cflags); then
-            if XMMS_INPUT_PLUGIN_DIR=$(xmms-config --input-plugin-dir); then
-                echo "ok"
-            else
-                echo "error running xmms-config --input-plugin-dir!"
-            fi
-        else
-            echo "error running xmms-config --cflags!"
-        fi
-    else
-        echo "xmms-config not found!"
-    fi
-else
-    GLIB_CFLAGS=
-    XMMS_CFLAGS=
-    PTHREAD=
-fi
-
-## can XMMS be built?
-
-if [ "$build_xmmsplugin" != "no" ] && [ "$GLIB_CFLAGS" ] && [ "$XMMS_CFLAGS" ] && [ "$XMMS_INPUT_PLUGIN_DIR" ] && [ "$PTHREAD" ]; then
-    append_nodupe CFLAGS $GLIB_CFLAGS $XMMS_CFLAGS
-    EXTRA_INSTALL="$EXTRA_INSTALL install-gbsxmms.so"
-    EXTRA_UNINSTALL="$EXTRA_UNINSTALL uninstall-gbsxmms.so"
-    build_xmmsplugin=yes
-else
-    build_xmmsplugin=no
-fi
-
 ## can xgbsplay be built?
 
 if [ "$build_xgbsplay" != "no" ]; then
@@ -1255,8 +1170,6 @@ EXTRA_INSTALL
 EXTRA_LDFLAGS
 EXTRA_SRCS
 EXTRA_UNINSTALL
-PTHREAD
-XMMS_INPUT_PLUGIN_DIR
 VERSION
 prefix
 exec_prefix
@@ -1275,7 +1188,6 @@ BUILDCC
 HOSTCC
 build_contrib
 build_test
-build_xmmsplugin
 build_xgbsplay
 have_doxygen
 have_xgettext
