@@ -31,8 +31,8 @@ good to go.  At the very least the following is needed:
 
 - a C compiler (we regularly test with both `gcc` and `clang`)
 - the corresponding `binutils`
-- a POSIX compatible shell (eg. `bash`)
 - GNU `make`
+- `bash`
 
 To get the the sources, either clone our repository using
 
@@ -106,4 +106,4 @@ Be aware that you need a GNU make: You need to run `gmake` instead of `make`.
 
 Solaris `/bin/sh` is not POSIX compatible (`${foo#bar}` and `${foo%bar}` are
 not supported), please change the first line of configure to from `/bin/sh`
-to `/usr/bin/ksh`.
+to `/usr/bin/ksh`.  The `Makefile` will need `bash` anyway (`SHELL := bash`).
