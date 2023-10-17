@@ -2,7 +2,7 @@
 gbsplay HISTORY
 
 
-2020/xx/xx  -  unreleased
+2023/xx/xx  -  unreleased
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Bugfixes:
@@ -10,15 +10,28 @@ Bugfixes:
 - gbsplay:
   - fix off-by-one error in gbhw_io_peek (fixes verbose WAVE display)
   - fix sign extension bug in byte swapping (fixes endian change via -E)
-  - fix Windows builds on MSYS2, MINGW32 and MINGW64
-  - fix buffer handling in dsound plugout (fixes choppy and too fast playback)
   - fix newline conversion of binary data (fixes stdout plugout on MINGW)
+  - fix missing sound with ROMs using ugetab's VBlank timing
+  - fix octaves in note display during playback
   - fix typos in manpage
+  - fix hex dump endianess in debug output
+  - fix possible duplicate free() on zlib compressed data
+  - fix subsong change when loop mode was changed during playback
+  - always use 64 bits for cycle counter (fixes overflow issues on MINGW32)
+  - dsound plugout:
+    - fix buffer handling (fixes choppy and too fast playback)
+  - MIDI plugouts:
+    - fix notes getting out of sync from accumulated rounding errors
+    - fix 'sound off' (NR52) to affect all channels instead of channel 2 only
+    - fix octaves of exported notes (not perfect since wave data on channel 3
+      could contain repetitions resulting in higher octaves)
 
 - build process:
   - don't run depend.sh before config.mk is included
   - only enable i18n if it really works
   - only build with -fstack-* protections if they really work
+  - fix Windows builds on MSYS2, MINGW32 and MINGW64
+  - fix library path detection on macOS
 
 Removals:
 
@@ -26,6 +39,9 @@ Removals:
   - remove unmaintained splint annotations
   - remove regparm optimizations
   - remove usleep() usage, use nanosleep() instead (it's more POSIX)
+
+- gbsxmms:
+  - finally remove XMMS plugin sourcecode that has been declared broken in 2008
 
 Enhancements:
 
@@ -37,6 +53,15 @@ Enhancements:
   - add WAV writer plugout
   - add VGM writer plugout
   - support channel mute in MIDI output plugins
+  - suppress unneeded endian changes between player routine and audio plugouts
+  - implement DIV register emulation
+  - add example ROM source using SDCC (see examples/sdcc)
+  - increase impulse data resoultion
+  - loop mode can be changed interactively (use the 'l' key)
+  - display pause status when playback is paused
+  - display '99:99' as remaining time when no subsong timeout is set
+  - enforce minimum subsong timeout when playing actual ROMS
+    (otherwise gbsplay might quit before the bootrom beep is played)
 
 - xgbsplay:
   - add simple X11 frontend; use configure --with-xgbsplay
@@ -44,18 +69,20 @@ Enhancements:
 - build process:
   - depend on bash 3.x for configure script
   - add automated build pipelines for Linux, macOS and
-    Windows (MSYS2, MINGW32 and MINGW64; no CygWin yet)
+    Windows (MSYS2, MINGW32, MINGW64 and CygWin)
     - test for successful builds
     - test plugout configuration
     - test some configure options
     - test install and uninstall targets
     - calculate code coverage
   - use command -v instead of homegrown which replacement
+  - add tests to catch regressions in file writer plugouts
 
 Documentation:
 
-- convert README to Markdown format
+- convert README and INSTALL to Markdown format
 - add shiny build status badges to README.md
+- update INSTALL.md instructions and information
 
 
 2020/06/26  -  0.0.94
