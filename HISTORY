@@ -8,16 +8,11 @@ gbsplay HISTORY
 Bugfixes:
 
 - gbsplay:
-  - fix off-by-one error in gbhw_io_peek (fixes verbose WAVE display)
-  - fix sign extension bug in byte swapping (fixes endian change via -E)
-  - fix newline conversion of binary data (fixes stdout plugout on MINGW)
-  - fix missing sound with ROMs using ugetab's VBlank timing
   - fix octaves in note display during playback
-  - fix typos in manpage
-  - fix hex dump endianess in debug output
-  - fix possible duplicate free() on zlib compressed data
   - fix subsong change when loop mode was changed during playback
-  - always use 64 bits for cycle counter (fixes overflow issues on MINGW32)
+  - fix segfaults on status display for files other than .gbs
+  - don't set up the terminal if stdout is redirected
+  - fix duplicate handling of keystrokes
   - dsound plugout:
     - fix buffer handling (fixes choppy and too fast playback)
   - MIDI plugouts:
@@ -25,6 +20,22 @@ Bugfixes:
     - fix 'sound off' (NR52) to affect all channels instead of channel 2 only
     - fix octaves of exported notes (not perfect since wave data on channel 3
       could contain repetitions resulting in higher octaves)
+  - stdout plugout:
+    - fix newline conversion of binary data on MINGW
+
+- gbs core:
+  - fix envelope volume in cannel retrigger
+  - fix off-by-one error in gbhw_io_peek (fixes verbose WAVE display)
+  - fix sign extension bug in byte swapping (fixes endian change via -E)
+  - fix small memory leak from impulse buffer
+  - fix missing sound with ROMs using ugetab's VBlank timing
+  - fix hex dump endianess in debug output
+  - fix possible duplicate free() on zlib compressed data
+  - always use 64 bits for cycle counter (fixes overflow issues on MINGW32)
+  - free ROM buffer on exit
+
+- libgbs:
+  - install libgbs.h alongside the shared library to make it usable
 
 - build process:
   - don't run depend.sh before config.mk is included
@@ -32,6 +43,10 @@ Bugfixes:
   - only build with -fstack-* protections if they really work
   - fix Windows builds on MSYS2, MINGW32 and MINGW64
   - fix library path detection on macOS
+  - fix SDL2 detection
+
+- documentation:
+  - fix typos in manpage
 
 Removals:
 
@@ -47,24 +62,44 @@ Enhancements:
 
 - gbsplay:
   - add SDL2 plugout
-  - transparent decompression of gzip-compressed files
-  - basic VGM file playback support
   - remove unneeded dsound3d dependency from dsound plugin
   - add WAV writer plugout
   - add VGM writer plugout
   - support channel mute in MIDI output plugins
   - suppress unneeded endian changes between player routine and audio plugouts
-  - implement DIV register emulation
-  - add example ROM source using SDCC (see examples/sdcc)
-  - increase impulse data resoultion
   - loop mode can be changed interactively (use the 'l' key)
   - display pause status when playback is paused
   - display '99:99' as remaining time when no subsong timeout is set
   - enforce minimum subsong timeout when playing actual ROMS
     (otherwise gbsplay might quit before the bootrom beep is played)
+  - allow repetition of single subsongs
+
+- gbs core:
+  - transparent decompression of gzip-compressed files
+  - basic VGM file playback support
+  - implement DIV register emulation
+  - add example ROM source using SDCC (see examples/sdcc)
+  - increase impulse data resolution
+  - support different cartridge types like MBC1 and MBC3 in ROM mapper
+  - don't limit rombank range in the gbs mapper
+  - remove home-grown extended header support for GBS files
+  - add support for dumped ROMs (no controls, first song only)
+
+- libgbs:
+  - clean up libgbs (still ongoing, so no 1.0.0 yet)
+  - support reentrancy to render multiple files simultaneously
+    (test cases to prove this is working are still missing)
+  - generate pgk-config configuration
+  - install API documentation (needs doxygen)
 
 - xgbsplay:
-  - add simple X11 frontend; use configure --with-xgbsplay
+  - add simple X11 frontend (configure --with-xgbsplay)
+  - and replace it by a better looking xcb/cairo frontend
+    (dig through the sources before commit 840f89460 to
+     get the initial X11 frontend)
+
+- gbs2gb:
+  - experimental tool to convert .gbs files to .gb ROMs
 
 - build process:
   - depend on bash 3.x for configure script
@@ -77,12 +112,12 @@ Enhancements:
     - calculate code coverage
   - use command -v instead of homegrown which replacement
   - add tests to catch regressions in file writer plugouts
+  - add verbose build mode (configure --build-verbose)
 
-Documentation:
-
-- convert README and INSTALL to Markdown format
-- add shiny build status badges to README.md
-- update INSTALL.md instructions and information
+- documentation:
+  - update INSTALL.md instructions and information
+  - convert README and INSTALL to Markdown format
+  - add shiny build status badges to README.md
 
 
 2020/06/26  -  0.0.94
