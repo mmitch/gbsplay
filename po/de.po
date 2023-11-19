@@ -1,7 +1,7 @@
 # German translations for gbsplay.
 #
-# Copyright (C) 2003-2020  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
-#                          Christian Garbs <mitch@cgarbs.de>
+# Copyright (C) 2003-2020,2023  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+#                               Christian Garbs <mitch@cgarbs.de>
 #
 # This file is distributed under GNU GPL v1 or, at your option, any later version.
 #
@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-21 23:08+0100\n"
-"PO-Revision-Date: 2020-11-12 21:21+0100\n"
+"POT-Creation-Date: 2023-11-19 15:29+0100\n"
+"PO-Revision-Date: 2023-11-19 16:03+0100\n"
 "Last-Translator: Christian Garbs <mitch@cgarbs.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -57,13 +57,11 @@ msgstr ""
 msgid ""
 "\"%s\" is not a valid endian.\n"
 "\n"
-msgstr ""
-"\"%s\" ist keine gültige Byte-Order.\n"
-"\n"
+msgstr "\"%s\" ist keine gültige Byte-Reihenfolge.\n\n"
 
-#, c-format
+#, c-format, fuzzy
 msgid "%s: Can't create audio flow\n"
-msgstr "%s: Kann keinen audio flow erzeugen\n"
+msgstr "%s: Kann keinen Audio-Flow erzeugen\n"
 
 #, c-format
 msgid "%s: Can't find device with 2 channels\n"
@@ -73,13 +71,13 @@ msgstr "%s: Kann kein Gerät mit 2 Kanälen finden\n"
 msgid "%s: Can't open server: %s\n"
 msgstr "%s: Kann den Server nicht öffnen: %s\n"
 
-#, c-format
+#, c-format, fuzzy
 msgid "%s: Can't set audio elements: %s\n"
-msgstr "%s: Kann audio elements nicht setzen: %s\n"
+msgstr "%s: Kann Audio-Elemente nicht setzen: %s\n"
 
-#, c-format
+#, c-format, fuzzy
 msgid "%s: Can't start audio flow: %s\n"
-msgstr "%s: Kann den audio flow nicht starten: %s\n"
+msgstr "%s: Kann den Audio-Flow nicht starten: %s\n"
 
 #, c-format
 msgid "'%s' expected at %s line %ld char %ld.\n"
@@ -88,19 +86,14 @@ msgstr "'%s' erwartet in %s Zeile %ld Spalte %ld.\n"
 msgid "59.7Hz VBlank\n"
 msgstr "59.7Hz VBlank\n"
 
-msgid "Artist:"
-msgstr "Künstler:"
-
 msgid ""
 "Available output plugins:\n"
 "\n"
-msgstr ""
-"Verfügbare Ausgabemöglichkeiten:\n"
-"\n"
+msgstr "Verfügbare Ausgabemethoden:\n\n"
 
 #, c-format
 msgid "Bad GD3 offset: %08lx\n"
-msgstr "Unzulässiger GD3 offset: %08lx\n"
+msgstr "Unzulässiger GD3-Offset: %08lx\n"
 
 #, c-format
 msgid "Bad data length: %ld\n"
@@ -120,12 +113,6 @@ msgstr "Größer als erlaubtes Maximum (4MiB)"
 #, c-format
 msgid "CRC32:            0x%08lx\n"
 msgstr "CRC32:            0x%08lx\n"
-
-msgid "Cancel"
-msgstr "Abbrechen"
-
-msgid "Copyright:"
-msgstr "Copyright:"
 
 #, c-format
 msgid "Could not init SDL: %s\n"
@@ -187,24 +174,6 @@ msgstr "Konnte SDL-Audiodaten nicht schreiben: %s\n"
 msgid "Default subsong %d is out of range [1..%d].\n"
 msgstr "Standard-Subsong %d liegt außerhalb des Wertebereiches [1..%d].\n"
 
-msgid "Error opening output plugin."
-msgstr "Konnte Ausgabemethode nicht öffnen."
-
-msgid "Extended Info"
-msgstr "Erweiterte Informationen"
-
-msgid "File Info"
-msgstr "Dateiinformationen"
-
-msgid "File Info: "
-msgstr "Dateiinformationen: "
-
-msgid "Filename:"
-msgstr "Dateiname:"
-
-msgid "GBS Info"
-msgstr "GBS Info"
-
 #, c-format
 msgid "GBS Version %d unsupported.\n"
 msgstr "GBS Version %d wird nicht unterstützt.\n"
@@ -237,21 +206,19 @@ msgstr ""
 "Subsongs:         %u\n"
 "Standard-Subsong: %u\n"
 
-msgid "Game:"
-msgstr "Spiel:"
-
 #, c-format
 msgid "Invalid filter type \"%s\"\n"
 msgstr "Ungültiger Filtertyp \"%s\"\n"
+
+#, c-format, fuzzy
+msgid "Load address %04x overlaps with replayer end %04x.\n"
+msgstr "Ladeaddresse %04x überlappt mit Replayer-Ende %04x.\n"
 
 msgid "Memory allocation failed!"
 msgstr "Speicherreservierung fehlgeschlagen!"
 
 msgid "Memory allocation failed!\n"
 msgstr "Speicherreservierung fehlgeschlagen!\n"
-
-msgid "Next"
-msgstr "Nächster"
 
 msgid ""
 "No output plugins available.\n"
@@ -272,6 +239,7 @@ msgstr "Keine GBS-Datei: %s\n"
 msgid "Not a VGM-File: %s\n"
 msgstr "Keine VGM-Datei: %s\n"
 
+#, fuzzy
 msgid "Not compiled with zlib support"
 msgstr "Unterstützung für zlib nicht aktiviert"
 
@@ -279,21 +247,15 @@ msgstr "Unterstützung für zlib nicht aktiviert"
 msgid "Number of subsongs = %d is unreasonable.\n"
 msgstr "Anzahl der Subsongs = %d ist unsinnig.\n"
 
-msgid "Prev"
-msgstr "Vorheriger"
-
 msgid "ROM size above limit (8 MiB)!"
-msgstr "ROM size above limit (8 MiB)!"
+msgstr "ROM-Größe über Limit (8 MiB)!"
 
 msgid "ROM template data not found!\n"
-msgstr "ROM template data not found!\n"
+msgstr "ROM-Template-Daten nicht gefunden!\n"
 
 #, c-format
 msgid "Requested rate %ldHz, got %dHz.\n"
-msgstr "Samplingrate %ldHz angefordert, %ldHz erhalten.\n"
-
-msgid "Save"
-msgstr "Speichern"
+msgstr "Samplingrate %ldHz angefordert, %dHz erhalten.\n"
 
 #, c-format
 msgid "Subsong number out of range (min=0, max=%d).\n"
@@ -301,7 +263,7 @@ msgstr "Subsong-Nummer außerhalb des Wertebereichs (min=0, max=%d).\n"
 
 #, c-format
 msgid "Timing:           %2.2fHz timer%s\n"
-msgstr "Timing:           %2.2fHz timer%s\n"
+msgstr "Timing:           %2.2fHz-Timer%s\n"
 
 #, c-format
 msgid "Timing:           %s\n"
@@ -328,8 +290,12 @@ msgid "Unsupported cartridge type: 0x%02x\n"
 msgstr "Nicht unterstützter Modul-Typ: 0x%02x\n"
 
 #, c-format
+msgid "Unsupported endian for output plugin \"%s\"\n"
+msgstr "Nicht unterstützte Byte-Reihenfolge für Ausgabemethode \"%s\"\n"
+
+#, c-format
 msgid "Unsupported timerflag value: %d\n"
-msgstr "Nicht unterstützter wert für timerflag: %d\n"
+msgstr "Nicht unterstützter Wert für Timer-Flag: %d\n"
 
 msgid "Untitled"
 msgstr "Unbenannt"
@@ -344,8 +310,8 @@ msgid ""
 "  -g        set subsong gap (%ld seconds)\n"
 "  -h        display this help and exit\n"
 "  -H        set output high-pass type (%s)\n"
-"  -l        loop whole playlist mode\n"
-"  -L        loop single song mode\n"
+"  -l        set loop mode to range\n"
+"  -L        set loop mode to single\n"
 "  -o        select output plugin (%s)\n"
 "            'list' shows available plugins\n"
 "  -q        reduce verbosity\n"
@@ -362,25 +328,25 @@ msgstr ""
 "Benutzung: %s [Option(en)] <GBS-Datei> [starte_bei_Subsong [stoppe_bei_Subsong] ]\n"
 "\n"
 "Verfügbare Optionen sind:\n"
-"  -E        endian, b == big, l == little, n == native (%s)\n"
-"  -f        Ausblendzeit (%ld Sekunden)\n"
-"  -g        Pause zwischen Subsongs (%ld Sekunden)\n"
-"  -h        Diese Hilfe anzeigen und Programm beenden\n"
-"  -H        Hochpass-filter typ (%s)\n"
-"  -l        Ganze Playliste wiederholen\n"
-"  -L        Einzelnes Lied wiederholen\n"
-"  -o        Wahl der Ausgabemethode (%s)\n"
-"            'list' zeigt alle Möglichkeiten\n"
-"  -q        Geschwätzigkeit verringern\n"
-"  -r        Abspielrate (%ldHz)\n"
-"  -R        Anzeigeverzögerung (%ld Millisekunden)\n"
-"  -t        Subsong Zeitlimit (%ld Sekunden)\n"
-"  -T        Subsong Zeitlimit für Stille (%ld Sekunden)\n"
-"  -v        Geschwätzigkeit erhöhen\n"
-"  -V        Version anzeigen und Programm beenden\n"
-"  -z        Subsongs durcheinandergewürfelt abspielen\n"
-"  -Z        Subsongs zufällig abspielen (Wiederholungen möglich)\n"
-"  -1 to -4  Kanal beim Starten stummschalten\n"
+"  -E         Byte-Reihenfolge, b == big-endian, l == little-endian, n == nativ (%s)\n"
+"  -f         Ausblendzeit (%ld Sekunden)\n"
+"  -g         Pause zwischen Subsongs (%ld Sekunden)\n"
+"  -h         Diese Hilfe anzeigen und Programm beenden\n"
+"  -H         Hochpass-Filter (%s)\n"
+"  -l         Ausgewählte Subsongs wiederholen\n"
+"  -L         Einzelnen Subsong wiederholen\n"
+"  -o         Ausgabemethode (%s)\n"
+"             'list' zeigt verfügbare Ausgabemethoden\n"
+"  -q         Geschwätzigkeit verringern\n"
+"  -r         Abspielrate (%ldHz)\n"
+"  -R         Anzeigeverzögerung (%ld Millisekunden)\n"
+"  -t         Subsong-Zeitlimit (%ld Sekunden)\n"
+"  -T         Stille-Zeitlimit (%ld Sekunden)\n"
+"  -v         Geschwätzigkeit erhöhen\n"
+"  -V         Version anzeigen und Programm beenden\n"
+"  -z         Subsongs in zufälliger Reihenfolge abspielen\n"
+"  -Z         Subsongs komplett zufällig abspielen (Wiederholungen möglich)\n"
+"  -1 bis -4  Kanal beim Starten stummschalten\n"
 
 #, c-format
 msgid ""
@@ -407,7 +373,7 @@ msgstr ""
 "Benutzung: gbs2gb [Option] <GBS-Datei> <Ausgabe-Datei>\n"
 "\n"
 "Verfügbare Optionen sind:\n"
-"  -t  ROM-Vorlage\n"
+"  -t  ROM-Template\n"
 "  -h  Diese Hilfe anzeigen und Programm beenden\n"
 "  -V  Version anzeigen und Programm beenden\n"
 
@@ -483,4 +449,3 @@ msgstr "snd_pcm_writei fehlgeschlagen: %s\n"
 
 msgid "vgm / not available"
 msgstr "vgm / nicht verfügbar"
-

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-21 23:08+0100\n"
-"PO-Revision-Date: 2015-07-18 22:22+0200\n"
+"POT-Creation-Date: 2023-11-19 15:29+0100\n"
+"PO-Revision-Date: 2023-11-19 15:29+0100\n"
 "Last-Translator: Tobias Diedrich <ranma+gbsplay@tdiedrich.de>\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -87,9 +87,6 @@ msgstr "'%s' expected at %s line %ld char %ld.\n"
 msgid "59.7Hz VBlank\n"
 msgstr "59.7Hz VBlank\n"
 
-msgid "Artist:"
-msgstr "Artist:"
-
 msgid ""
 "Available output plugins:\n"
 "\n"
@@ -119,12 +116,6 @@ msgstr "Bigger than allowed maximum (4MiB)"
 #, c-format
 msgid "CRC32:            0x%08lx\n"
 msgstr "CRC32:            0x%08lx\n"
-
-msgid "Cancel"
-msgstr "Cancel"
-
-msgid "Copyright:"
-msgstr "Copyright:"
 
 #, c-format
 msgid "Could not init SDL: %s\n"
@@ -186,24 +177,6 @@ msgstr "Could not write SDL audio data: %s\n"
 msgid "Default subsong %d is out of range [1..%d].\n"
 msgstr "Default subsong %d is out of range [1..%d].\n"
 
-msgid "Error opening output plugin."
-msgstr "Error opening output plugin."
-
-msgid "Extended Info"
-msgstr "Extended Info"
-
-msgid "File Info"
-msgstr "File Info"
-
-msgid "File Info: "
-msgstr "File Info: "
-
-msgid "Filename:"
-msgstr "Filename:"
-
-msgid "GBS Info"
-msgstr "GBS Info"
-
 #, c-format
 msgid "GBS Version %d unsupported.\n"
 msgstr "GBS Version %d unsupported.\n"
@@ -236,21 +209,19 @@ msgstr ""
 "Subsongs:         %u\n"
 "Default subsong:  %u\n"
 
-msgid "Game:"
-msgstr "Game:"
-
 #, c-format
 msgid "Invalid filter type \"%s\"\n"
 msgstr "Invalid filter type \"%s\"\n"
+
+#, c-format
+msgid "Load address %04x overlaps with replayer end %04x.\n"
+msgstr "Load address %04x overlaps with replayer end %04x.\n"
 
 msgid "Memory allocation failed!"
 msgstr "Memory allocation failed!"
 
 msgid "Memory allocation failed!\n"
 msgstr "Memory allocation failed!\n"
-
-msgid "Next"
-msgstr "Next"
 
 msgid ""
 "No output plugins available.\n"
@@ -278,9 +249,6 @@ msgstr "Not compiled with zlib support"
 msgid "Number of subsongs = %d is unreasonable.\n"
 msgstr "Number of subsongs = %d is unreasonable.\n"
 
-msgid "Prev"
-msgstr "Prev"
-
 msgid "ROM size above limit (8 MiB)!"
 msgstr "ROM size above limit (8 MiB)!"
 
@@ -290,9 +258,6 @@ msgstr "ROM template data not found!\n"
 #, c-format
 msgid "Requested rate %ldHz, got %dHz.\n"
 msgstr "Requested rate %ldHz, got %dHz.\n"
-
-msgid "Save"
-msgstr "Save"
 
 #, c-format
 msgid "Subsong number out of range (min=0, max=%d).\n"
@@ -327,6 +292,10 @@ msgid "Unsupported cartridge type: 0x%02x\n"
 msgstr "Unsupported cartridge type: 0x%02x\n"
 
 #, c-format
+msgid "Unsupported endian for output plugin \"%s\"\n"
+msgstr "Unsupported endian for output plugin \"%s\"\n"
+
+#, c-format
 msgid "Unsupported timerflag value: %d\n"
 msgstr "Unsupported timerflag value: %d\n"
 
@@ -343,8 +312,8 @@ msgid ""
 "  -g        set subsong gap (%ld seconds)\n"
 "  -h        display this help and exit\n"
 "  -H        set output high-pass type (%s)\n"
-"  -l        loop whole playlist mode\n"
-"  -L        loop single song mode\n"
+"  -l        set loop mode to range\n"
+"  -L        set loop mode to single\n"
 "  -o        select output plugin (%s)\n"
 "            'list' shows available plugins\n"
 "  -q        reduce verbosity\n"
@@ -366,8 +335,8 @@ msgstr ""
 "  -g        set subsong gap (%ld seconds)\n"
 "  -h        display this help and exit\n"
 "  -H        set output high-pass type (%s)\n"
-"  -l        loop whole playlist mode\n"
-"  -L        loop single song mode\n"
+"  -l        set loop mode to range\n"
+"  -L        set loop mode to single\n"
 "  -o        select output plugin (%s)\n"
 "            'list' shows available plugins\n"
 "  -q        reduce verbosity\n"
