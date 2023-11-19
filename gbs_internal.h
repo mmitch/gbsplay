@@ -16,7 +16,7 @@
 #include "libgbs.h"
 
 /***
- ***  THIS IS THE INTERNAL API AND MAY CHANGE FREELY BETWEEN VERSION.
+ ***  THIS IS THE INTERNAL API AND MAY CHANGE FREELY BETWEEN VERSIONS.
  ***/
 
 typedef const uint8_t* (get_bootrom_fn)(void);
