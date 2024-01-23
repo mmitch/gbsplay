@@ -164,7 +164,7 @@ long rand_long(long max)
 /* return random long from [0;max[ */
 {
 	/* This is not thread-safe, but rand_long and shuffle_long are only used in
-	 * player.c so their is no need for thread-safety at this point. */
+	 * player.c so there is no need for thread-safety at this point. */
 	uint64_t r = xorshift64(&rand_state);
 	return (long)(r % max);
 }
