@@ -2,14 +2,13 @@
 gbsplay HISTORY
 
 
-2023/xx/xx  -  unreleased
+2024/xx/xx  -  unreleased
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Bugfixes:
 
 - gbsplay:
   - fix octaves in note display during playback
-  - fix subsong change when loop mode was changed during playback
   - fix segfaults on status display for files other than .gbs
   - don't set up the terminal if stdout is redirected
   - fix duplicate handling of keystrokes
@@ -67,12 +66,12 @@ Enhancements:
   - add VGM writer plugout
   - support channel mute in MIDI output plugins
   - suppress unneeded endian changes between player routine and audio plugouts
+  - allow repetition of single subsongs (gbsplay -L)
   - loop mode can be changed interactively (use the 'l' key)
   - display pause status when playback is paused
   - display '99:99' as remaining time when no subsong timeout is set
   - enforce minimum subsong timeout when playing actual ROMS
     (otherwise gbsplay might quit before the bootrom beep is played)
-  - allow repetition of single subsongs
 
 - gbs core:
   - transparent decompression of gzip-compressed files
@@ -89,14 +88,14 @@ Enhancements:
   - clean up libgbs (still ongoing, so no 1.0.0 yet)
   - support reentrancy to render multiple files simultaneously
     (test cases to prove this is working are still missing)
-  - generate pgk-config configuration
+  - generate pkg-config configuration
   - install API documentation (needs doxygen)
 
 - xgbsplay:
   - add simple X11 frontend (configure --with-xgbsplay)
   - and replace it by a better looking xcb/cairo frontend
     (dig through the sources before commit 840f89460 to
-     get the initial X11 frontend)
+     get the initial simple X11 frontend v1)
 
 - gbs2gb:
   - experimental tool to convert .gbs files to .gb ROMs
