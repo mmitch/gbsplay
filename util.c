@@ -142,10 +142,31 @@ test void test_spack()
 }
 TEST(test_spack);
 
+static uint64_t rand_state = 88172645463325252ULL;
+
+uint64_t xorshift64(uint64_t *state)
+{
+	/* Algorithm "xor64" from p. 4 of Marsaglia, "Xorshift RNGs" */
+	uint64_t x = *state;
+	x ^= x << 13;
+	x ^= x >> 7;
+	x ^= x << 17;
+	*state = x;
+	return x;
+}
+
+void rand_seed(uint64_t seed)
+{
+	rand_state = seed + 88172645463325252ULL;
+}
+
 long rand_long(long max)
 /* return random long from [0;max[ */
 {
-	return (long) (((double)max)*rand()/(RAND_MAX+1.0));
+	/* This is not thread-safe, but rand_long and shuffle_long are only used in
+	 * player.c so their is no need for thread-safety at this point. */
+	uint64_t r = xorshift64(&rand_state);
+	return (long)(r % max);
 }
 
 void shuffle_long(long *array, long elements)
@@ -164,20 +185,13 @@ void shuffle_long(long *array, long elements)
 test void test_shuffle()
 {
 	long actual[]   = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-#ifdef __MSYS__
-	long expected[] = { 7, 8, 9, 2, 6, 3, 4, 5, 1 };
-#else
-	long expected[] = { 2, 8, 9, 1, 6, 4, 5, 3, 7 };
-#endif
+	long expected[] = { 6, 8, 2, 7, 3, 4, 5, 9, 1 };
 	long len = sizeof(actual) / sizeof(*actual);
-	int i;
 
-	srand(0);
+	rand_seed(0);
 	shuffle_long(actual, len);
 
-	for (i=0; i<len; i++) {
-		ASSERT_EQUAL("%ld", actual[i], expected[i]);
-	}
+	ASSERT_ARRAY_EQUAL("%ld", actual, expected);
 }
 TEST(test_shuffle);
 TEST_EOF;

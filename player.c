@@ -155,7 +155,7 @@ long *setup_playlist(long songs)
 	}
 
 	/* reinit RNG with current seed - playlists shall be reproducible! */
-	srand(random_seed);
+	rand_seed(random_seed);
 	shuffle_long(playlist, songs);
 
 	return playlist;
@@ -560,7 +560,7 @@ struct gbs *common_init(int argc, char **argv)
 
 	/* initialize RNG */
 	random_seed = time(0)+getpid();
-	srand(random_seed);
+	rand_seed(random_seed);
 
 	usercfg = get_userconfig(cfgfile);
 	cfg_parse(SYSCONF_PREFIX "/gbsplayrc", options);
