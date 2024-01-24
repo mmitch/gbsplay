@@ -13,7 +13,6 @@ format; button input and graphics are not supported) and Gameboy Video
 Game Music dumps (.VGM/.VGZ format).
 
 Homepage/Repo:   https://github.com/mmitch/gbsplay/
-Email contact:   <gbsplay-dev@lists.uguu.de>
 Bug reports:     please send new bugs to the mailing list
                  or use the issue tracker at
                  https://github.com/mmitch/gbsplay/issues

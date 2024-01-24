@@ -114,6 +114,7 @@ Enhancements:
   - add verbose build mode (configure --build-verbose)
 
 - documentation:
+  - the mailing list is gone, please contact us on GitHub
   - update INSTALL.md instructions and information
   - convert README and INSTALL to Markdown format
   - add shiny build status badges to README.md
