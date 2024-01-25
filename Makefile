@@ -87,7 +87,7 @@ EXTRA_CLEAN :=
 export Q VERBOSE CC HOSTCC BUILDCC GBSCFLAGS GBSLDFLAGS
 
 docs               := README.md HISTORY COPYRIGHT
-docs-dist          := INSTALL.md CODINGSTYLE TESTSUITE gbsformat.txt
+docs-dist          := INSTALL.md CODINGSTYLE gbsformat.txt
 contribs           := contrib/gbs2ogg.sh contrib/gbsplay.bashcompletion
 examples           := examples/nightmode.gbs examples/gbsplayrc_sample
 
@@ -441,7 +441,6 @@ dist:	distclean
 	install -m 644 Makefile ./$(DISTDIR)/
 	install -m 644 *.c ./$(DISTDIR)/
 	install -m 644 *.h ./$(DISTDIR)/
-	install -m 644 *.ver ./$(DISTDIR)/
 	install -d ./$(DISTDIR)/man
 	install -m 644 $(mans_src) ./$(DISTDIR)/man
 	install -m 644 $(docs) $(docs-dist) ./$(DISTDIR)/
