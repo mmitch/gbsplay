@@ -2,8 +2,8 @@
 gbsplay HISTORY
 
 
-2024/xx/xx  -  unreleased
-~~~~~~~~~~~~~~~~~~~~~~~~~
+2024/01/25  -  0.0.95
+~~~~~~~~~~~~~~~~~~~~~
 
 Bugfixes:
 
@@ -23,7 +23,7 @@ Bugfixes:
     - fix newline conversion of binary data on MINGW
 
 - gbs core:
-  - fix envelope volume in cannel retrigger
+  - fix envelope volume in channel retrigger
   - fix off-by-one error in gbhw_io_peek (fixes verbose WAVE display)
   - fix sign extension bug in byte swapping (fixes endian change via -E)
   - fix small memory leak from impulse buffer
@@ -121,7 +121,7 @@ Enhancements:
 
 
 2020/06/26  -  0.0.94
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 Bugfixes:
 
