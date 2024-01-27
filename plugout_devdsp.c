@@ -17,7 +17,14 @@
 #include <string.h>
 
 #include <sys/ioctl.h>
+
+#if HAVE_SOUNDCARD_H
+/* Preferred by 4front OSS docs */
+#include <soundcard.h>
+#else
+/* May rely on OS-specific details */
 #include <sys/soundcard.h>
+#endif
 
 #include "common.h"
 #include "plugout.h"

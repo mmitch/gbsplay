@@ -760,8 +760,13 @@ fi
 
 if [ "$use_devdsp" != no ]; then
     remember_use devdsp
+    check_include soundcard.h
     check_include sys/soundcard.h
-    use_devdsp="$have_sys_soundcard_h"
+    if [ "$have_soundcard_h" = yes -o "$have_sys_soundcard_h" = yes ]; then
+        use_devdsp=yes
+    else
+        use_devdsp=no
+    fi
     recheck_use devdsp
 fi
 
@@ -1236,6 +1241,7 @@ __EOF__
     use_x ZLIB
     have_x ESTRPIPE
     have_x SETMODE
+    have_x SOUNDCARD_H
     echo "#endif"
 ) > config.h
 
