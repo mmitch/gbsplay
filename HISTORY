@@ -2,6 +2,16 @@
 gbsplay HISTORY
 
 
+202x/xx/xx  -  unreleased
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Enhancements:
+
+- build process:
+  - add automated build pipeline for FreeBSD (x86-64 and arm64)
+
+
+
 2024/01/25  -  0.0.95
 ~~~~~~~~~~~~~~~~~~~~~
 

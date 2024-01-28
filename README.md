@@ -2,6 +2,7 @@
 
 [![Code coverage status](https://codecov.io/github/mmitch/gbsplay/coverage.svg?branch=master)](https://codecov.io/github/mmitch/gbsplay?branch=master)
 [![Linux Build status](https://github.com/mmitch/gbsplay/workflows/Linux%20Build/badge.svg?branch=master)](https://github.com/mmitch/gbsplay/actions?query=workflow%3A%22Linux+Build%22)
+[![FreeBSD Build status](https://github.com/mmitch/gbsplay/workflows/FreeBSD%20Build/badge.svg?branch=master)](https://github.com/mmitch/gbsplay/actions?query=workflow%3A%22FreeBSD+Build%22)
 [![macOS Build status](https://github.com/mmitch/gbsplay/workflows/macOS%20Build/badge.svg?branch=master)](https://github.com/mmitch/gbsplay/actions?query=workflow%3A%22macOS+Build%22)
 [![Windows Build status](https://github.com/mmitch/gbsplay/workflows/Windows%20Build/badge.svg?branch=master)](https://github.com/mmitch/gbsplay/actions?query=workflow%3A%22Windows+Build%22)
 [![CodeQL status](https://github.com/mmitch/gbsplay/workflows/CodeQL/badge.svg?branch=master)](https://github.com/mmitch/gbsplay/actions?query=workflow%3ACodeQL)
