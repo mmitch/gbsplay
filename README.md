@@ -14,8 +14,7 @@ format; button input and graphics are not supported) and Gameboy Video
 Game Music dumps (.VGM/.VGZ format).
 
 Homepage/Repo:   https://github.com/mmitch/gbsplay/
-Bug reports:     please send new bugs to the mailing list
-                 or use the issue tracker at
+Bug reports:     please use the issue tracker at
                  https://github.com/mmitch/gbsplay/issues
 
 gbsplay is compatible to GBSv1.  It uses a backwards compatible extension
