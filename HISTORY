@@ -5,6 +5,11 @@ gbsplay HISTORY
 202x/xx/xx  -  unreleased
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Bugfixes:
+
+- build process:
+  - fix build errors of devdsp plugout on FreeBSD
+
 Enhancements:
 
 - build process:
