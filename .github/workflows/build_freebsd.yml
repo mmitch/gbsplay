@@ -36,6 +36,7 @@ jobs:
           CONFIGURE_FLAGS: ${{ matrix.flags }} --enable-verbosebuild
           CFLAGS: -Wformat -Werror=format-security -Wall -pedantic
         with:
+          environment_variables: CONFIGURE_FLAGS CFLAGS
           operating_system: ${{ matrix.os.name }}
           architecture: ${{ matrix.os.architecture }}
           version: ${{ matrix.os.version }}
