@@ -762,6 +762,39 @@ if [ "$use_devdsp" != no ]; then
     remember_use devdsp
     check_include sys/soundcard.h
     use_devdsp="$have_sys_soundcard_h"
+    # this check is needed for FreeBSD but it only works when the C11 flags are used
+    C11_FLAGS="-D_XOPEN_SOURCE=500 -D_POSIX_C_SOURCE=200809L"
+    if [ "$have_sys_soundcard_h" = yes ]; then
+	if ! cc_check "checking if we need additional flags for sys/soundcard.h" "" "$C11_FLAGS" "no" "yes" <<EOF; then
+#include <sys/soundcard.h>
+int main(int argc, char **argv)
+{
+    #ifdef OPEN_SOUND_SYSTEM
+    return 0;
+    #else
+    return 1;
+    #endif
+}
+EOF
+
+            if cc_check "checking if we need __BSD_VISIBLE for sys/soundcard.h" "" "$C11_FLAGS -D__BSD_VISIBLE" "yes" "no" <<EOF; then
+#include <sys/soundcard.h>
+int main(int argc, char **argv)
+{
+    #ifdef OPEN_SOUND_SYSTEM
+    return 0;
+    #else
+    return 1;
+    #endif
+}
+EOF
+                append_nodupe CFLAGS "-D__BSD_VISIBLE"
+	    else
+		echo "no way found to make sys/soundcard.h work"
+	        use_devdsp=no
+	    fi
+	fi
+    fi
     recheck_use devdsp
 fi
 
