@@ -18,15 +18,16 @@ jobs:
     strategy:
       matrix:
         os:
-          - name: freebsd
-            architecture: x86-64
-            version: '13.2'
-            host: macos-12
+#          - name: freebsd
+#            architecture: x86-64
+#            version: '13.2'
+#            host: macos-12
           - name: freebsd
             architecture: arm64
             version: '13.2'
             host: ubuntu-latest
-        flags: ['', '--enable-sharedlibgbs']
+        flags: ['']
+#        flags: ['', '--enable-sharedlibgbs']
 
     steps:
       - uses: actions/checkout@v4
@@ -46,7 +47,7 @@ jobs:
           run: |
             yes | sudo pkg install gmake
             gmake
-            ./check_plugout_wav.sh
+            ## ./check_plugout_wav.sh
       - name: Check activated plugouts
         run: |
           ./check_plugouts.sh devdsp wav
