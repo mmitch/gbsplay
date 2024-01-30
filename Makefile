@@ -147,6 +147,10 @@ endif
 ifeq ($(plugout_altmidi),yes)
 plugout_objs += plugout_altmidi.o midifile.o filewriter.o
 endif
+ifeq ($(plugout_pipewire),yes)
+plugout_objs += plugout_pipewire.o
+plugout_ldflags += $(libpipewire_0_3_flags)
+endif
 ifeq ($(plugout_pulse),yes)
 plugout_objs += plugout_pulse.o
 plugout_ldflags += -lpulse-simple -lpulse
