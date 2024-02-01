@@ -108,6 +108,15 @@ static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_b
 	return 0;
 }
 
+static void pipewire_pause(int pause)
+{
+	int err;
+	if ((err = pw_stream_set_active(pipewire_data.stream, !pause))) {
+		fprintf(stderr, _("pw_stream_set_active failed: %s\n"), spa_strerror(err));
+		return;
+	}
+}
+
 static ssize_t pipewire_write(const void *buf, size_t count)
 {
         struct pw_buffer *b;
@@ -171,6 +180,7 @@ const struct output_plugin plugout_pipewire = {
 	.name = "pipewire",
 	.description = "PipeWire sound driver",
 	.open = pipewire_open,
+	.pause = pipewire_pause,
 	.write = pipewire_write,
 	.close = pipewire_close,
 };
