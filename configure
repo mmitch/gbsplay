@@ -186,7 +186,7 @@ check_libs()
     local INFILE="$TEMPDIR/cl.c"
     local OUTFILE="$TEMPDIR/cl"
     local checklib="$1"
-    local libname="$(echo "$checklib" | sed -e 's@[/\.-]@_@g')"
+    local libname="$(echo "$checklib" | sed -e 's@[/\.-]@_@g' -e 's/ //g')"
     local extralibs="${checklib} ${2-}"
     local extralibdirs="${3-}"
     local name="${4-}"
