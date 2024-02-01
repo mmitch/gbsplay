@@ -145,8 +145,12 @@ static ssize_t pipewire_write(const void *buf, size_t count)
 
 		// check how much we can send
 		n_frames = spa_buf->datas[0].maxsize / STRIDE;
+#if PW_CHECK_VERSION(0,3,49)
+		// unfortunately our CI pipeline runs Ubuntu 22.04LTS
+	        // which is on 0.3.48, so we have to do this version check
 		if (b->requested)
 			n_frames = SPA_MIN((int)b->requested, n_frames);
+#endif
 		n_frames = SPA_MIN(n_frames, frames_to_send);
 		bytes_to_send = n_frames * STRIDE;
 
