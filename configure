@@ -221,6 +221,7 @@ check_libs()
     done
 
     if [ "$minerrs" -ne 0 ]; then
+	echo "...but it still won't compile cleanly"
         # log the default result to config.err
         (
             echo "minerrs: $minerrs > 0"
