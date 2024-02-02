@@ -194,6 +194,9 @@ check_libs()
     local msg="${6-$checklib}"
     local cflags="$CFLAGS $LDFLAGS"
 
+    # don't let -pedantic mess with our checks
+    cflags="$(sed -E 's/-pedantic ?//g'<<<"$cflags")"
+
     eval "lib${libname}_flags="
 
     cat > "$INFILE"
