@@ -12,6 +12,9 @@ Bugfixes:
 
 Enhancements:
 
+- gbsplay:
+  - add PipeWire plugout
+
 - build process:
   - add automated build pipeline for FreeBSD (x86-64 and arm64)
 
