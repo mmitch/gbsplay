@@ -26,14 +26,10 @@ static const int BYTES_PER_SAMPLE = 2;
 static const int CHANNELS = 2;
 static const int STRIDE = BYTES_PER_SAMPLE * CHANNELS;
 
-static const struct timespec buffer_fill_wait_time = {
-	.tv_sec  = 0,
-	.tv_nsec = 100000 // 0.1 milliseconds
-};
-
 static struct pipewire_data {
 	struct pw_thread_loop *loop;
 	struct pw_stream *stream;
+	struct timespec buffer_fill_wait_time;
 } pipewire_data;
 
 static const struct pw_stream_events pipewire_stream_events = {
@@ -56,13 +52,19 @@ static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_b
 	default:                    fmt = SPA_AUDIO_FORMAT_S16_NE; break;
 	}
 
+	// determine buffer wait time - use 25% gbsplay buffer length (~2 wait cycles on my machine)
+	pipewire_data.buffer_fill_wait_time.tv_sec = 0;
+	pipewire_data.buffer_fill_wait_time.tv_nsec =
+		1000000000                 // nanoseconds per second
+		/ rate                     // sample rate
+		* (*buffer_bytes / STRIDE) // samples in buffer
+		/ 4;                       // 25% of that
+
 	// init pipewire
 	pw_init(0, NULL);
 
 	// set main loop
 	pipewire_data.loop = pw_thread_loop_new("gbsplay", NULL);
-
-	// TODO: add signals?  provide do_quit?
 
 	// set stream metadata
 	props = pw_properties_new(PW_KEY_MEDIA_TYPE, "Audio",
@@ -121,17 +123,14 @@ static ssize_t pipewire_write(const void *buf, size_t count)
 		const int frames_to_send = (count - buf_sent) / STRIDE;
 
 		// wait until data can be sent by us
-		if ((b = pw_stream_dequeue_buffer(pipewire_data.stream)) == NULL) {
-			fprintf(stderr, "%s\n", _("pw_stream_dequeue_buffer is out of buffers"));
-			while ((b = pw_stream_dequeue_buffer(pipewire_data.stream)) == NULL) {
-				nanosleep(&buffer_fill_wait_time, NULL);
-			}
+		while ((b = pw_stream_dequeue_buffer(pipewire_data.stream)) == NULL) {
+			nanosleep(&pipewire_data.buffer_fill_wait_time, NULL);
 		}
 
 		// get send buffer
 		spa_buf = b->buffer;
 		if ((p = spa_buf->datas[0].data) == NULL) {
-			nanosleep(&buffer_fill_wait_time, NULL);
+			nanosleep(&pipewire_data.buffer_fill_wait_time, NULL);
 			break;
 		}
 
