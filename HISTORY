@@ -14,6 +14,9 @@ Enhancements:
 
 - gbsplay:
   - add PipeWire plugout
+  - add application and filename to audio stream metadata
+    (currently works with PipeWire, PulseAudio and with SDL2 depending
+     on the configured audio backend)
 
 - build process:
   - add automated build pipeline for FreeBSD (x86-64 and arm64)
