@@ -19,12 +19,14 @@
 #include "common.h"
 #include "plugout.h"
 
-pa_simple *pulse_handle;
-pa_sample_spec pulse_spec;
+static pa_simple *pulse_handle;
+static pa_sample_spec pulse_spec;
 
-static long pulse_open(enum plugout_endian *endian, long rate, long *buffer_bytes)
+static long pulse_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const char *const filename)
 {
 	int err;
+
+	UNUSED(buffer_bytes);
 
 	switch (*endian) {
 	case PLUGOUT_ENDIAN_BIG:    pulse_spec.format = PA_SAMPLE_S16BE; break;
@@ -34,7 +36,7 @@ static long pulse_open(enum plugout_endian *endian, long rate, long *buffer_byte
 	pulse_spec.rate = rate;
 	pulse_spec.channels = 2;
 
-	pulse_handle = pa_simple_new(NULL, "gbsplay", PA_STREAM_PLAYBACK, NULL, "gbsplay", &pulse_spec, NULL, NULL, &err);
+	pulse_handle = pa_simple_new(NULL, "gbsplay", PA_STREAM_PLAYBACK, NULL, filename, &pulse_spec, NULL, NULL, &err);
 	if (!pulse_handle) {
 		fprintf(stderr, "pulse: %s\n", pa_strerror(err));
 		return -1;

@@ -573,12 +573,15 @@ struct gbs *common_init(int argc, char **argv)
 		usage(1);
 	}
 
+	/* options have been parsed, argv[0] is our filename */
+	filename = filename_only(argv[0]);
+
 	if (requested_endian == PLUGOUT_ENDIAN_AUTOSELECT) {
 		actual_endian = PLUGOUT_ENDIAN_NATIVE;
 	} else {
 		actual_endian = requested_endian;
 	}
-	if (sound_open(&actual_endian, rate, &buf.bytes) != 0) {
+	if (sound_open(&actual_endian, rate, &buf.bytes, filename) != 0) {
 		fprintf(stderr, _("Could not open output plugin \"%s\"\n"),
 		        sound_name);
 		exit(1);
@@ -590,9 +593,6 @@ struct gbs *common_init(int argc, char **argv)
 		exit(1);
 	}
 	buf.data = malloc(buf.bytes);
-
-	/* options have been parsed, argv[0] is our filename */
-	filename = filename_only(argv[0]);
 
 	if (argc >= 2) {
 		sscanf(argv[1], "%ld", &subsong_start);

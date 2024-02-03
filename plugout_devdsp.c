@@ -24,10 +24,12 @@
 
 static int fd;
 
-static long devdsp_open(enum plugout_endian *endian, long rate, long *buffer_bytes)
+static long devdsp_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const char *const filename)
 {
 	int c;
 	int flags;
+
+	UNUSED(filename);
 	
 	if ((fd = open("/dev/dsp", O_WRONLY|O_NONBLOCK)) == -1) {
 		fprintf(stderr, _("Could not open /dev/dsp: %s\n"), strerror(errno));

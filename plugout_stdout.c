@@ -27,11 +27,13 @@ static int set_fd_to_binmode()
 }
 
 static long stdout_open(enum plugout_endian *endian,
-                        long rate, long *buffer_bytes)
+                        long rate, long *buffer_bytes,
+                        const char *const filename)
 {
 	UNUSED(endian);
 	UNUSED(rate);
 	UNUSED(buffer_bytes);
+	UNUSED(filename);
 
 	/*
 	 * clone and close STDOUT_FILENO

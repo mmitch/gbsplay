@@ -3,12 +3,13 @@
  *
  * SDL2 sound output plugin
  *
- * 2020 (C) by Christian Garbs <mitch@cgarbs.de>
+ * 2020-2024 (C) by Christian Garbs <mitch@cgarbs.de>
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
 #include <time.h>
 #include <SDL.h>
+#include <SDL_hints.h>
 
 #include "common.h"
 #include "plugout.h"
@@ -26,13 +27,16 @@
 int device;
 SDL_AudioSpec obtained;
 
-static long sdl_open(enum plugout_endian *endian, long rate, long *buffer_bytes)
+static long sdl_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const char *const filename)
 {
 	SDL_AudioSpec desired;
+
 	if (SDL_Init(SDL_INIT_AUDIO) != 0) {
 		fprintf(stderr, _("Could not init SDL: %s\n"), SDL_GetError());
 		return -1;
 	}
+
+	SDL_SetHint(SDL_HINT_AUDIO_DEVICE_STREAM_NAME, filename);
 
 	SDL_zero(desired);
 	desired.freq = rate;

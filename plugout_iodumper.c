@@ -17,13 +17,20 @@
 static FILE *file;
 static cycles_t cycles_prev = 0;
 
-static long iodumper_open(enum plugout_endian *endian, long rate, long *buffer_bytes)
+static long iodumper_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const char *const filename)
 {
+	int fd;
+
+	UNUSED(endian);
+	UNUSED(rate);
+	UNUSED(buffer_bytes);
+	UNUSED(filename);
+
 	/*
 	 * clone and close STDOUT_FILENO
 	 * to make sure nobody else can write to stdout
 	 */
-	int fd = dup(STDOUT_FILENO);
+	fd = dup(STDOUT_FILENO);
 	if (fd == -1) return -1;
 	(void)close(STDOUT_FILENO);
 	file = fdopen(fd, "w");

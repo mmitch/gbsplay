@@ -36,7 +36,7 @@ static const struct pw_stream_events pipewire_stream_events = {
         PW_VERSION_STREAM_EVENTS,
 };
 
-static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_bytes)
+static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const char *const filename)
 {
 	const struct spa_pod *params[1];
 	uint8_t buffer[1024];
@@ -84,7 +84,7 @@ static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_b
 
 	// create stream
 	pipewire_data.stream = pw_stream_new_simple(pw_thread_loop_get_loop(pipewire_data.loop),
-						    "gbsplay",
+						    filename,
 						    props,
 						    &pipewire_stream_events,
 						    &pipewire_data);

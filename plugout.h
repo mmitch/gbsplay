@@ -43,7 +43,7 @@ enum plugout_endian {
 #endif
 
 /* Initial open of plugout. */
-typedef long    (*plugout_open_fn )(enum plugout_endian *endian, long rate, long *buffer_bytes);
+typedef long    (*plugout_open_fn )(enum plugout_endian *endian, long rate, long *buffer_bytes, const char *const filename);
 /* Notification when next subsong is about to start. */
 typedef int     (*plugout_skip_fn )(int subsong);
 /* Notification the the player is paused/resumed. */

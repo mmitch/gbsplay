@@ -59,7 +59,12 @@ static void vgm_finalize(void) {
 	fpackat(vgmfile, VGM_OFS_NUMSAMPLES, "<d", (uint32_t)samples_total);
 }
 
-static long vgm_open(enum plugout_endian *endian, long rate, long *buffer_bytes) {
+static long vgm_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const char *const filename)
+{
+	UNUSED(endian);
+	UNUSED(rate);
+	UNUSED(buffer_bytes);
+	UNUSED(filename);
 	return 0;
 }
 
