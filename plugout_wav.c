@@ -69,8 +69,12 @@ static int wav_close_file() {
 }
 
 static long wav_open(enum plugout_endian *endian,
-		     const long rate, long *buffer_bytes)
+		     const long rate, long *buffer_bytes,
+		     const struct plugout_metadata metadata)
 {
+	UNUSED(buffer_bytes);
+	UNUSED(metadata);
+
 	sample_rate = rate;
 
 	*endian = PLUGOUT_ENDIAN_LITTLE;

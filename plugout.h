@@ -42,8 +42,13 @@ enum plugout_endian {
 #define PLUGOUT_ENDIAN_NATIVE PLUGOUT_ENDIAN_BIG
 #endif
 
+struct plugout_metadata {
+	const char * player_name;
+	const char * filename;
+};
+
 /* Initial open of plugout. */
-typedef long    (*plugout_open_fn )(enum plugout_endian *endian, long rate, long *buffer_bytes);
+typedef long    (*plugout_open_fn )(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata);
 /* Notification when next subsong is about to start. */
 typedef int     (*plugout_skip_fn )(int subsong);
 /* Notification the the player is paused/resumed. */

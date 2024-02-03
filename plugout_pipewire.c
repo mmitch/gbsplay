@@ -36,7 +36,7 @@ static const struct pw_stream_events pipewire_stream_events = {
         PW_VERSION_STREAM_EVENTS,
 };
 
-static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_bytes)
+static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata)
 {
 	const struct spa_pod *params[1];
 	uint8_t buffer[1024];
@@ -64,7 +64,7 @@ static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_b
 	pw_init(0, NULL);
 
 	// set main loop
-	pipewire_data.loop = pw_thread_loop_new("gbsplay", NULL);
+	pipewire_data.loop = pw_thread_loop_new(metadata.player_name, NULL);
 
 	// set stream metadata
 	props = pw_properties_new(PW_KEY_MEDIA_TYPE, "Audio",
@@ -84,7 +84,7 @@ static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_b
 
 	// create stream
 	pipewire_data.stream = pw_stream_new_simple(pw_thread_loop_get_loop(pipewire_data.loop),
-						    "gbsplay",
+						    metadata.filename,
 						    props,
 						    &pipewire_stream_events,
 						    &pipewire_data);

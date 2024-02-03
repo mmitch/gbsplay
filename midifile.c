@@ -163,11 +163,12 @@ void midi_pan(cycles_t cycles, int channel, int pan)
 	midi_write_event(cycles, event, sizeof(event));
 }
 
-long midi_open(enum plugout_endian *endian, long rate, long *buffer_bytes)
+long midi_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata)
 {
 	UNUSED(endian);
 	UNUSED(rate);
 	UNUSED(buffer_bytes);
+	UNUSED(metadata);
 
 	return 0;
 }

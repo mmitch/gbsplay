@@ -30,9 +30,11 @@ static DWORD writeMax;       // Maximum amount we can write at once.
 static WAVEFORMATEX wfx;
 static DSBUFFERDESC dsbdesc;
 
-static long dsound_open(enum plugout_endian *endian, long rate, long *buffer_bytes)
+static long dsound_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const char *const filename)
 {
 	HRESULT hr;
+	
+	UNUSED(filename);
 
 	*endian = PLUGOUT_ENDIAN_NATIVE;
 
