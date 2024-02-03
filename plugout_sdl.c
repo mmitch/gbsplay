@@ -27,7 +27,7 @@
 int device;
 SDL_AudioSpec obtained;
 
-static long sdl_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const char *const filename)
+static long sdl_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata)
 {
 	SDL_AudioSpec desired;
 
@@ -36,7 +36,8 @@ static long sdl_open(enum plugout_endian *endian, long rate, long *buffer_bytes,
 		return -1;
 	}
 
-	SDL_SetHint(SDL_HINT_AUDIO_DEVICE_STREAM_NAME, filename);
+	SDL_SetHint(SDL_HINT_APP_NAME, metadata.player_name);
+	SDL_SetHint(SDL_HINT_AUDIO_DEVICE_STREAM_NAME, metadata.filename);
 
 	SDL_zero(desired);
 	desired.freq = rate;

@@ -17,14 +17,14 @@
 static FILE *file;
 static cycles_t cycles_prev = 0;
 
-static long iodumper_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const char *const filename)
+static long iodumper_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata)
 {
 	int fd;
 
 	UNUSED(endian);
 	UNUSED(rate);
 	UNUSED(buffer_bytes);
-	UNUSED(filename);
+	UNUSED(metadata);
 
 	/*
 	 * clone and close STDOUT_FILENO

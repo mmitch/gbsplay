@@ -555,6 +555,7 @@ struct gbs *common_init(int argc, char **argv)
 	struct gbs *gbs;
 	uint8_t songs;
 	uint8_t initial_subsong;
+	struct plugout_metadata metadata;
 
 	i18n_init();
 
@@ -581,7 +582,10 @@ struct gbs *common_init(int argc, char **argv)
 	} else {
 		actual_endian = requested_endian;
 	}
-	if (sound_open(&actual_endian, rate, &buf.bytes, filename) != 0) {
+
+	metadata.player_name = myname;
+	metadata.filename = filename;
+	if (sound_open(&actual_endian, rate, &buf.bytes, metadata) != 0) {
 		fprintf(stderr, _("Could not open output plugin \"%s\"\n"),
 		        sound_name);
 		exit(1);

@@ -22,7 +22,7 @@
 static pa_simple *pulse_handle;
 static pa_sample_spec pulse_spec;
 
-static long pulse_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const char *const filename)
+static long pulse_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata)
 {
 	int err;
 
@@ -36,7 +36,7 @@ static long pulse_open(enum plugout_endian *endian, long rate, long *buffer_byte
 	pulse_spec.rate = rate;
 	pulse_spec.channels = 2;
 
-	pulse_handle = pa_simple_new(NULL, "gbsplay", PA_STREAM_PLAYBACK, NULL, filename, &pulse_spec, NULL, NULL, &err);
+	pulse_handle = pa_simple_new(NULL, metadata.player_name, PA_STREAM_PLAYBACK, NULL, metadata.filename, &pulse_spec, NULL, NULL, &err);
 	if (!pulse_handle) {
 		fprintf(stderr, "pulse: %s\n", pa_strerror(err));
 		return -1;

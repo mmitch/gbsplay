@@ -35,7 +35,7 @@ static AuServer *nas_server;
 static AuFlowID             nas_flow;
 
 /* forward function declarations */
-static long    nas_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const char *const filename);
+static long    nas_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata);
 static ssize_t nas_write(const void *buf, size_t count);
 static void    nas_close();
 
@@ -94,10 +94,10 @@ static AuDeviceID nas_find_device(AuServer *aud)
  * @param rate  requested samplerate
  * @param buffer_bytes  pointer to requested buffer_size,
  *                      value update to actual buffer_size.
- * @param filename  filename currently playing (basename only)
+ * @param metadata  player name and currently playing filename (basename only)
  * @return  0 on success
  */
-static long nas_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const char *const filename)
+static long nas_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata)
 {
 	char *text = "";
 	unsigned char nas_format;
@@ -106,7 +106,7 @@ static long nas_open(enum plugout_endian *endian, long rate, long *buffer_bytes,
 	AuDeviceID nas_device;
 
 	UNUSED(buffer_bytes);
-	UNUSED(filename);
+	UNUSED(metadata);
 
 	switch (*endian) {
 	case PLUGOUT_ENDIAN_BIG:
