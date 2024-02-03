@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-19 15:29+0100\n"
+"POT-Creation-Date: 2024-02-02 22:58+0100\n"
 "PO-Revision-Date: 2023-11-19 15:29+0100\n"
 "Last-Translator: Tobias Diedrich <ranma+gbsplay@tdiedrich.de>\n"
 "Language-Team: none\n"
@@ -412,6 +412,14 @@ msgstr "ioctl(fd, SNDCTL_DSP_SPEED, %ld) failed: %s\n"
 #, c-format
 msgid "ioctl(fd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
 msgstr "ioctl(fd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
+
+#, c-format
+msgid "pw_stream_connect failed: %s\n"
+msgstr "pw_stream_connect failed: %s\n"
+
+#, c-format
+msgid "pw_stream_set_active failed: %s\n"
+msgstr "pw_stream_set_active failed: %s\n"
 
 #, c-format
 msgid "snd_pcm_hw_params failed: %s\n"

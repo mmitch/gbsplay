@@ -25,7 +25,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install libasound2-dev libpulse-dev libaudio-dev libxcb1-dev libxcb-icccm4-dev libcairo2-dev libsdl2-dev
+        sudo apt-get install libasound2-dev libpulse-dev libaudio-dev libxcb1-dev libxcb-icccm4-dev libcairo2-dev libsdl2-dev libpipewire-0.3-dev
     - name: Install valgrind
       if: ${{ matrix.flags == '' }}
       run: |
@@ -39,7 +39,7 @@ jobs:
         make
     - name: Check activated plugouts
       run: |
-        ./check_plugouts.sh alsa pulse devdsp nas sdl
+        ./check_plugouts.sh alsa pulse devdsp nas sdl pipewire
     - name: Check WAV plugout
       run: |
         ./check_plugout_wav.sh

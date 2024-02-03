@@ -1,7 +1,7 @@
 # German translations for gbsplay.
 #
-# Copyright (C) 2003-2020,2023  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
-#                               Christian Garbs <mitch@cgarbs.de>
+# Copyright (C) 2003-2024  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+#                          Christian Garbs <mitch@cgarbs.de>
 #
 # This file is distributed under GNU GPL v1 or, at your option, any later version.
 #
@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-19 15:29+0100\n"
-"PO-Revision-Date: 2023-11-19 16:03+0100\n"
+"POT-Creation-Date: 2024-02-02 22:58+0100\n"
+"PO-Revision-Date: 2024-02-02 23:02+0100\n"
 "Last-Translator: Christian Garbs <mitch@cgarbs.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -57,9 +57,11 @@ msgstr ""
 msgid ""
 "\"%s\" is not a valid endian.\n"
 "\n"
-msgstr "\"%s\" ist keine gültige Byte-Reihenfolge.\n\n"
+msgstr ""
+"\"%s\" ist keine gültige Byte-Reihenfolge.\n"
+"\n"
 
-#, c-format, fuzzy
+#, fuzzy, c-format
 msgid "%s: Can't create audio flow\n"
 msgstr "%s: Kann keinen Audio-Flow erzeugen\n"
 
@@ -71,11 +73,11 @@ msgstr "%s: Kann kein Gerät mit 2 Kanälen finden\n"
 msgid "%s: Can't open server: %s\n"
 msgstr "%s: Kann den Server nicht öffnen: %s\n"
 
-#, c-format, fuzzy
+#, fuzzy, c-format
 msgid "%s: Can't set audio elements: %s\n"
 msgstr "%s: Kann Audio-Elemente nicht setzen: %s\n"
 
-#, c-format, fuzzy
+#, fuzzy, c-format
 msgid "%s: Can't start audio flow: %s\n"
 msgstr "%s: Kann den Audio-Flow nicht starten: %s\n"
 
@@ -89,7 +91,9 @@ msgstr "59.7Hz VBlank\n"
 msgid ""
 "Available output plugins:\n"
 "\n"
-msgstr "Verfügbare Ausgabemethoden:\n\n"
+msgstr ""
+"Verfügbare Ausgabemethoden:\n"
+"\n"
 
 #, c-format
 msgid "Bad GD3 offset: %08lx\n"
@@ -210,7 +214,7 @@ msgstr ""
 msgid "Invalid filter type \"%s\"\n"
 msgstr "Ungültiger Filtertyp \"%s\"\n"
 
-#, c-format, fuzzy
+#, fuzzy, c-format
 msgid "Load address %04x overlaps with replayer end %04x.\n"
 msgstr "Ladeaddresse %04x überlappt mit Replayer-Ende %04x.\n"
 
@@ -410,6 +414,14 @@ msgstr "ioctl(fd, SNDCTL_DSP_SPEED, %ld) fehlgeschlagen: %s\n"
 #, c-format
 msgid "ioctl(fd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
 msgstr "ioctl(fd, SNDCTL_DSP_STEREO, %d) fehlgeschlagen: %s\n"
+
+#, c-format
+msgid "pw_stream_connect failed: %s\n"
+msgstr "pw_stream_connect fehlgeschlagen: %s\n"
+
+#, c-format
+msgid "pw_stream_set_active failed: %s\n"
+msgstr "pw_stream_set_active fehlgeschlagen: %s\n"
 
 #, c-format
 msgid "snd_pcm_hw_params failed: %s\n"

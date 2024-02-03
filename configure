@@ -4,7 +4,7 @@
 #
 # generate config.mk for gbsplay Makefile
 #
-# 2003-2022 (C) by Christian Garbs <mitch@cgarbs.de>
+# 2003-2024 (C) by Christian Garbs <mitch@cgarbs.de>
 #                  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
 #
 # Licensed under GNU GPL v1 or, at your option, any later version.
@@ -186,13 +186,16 @@ check_libs()
     local INFILE="$TEMPDIR/cl.c"
     local OUTFILE="$TEMPDIR/cl"
     local checklib="$1"
-    local libname="$(echo "$checklib" | sed -e 's@[/\.-]@_@g')"
+    local libname="$(echo "$checklib" | sed -e 's@[/\.-]@_@g' -e 's/ //g')"
     local extralibs="${checklib} ${2-}"
     local extralibdirs="${3-}"
     local name="${4-}"
     local extraflags="${5-}"
     local msg="${6-$checklib}"
     local cflags="$CFLAGS $LDFLAGS"
+
+    # don't let -pedantic mess with our checks
+    cflags="$(sed -E 's/-pedantic ?//g'<<<"$cflags")"
 
     eval "lib${libname}_flags="
 
@@ -221,6 +224,7 @@ check_libs()
     done
 
     if [ "$minerrs" -ne 0 ]; then
+	echo "...but it still won't compile cleanly"
         # log the default result to config.err
         (
             echo "minerrs: $minerrs > 0"
@@ -542,6 +546,7 @@ Output Plugins:
   --disable-midi         omit MIDI file writer plugin
   --disable-altmidi      omit alternative MIDI file writer plugin
   --disable-nas          omit NAS sound output plugin
+  --disable-pipewire     omit PipeWire sound output plugin
   --disable-pulse        omit PulseAudio sound output plugin
   --disable-sdl          omit SDL sound output plugin
   --disable-stdout       omit stdout file writer plugin
@@ -565,6 +570,7 @@ OPTS="${OPTS} use_iodumper"
 OPTS="${OPTS} use_midi"
 OPTS="${OPTS} use_altmidi"
 OPTS="${OPTS} use_nas"
+OPTS="${OPTS} use_pipewire"
 OPTS="${OPTS} use_pulse"
 OPTS="${OPTS} use_sdl"
 OPTS="${OPTS} use_sharedlibgbs"
@@ -698,6 +704,7 @@ if [ "$windows_build" = yes ]; then
   # don't look for audio libs that are unavailable on Windows
   setdefault use_alsa no
   setdefault use_nas no
+  setdefault use_pipewire no
   setdefault use_pulse no
   if cc_check "" "" "" <<EOF; then
 int main(int argc, char **argv)
@@ -838,6 +845,61 @@ EOF
         use_dsound="$have_dsound_h"
     fi
     recheck_use dsound
+fi
+
+if [ "$use_pipewire" != no ]; then
+    remember_use pipewire
+
+    pipewire_version='libpipewire-0.3'
+    if command -v pkg-config >/dev/null && pkg-config ${pipewire_version}; then
+	pipewire_have_pkg_config=yes
+    else
+	pipewire_have_pkg_config=no
+    fi
+
+    if [ "$pipewire_have_pkg_config" = yes ]; then
+	pipewire_include_flags="$(pkg-config --cflags-only-I ${pipewire_version})"
+	pipewire_cflags="$(pkg-config --cflags-only-other ${pipewire_version})"
+    else
+	pipewire_include_flags='-I/usr/include/pipewire-0.3 -I/usr/include/spa-0.2'
+	pipewire_cflags=''
+    fi
+    pipewire_include_path="$(sed -e 's/^-I//' -e 's/ -I/ /g' <<<"${pipewire_include_flags}")"
+
+    check_include spa/support/plugin.h "$pipewire_include_path"
+    if [ "$have_spa_support_plugin_h" = yes ]; then
+	append_nodupe CFLAGS "-I${include_spa_support_plugin_h_path}"
+	check_include pipewire/pipewire.h "$pipewire_include_path"
+	if [ "$have_pipewire_pipewire_h" = yes ]; then
+	    append_nodupe CFLAGS "-I${include_pipewire_pipewire_h_path} ${pipewire_cflags}"
+
+	    if [ "$pipewire_have_pkg_config" = yes ]; then
+		pipewire_ldpath_flags="$(pkg-config --libs-only-L ${pipewire_version})"
+		pipewire_libname_flags="$(pkg-config --libs-only-l ${pipewire_version})"
+		pipewire_ldflags="$(pkg-config --libs-only-other ${pipewire_version})"
+	    else
+		pipewire_ldpath_flags=''
+		pipewire_libname_flags='-lpipewire-0.3'
+		pipewire_ldflags=''
+	    fi
+	    pipewire_ldpath="$(sed -e 's/^-L//' -e 's/ -L/ /g' <<<"${pipewire_ldpath_flags}")"
+	    pipewire_libname="${pipewire_libname_flags#*-l}"
+
+            check_libs "${pipewire_libname}" "" "${pipewire_ldpath}" "" "${pipewire_ldflags}" <<EOF
+#include <pipewire/pipewire.h>
+int main(int argc, char **argv) {
+    pw_init(0, NULL);
+    pw_deinit();
+    return 0;
+}
+EOF
+            if [ "$?" -eq 0 ]; then
+		use_pipewire=yes
+            fi
+	fi
+    fi
+
+    recheck_use pipewire
 fi
 
 if [ "$use_pulse" != no ]; then
@@ -1230,6 +1292,7 @@ use_verbosebuild
 windows_build
 windows_libprefix
 libaudio_flags
+libpipewire_0_3_flags
 libSDL2_flags
 __EOF__
     echo plugout_alsa := $use_alsa
@@ -1239,6 +1302,7 @@ __EOF__
     echo plugout_midi := $use_midi
     echo plugout_altmidi := $use_altmidi
     echo plugout_nas := $use_nas
+    echo plugout_pipewire := $use_pipewire
     echo plugout_pulse := $use_pulse
     echo plugout_sdl := $use_sdl
     echo plugout_stdout := $use_stdout
@@ -1260,6 +1324,7 @@ __EOF__
     plugout_x MIDI
     plugout_x ALTMIDI
     plugout_x NAS
+    plugout_x PIPEWIRE
     plugout_x PULSE
     plugout_x STDOUT
     plugout_x SDL
