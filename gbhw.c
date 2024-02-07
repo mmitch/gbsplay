@@ -114,7 +114,7 @@ void gbhw_init_struct(struct gbhw *gbhw) {
 	gbhw->impbuf = NULL;   /* internal impulse output buffer */
 
 	gbhw->lfsr_narrow = 0;
-	gbhw->lfsr = 0xffffffff;
+	gbhw->lfsr = 0;
 
 	gbhw->sound_div_tc = 0;
 
