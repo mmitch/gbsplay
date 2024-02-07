@@ -107,8 +107,7 @@ struct gbhw {
 	gbhw_stepcallback_fn stepcallback;
 	void *stepcallback_priv;
 
-	uint32_t tap1;
-	uint32_t tap2;
+	long lfsr_narrow;
 	uint32_t lfsr;
 
 	long long sound_div_tc;
