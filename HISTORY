@@ -2,6 +2,15 @@
 gbsplay HISTORY
 
 
+2024/xx/xx  -  unreleased
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Bugfixes:
+
+- gbs core:
+  - fix noise channel LSFR for more faithful drumtracks in most ROMs
+
+
 2024/02/04  -  0.0.96
 ~~~~~~~~~~~~~~~~~~~~~
 
