@@ -44,9 +44,10 @@ int gblfsr_next_value(struct gblfsr* gblfsr) {
 test void test_lsfr()
 {
 	struct gblfsr state;
-	uint32_t xw, xn;
+	uint32_t x = 0;
 	int n;
 
+	/* Full period should be 32767 */
 	gblfsr_reset(&state);
 	n = 0;
 	do {
@@ -55,6 +56,7 @@ test void test_lsfr()
 	} while ((state.lfsr & MASK_FULL) != 0 && n < 99999);
 	ASSERT_EQUAL("%d", n, 32767);
 
+	/* Narrow period should be 127 */
 	gblfsr_reset(&state);
 	gblfsr_set_narrow(&state, true);
 	n = 0;
@@ -64,22 +66,30 @@ test void test_lsfr()
 	} while ((state.lfsr & MASK_NARROW) != 0 && n < 999);
 	ASSERT_EQUAL("%d", n, 127);
 
+	/* Test first 32 full output bits from reset */
 	gblfsr_reset(&state);
-	xw = 0;
 	for (n = 0; n < 32; n++) {
-		xw <<= 1;
-		xw |= gblfsr_next_value(&state);
+		x <<= 1;
+		x |= gblfsr_next_value(&state);
 	}
-	ASSERT_EQUAL("%08x", xw, 0xfffc0008);
+	ASSERT_EQUAL("%08x", x, 0xfffc0008);
 
+	/* Test first 32 narrow output bits from reset */
 	gblfsr_reset(&state);
 	gblfsr_set_narrow(&state, true);
-	xn = 0;
 	for (n = 0; n < 32; n++) {
-		xn <<= 1;
-		xn |= gblfsr_next_value(&state);
+		x <<= 1;
+		x |= gblfsr_next_value(&state);
 	}
-	ASSERT_EQUAL("%08x", xn, 0xfc0830a3);
+	ASSERT_EQUAL("%08x", x, 0xfc0830a3);
+
+	/* Test output bits after switching from narrow to long without reset */
+	gblfsr_set_narrow(&state, false);
+	for (n = 0; n < 32; n++) {
+		x <<= 1;
+		x |= gblfsr_next_value(&state);
+	}
+	ASSERT_EQUAL("%08x", x, 0xcbc8b8b3);
 }
 TEST(test_lsfr);
 TEST_EOF;
