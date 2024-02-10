@@ -11,6 +11,11 @@
 #include <SDL.h>
 #include <SDL_hints.h>
 
+/* SDL_HINT_APP_NAME was only added in SDL 2.0.18 */
+#ifndef SDL_HINT_APP_NAME
+#define SDL_HINT_APP_NAME "SDL_APP_NAME"
+#endif
+
 #include "common.h"
 #include "plugout.h"
 
