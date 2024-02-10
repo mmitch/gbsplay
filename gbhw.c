@@ -65,10 +65,11 @@ static const long vblankclocks = 4560;
 
 static const long msec_cycles = GBHW_CLOCK/1000;
 
-#define TAP1_15		0x4000;
-#define TAP2_15		0x2000;
-#define TAP1_7		0x0040;
-#define TAP2_7		0x0020;
+/* our LFSR shifts left so we can save on some shifting and masking,
+   hence the bit order is reversed */
+#define TAP_0		(1 << 14)
+#define TAP_1		(1 << 13)
+#define FB_6		(1 << 8)
 
 #define SOUND_DIV_MULT 0x10000LL
 
@@ -112,9 +113,8 @@ void gbhw_init_struct(struct gbhw *gbhw) {
 	gbhw->soundbuf = NULL; /* externally visible output buffer */
 	gbhw->impbuf = NULL;   /* internal impulse output buffer */
 
-	gbhw->tap1 = TAP1_15;
-	gbhw->tap2 = TAP2_15;
-	gbhw->lfsr = 0xffffffff;
+	gbhw->lfsr_narrow = 0;
+	gbhw->lfsr = 0;
 
 	gbhw->sound_div_tc = 0;
 
@@ -463,20 +463,14 @@ static void io_put(void *priv, uint32_t addr, uint8_t val)
 				long old_len_enable = gbhw->ch[chn].len_enable;
 				gbhw->ch[3].div_ctr = 0;
 				gbhw->ch[3].div_tc = 16 << shift;
-				if (reg & 8) {
-					gbhw->tap1 = TAP1_7;
-					gbhw->tap2 = TAP2_7;
-				} else {
-					gbhw->tap1 = TAP1_15;
-					gbhw->tap2 = TAP2_15;
-				}
+				gbhw->lfsr_narrow = (reg & 8) > 0;
 				if (rate) gbhw->ch[3].div_tc *= rate;
 				else gbhw->ch[3].div_tc /= 2;
 				gbhw->ch[chn].len_enable = (gbhw->ioregs[0x23] & 0x40) > 0;
 				if (addr == 0xff22) break;
 
 				if (val & 0x80) {  /* trigger */
-					gbhw->lfsr = 0xffffffff;
+					gbhw->lfsr = 0;
 					gbhw->ch[chn].env_volume = gbhw->ch[chn].volume;
 					if (!gbhw->ch[chn].len_gate) {
 						gbhw->ch[chn].len_gate = 1;
@@ -774,10 +768,15 @@ static void gb_sound(struct gbhw *gbhw, cycles_t cycles)
 		if (gbhw->ch[3].running) {
 			gbhw->ch[3].div_ctr--;
 			if (gbhw->ch[3].div_ctr <= 0) {
+				long tap_out;
 				long val;
 				gbhw->ch[3].div_ctr = gbhw->ch[3].div_tc;
-				gbhw->lfsr = (gbhw->lfsr << 1) | (((gbhw->lfsr & gbhw->tap1) > 0) ^ ((gbhw->lfsr & gbhw->tap2) > 0));
-				val = gbhw->ch[3].env_volume * 2 * (!(gbhw->lfsr & gbhw->tap1));
+				tap_out = !(((gbhw->lfsr & TAP_0) > 0) ^ ((gbhw->lfsr & TAP_1) > 0));
+				gbhw->lfsr = (gbhw->lfsr << 1) | tap_out;
+				if(gbhw->lfsr_narrow) {
+					gbhw->lfsr = (gbhw->lfsr & ~FB_6) | ((tap_out) * FB_6);
+				}
+				val = gbhw->ch[3].env_volume * 2 * (!(gbhw->lfsr & TAP_0));
 				gbhw->ch[3].lvl = val - 15;
 				gbhw->update_level = 1;
 			}
