@@ -15,6 +15,7 @@
 #include "common.h"
 #include "libgbs.h"
 #include "gbcpu.h"
+#include "gblfsr.h"
 
 #define GBHW_CLOCK 4194304
 
@@ -107,8 +108,7 @@ struct gbhw {
 	gbhw_stepcallback_fn stepcallback;
 	void *stepcallback_priv;
 
-	long lfsr_narrow;
-	uint32_t lfsr;
+	struct gblfsr lfsr;
 
 	long long sound_div_tc;
 	long main_div;

@@ -100,8 +100,8 @@ apimans            := $(patsubst %,$(apidocdir)/man/man3/%.3,$(apimans_list))
 
 apiheaders         := libgbs.h
 
-objs_libgbspic     := gbcpu.lo gbhw.lo mapper.lo gbs.lo crc32.lo
-objs_libgbs        := gbcpu.o  gbhw.o  mapper.o  gbs.o  crc32.o
+objs_libgbspic     := gbcpu.lo gbhw.lo gblfsr.lo mapper.lo gbs.lo crc32.lo
+objs_libgbs        := gbcpu.o  gbhw.o  gblfsr.o  mapper.o  gbs.o  crc32.o
 objs_gbs2gb        := gbs2gb.o
 objs_gbsinfo       := gbsinfo.o
 objs_gbsplay       := gbsplay.o  util.o plugout.o player.o cfgparser.o
