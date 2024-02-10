@@ -10,21 +10,17 @@
 #include "gblfsr.h"
 #include "test.h"
 
-/* our LFSR shifts left so we can save on some shifting and masking,
-   hence the bit order is reversed */
-#define TAP_0		(1 << 14)
-#define TAP_1		(1 << 13)
-#define FB_6		(1 << 8)
+#define FB_6		(1 << 6)
 #define MASK_FULL	((1 << 15) - 1)
-#define MASK_NARROW	(((1 << 7) - 1) << (15 - 7))
+#define MASK_NARROW	((1 << 7) - 1)
 
 void gblfsr_reset(struct gblfsr* gblfsr) {
-	gblfsr->lfsr = -1;
+	gblfsr->lfsr = MASK_FULL;
 	gblfsr->narrow = false;
 }
 
 void gblfsr_trigger(struct gblfsr* gblfsr) {
-	gblfsr->lfsr = -1;
+	gblfsr->lfsr = MASK_FULL;
 }
 
 void gblfsr_set_narrow(struct gblfsr* gblfsr, bool narrow) {
@@ -32,13 +28,14 @@ void gblfsr_set_narrow(struct gblfsr* gblfsr, bool narrow) {
 }
 
 int gblfsr_next_value(struct gblfsr* gblfsr) {
-	long tap_out;
-	tap_out = (((gblfsr->lfsr & TAP_0) > 0) ^ ((gblfsr->lfsr & TAP_1) > 0));
-	gblfsr->lfsr = (gblfsr->lfsr << 1) | tap_out;
-	if(gblfsr->narrow) {
-		gblfsr->lfsr = (gblfsr->lfsr & ~FB_6) | ((tap_out) * FB_6);
-	}
-	return !!(gblfsr->lfsr & TAP_0);
+	uint32_t val = gblfsr->lfsr;
+	uint32_t shifted = val >> 1;
+	uint32_t xor_out = (val ^ shifted) & 1; /* TAP_0 ^ TAP_1 */
+	uint32_t wide = shifted | (xor_out << 14); /* FB_14 */
+	uint32_t narrow = (wide & ~FB_6) | (xor_out * FB_6);
+	uint32_t new = gblfsr->narrow ? narrow : wide;
+	gblfsr->lfsr = new;
+	return new & 1;
 }
 
 test void test_lsfr()
