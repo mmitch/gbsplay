@@ -10,6 +10,7 @@
 #define _TEST_H_
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #define ASSERT_EQUAL(fmt, a, b) do { \
 	if ((a) != (b)) { \

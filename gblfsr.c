@@ -65,6 +65,7 @@ test void test_lsfr()
 	ASSERT_EQUAL("%d", n, 127);
 
 	gblfsr_reset(&state);
+	xw = 0;
 	for (n = 0; n < 32; n++) {
 		xw <<= 1;
 		xw |= gblfsr_next_value(&state);
@@ -73,6 +74,7 @@ test void test_lsfr()
 
 	gblfsr_reset(&state);
 	gblfsr_set_narrow(&state, true);
+	xn = 0;
 	for (n = 0; n < 32; n++) {
 		xn <<= 1;
 		xn |= gblfsr_next_value(&state);
