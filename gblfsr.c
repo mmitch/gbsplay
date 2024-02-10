@@ -19,12 +19,12 @@
 #define MASK_NARROW	(((1 << 7) - 1) << (15 - 7))
 
 void gblfsr_reset(struct gblfsr* gblfsr) {
-	gblfsr->lfsr = 0;
+	gblfsr->lfsr = -1;
 	gblfsr->narrow = false;
 }
 
 void gblfsr_trigger(struct gblfsr* gblfsr) {
-	gblfsr->lfsr = 0;
+	gblfsr->lfsr = -1;
 }
 
 void gblfsr_set_narrow(struct gblfsr* gblfsr, bool narrow) {
@@ -33,12 +33,12 @@ void gblfsr_set_narrow(struct gblfsr* gblfsr, bool narrow) {
 
 int gblfsr_next_value(struct gblfsr* gblfsr) {
 	long tap_out;
-	tap_out = !(((gblfsr->lfsr & TAP_0) > 0) ^ ((gblfsr->lfsr & TAP_1) > 0));
+	tap_out = (((gblfsr->lfsr & TAP_0) > 0) ^ ((gblfsr->lfsr & TAP_1) > 0));
 	gblfsr->lfsr = (gblfsr->lfsr << 1) | tap_out;
 	if(gblfsr->narrow) {
 		gblfsr->lfsr = (gblfsr->lfsr & ~FB_6) | ((tap_out) * FB_6);
 	}
-	return !(gblfsr->lfsr & TAP_0);
+	return !!(gblfsr->lfsr & TAP_0);
 }
 
 test void test_lsfr()
@@ -53,7 +53,7 @@ test void test_lsfr()
 	do {
 		gblfsr_next_value(&state);
 		n++;
-	} while ((state.lfsr & MASK_FULL) != 0 && n < 99999);
+	} while ((state.lfsr & MASK_FULL) != MASK_FULL && n < 99999);
 	ASSERT_EQUAL("%d", n, 32767);
 
 	/* Narrow period should be 127 */
@@ -63,7 +63,7 @@ test void test_lsfr()
 	do {
 		gblfsr_next_value(&state);
 		n++;
-	} while ((state.lfsr & MASK_NARROW) != 0 && n < 999);
+	} while ((state.lfsr & MASK_NARROW) != MASK_NARROW && n < 999);
 	ASSERT_EQUAL("%d", n, 127);
 
 	/* Test first 32 full output bits from reset */
