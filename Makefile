@@ -109,7 +109,7 @@ objs_xgbsplay      := xgbsplay.o util.o plugout.o player.o cfgparser.o
 objs_test_gbs      := test_gbs.o
 objs_gen_impulse_h := gen_impulse_h.ho impulsegen.ho
 
-tests              := util.test impulsegen.test
+tests              := util.test impulsegen.test gblfsr.test
 
 # terminal handling
 ifeq ($(windows_libprefix),lib)
