@@ -10,6 +10,13 @@ Bugfixes:
 - gbs core:
   - fix noise channel LSFR for more faithful drumtracks in most ROMs
 
+- gbsplay
+  - fix display of unknown version number (gbsplay -V)
+
+Enhancements:
+
+- build process
+  - display version number during configure
 
 2024/02/04  -  0.0.96
 ~~~~~~~~~~~~~~~~~~~~~
