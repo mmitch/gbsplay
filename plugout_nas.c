@@ -25,6 +25,12 @@
 
 #define NAS_BUFFER_SAMPLES 8192
 
+#if GBS_BYTE_ORDER == GBS_ORDER_LITTLE_ENDIAN
+#define AuFormatLinearSigned16_NATIVE AuFormatLinearSigned16LSB
+#else
+#define AuFormatLinearSigned16_NATIVE AuFormatLinearSigned16MSB
+#endif
+
 static const struct timespec ONE_MILLISECOND = {
 	.tv_sec = 0,
 	.tv_nsec = 1000000
@@ -109,19 +115,9 @@ static long nas_open(enum plugout_endian *endian, long rate, long *buffer_bytes,
 	UNUSED(metadata);
 
 	switch (*endian) {
-	case PLUGOUT_ENDIAN_BIG:
-		nas_format = AuFormatLinearSigned16MSB;
-		break;
-	case PLUGOUT_ENDIAN_LITTLE:
-		nas_format = AuFormatLinearSigned16LSB;
-		break;
-	default:
-		if (is_le_machine()) {
-			nas_format = AuFormatLinearSigned16LSB;
-		} else {
-			nas_format = AuFormatLinearSigned16MSB;
-		}
-		break;
+	case PLUGOUT_ENDIAN_BIG:	nas_format = AuFormatLinearSigned16MSB;     break;
+	case PLUGOUT_ENDIAN_LITTLE:	nas_format = AuFormatLinearSigned16LSB;     break;
+	default:			nas_format = AuFormatLinearSigned16_NATIVE; break;
 	}
 
 	/* open server connection */
