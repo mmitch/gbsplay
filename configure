@@ -60,7 +60,7 @@ LANG=C
 export LANG
 
 ## set default version number to unknown
-# will be overwritten on git build or tar.gz export
+# will be overwritten on git build or tar.gz export using 'make dist'
 VERSION=unknown
 
 ##### begin of subroutines
@@ -679,10 +679,17 @@ else
     die "error executing '$BUILDCC'"
 fi
 
-# Check git timestamp
+# determine version that is built
 
 if [ -f .git/HEAD ]; then
+    # from git if the build happens in a repository
     VERSION=$(git describe --tags)
+elif [ "$VERSION" = unknown ]; then
+    # get a rough version number based on HISTORY file
+    VERSION="$(
+	grep -E '^[0-9]{4}/[0-9]{2}/[0-9]{2}  -  [0-9]+.[0-9]+.[0-9]+' HISTORY \
+	    | sed -n '1{s/^.*  -  //;s/ .*//;p}'
+	)ish"
 fi
 
 ## check for windows environment
