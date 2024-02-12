@@ -16,12 +16,6 @@
 #include "common.h"
 #include "plugout.h"
 
-#if GBS_BYTE_ORDER == GBS_ORDER_LITTLE_ENDIAN
-#define SPA_AUDIO_FORMAT_S16_NE SPA_AUDIO_FORMAT_S16_LE
-#else
-#define SPA_AUDIO_FORMAT_S16_NE SPA_AUDIO_FORMAT_S16_BE
-#endif
-
 static const int BYTES_PER_SAMPLE = 2;
 static const int CHANNELS = 2;
 static const int STRIDE = BYTES_PER_SAMPLE * CHANNELS;
@@ -49,7 +43,7 @@ static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_b
 	switch (*endian) {
 	case PLUGOUT_ENDIAN_BIG:    fmt = SPA_AUDIO_FORMAT_S16_BE; break;
 	case PLUGOUT_ENDIAN_LITTLE: fmt = SPA_AUDIO_FORMAT_S16_LE; break;
-	default:                    fmt = SPA_AUDIO_FORMAT_S16_NE; break;
+	default:                    fmt = SPA_AUDIO_FORMAT_S16;    break;
 	}
 
 	// determine buffer wait time - use 25% gbsplay buffer length (~2 wait cycles on my machine)
@@ -67,9 +61,9 @@ static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_b
 	pipewire_data.loop = pw_thread_loop_new(metadata.player_name, NULL);
 
 	// set stream metadata
-	props = pw_properties_new(PW_KEY_MEDIA_TYPE, "Audio",
+	props = pw_properties_new(PW_KEY_MEDIA_TYPE,     "Audio",
 				  PW_KEY_MEDIA_CATEGORY, "Playback",
-				  PW_KEY_MEDIA_ROLE, "Music",
+				  PW_KEY_MEDIA_ROLE,     "Music",
 				  NULL);
 
 	// TODO: we could add a PW_KEY_TARGET_OBJECT to select an audio target,
