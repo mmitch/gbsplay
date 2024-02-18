@@ -63,7 +63,7 @@ struct gbhw_channel {
 	long div_tc;
 	long div_tc_shadow;
 	long div_ctr;
-	long duty_tc;
+	long duty_val;
 	long duty_ctr;
 };
 

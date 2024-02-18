@@ -50,8 +50,20 @@ static const uint8_t ioregs_initdata[GBHW_IOREGS_SIZE] = {
 	/* 0x30 */ 0xac, 0xdd, 0xda, 0x48, 0x36, 0x02, 0xcf, 0x16, 0x2c, 0x04, 0xe5, 0x2c, 0xac, 0xdd, 0xda, 0x48,
 };
 
+/* Duty base counters:
+ * a: 01010101
+ * b: 00110011
+ * c: 00001111
+ *
+ * Combinations:
+ * c&b&!a: 00000010 (12.5%)
+ * c&b:    00000011 (25%)
+ * c:      00001111 (50%)
+ * !(c&b): 11111100 (75%)
+ */
+
 static const char dutylookup[4] = {
-	1, 2, 4, 6
+	0x02, 0x03, 0x0f, 0xfc
 };
 static const long len_mask[4] = {
 	0x3f, 0x3f, 0xff, 0x3f
@@ -71,8 +83,8 @@ static const long msec_cycles = GBHW_CLOCK/1000;
 #define IMPULSE_N (1 << IMPULSE_N_SHIFT)
 #define IMPULSE_N_MASK (IMPULSE_N - 1)
 
-static const long main_div_tc = 32;
-static const long sweep_div_tc = 256;
+static const long main_div_tc = 4;
+static const long sweep_div_tc = 2048;
 
 static inline long timertc_from_tac(uint8_t tac)
 {
@@ -222,7 +234,7 @@ static void apu_reset(struct gbhw *gbhw)
 		gbhw->ch[i].len_gate = 0;
 		gbhw->ch[i].volume = 0;
 		gbhw->ch[i].env_volume = 0;
-		gbhw->ch[i].duty_ctr = 4;
+		gbhw->ch[i].duty_ctr = 0;
 		gbhw->ch[i].div_tc = 1;
 		gbhw->ch[i].master = 1;
 		gbhw->ch[i].running = 0;
@@ -351,8 +363,7 @@ static void io_put(void *priv, uint32_t addr, uint8_t val)
 				long duty_ctr = val >> 6;
 				long len = val & 0x3f;
 
-				gbhw->ch[chn].duty_ctr = dutylookup[duty_ctr];
-				gbhw->ch[chn].duty_tc = gbhw->ch[chn].div_tc*gbhw->ch[chn].duty_ctr/8;
+				gbhw->ch[chn].duty_val = dutylookup[duty_ctr];
 				gbhw->ch[chn].len = len;
 				gbhw->ch[chn].len_gate = 1;
 
@@ -388,7 +399,6 @@ static void io_put(void *priv, uint32_t addr, uint8_t val)
 
 				div |= ((long)gbhw->ioregs[0x14 + 5*chn] & 7) << 8;
 				gbhw->ch[chn].div_tc = 2048 - div;
-				gbhw->ch[chn].duty_tc = gbhw->ch[chn].div_tc*gbhw->ch[chn].duty_ctr/8;
 
 				if (addr == 0xff13 ||
 				    addr == 0xff18 ||
@@ -590,7 +600,6 @@ static void sequencer_step(struct gbhw *gbhw)
 				}
 				gbhw->ch[0].div_tc = gbhw->ch[0].div_tc_shadow;
 			}
-			gbhw->ch[0].duty_tc = gbhw->ch[0].div_tc*gbhw->ch[0].duty_ctr/8;
 		}
 	}
 	for (i=0; clock_len && i<4; i++) {
@@ -773,14 +782,14 @@ static void gb_sound(struct gbhw *gbhw, cycles_t cycles)
 			gbhw->main_div -= main_div_tc;
 
 			for (i=0; i<2; i++) if (gbhw->ch[i].running) {
-				long val = 2 * gbhw->ch[i].env_volume;
-				if (gbhw->ch[i].div_ctr > gbhw->ch[i].duty_tc) {
-					val = 0;
-				}
+				long bit = (gbhw->ch[i].duty_val >> gbhw->ch[i].duty_ctr) & 1;
+				long val = bit * 2 * gbhw->ch[i].env_volume;
 				gbhw->ch[i].lvl = val - 15;
 				gbhw->ch[i].div_ctr--;
 				if (gbhw->ch[i].div_ctr <= 0) {
 					gbhw->ch[i].div_ctr = gbhw->ch[i].div_tc;
+					gbhw->ch[i].duty_ctr++;
+					gbhw->ch[i].duty_ctr &= 7;
 				}
 			}
 
@@ -935,6 +944,8 @@ void gbhw_init(struct gbhw* const gbhw)
 	gbhw->vblankctr = vblanktc;
 	gbhw->timerctr = 0;
 	gbhw->divoffset = 0;
+	gbhw->main_div = 0;
+	gbhw->sweep_div = 0;
 
 	if (gbhw->impbuf)
 		gbhw_impbuf_reset(gbhw);
@@ -961,6 +972,8 @@ void gbhw_init(struct gbhw* const gbhw)
 
 	gbhw->sum_cycles = 0;
 	gbhw->halted_noirq_cycles = 0;
+	gbhw->ch[0].duty_ctr = 0;
+	gbhw->ch[1].duty_ctr = 0;
 	gbhw->ch3pos = 0;
 	gbhw->ch3_next_nibble = 0;
 	gbhw->last_l_value = 0;
