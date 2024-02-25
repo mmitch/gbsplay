@@ -1,0 +1,42 @@
+# this workflow handles new releases and adds artifacts
+
+name: Release
+on:
+  release:
+    types:
+      - published
+
+permissions: read-all
+
+jobs:
+  release-tar-gz:
+    name: Release .tar.gz
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # needed to upload the artifact
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: build .tar.gz using make dist
+        run: |
+          # configure and determine build version
+          ./configure
+
+          # save build version for later
+          build_version="$(sed -n '/^VERSION/s/.*:= //p' config.mk)"
+          echo "build version is $build_version"
+
+          # build the tarball
+          make dist
+
+          # determine archive name for the next step
+          archive_name="../gbsplay-$build_version.tar.gz"
+          echo "archive name is $archive_name"
+          ls -l "$archive_name" || exit 1
+          echo "archive_name=$archive_name" >> "$GITHUB_ENV"
+      - name: upload .tar.gz artifact
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ env.archive_name }}
