@@ -537,7 +537,7 @@ test: gbsplay $(tests) test_gbs
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "alternate MIDI output ok"; \
 	else \
-		echo "alterante MIDI output failed"; \
+		echo "alternate MIDI output failed"; \
 		echo "  Expected: $$EXPECT"; \
 		echo "  Got:      $$MD5" ; \
 		exit 1; \
