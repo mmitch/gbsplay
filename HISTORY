@@ -9,7 +9,7 @@ Bugfixes:
 
 - gbs core:
   - fix noise channel LSFR for more faithful drumtracks in most ROMs
-  - fix generated MIDI files being ~3% too slow
+  - fix generated MIDI files being ~1.5% too slow
 
 - gbsplay
   - fix display of unknown version number (gbsplay -V)
