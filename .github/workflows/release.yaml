@@ -37,6 +37,6 @@ jobs:
           ls -l "$archive_name" || exit 1
           echo "archive_name=$archive_name" >> "$GITHUB_ENV"
       - name: upload .tar.gz artifact
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: ${{ env.archive_name }}
