@@ -242,6 +242,8 @@ long gbs_init(struct gbs* const gbs, long subsong)
 	struct gbcpu *gbcpu = &gbhw->gbcpu;
 
 	gbhw_init(gbhw);
+	if (gbs->mapper)
+		mapper_init(gbs->mapper);
 
 	if (subsong == -1) subsong = gbs->defaultsong - 1;
 	if (subsong >= gbs->songs) {
