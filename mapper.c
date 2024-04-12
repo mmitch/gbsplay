@@ -254,3 +254,7 @@ struct mapper *mapper_gb(struct gbcpu *gbcpu, const uint8_t *rom, size_t size, u
 void mapper_free(struct mapper *m) {
 	free(m);
 }
+
+void mapper_init(struct mapper *m) {
+	memset(m->ram, 0, sizeof(m->ram));
+}
