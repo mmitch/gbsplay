@@ -2,8 +2,8 @@
 gbsplay HISTORY
 
 
-2024/xx/xx  -  unreleased
-~~~~~~~~~~~~~~~~~~~~~~~~~
+2024/04/17  -  0.0.97
+~~~~~~~~~~~~~~~~~~~~~
 
 Bugfixes:
 
@@ -20,6 +20,8 @@ Enhancements:
 
 - build process
   - display version number during configure
+  - automatically provide a .tar.gz on the GitHub release page that
+    contains proper version information like the old manual releases
 
 
 2024/02/04  -  0.0.96
