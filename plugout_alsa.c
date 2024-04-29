@@ -22,6 +22,8 @@
 /* Handle for the PCM device */
 snd_pcm_t *pcm_handle;
 
+bool can_pause;
+
 #if GBS_BYTE_ORDER == GBS_ORDER_LITTLE_ENDIAN
 #define SND_PCM_FORMAT_S16_NE SND_PCM_FORMAT_S16_LE
 #else
@@ -98,12 +100,16 @@ static long alsa_open(enum plugout_endian *endian, long rate, long *buffer_bytes
 
 	*buffer_bytes = buffer_frames * 4;
 
+	can_pause = snd_pcm_hw_params_can_pause(hwparams);
+
 	return 0;
 }
 
 static void alsa_pause(int pause)
 {
-	snd_pcm_pause(pcm_handle, pause);
+	int err;
+	if (can_pause && (err = snd_pcm_pause(pcm_handle, pause)))
+		fprintf(stderr, _("snd_pcm_pause failed: %s\n"), snd_strerror(err));
 }
 
 static long is_suspended(snd_pcm_sframes_t retval)
