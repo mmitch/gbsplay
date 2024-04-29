@@ -101,6 +101,11 @@ static long alsa_open(enum plugout_endian *endian, long rate, long *buffer_bytes
 	return 0;
 }
 
+static void alsa_pause(int pause)
+{
+	snd_pcm_pause(pcm_handle, pause);
+}
+
 static long is_suspended(snd_pcm_sframes_t retval)
 {
 #ifdef HAVE_ESTRPIPE
@@ -110,18 +115,24 @@ static long is_suspended(snd_pcm_sframes_t retval)
 #endif
 }
 
+static long is_underrun(snd_pcm_sframes_t retval)
+{
+	return retval == -EPIPE;
+}
+
 static ssize_t alsa_write(const void *buf, size_t count)
 {
 	snd_pcm_sframes_t retval;
 
 	do {
 		retval = snd_pcm_writei(pcm_handle, buf, count / 4);
-		if (!is_suspended(retval))
-			break;
-
-		/* resume from suspend */
-		while (snd_pcm_resume(pcm_handle) == -EAGAIN)
-			sleep(1);
+		if (is_suspended(retval)) {
+			/* resume from suspend */
+			while (snd_pcm_resume(pcm_handle) == -EAGAIN)
+				sleep(1);
+		} else if (is_underrun(retval)) {
+			snd_pcm_prepare(pcm_handle);
+		} else break;
 	} while (1);
 	if (retval < 0) {
 		fprintf(stderr, _("snd_pcm_writei failed: %s\n"), snd_strerror(retval));
@@ -140,6 +151,7 @@ const struct output_plugin plugout_alsa = {
 	.name = "alsa",
 	.description = "ALSA sound driver",
 	.open = alsa_open,
+	.pause = alsa_pause,
 	.write = alsa_write,
 	.close = alsa_close,
 };
