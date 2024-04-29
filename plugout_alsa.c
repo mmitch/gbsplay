@@ -101,6 +101,28 @@ static long alsa_open(enum plugout_endian *endian, long rate, long *buffer_bytes
 	return 0;
 }
 
+static int handle_underrun() {
+	int err = snd_pcm_prepare(pcm_handle);
+	if (err < 0) {
+		fprintf(stderr, _("snd_pcm_prepare failed after underrun: %s\n"), snd_strerror(err));
+	}
+	return err;
+}
+
+static int handle_resume() {
+	int err;
+	while ((err = snd_pcm_resume(pcm_handle)) == -EAGAIN)
+		sleep(1); /* wait for release of suspend flag */
+
+	if (err < 0) {
+		err = snd_pcm_prepare(pcm_handle);
+		if (err < 0) {
+			fprintf(stderr, _("snd_pcm_prepare failed after resume: %s\n"), snd_strerror(err));
+		}
+	}
+	return err;
+}
+
 static long is_suspended(snd_pcm_sframes_t retval)
 {
 #ifdef HAVE_ESTRPIPE
@@ -113,20 +135,31 @@ static long is_suspended(snd_pcm_sframes_t retval)
 static ssize_t alsa_write(const void *buf, size_t count)
 {
 	snd_pcm_sframes_t retval;
-
 	do {
 		retval = snd_pcm_writei(pcm_handle, buf, count / 4);
-		if (!is_suspended(retval))
-			break;
 
-		/* resume from suspend */
-		while (snd_pcm_resume(pcm_handle) == -EAGAIN)
-			sleep(1);
+		if (retval == -EAGAIN) {
+			continue;
+		}
+		else if (retval == -EPIPE) {
+			retval = handle_underrun();
+			if (retval < 0)
+				break;
+		}
+		else if (is_suspended(retval)) {
+			retval = handle_resume();
+			if (retval < 0)
+				break;
+		}
+		else if (retval < 0) {
+			fprintf(stderr, _("snd_pcm_writei failed: %s\n"), snd_strerror(retval));
+			snd_pcm_prepare(pcm_handle);
+			break;
+		}
+		else {
+			break; /* write successful */
+		}
 	} while (1);
-	if (retval < 0) {
-		fprintf(stderr, _("snd_pcm_writei failed: %s\n"), snd_strerror(retval));
-		snd_pcm_prepare(pcm_handle);
-	}
 	return retval;
 }
 
