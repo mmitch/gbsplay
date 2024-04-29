@@ -105,10 +105,8 @@ static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_b
 static void pipewire_pause(int pause)
 {
 	int err;
-	if ((err = pw_stream_set_active(pipewire_data.stream, !pause))) {
+	if ((err = pw_stream_set_active(pipewire_data.stream, !pause)))
 		fprintf(stderr, _("pw_stream_set_active failed: %s\n"), spa_strerror(err));
-		return;
-	}
 }
 
 static ssize_t pipewire_write(const void *buf, size_t count)
