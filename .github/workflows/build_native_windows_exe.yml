@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         type: [MINGW64]
-        flags: ['']
+        flags: ['LDFLAGS=-static']
         include:
           - type: MINGW64
             msystem: true
