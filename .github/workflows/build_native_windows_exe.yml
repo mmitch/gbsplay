@@ -1,0 +1,55 @@
+# This workflow will build and test gbsplay in various configurations on Windows.
+
+name: Windows Build
+
+on:
+  push:
+  pull_request:
+    types: [opened]
+  schedule:
+    - cron: '23 4 5 * *'
+
+jobs:
+  build-windows:
+    name: Build and test on Windows
+
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        type: [MINGW64]
+        flags: ['']
+        include:
+          - type: MINGW64
+            msystem: true
+            packages: mingw-w64-x86_64-toolchain mingw-w64-x86_64-SDL2
+            plugouts: dsound sdl
+            shell: msys2 {0}
+
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+
+    steps:
+    - uses: actions/checkout@v4
+    - if: ${{ matrix.msystem }}
+      name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: ${{ matrix.type }}
+        install: git base-devel ${{ matrix.packages }} libintl gettext-devel zlib-devel dos2unix
+        release: false
+        update: false
+    - name: Build and test
+      env:
+        CONFIGURE_FLAGS: ${{ matrix.flags }} --enable-verbosebuild --build=x86_64-w64-mingw32
+      run: |
+        make
+    - name: upload binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: standalone Windows binary
+        path: gbsplay.exe
+        if-no-files-found: error
+        retention-days: 7 # this branch is for tests only, don't hog resources
+        compression-level: 0 # we don't expect to be able to compress an .exe significantly
