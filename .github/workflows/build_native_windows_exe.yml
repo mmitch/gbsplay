@@ -22,8 +22,8 @@ jobs:
         include:
           - type: MINGW64
             msystem: true
-            packages: mingw-w64-x86_64-toolchain mingw-w64-x86_64-SDL2
-            plugouts: dsound sdl
+            packages: mingw-w64-x86_64-toolchain
+            plugouts: dsound
             shell: msys2 {0}
 
     defaults:
