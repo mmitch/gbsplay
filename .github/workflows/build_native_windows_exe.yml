@@ -22,7 +22,7 @@ jobs:
         include:
           - type: MINGW64
             msystem: true
-            packages: mingw-w64-x86_64-toolchain
+            packages: mingw-w64-x86_64-toolchain groff
             plugouts: dsound
             shell: msys2 {0}
 
@@ -45,6 +45,9 @@ jobs:
         CONFIGURE_FLAGS: ${{ matrix.flags }} --enable-verbosebuild --build=x86_64-w64-mingw32
       run: |
         make
+    - name: Generate manpage
+      run: |
+        groff -man -Tascii -rLL=100n man/gbsplay.1 | col -bx > gbsplay-help.txt
     - name: upload binary
       uses: actions/upload-artifact@v4
       with:
@@ -53,3 +56,11 @@ jobs:
         if-no-files-found: error
         retention-days: 7 # this branch is for tests only, don't hog resources
         compression-level: 0 # we don't expect to be able to compress an .exe significantly
+    - name: upload help text
+      uses: actions/upload-artifact@v4
+      with:
+        name: manpage for gbsplay.exe
+        path: gbsplay-help.txt
+        if-no-files-found: error
+        retention-days: 7 # this branch is for tests only, don't hog resources
+        compression-level: 9 # we don't expect to be able to compress this plaintext significantly
