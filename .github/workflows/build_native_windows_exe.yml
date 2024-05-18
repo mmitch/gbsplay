@@ -47,7 +47,12 @@ jobs:
         make
     - name: Generate manpage
       run: |
-        groff -man -Tascii -rLL=100n man/gbsplay.1 | col -bx > gbsplay-help.txt
+        groff -man -Tascii man/gbsplay.1 > groff-nowidth.txt
+        groff -man -Tutf8 man/gbsplay.1 > groff-utf8.txt
+        groff -man -Tascii -rLL=100n man/gbsplay.1 > groff-plain.txt
+        groff -man -Tascii -rLL=100n man/gbsplay.1 | col -bx > groff-col-bx.txt
+        groff -man -Thtml man/gbsplay.1 > groff.html
+        groff -man -Tpdf man/gbsplay.1 > groff.pdf
     - name: upload binary
       uses: actions/upload-artifact@v4
       with:
@@ -60,7 +65,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: manpage for gbsplay.exe
-        path: gbsplay-help.txt
+        path: groff*
         if-no-files-found: error
         retention-days: 7 # this branch is for tests only, don't hog resources
         compression-level: 9 # we don't expect to be able to compress this plaintext significantly
