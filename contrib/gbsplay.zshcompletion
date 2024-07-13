@@ -1,6 +1,6 @@
-#compdef gbsinfo gbsplay gbs2ogg
+#compdef gbsinfo gbsplay gbs2ogg gbs2gb
 
-# gbsplay, gbsinfo and gbs2ogg zsh completion
+# gbsplay, gbsinfo, gbs2gb and gbs2ogg zsh completion
 #
 # 2024 (c) Riedler <dev@riedler.wien>
 # licensed under GNU GPL v1 or, at your option, any later version
@@ -80,6 +80,18 @@ function _gbs2ogg_internal() {
 	_arguments : $options
 }
 
+function _gbs2gb_internal() {
+	local options=(
+		'(- :)'-h'[display help and exit]'
+		'(- :)'-V'[display version number and exit]'
+		-t'[rom template]:_files -g "*.gb"'
+		': :_files -g "*.gbs"'
+		':out-file: '
+	)
+	
+	_arguments -A "-*" : $options
+}
+
 case $service in
 	gbsplay)
 		_gbsplay_internal
@@ -89,5 +101,8 @@ case $service in
 	;;
 	gbs2ogg)
 		_gbs2ogg_internal
+	;;
+	gbs2gb)
+		_gbs2gb_internal
 	;;
 esac
