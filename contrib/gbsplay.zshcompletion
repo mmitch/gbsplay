@@ -1,6 +1,6 @@
-#compdef gbsinfo gbsplay
+#compdef gbsinfo gbsplay gbs2ogg
 
-# gbsplay/gbsinfo zsh completion
+# gbsplay, gbsinfo and gbs2ogg zsh completion
 #
 # 2024 (c) Riedler <dev@riedler.wien>
 # licensed under GNU GPL v1 or, at your option, any later version
@@ -71,11 +71,23 @@ function _gbsinfo_internal() {
 	_arguments -A "-*" : $options
 }
 
+function _gbs2ogg_internal() {
+	local options=(
+		': :_files -g "*.gbs"'
+		':subsong_seconds: '
+	)
+	
+	_arguments : $options
+}
+
 case $service in
 	gbsplay)
 		_gbsplay_internal
 	;;
 	gbsinfo)
 		_gbsinfo_internal
+	;;
+	gbs2ogg)
+		_gbs2ogg_internal
 	;;
 esac
