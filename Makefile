@@ -88,7 +88,7 @@ export Q VERBOSE CC HOSTCC BUILDCC GBSCFLAGS GBSLDFLAGS
 
 docs               := README.md HISTORY COPYRIGHT
 docs-dist          := INSTALL.md CODINGSTYLE gbsformat.txt
-contribs           := contrib/gbs2ogg.sh contrib/gbsplay.bashcompletion
+contribs           := contrib/gbs2ogg.sh contrib/gbsplay.bashcompletion contrib/gbsplay.zshcompletion
 examples           := examples/nightmode.gbs examples/gbsplayrc_sample
 
 mans               := man/gbsplay.1    man/gbsinfo.1    man/gbsplayrc.5
