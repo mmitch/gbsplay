@@ -39,4 +39,4 @@ jobs:
           gcov *.o
       - name: Upload coverage to Codecov
         # upload to codecov.io
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
