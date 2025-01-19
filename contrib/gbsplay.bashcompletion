@@ -7,26 +7,59 @@
 #
 # originally based on the ditz bash completion code
 
-_gbsplay() 
+# FIXME: "--" as end-of-options is not recognized; filenames starting with "-" will fail
+
+__gbsplay_add_spaces_to_compreply()
+{
+    # add trailing spaces
+    local i
+    for (( i=0; i < ${#COMPREPLY[@]}; i++ )); do
+	COMPREPLY[i]="${COMPREPLY[$i]} "
+    done
+}
+
+__gbsplay_expand_filename()
+# TODO/CHECK: do all file extensions work (eg .gbs.gz)?
+{
+    COMPREPLY=()
+    local i
+
+    # add trailing space to filenames
+    local -a files
+    mapfile -t files < <( compgen -f -X '!*.gbs' -- "$cur" ) # does not work: | sed -e 's/\([[:space:]]\)/\\\1/g'
+    for (( i=0; i < ${#files[@]}; i++ )); do
+	COMPREPLY[${#COMPREPLY[@]}]="${files[$i]} "
+    done
+
+    # add trailing slash to directories
+    local -a dirs
+    mapfile -t dirs < <( compgen -d -- "$cur" )
+    for (( i=0; i < ${#dirs[@]}; i++ )); do
+	COMPREPLY[${#COMPREPLY[@]}]="${dirs[$i]}/"
+    done
+}
+
+__gbsplay_expand_subsongs()
+{
+    mapfile -t COMPREPLY < <( compgen -W "$(seq "$(gbsinfo "${COMP_WORDS[filepos]}" 2>/dev/null | grep ^Subsongs | cut -d: -f 2)" 2>/dev/null)" -- "$cur" )
+    __gbsplay_add_spaces_to_compreply
+}
+
+__gbsplay()
 {
     local cur=${COMP_WORDS[COMP_CWORD]}
+    local prev=${COMP_WORDS[$(( COMP_CWORD - 1))]}
 
     if [ "${cur:0:1}" = '-' ]; then
 	# ==> looks like an option, return list of all options
 	mapfile -t COMPREPLY < <( compgen -W "-E -f -g -h -H -l -L -o -q -r -R -t -T -v -V -z -Z -1 -2 -3 -4" -- "$cur" )
-	# add trailing spaces
-	local i
-	for (( i=0; i < ${#COMPREPLY[@]}; i++ )); do
-	    COMPREPLY[i]="${COMPREPLY[$i]} "
-	done
-    elif [[ "${COMP_WORDS[$(( COMP_CWORD - 1))]}" =~ ^-.*o$ ]]; then
+	__gbsplay_add_spaces_to_compreply
+
+    elif [[ "$prev" =~ ^-.*o$ ]]; then
 	# ==> previous word contained -o, return list of output plugins
 	mapfile -t COMPREPLY < <( compgen -W "$(gbsplay -o list 2>/dev/null | ( read -r; cut -d -  -f 1 )) list" -- "$cur" )
-	# add trailing spaces
-	local i
-	for (( i=0; i < ${#COMPREPLY[@]}; i++ )); do
-	    COMPREPLY[i]="${COMPREPLY[$i]} "
-	done
+	__gbsplay_add_spaces_to_compreply
+
     else
 	# calculate position of filename
 	local filepos=1
@@ -37,83 +70,49 @@ _gbsplay()
 	    fi
 	    (( filepos++ ))
 	done
-	if [ $(( COMP_CWORD - filepos )) -eq 0 ] ; then
+
+	local after_filepos=$(( COMP_CWORD - filepos ))
+	if [ $after_filepos -eq 0 ] ; then
 	    # ==> this is the filename
-	    COMPREPLY=()
-	    local i
-	    # add trailing space to filenames
-	    local -a files
-	    mapfile -t files < <( compgen -f -X '!*.gbs' -- "$cur" ) # does not work: | sed -e 's/\([[:space:]]\)/\\\1/g'
-	    for (( i=0; i < ${#files[@]}; i++ )); do
-		COMPREPLY[${#COMPREPLY[@]}]="${files[$i]} "
-	    done
-	    # add trailing slash to directories
-	    local -a dirs
-	    mapfile -t dirs < <( compgen -d -- "$cur" )
-	    for (( i=0; i < ${#dirs[@]}; i++ )); do
-		COMPREPLY[${#COMPREPLY[@]}]="${dirs[$i]}/"
-	    done
-	elif [ $(( COMP_CWORD - filepos )) -eq 1 ] ; then
+	    __gbsplay_expand_filename
+
+	elif [ $after_filepos -eq 1 ] ; then
 	    # ==> this is the subsong start
-	    mapfile -t COMPREPLY < <( compgen -W "$(seq "$(gbsinfo "${COMP_WORDS[filepos]}" 2>/dev/null | grep ^Subsongs | cut -d: -f 2)" 2>/dev/null)" -- "$cur" )
-	    # add trailing spaces
-	    local i
-	    for (( i=0; i < ${#COMPREPLY[@]}; i++ )); do
-		COMPREPLY[i]="${COMPREPLY[$i]} "
-	    done
-	elif [ $(( COMP_CWORD - filepos )) -eq 2 ] ; then
+	    __gbsplay_expand_subsongs
+
+	elif [ $after_filepos -eq 2 ] ; then
 	    # ==> this is the subsong stop...
 	    if [[ ${COMP_WORDS[COMP_CWORD - 1]} =~ ^[0-9]+$ ]] ; then
 		# ...but only if subsong start was given before
-		mapfile -t COMPREPLY < <( compgen -W "$(seq "$(gbsinfo "${COMP_WORDS[filepos]}" 2>/dev/null | grep ^Subsongs | cut -d: -f 2)" 2>/dev/null)" -- "$cur" )
-                # add trailing spaces
-		local i
-		for (( i=0; i < ${#COMPREPLY[@]}; i++ )); do
-		    COMPREPLY[i]="${COMPREPLY[$i]} "
-		done
+		__gbsplay_expand_subsongs
 	    fi
 	fi
     fi
 }
 
-
-_gbsinfo() 
+__gbsinfo()
 {
     local cur=${COMP_WORDS[COMP_CWORD]}
 
     if [ "${cur:0:1}" = '-' ]; then
 	# ==> looks like an option, return list of all options
 	mapfile -t COMPREPLY < <( compgen -W "-h -V" -- "$cur" )
-	# add trailing spaces
-	local i
-	for (( i=0; i < ${#COMPREPLY[@]}; i++ )); do
-	    COMPREPLY[i]="${COMPREPLY[$i]} "
-	done
+	__gbsplay_add_spaces_to_compreply
+
     else
 	# calculate position of filename
 	local filepos=1
 	while [ "${COMP_WORDS[filepos]:0:1}" = '-' ]; do
 	    ((  filepos++ ))
 	done
-	if [ $(( COMP_CWORD - filepos )) -eq 0 ] ; then
+
+	local after_filepos=$(( COMP_CWORD - filepos ))
+	if [ $after_filepos -eq 0 ] ; then
 	    # ==> this is the filename
-	    COMPREPLY=()
-	    local i
-	    # add trailing space to filenames
-	    local -a files
-	    mapfile -t files < <( compgen -f -X '!*.gbs' -- "$cur" ) # does not work: | sed -e 's/\([[:space:]]\)/\\\1/g'
-	    for (( i=0; i < ${#files[@]}; i++ )); do
-		COMPREPLY[${#COMPREPLY[@]}]="${files[$i]} "
-	    done
-	    # add trailing slash to directories
-	    local -a dirs
-	    mapfile -t dirs < <( compgen -d -- "$cur" )
-	    for (( i=0; i < ${#dirs[@]}; i++ )); do
-		COMPREPLY[${#COMPREPLY[@]}]="${dirs[$i]}/"
-	    done
+	    __gbsplay_expand_filename
 	fi
     fi
 }
 
-complete -F _gbsplay -o default -o nospace gbsplay
-complete -F _gbsinfo -o default -o nospace gbsinfo
+complete -F __gbsplay -o default -o nospace gbsplay
+complete -F __gbsinfo -o default -o nospace gbsinfo
