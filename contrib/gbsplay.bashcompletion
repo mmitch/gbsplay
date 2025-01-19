@@ -11,7 +11,7 @@ _gbsplay()
 
     if [ "${cur:0:1}" = '-' ]; then
 	# ==> looks like an option, return list of all options
-	COMPREPLY=( $( compgen -W "-E -f -g -h -l -o -q -r -R -t -T -v -V -z -Z -1 -2 -3 -4" -- $cur) )
+	COMPREPLY=( $( compgen -W "-E -f -g -h -H -l -L -o -q -r -R -t -T -v -V -z -Z -1 -2 -3 -4" -- $cur) )
 	# add trailing spaces
 	local i
 	for (( i=0; i < ${#COMPREPLY[@]}; i++ )); do
