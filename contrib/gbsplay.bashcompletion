@@ -7,8 +7,6 @@
 #
 # originally based on the ditz bash completion code
 
-# FIXME: "--" as end-of-options is not recognized; filenames starting with "-" will fail
-
 __gbsplay_add_spaces_to_compreply()
 {
     # add trailing spaces
@@ -50,9 +48,9 @@ __gbsplay()
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[$(( COMP_CWORD - 1))]}
 
-    if [ "${cur:0:1}" = '-' ]; then
+    if [ "${cur:0:1}" = '-' ] && ! [ "$prev" = '--' ]; then
 	# ==> looks like an option, return list of all options
-	mapfile -t COMPREPLY < <( compgen -W "-E -f -g -h -H -l -L -o -q -r -R -t -T -v -V -z -Z -1 -2 -3 -4" -- "$cur" )
+	mapfile -t COMPREPLY < <( compgen -W "-E -f -g -h -H -l -L -o -q -r -R -t -T -v -V -z -Z -1 -2 -3 -4 --" -- "$cur" )
 	__gbsplay_add_spaces_to_compreply
 
     elif [[ "$prev" =~ ^-.*o$ ]]; then
@@ -62,13 +60,16 @@ __gbsplay()
 
     else
 	# calculate position of filename
-	local filepos=1
+	local filepos=1 check=
 	while [ "${COMP_WORDS[filepos]:0:1}" = '-' ]; do
-	    if [[ "${COMP_WORDS[$filepos]}" =~ ^-.*o$ ]]; then
+	    check=${COMP_WORDS[$filepos]}
+	    if [[ "$check" =~ ^-.*o$ ]]; then
 		# jump over parameter to -o
 		(( filepos++ ))
 	    fi
 	    (( filepos++ ))
+	    # immediately break on "end of options"
+	    [ "$check" = '' ] && break
 	done
 
 	local after_filepos=$(( COMP_CWORD - filepos ))
@@ -93,17 +94,21 @@ __gbsplay()
 __gbsinfo()
 {
     local cur=${COMP_WORDS[COMP_CWORD]}
+    local prev=${COMP_WORDS[$(( COMP_CWORD - 1))]}
 
-    if [ "${cur:0:1}" = '-' ]; then
+    if [ "${cur:0:1}" = '-' ] && ! [ "$prev" = '--' ]; then
 	# ==> looks like an option, return list of all options
-	mapfile -t COMPREPLY < <( compgen -W "-h -V" -- "$cur" )
+	mapfile -t COMPREPLY < <( compgen -W "-h -V --" -- "$cur" )
 	__gbsplay_add_spaces_to_compreply
 
     else
 	# calculate position of filename
-	local filepos=1
+	local filepos=1 check=
 	while [ "${COMP_WORDS[filepos]:0:1}" = '-' ]; do
-	    ((  filepos++ ))
+	    check=${COMP_WORDS[$filepos]}
+	    (( filepos++ ))
+	    # immediately break on "end of options"
+	    [ "$check" = '' ] && break
 	done
 
 	local after_filepos=$(( COMP_CWORD - filepos ))
