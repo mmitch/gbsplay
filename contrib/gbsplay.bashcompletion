@@ -17,21 +17,30 @@ __gbsplay_add_spaces_to_compreply()
 }
 
 __gbsplay_expand_filename()
-# TODO/CHECK: do all file extensions work (eg .gbs.gz)?
 {
     COMPREPLY=()
-    local i
+    local i ext
 
-    # add trailing space to filenames
     local -a files
-    mapfile -t files < <( compgen -f -X '!*.gbs' -- "$cur" ) # does not work: | sed -e 's/\([[:space:]]\)/\\\1/g'
-    for (( i=0; i < ${#files[@]}; i++ )); do
-	COMPREPLY[${#COMPREPLY[@]}]="${files[$i]} "
+    for ext in .gbs .gbs.gz; do
+
+	# get all matching files ending with $ext
+	mapfile -t files < <( compgen -f -X "!*$ext" -- "$cur" )
+
+	# add trailing space to filenames
+	for (( i=0; i < ${#files[@]}; i++ )); do
+	    if ! [ -d "${files[$i]}" ]; then # prevent directories from also showing up as files
+		COMPREPLY[${#COMPREPLY[@]}]="${files[$i]} "
+	    fi
+	done
+
     done
 
-    # add trailing slash to directories
+    # get all matching directories
     local -a dirs
     mapfile -t dirs < <( compgen -d -- "$cur" )
+
+    # add trailing slash to directories
     for (( i=0; i < ${#dirs[@]}; i++ )); do
 	COMPREPLY[${#COMPREPLY[@]}]="${dirs[$i]}/"
     done
@@ -44,11 +53,13 @@ __gbsplay_expand_subsongs()
 }
 
 __gbsplay_return_empty_completion()
+# FIXME: empty COMPREPLY seems to fall back to default filename completion - how can we avoid that?
 {
     COMPREPLY=()
 }
 
 __gbsplay()
+# FIXME: gbsinfo don't do tilde expansion, eg. '~/foo.gbs' as a filename won't be found
 {
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[$(( COMP_CWORD - 1))]}
