@@ -43,6 +43,11 @@ __gbsplay_expand_subsongs()
     __gbsplay_add_spaces_to_compreply
 }
 
+__gbsplay_return_empty_completion()
+{
+    COMPREPLY=()
+}
+
 __gbsplay()
 {
     local cur=${COMP_WORDS[COMP_CWORD]}
@@ -53,17 +58,51 @@ __gbsplay()
 	mapfile -t COMPREPLY < <( compgen -W "-E -f -g -h -H -l -L -o -q -r -R -t -T -v -V -z -Z -1 -2 -3 -4 --" -- "$cur" )
 	__gbsplay_add_spaces_to_compreply
 
+    elif [[ "$prev" =~ ^-.*E$ ]]; then
+	# ==> previous word ended with -E, return list of endians
+	mapfile -t COMPREPLY < <( compgen -W "b l n" -- "$cur" )
+	__gbsplay_add_spaces_to_compreply
+
+    elif [[ "$prev" =~ ^-.*f$ ]]; then
+	# ==> previous word ended with -f, but fadeout is an integer that can't be completed
+	__gbsplay_return_empty_completion
+
+    elif [[ "$prev" =~ ^-.*g$ ]]; then
+	# ==> previous word ended with -g, but subsong gap is an integer that can't be completed
+	__gbsplay_return_empty_completion
+
+    elif [[ "$prev" =~ ^-.*H$ ]]; then
+	# ==> previous word ended with -H, return list of filters
+	mapfile -t COMPREPLY < <( compgen -W "dmg cgb off" -- "$cur" )
+	__gbsplay_add_spaces_to_compreply
+
     elif [[ "$prev" =~ ^-.*o$ ]]; then
-	# ==> previous word contained -o, return list of output plugins
+	# ==> previous word ended with -o, return list of output plugins
 	mapfile -t COMPREPLY < <( compgen -W "$(gbsplay -o list 2>/dev/null | ( read -r; cut -d -  -f 1 )) list" -- "$cur" )
 	__gbsplay_add_spaces_to_compreply
+
+    elif [[ "$prev" =~ ^-.*r$ ]]; then
+	# ==> previous word ended with -r, but samplerate is an integer that can't be completed
+	__gbsplay_return_empty_completion
+
+    elif [[ "$prev" =~ ^-.*R$ ]]; then
+	# ==> previous word ended with -R, but refresh delay is an integer that can't be completed
+	__gbsplay_return_empty_completion
+
+    elif [[ "$prev" =~ ^-.*t$ ]]; then
+	# ==> previous word ended with -t, but subsong timeout is an integer that can't be completed
+	__gbsplay_return_empty_completion
+
+    elif [[ "$prev" =~ ^-.*T$ ]]; then
+	# ==> previous word ended with -T, but silence timeout is an integer that can't be completed
+	__gbsplay_return_empty_completion
 
     else
 	# calculate position of filename
 	local filepos=1 check=
 	while [ "${COMP_WORDS[filepos]:0:1}" = '-' ]; do
 	    check=${COMP_WORDS[$filepos]}
-	    if [[ "$check" =~ ^-.*o$ ]]; then
+	    if [[ "$check" =~ ^-.*[EfgHorRtT]$ ]]; then
 		# jump over parameter to -o
 		(( filepos++ ))
 	    fi
