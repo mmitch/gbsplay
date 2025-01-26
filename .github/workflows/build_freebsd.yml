@@ -3,9 +3,9 @@
 name: FreeBSD Build
 
 on:
-  push:
-  pull_request:
-    types: [opened]
+#  push:
+#  pull_request:
+#    types: [opened]
   schedule:
     - cron: '13 4 5 * *'
 

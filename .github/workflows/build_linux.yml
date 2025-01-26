@@ -3,7 +3,7 @@
 name: Linux Build
 
 on:
-  push:
+#  push:
   pull_request:
     types: [opened]
   schedule:
