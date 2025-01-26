@@ -52,6 +52,9 @@ hostalias=
 windows_build=
 windows_libprefix=
 
+EXTRA_INCLUDEDIRS_TO_CHECK=
+EXTRA_LIBDIRS_TO_CHECK=
+
 ## define sane environment
 unset LC_ALL LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY \
       LC_MESSAGES LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE      \
@@ -84,7 +87,7 @@ die()
 check_include()
 {
     local include="$1"
-    local includedirs="${2-} /usr/local/include /opt/local/include"
+    local includedirs="${2-} /usr/local/include /opt/local/include ${EXTRA_INCLUDEDIRS_TO_CHECK}"
     local extraline="${3-}"
     local includename="$(echo "$include" | sed -e 's@[/\.-]@_@g')"
     eval "value=\${have_${includename}-}"
@@ -115,7 +118,7 @@ find_lib()
     local INFILE="$TEMPDIR/fl.c"
     local lib="$1"
     local libname="$(echo "$lib" | sed -e 's@[/\.-]@_@g')"
-    local libdirs="${2-} /usr/local/lib /opt/local/lib"
+    local libdirs="${2-} /usr/local/lib /opt/local/lib ${EXTRA_LIBDIRS_TO_CHECK}"
 
     cat > "$INFILE"
 
@@ -622,6 +625,8 @@ case "$BUILDOS" in
     Darwin)
         setdefault build_test yes
         append_nodupe CFLAGS "-D_DARWIN_C_SOURCE=1"
+        EXTRA_INCLUDEDIRS_TO_CHECK=/opt/homebrew/include
+        EXTRA_LIBDIRS_TO_CHECK=/opt/homebrew/lib
         ;;
 
     MSYS_*)

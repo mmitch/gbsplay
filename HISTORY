@@ -2,7 +2,7 @@
 gbsplay HISTORY
 
 
-2024/04/17  -  unreleased
+2024/xx/xx  -  unreleased
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Bugfixes:
@@ -10,6 +10,8 @@ Bugfixes:
 - gbsplay
   - don't mess up the screen with underrun errors from the ALSA plugout
     when resuming from a pause
+- build process:
+  - fix i18n on brew/MaOS
 
 Enhancements:
 
