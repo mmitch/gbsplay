@@ -59,7 +59,7 @@ typedef uint64_t cycles_t;
 #define FREQTONOTE(f) (lround(log2((f)/C0HZ)*12)+C0MIDI)
 #define NOTE(x,ch) FREQTONOTE(FREQ(x,ch))
 
-#if USE_I18N == 1
+#if USE_I18N == 1 && ENABLE_TEST != 1
 
 #  include <locale.h>
 #  include <libintl.h>

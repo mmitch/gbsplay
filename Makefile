@@ -592,7 +592,7 @@ config.mk: configure
 
 %.test: %.c
 	@echo TEST $<
-	$(Q)$(HOSTCC) $(filter -I%,$(GBSCFLAGS)) -DENABLE_TEST=1 -o $@$(binsuffix) $< -lm
+	$(Q)$(HOSTCC) -DENABLE_TEST=1 -o $@$(binsuffix) $< -lm
 	$(Q)./$@$(binsuffix)
 	$(Q)rm ./$@$(binsuffix)
 
