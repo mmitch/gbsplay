@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies, build and test under ${{ matrix.os.name }}
-        uses: cross-platform-actions/action@v0.26.0
+        uses: cross-platform-actions/action@v0.27.0
         env:
           CONFIGURE_FLAGS: ${{ matrix.flags }} --enable-verbosebuild
           CFLAGS: -Wformat -Werror=format-security -Wall -pedantic
