@@ -85,7 +85,7 @@ function _gbs2gb_internal() {
 	local options=(
 		'(- :)'-h'[display help and exit]'
 		'(- :)'-V'[display version number and exit]'
-		-t'[rom template]:_files -g "*.gb"'
+		-t'[rom template]:rom template:_files -g "*.gb"'
 		': :_files -g "*.gbs"'
 		':out-file: '
 	)
