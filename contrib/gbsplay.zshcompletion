@@ -47,14 +47,14 @@ function _gbsplay_internal() {
 		;;
 		subsong_start)
 			# NOTE: assuming previous parameters are valid
-			local max_subsongs=$(_get_subsongs "${line[-2]}")
+			local max_subsongs=$(_get_subsongs "${(Q)words[-2]}")
 			local -a subsongs=($(seq 1 $max_subsongs))
 			_describe start_at_subsong subsongs
 		;;
 		subsong_stop)
 			# NOTE: assuming previous parameters are valid
-			local min_subsongs=${line[-2]}
-			local max_subsongs=$(_get_subsongs "${line[-3]}")
+			local min_subsongs=${words[-2]}
+			local max_subsongs=$(_get_subsongs "${(Q)words[-3]}")
 			local -a subsongs=($(seq $min_subsongs $max_subsongs))
 			_describe stop_at_subsong subsongs
 		;;
