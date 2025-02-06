@@ -32,7 +32,7 @@ function _gbsplay_internal() {
 		-2'[mute channel 2 on start]'
 		-3'[mute channel 3 on start]'
 		-4'[mute channel 4 on start]'
-		': :_files -g "*.gbs"'
+		': :_files -g "*(.gbs|.gbs.gz)"'
 		':start_at_subsong:->subsong_start'
 		':stop_at_subsong:->subsong_stop'
 	)
