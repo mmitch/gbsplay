@@ -95,7 +95,10 @@ static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_b
 	}
 
 	// run the loop
-	pw_thread_loop_start(pipewire_data.loop);
+	if ((err = pw_thread_loop_start(pipewire_data.loop) != 0)) {
+		fprintf(stderr, _("pw_thread_loop_start failed: %s\n"), spa_strerror(err));
+		return -1;
+	}
 
 	return 0;
 }
