@@ -84,13 +84,11 @@ static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_b
 						    &pipewire_data);
 
 	// connect the stream
-	// TODO: do we need the realtime flag?
         if ((err = pw_stream_connect(pipewire_data.stream,
 				     PW_DIRECTION_OUTPUT,
 				     PW_ID_ANY,
 				     PW_STREAM_FLAG_AUTOCONNECT |
-				     PW_STREAM_FLAG_MAP_BUFFERS |
-				     PW_STREAM_FLAG_RT_PROCESS,
+				     PW_STREAM_FLAG_MAP_BUFFERS,
 				     params, 1))) {
 		fprintf(stderr, _("pw_stream_connect failed: %s\n"), spa_strerror(err));
 		return -1;
