@@ -167,8 +167,6 @@ static ssize_t pipewire_write(const void *buf, size_t count)
 
 static void pipewire_close()
 {
-        pw_thread_loop_wait(pipewire_data.loop);
-        pw_thread_loop_unlock(pipewire_data.loop);
         pw_thread_loop_stop(pipewire_data.loop);
 	pw_stream_destroy(pipewire_data.stream);
         pw_thread_loop_destroy(pipewire_data.loop);
