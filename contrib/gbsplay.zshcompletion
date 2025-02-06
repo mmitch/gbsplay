@@ -5,6 +5,8 @@
 # 2024 (c) Riedler <dev@riedler.wien>
 # licensed under GNU GPL v1 or, at your option, any later version
 
+local gbsfiles='_files -g "*(.gbs|.gbs.gz)"'
+
 function _get_subsongs() {
 	gbsinfo "$1" | grep -i "subsongs" | grep -oP "\\d+"
 }
@@ -33,7 +35,7 @@ function _gbsplay_internal() {
 		-3'[mute channel 3 on start]'
 		-4'[mute channel 4 on start]'
 		--'[end-of-options separator]'
-		': :_files -g "*(.gbs|.gbs.gz)"'
+		": :${gbsfiles}"
 		':start_at_subsong:->subsong_start'
 		':stop_at_subsong:->subsong_stop'
 	)
@@ -66,7 +68,7 @@ function _gbsinfo_internal() {
 	local options=(
 		'(- :)'-h'[display help and exit]'
 		'(- :)'-V'[display version number and exit]'
-		': :_files -g "*.gbs"'
+		": :${gbsfiles}"
 	)
 	
 	_arguments -A "-*" : $options
@@ -74,7 +76,7 @@ function _gbsinfo_internal() {
 
 function _gbs2ogg_internal() {
 	local options=(
-		': :_files -g "*.gbs"'
+		": :${gbsfiles}"
 		':subsong_seconds: '
 	)
 	
@@ -86,7 +88,7 @@ function _gbs2gb_internal() {
 		'(- :)'-h'[display help and exit]'
 		'(- :)'-V'[display version number and exit]'
 		-t'[rom template]:rom template:_files -g "*.gb"'
-		': :_files -g "*.gbs"'
+		": :${gbsfiles}"
 		':out-file: '
 	)
 	
