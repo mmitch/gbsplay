@@ -32,7 +32,7 @@ static const struct pw_stream_events pipewire_stream_events = {
 
 static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata)
 {
-	const struct spa_pod *params[1];
+	const struct spa_pod *params[2];
 	uint8_t buffer[1024];
 	struct pw_properties *props;
 	struct spa_pod_builder pod_builder = SPA_POD_BUILDER_INIT(buffer, sizeof(buffer));
@@ -75,6 +75,10 @@ static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_b
 						       .format = fmt,
 						       .channels = CHANNELS,
 						       .rate = rate));
+	// triple-buffer audio
+	params[1] = spa_pod_builder_add_object(&pod_builder, SPA_TYPE_OBJECT_ParamBuffers,
+					       SPA_PARAM_Buffers,
+					       SPA_PARAM_BUFFERS_buffers, SPA_POD_Int(3));
 
 	// create stream
 	pipewire_data.stream = pw_stream_new_simple(pw_thread_loop_get_loop(pipewire_data.loop),
@@ -89,7 +93,7 @@ static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_b
 				     PW_ID_ANY,
 				     PW_STREAM_FLAG_AUTOCONNECT |
 				     PW_STREAM_FLAG_MAP_BUFFERS,
-				     params, 1))) {
+				     params, 2))) {
 		fprintf(stderr, _("pw_stream_connect failed: %s\n"), spa_strerror(err));
 		return -1;
 	}
