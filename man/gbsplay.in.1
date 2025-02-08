@@ -1,4 +1,4 @@
-.\" This manpage 2003-2024 (C) by Christian Garbs <mitch@cgarbs.de>
+.\" This manpage 2003-2025 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL v1 or, at your option, any later version.
 .TH "GBSPLAY" "1" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
 .SH "NAME"
@@ -6,6 +6,7 @@ gbsplay \- Gameboy sound player
 .SH "SYNOPSIS"
 .B gbsplay
 .RI [ options ]
+.RI [ -- ]
 .I gbs\-file
 .RI [ start\-subsong " [" stop\-subsong "] ]"
 .SH "DESCRIPTION"
@@ -114,6 +115,11 @@ Mute channel 3 on start.
 .TP
 .B -4
 Mute channel 4 on start.
+.TP
+.B \-\-
+Marks the end of options.
+The next argument will be treated as a filename, even when starting with a
+.BR \- .
 .TP
 .I gbs\-file
 The sound file to play.

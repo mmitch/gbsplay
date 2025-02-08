@@ -2,12 +2,12 @@
 gbsplay HISTORY
 
 
-2024/xx/xx  -  unreleased
+2025/xx/xx  -  unreleased
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Bugfixes:
 
-- gbsplay
+- gbsplay:
   - don't mess up the screen with underrun errors from the ALSA plugout
     when resuming from a pause
 - build process:
@@ -15,8 +15,11 @@ Bugfixes:
 
 Enhancements:
 
-- gbsplay
+- gbsplay:
   - add proper pause handling to ALSA plugout
+
+- documentation:
+  - document -- option to end option parsing
 
 
 2024/04/17  -  0.0.97
@@ -30,12 +33,12 @@ Bugfixes:
   - reset cartridge RAM on subsong change to prevent the state of a
     subsong from influencing later subsongs
 
-- gbsplay
+- gbsplay:
   - fix display of unknown version number (gbsplay -V)
 
 Enhancements:
 
-- build process
+- build process:
   - display version number during configure
   - automatically provide a .tar.gz on the GitHub release page that
     contains proper version information like the old manual releases

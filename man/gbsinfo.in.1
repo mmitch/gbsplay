@@ -1,4 +1,4 @@
-.\" This manpage 2003-2020 (C) by Christian Garbs <mitch@cgarbs.de>
+.\" This manpage 2003-2025 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL v1 or, at your option, any later version.
 .TH "GBSINFO" "1" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
 .SH "NAME"
@@ -6,6 +6,7 @@ gbsinfo \- display Gameboy sound file information
 .SH "SYNOPSIS"
 .B gbsinfo
 .RB [ -h | -V ]
+.RB [ -- ]
 .I gbs\-file
 .SH "DESCRIPTION"
 gbsinfo displays information about a Gameboy module dump
@@ -17,6 +18,11 @@ Display short help and exit.
 .TP
 .B \-V
 Display version number and exit.
+.TP
+.B \-\-
+Marks the end of options.
+The next argument will be treated as a filename, even when starting with a
+.BR \- .
 .TP
 .I gbs\-file
 The sound file to read.

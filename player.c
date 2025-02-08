@@ -3,7 +3,7 @@
  *
  * This file contains the player code common to both CLI and X11 frontends.
  *
- * 2003-2022 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2025 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -391,7 +391,7 @@ static void usage(long exitcode)
 {
 	FILE *out = exitcode ? stderr : stdout;
 	fprintf(out,
-		_("Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
+		_("Usage: %s [option(s)] [--] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
 		  "\n"
 		  "Available options are:\n"
 		  "  -E        endian, b == big, l == little, n == native (%s)\n"
@@ -412,7 +412,8 @@ static void usage(long exitcode)
 		  "  -V        print version and exit\n"
 		  "  -z        play subsongs in shuffle mode\n"
 		  "  -Z        play subsongs in random mode (repetitions possible)\n"
-		  "  -1 to -4  mute a channel on startup\n"),
+		  "  -1 to -4  mute a channel on startup\n"
+		  "  --        end options, next argument is the filename\n"),
 		myname,
 		endian_str(requested_endian),
 		fadeout,
