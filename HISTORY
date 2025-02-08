@@ -20,6 +20,7 @@ Enhancements:
 
 - documentation:
   - document -- option to end option parsing
+  - update xgbsplay(1) manpage
 
 
 2024/04/17  -  0.0.97
