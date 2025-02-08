@@ -391,9 +391,9 @@ static void usage(long exitcode)
 {
 	FILE *out = exitcode ? stderr : stdout;
 	fprintf(out,
-		_("Usage: %s [option(s)] [--] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
+		_("Usage: %s [OPTION]... [--] GBS-FILE [START-AT-SUBSONG [STOP-AT-SUBSONG] ]\n"
 		  "\n"
-		  "Available options are:\n"
+		  "Available OPTIONs are:\n"
 		  "  -E        endian, b == big, l == little, n == native (%s)\n"
 		  "  -f        set fadeout (%ld seconds)\n"
 		  "  -g        set subsong gap (%ld seconds)\n"
@@ -413,7 +413,7 @@ static void usage(long exitcode)
 		  "  -z        play subsongs in shuffle mode\n"
 		  "  -Z        play subsongs in random mode (repetitions possible)\n"
 		  "  -1 to -4  mute a channel on startup\n"
-		  "  --        end options, next argument is the filename\n"),
+		  "  --        end options, next argument is GBS-FILE\n"),
 		myname,
 		endian_str(requested_endian),
 		fadeout,

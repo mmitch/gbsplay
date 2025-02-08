@@ -25,12 +25,12 @@ void usage(long exitcode)
 {
         FILE *out = exitcode ? stderr : stdout;
         fprintf(out,
-                _("Usage: %s [option] [--] <gbs-file>\n"
+                _("Usage: %s [OPTION]... [--] <GBS-FILE>\n"
 		  "\n"
 		  "Available options are:\n"
 		  "  -h  display this help and exit\n"
 		  "  -V  print version and exit\n"
-		  "  --  end options, next argument is the filename\n"),
+		  "  --  end options, next argument is GBS-FILE\n"),
                 myname);
         exit(exitcode);
 }

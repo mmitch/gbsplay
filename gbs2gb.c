@@ -24,13 +24,13 @@ uint8_t logo_data[0x30];
 void usage(long exitcode)
 {
 	FILE *out = exitcode ? stderr : stdout;
-	fputs(_("Usage: gbs2gb [option] [--] <gbs-file> <out-file>\n"
+	fputs(_("Usage: gbs2gb [OPTION]... [--] GBS-FILE OUT-FILE\n"
 		"\n"
 		"Available options are:\n"
 		"  -t  rom template\n"
 		"  -h  display this help and exit\n"
 		"  -V  print version and exit\n"
-		"  --  end options, next argument is the first filename\n"),
+		"  --  end options, next argument is GBS-FILE\n"),
 	      out);
 	exit(exitcode);
 }

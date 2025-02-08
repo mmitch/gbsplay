@@ -5,10 +5,10 @@
 gbsplay \- Gameboy sound player
 .SH "SYNOPSIS"
 .B gbsplay
-.RI [ options ]
+.RI [ OPTION ]...
 .RI [ -- ]
-.I gbs\-file
-.RI [ start\-subsong " [" stop\-subsong "] ]"
+.I GBS\-FILE
+.RI [ START\-AT\-SUBSONG " [" STOP\-AT\-SUBSONG "] ]"
 .SH "DESCRIPTION"
 .B gbsplay
 emulates the sound hardware of the Nintendo Gameboy.
@@ -121,17 +121,17 @@ Marks the end of options.
 The next argument will be treated as a filename, even when starting with a
 .BR \- .
 .TP
-.I gbs\-file
+.I GBS\-FILE
 The sound file to play.
 Must be in uncompressed .GBS format.
 .TP
-.I start\-subsong
+.I START\-AT\-SUBSONG
 The subsong from the sound file to play first.
 If not specified, the default song declared in the sound file will be played
 unless shuffle (\fI-z\fP) or random mode (\fI-Z\fP) are active.
 An out\-of\-bounds number will be clipped to the possible range of subsongs.
 .TP
-.I stop\-subsong
+.I STOP\-AT\-SUBSONG
 The last subsong to be played.
 See \fILOOP MODES\fP below for further details.
 .SH "KEYBOARD CONTROL"
@@ -172,7 +172,7 @@ the last mode set wins.
 The term
 .I first subsong
 refers to the parameter
-.I start\-subsong
+.I START\-AT\-SUBSONG
 if it is set,
 or the first subsong in the file otherwise.
 The term
@@ -186,7 +186,7 @@ are active.
 The term
 .I last subsong
 refers to the parameter
-.I stop\-subsong
+.I STOP\-AT\-SUBSONG
 if it is set and not out-of-bounds,
 or the last subsong in the file otherwise.
 .TP
@@ -207,7 +207,7 @@ the fist subsong will start to play again.
 When a subsong has finished playing,
 the same subsong will start to play again.
 The
-.I stop\-subsong
+.I STOP\-AT\-SUBSONG
 parameter will be ignored as no subsong change can occur.
 The 
 .I subsong\-timeout

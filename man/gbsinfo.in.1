@@ -5,9 +5,9 @@
 gbsinfo \- display Gameboy sound file information
 .SH "SYNOPSIS"
 .B gbsinfo
-.RB [ -h | -V ]
-.RB [ -- ]
-.I gbs\-file
+.RI [ OPTION ]...
+.RI [ -- ]
+.I GBS\-FILE
 .SH "DESCRIPTION"
 gbsinfo displays information about a Gameboy module dump
 (.GBS format).
@@ -21,10 +21,10 @@ Display version number and exit.
 .TP
 .B \-\-
 Marks the end of options.
-The next argument will be treated as a filename, even when starting with a
+The next argument will be treated as GBS-FILE, even when starting with a
 .BR \- .
 .TP
-.I gbs\-file
+.I GBS\-FILE
 The sound file to read.
 Must be in uncompressed .GBS format.
 .SH "BUGS"
