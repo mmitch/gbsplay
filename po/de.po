@@ -1,6 +1,6 @@
 # German translations for gbsplay.
 #
-# Copyright (C) 2003-2024  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+# Copyright (C) 2003-2025  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
 #                          Christian Garbs <mitch@cgarbs.de>
 #
 # This file is distributed under GNU GPL v1 or, at your option, any later version.
@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-02 22:58+0100\n"
-"PO-Revision-Date: 2024-02-02 23:02+0100\n"
+"POT-Creation-Date: 2025-02-09 17:17+0100\n"
+"PO-Revision-Date: 2025-02-09 17:06+0100\n"
 "Last-Translator: Christian Garbs <mitch@cgarbs.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -306,7 +306,23 @@ msgstr "Unbenannt"
 
 #, c-format
 msgid ""
-"Usage: %s [option(s)] <gbs-file> [start_at_subsong [stop_at_subsong] ]\n"
+"Usage: %s [OPTION]... [--] <GBS-FILE>\n"
+"\n"
+"Available options are:\n"
+"  -h  display this help and exit\n"
+"  -V  print version and exit\n"
+"  --  end options, next argument is GBS-FILE\n"
+msgstr ""
+"Benutzung: %s [OPTION]... <GBS-DATEI>\n"
+"\n"
+"Verfügbare Optionen sind:\n"
+"  -h  Diese Hilfe anzeigen und Programm beenden\n"
+"  -V  Version anzeigen und Programm beenden\n"
+"  --  Ende der Optionen, nächstes Argument ist die GBS-DATEI\n"
+
+#, c-format
+msgid ""
+"Usage: %s [OPTION]... [--] GBS-FILE [START-AT-SUBSONG [STOP-AFTER-SUBSONG] ]\n"
 "\n"
 "Available options are:\n"
 "  -E        endian, b == big, l == little, n == native (%s)\n"
@@ -328,8 +344,9 @@ msgid ""
 "  -z        play subsongs in shuffle mode\n"
 "  -Z        play subsongs in random mode (repetitions possible)\n"
 "  -1 to -4  mute a channel on startup\n"
+"  --        end options, next argument is GBS-FILE\n"
 msgstr ""
-"Benutzung: %s [Option(en)] <GBS-Datei> [starte_bei_Subsong [stoppe_bei_Subsong] ]\n"
+"Benutzung: %s [OPTION]... [--] GBS-DATEI [STARTE-MIT-SUBSONG [STOPPE-NACH-SUBSONG] ]\n"
 "\n"
 "Verfügbare Optionen sind:\n"
 "  -E         Byte-Reihenfolge, b == big-endian, l == little-endian, n == nativ (%s)\n"
@@ -351,35 +368,24 @@ msgstr ""
 "  -z         Subsongs in zufälliger Reihenfolge abspielen\n"
 "  -Z         Subsongs komplett zufällig abspielen (Wiederholungen möglich)\n"
 "  -1 bis -4  Kanal beim Starten stummschalten\n"
-
-#, c-format
-msgid ""
-"Usage: %s [option] <gbs-file>\n"
-"\n"
-"Available options are:\n"
-"  -h  display this help and exit\n"
-"  -V  print version and exit\n"
-msgstr ""
-"Benutzung: %s [Option] <GBS-Datei>\n"
-"\n"
-"Verfügbare Optionen sind:\n"
-"  -h  Diese Hilfe anzeigen und Programm beenden\n"
-"  -V  Version anzeigen und Programm beenden\n"
+"  --         Ende der Optionen, nächstes Argument ist die GBS-DATEI\n"
 
 msgid ""
-"Usage: gbs2gb [option] <gbs-file> <out-file>\n"
+"Usage: gbs2gb [OPTION]... [--] GBS-FILE OUT-FILE\n"
 "\n"
 "Available options are:\n"
 "  -t  rom template\n"
 "  -h  display this help and exit\n"
 "  -V  print version and exit\n"
+"  --  end options, next argument is GBS-FILE\n"
 msgstr ""
-"Benutzung: gbs2gb [Option] <GBS-Datei> <Ausgabe-Datei>\n"
+"Benutzung: gbs2gb [OPTION]... [--] <GBS-DATEI> <AUSGABE-DATEI>\n"
 "\n"
 "Verfügbare Optionen sind:\n"
 "  -t  ROM-Template\n"
 "  -h  Diese Hilfe anzeigen und Programm beenden\n"
 "  -V  Version anzeigen und Programm beenden\n"
+"  --  Ende der Optionen, nächstes Argument ist die GBS-DATEI\n"
 
 #, c-format
 msgid "fcntl(F_GETFL) failed: %s\n"
@@ -454,6 +460,10 @@ msgstr "snd_pcm_hw_params_set_period_size_near fehlgeschlagen: %s\n"
 #, c-format
 msgid "snd_pcm_hw_params_set_rate_near failed: %s\n"
 msgstr "snd_pcm_hw_params_set_rate_near fehlgeschlagen: %s\n"
+
+#, c-format
+msgid "snd_pcm_pause failed: %s\n"
+msgstr "snd_pcm_pause fehlgeschlagen: %s\n"
 
 #, c-format
 msgid "snd_pcm_writei failed: %s\n"
