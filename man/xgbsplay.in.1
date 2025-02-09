@@ -8,7 +8,7 @@ xgbsplay \- X11 frontent to Gameboy sound player
 .RI [ OPTION ]...
 .RI [ -- ]
 .I GBS\-FILE
-.RI [ START\-AT\-SUBSONG " [" STOP\-AT\-SUBSONG "] ]"
+.RI [ START\-AT\-SUBSONG " [" STOP\-AFTER\-SUBSONG "] ]"
 .SH "DESCRIPTION"
 .B xgbsplay
 emulates the sound hardware of the Nintendo Gameboy.
@@ -130,7 +130,7 @@ If not specified, the default song declared in the sound file will be played
 unless shuffle (\fI-z\fP) or random mode (\fI-Z\fP) are active.
 An out\-of\-bounds number will be clipped to the possible range of subsongs.
 .TP
-.I STOP\-AT\-SUBSONG
+.I STOP\-AFTER\-SUBSONG
 The last subsong to be played.
 See \fILOOP MODES\fP below for further details.
 .SH "KEYBOARD CONTROL"
@@ -185,7 +185,7 @@ are active.
 The term
 .I last subsong
 refers to the parameter
-.I STOP\-AT\-SUBSONG
+.I STOP\-AFTER\-SUBSONG
 if it is set and not out-of-bounds,
 or the last subsong in the file otherwise.
 .TP
@@ -206,7 +206,7 @@ the fist subsong will start to play again.
 When a subsong has finished playing,
 the same subsong will start to play again.
 The
-.I STOP\-AT\-SUBSONG
+.I STOP\-AFTER\-SUBSONG
 parameter will be ignored as no subsong change can occur.
 The 
 .I subsong\-timeout

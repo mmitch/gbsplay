@@ -391,9 +391,9 @@ static void usage(long exitcode)
 {
 	FILE *out = exitcode ? stderr : stdout;
 	fprintf(out,
-		_("Usage: %s [OPTION]... [--] GBS-FILE [START-AT-SUBSONG [STOP-AT-SUBSONG] ]\n"
+		_("Usage: %s [OPTION]... [--] GBS-FILE [START-AT-SUBSONG [STOP-AFTER-SUBSONG] ]\n"
 		  "\n"
-		  "Available OPTIONs are:\n"
+		  "Available options are:\n"
 		  "  -E        endian, b == big, l == little, n == native (%s)\n"
 		  "  -f        set fadeout (%ld seconds)\n"
 		  "  -g        set subsong gap (%ld seconds)\n"
