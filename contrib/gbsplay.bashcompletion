@@ -53,7 +53,6 @@ __gbsplay_expand_subsongs()
 }
 
 __gbsplay_return_empty_completion()
-# FIXME: empty COMPREPLY seems to fall back to default filename completion - how can we avoid that?
 {
     COMPREPLY=()
 }
@@ -169,5 +168,5 @@ __gbsinfo()
     fi
 }
 
-complete -F __gbsplay -o default -o nospace gbsplay
-complete -F __gbsinfo -o default -o nospace gbsinfo
+complete -F __gbsplay -o nospace gbsplay
+complete -F __gbsinfo -o nospace gbsinfo
