@@ -1,7 +1,8 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2024 (C) by Christian Garbs <mitch@cgarbs.de>
+ * 2024-2025 (C) by Christian Garbs <mitch@cgarbs.de>
+ *                  Lisa Riedler <dev@riedler.wien>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
