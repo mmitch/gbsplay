@@ -10,6 +10,8 @@ Bugfixes:
 - gbsplay:
   - don't mess up the screen with underrun errors from the ALSA plugout
     when resuming from a pause
+  - fix Pipewire plugout for Pipewire versions greater than 0.3.x
+
 - build process:
   - fix i18n on brew/MaOS
 
