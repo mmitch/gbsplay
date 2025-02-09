@@ -267,6 +267,7 @@ int main(int argc, char **argv)
 
 	/* clean up terminal */
 	restore_terminal();
+	/* unhide terminal cursor */
 	printf("\033[?25h");
 	if (verbosity>3) {
 		printf("\n\n\n\n\n\n");
