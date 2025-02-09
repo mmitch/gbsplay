@@ -25,6 +25,9 @@ __gbsplay_expand_filename()
     for ext in .gbs .gbs.gz; do
 
 	# get all matching files ending with $ext
+	# FIXME: This will always fail for filenames containing a newline.
+	# compgen produces per-line output and this can never work for those filenames.
+	# I think bash simply can't handle newlines in any form of Programmable Completion.
 	mapfile -t files < <( compgen -f -X "!*$ext" -- "$cur" )
 
 	# add trailing space to filenames
@@ -37,6 +40,7 @@ __gbsplay_expand_filename()
     done
 
     # get all matching directories
+    # FIXME: directories with newlines also don't work
     local -a dirs
     mapfile -t dirs < <( compgen -d -- "$cur" )
 
@@ -48,7 +52,21 @@ __gbsplay_expand_filename()
 
 __gbsplay_expand_subsongs()
 {
-    mapfile -t COMPREPLY < <( compgen -W "$(seq "$(gbsinfo "${COMP_WORDS[filepos]}" 2>/dev/null | grep ^Subsongs | cut -d: -f 2)" 2>/dev/null)" -- "$cur" )
+    # The filename needs to be quoted to save us from bad surprises,
+    # but this will make things like ~/foo.gbs fail because we also suppress Tilde Expansion.
+    # Manually expand ~/ to make the most common case work.
+    # FIXME: All other Tilde Expansions are unsupported and will not work.
+    local filename="${COMP_WORDS[filepos]}"
+    if [[ $filename =~ ^~/ ]]; then
+	filename="${HOME}/${filename#*/}"
+    fi
+
+    if [ ! -r "$filename" ]; then
+	__gbsplay_return_empty_completion
+	return
+    fi
+
+    mapfile -t COMPREPLY < <( compgen -W "$(seq "$(gbsinfo "$filename" 2>/dev/null | grep ^Subsongs | cut -d: -f 2)" 2>/dev/null)" -- "$cur" )
     __gbsplay_add_spaces_to_compreply
 }
 

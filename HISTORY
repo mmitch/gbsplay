@@ -20,6 +20,9 @@ Enhancements:
 - gbsplay:
   - add proper pause handling to ALSA plugout
 
+- contrib:
+  - add missiong options to bash completion script and fix some edge cases
+
 - documentation:
   - document -- option to end option parsing
   - update xgbsplay(1) manpage
