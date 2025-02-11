@@ -2,7 +2,7 @@
 
 # gbsplay, gbsinfo, gbs2gb and gbs2ogg zsh completion
 #
-# 2024 (c) Riedler <dev@riedler.wien>
+# 2024-2025 (c) Riedler <dev@riedler.wien>
 # licensed under GNU GPL v1 or, at your option, any later version
 
 local gbsfiles='_files -g "*(.gbs|.gbs.gz)"'
