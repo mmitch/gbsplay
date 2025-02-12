@@ -14,6 +14,7 @@ Bugfixes:
 
 - build process:
   - fix i18n on brew/MaOS
+  - disable i8n during unit tests
 
 Enhancements:
 
@@ -21,6 +22,7 @@ Enhancements:
   - add proper pause handling to ALSA plugout
 
 - contrib:
+  - add Zsh command completion for gbsplay, gbsinfo, gbs2gb and gbs2ogg
   - add missiong options to bash completion script and fix some edge cases
 
 - documentation:
