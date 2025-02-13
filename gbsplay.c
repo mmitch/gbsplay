@@ -265,10 +265,8 @@ int main(int argc, char **argv)
 	/* stop sound */
 	common_cleanup(gbs);
 
-	/* clean up terminal */
+	/* restore terminal state */
 	restore_terminal();
-	/* unhide terminal cursor */
-	printf("\033[?25h");
 	if (verbosity>3) {
 		printf("\n\n\n\n\n\n");
 	}
