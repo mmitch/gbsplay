@@ -71,6 +71,9 @@ void restore_terminal(void)
 {
 	if (terminit)
 		tcsetattr(STDIN_FILENO, TCSAFLUSH, &ots);
+
+	/* unhide cursor */
+	printf("\033[?25h");
 }
 
 long get_input(char *c)
