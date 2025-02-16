@@ -45,50 +45,32 @@ jobs:
         CONFIGURE_FLAGS: ${{ matrix.flags }} --enable-verbosebuild --build=x86_64-w64-mingw32
       run: |
         make
-    - name: Generate manpage
+    - name: prepare artifacts
       run: |
-        groff -man -Tascii man/gbsplay.1 > groff-nowidth.txt
-        groff -man -Tutf8 man/gbsplay.1 > groff-utf8.txt
-        groff -man -Tascii -rLL=100n man/gbsplay.1 > groff-plain.txt
-        groff -man -Tascii -rLL=100n man/gbsplay.1 | col -bx > groff-col-bx.txt
-        groff -man -Thtml man/gbsplay.1 > groff.html
-        groff -man -Tpdf man/gbsplay.1 > groff.pdf
-    - name: Generate manpage plan B
-      run: |
-        troff -man -Tascii man/gbsinfo.1   | grotty > troff-ascii.gbsinfo.txt
-        troff -man -Tascii man/gbsplay.1   | grotty > troff-ascii.gbsplay.txt
-        troff -man -Tascii man/gbsplayrc.5 | grotty > troff-ascii.gbsplayrc.txt
-        cat COPYRIGHT > troff-ascii.COPYRIGHT.txt
-        grep -v '^\[!\[' README.md > troff-ascii.README.txt
-    - name: upload binary
+        version=$(sed -n "/^VERSION/s/.* //p" config.mk)
+        output_dir=gbsplay-${version}
+
+        echo create artifact directory ${output_dir}/"
+        mkdir -p artifacts/${output_dir}/
+
+        echo "copy binaries"
+        cp -v gbsplay.exe gbsinfo.exe ${output_dir}/
+        
+        for manpage in gbsinfo gbsplay gbsplayrc; do
+            echo format manpage ${manpage}"
+            groff -Tascii -P-c -P-b -P-u -man man/${manpage}.? > ${output_dir}/${manpage}.txt
+        done
+
+        echo "copy README"
+        grep -v '^\[!\[' README.md > ${output_dir}/README.txt
+
+        echo "copy HISTORY"
+        cat HISTORY > ${output_dir}/HISTORY.txt
+    - name: upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: gbsplay win exe
-        path: gbsplay.exe
+        name: gbsplay windows
+        path: artifacts/
         if-no-files-found: error
-        retention-days: 7 # this branch is for tests only, don't hog resources
-        compression-level: 0 # we don't expect to be able to compress an .exe significantly
-    - name: upload binary
-      uses: actions/upload-artifact@v4
-      with:
-        name: gbsinfo win exe
-        path: gbsinfo.exe
-        if-no-files-found: error
-        retention-days: 7 # this branch is for tests only, don't hog resources
-        compression-level: 0 # we don't expect to be able to compress an .exe significantly
-    - name: upload help text
-      uses: actions/upload-artifact@v4
-      with:
-        name: groff manpages
-        path: groff*
-        if-no-files-found: error
-        retention-days: 7 # this branch is for tests only, don't hog resources
-        compression-level: 9 # we expect to be able to compress this plaintext significantly
-    - name: upload help text
-      uses: actions/upload-artifact@v4
-      with:
-        name: troff manpages
-        path: troff*
-        if-no-files-found: error
-        retention-days: 7 # this branch is for tests only, don't hog resources
-        compression-level: 9 # we expect to be able to compress this plaintext significantly
+        retention-days: 7 # don't hog resources, real builds are attached to the release anyway
+        compression-level: 9 # we seldom release, so try as hard as we can
