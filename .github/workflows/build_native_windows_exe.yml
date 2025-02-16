@@ -53,19 +53,42 @@ jobs:
         groff -man -Tascii -rLL=100n man/gbsplay.1 | col -bx > groff-col-bx.txt
         groff -man -Thtml man/gbsplay.1 > groff.html
         groff -man -Tpdf man/gbsplay.1 > groff.pdf
+    - name: Generate manpage plan B
+      run: |
+        troff -man -Tascii man/gbsinfo.1   | grotty > troff-ascii.gbsinfo.txt
+        troff -man -Tascii man/gbsplay.1   | grotty > troff-ascii.gbsplay.txt
+        troff -man -Tascii man/gbsplayrc.5 | grotty > troff-ascii.gbsplayrc.txt
+        cat COPYRIGHT > troff-ascii.COPYRIGHT.txt
+        grep -v '^\[!\[' README.md > troff-ascii.README.txt
     - name: upload binary
       uses: actions/upload-artifact@v4
       with:
-        name: standalone Windows binary
+        name: gbsplay win exe
         path: gbsplay.exe
+        if-no-files-found: error
+        retention-days: 7 # this branch is for tests only, don't hog resources
+        compression-level: 0 # we don't expect to be able to compress an .exe significantly
+    - name: upload binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: gbsinfo win exe
+        path: gbsinfo.exe
         if-no-files-found: error
         retention-days: 7 # this branch is for tests only, don't hog resources
         compression-level: 0 # we don't expect to be able to compress an .exe significantly
     - name: upload help text
       uses: actions/upload-artifact@v4
       with:
-        name: manpage for gbsplay.exe
+        name: groff manpages
         path: groff*
         if-no-files-found: error
         retention-days: 7 # this branch is for tests only, don't hog resources
-        compression-level: 9 # we don't expect to be able to compress this plaintext significantly
+        compression-level: 9 # we expect to be able to compress this plaintext significantly
+    - name: upload help text
+      uses: actions/upload-artifact@v4
+      with:
+        name: troff manpages
+        path: troff*
+        if-no-files-found: error
+        retention-days: 7 # this branch is for tests only, don't hog resources
+        compression-level: 9 # we expect to be able to compress this plaintext significantly
