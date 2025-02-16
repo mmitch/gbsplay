@@ -5,6 +5,11 @@ gbsplay HISTORY
 2025/xx/xx  -  unreleased
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Bugfixes:
+
+- build process:
+  - fix version number detection in GitHub CI builds
+
 Enhancements:
 
 - documentation:
