@@ -655,15 +655,19 @@ fi
 
 # determine version that is built
 
-if [ -f .git/HEAD ]; then
-    # from git if the build happens in a repository
-    VERSION=$(git describe --tags)
-elif [ "$VERSION" = unknown ]; then
-    # get a rough version number based on HISTORY file
-    VERSION="$(
+VERSION_FROM_HISTORY_FILE="$(
 	grep -E '^[0-9]{4}/[0-9]{2}/[0-9]{2}  -  [0-9]+.[0-9]+.[0-9]+' HISTORY \
 	    | sed -n '1{s/^.*  -  //;s/ .*//;p}'
 	)ish"
+if [ -f .git/HEAD ]; then
+    # from git if the build happens in a repository
+    if ! VERSION=$(git describe --tags); then
+	# no tags available (we might be in a GitHub CI build), so cobble something together
+	VERSION="${VERSION_FROM_HISTORY_FILE}-git-$(git describe --tags --always)"
+    fi
+elif [ "$VERSION" = unknown ]; then
+    # get a rough version number based on HISTORY file
+    VERSION="$VERSION_FROM_HISTORY_FILE"
 fi
 echo "configure gbsplay $VERSION"
 
