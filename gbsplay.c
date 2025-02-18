@@ -111,7 +111,7 @@ static void handleuserinput(struct gbs *gbs)
 			quit = 1;
 			break;
 		case ' ':
-			toggle_pause(gbs);
+			toggle_pause();
 			if (redraw) printinfo();
 			if (verbosity>1) printstatus(gbs);
 			break;
