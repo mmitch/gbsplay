@@ -13,6 +13,7 @@ Bugfixes:
 Enhancements:
 
 - xgbsplay:
+  - loop mode can be changed interactively (use the 'l' key)
   - display pause status when playback is paused
   - display current loop mode
 

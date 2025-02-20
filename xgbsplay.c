@@ -241,7 +241,8 @@ static void draw_screen_content()
 	draw_screen_linef(0, 5, "%02ld:%02ld/%02ld:%02ld%s%s", displaytime.played_min, displaytime.played_sec, displaytime.total_min, displaytime.total_sec, get_pause_string(), get_loopmode_string(status));
 
 	draw_screen_line(0, 7, "[p]revious/[n]ext subsong   [q]uit");
-	draw_screen_line(0, 8, "[ ] pause/resume   [1-4] mute ch");
+	draw_screen_line(0, 8, "[1-4] mute channel     [l]oop mode");
+	draw_screen_line(0, 9, "[ ] pause/resume");
 }
 
 static void redraw()
@@ -431,6 +432,9 @@ static bool handle_user_input(struct gbs *gbs, char c)
 	case '3':
 	case '4':
 		gbs_toggle_mute(gbs, c-'1');
+		break;
+	case 'l':
+		gbs_cycle_loop_mode(gbs);
 		break;
 
 	default:
