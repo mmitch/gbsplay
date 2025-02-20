@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-20 23:10+0100\n"
+"POT-Creation-Date: 2025-02-21 09:44+0100\n"
 "PO-Revision-Date: 2023-11-19 15:29+0100\n"
 "Last-Translator: Tobias Diedrich <ranma+gbsplay@tdiedrich.de>\n"
 "Language-Team: none\n"
@@ -119,6 +119,13 @@ msgstr "Bigger than allowed maximum (4MiB)"
 #, c-format
 msgid "CRC32:            0x%08lx\n"
 msgstr "CRC32:            0x%08lx\n"
+
+#, c-format
+msgid "Could not connect to X server: XCB error %d\n"
+msgstr "Could not connect to X server: XCB error %d\n"
+
+msgid "Could not find visual\n"
+msgstr "Could not find visual\n"
 
 #, c-format
 msgid "Could not init SDL: %s\n"
@@ -388,6 +395,18 @@ msgstr ""
 "  -V  print version and exit\n"
 "  --  end options, next argument is GBS-FILE\n"
 
+msgid "[ ] pause/resume"
+msgstr "[ ] pause/resume"
+
+msgid "[1-4] mute channel     [l]oop mode"
+msgstr "[1-4] mute channel     [l]oop mode"
+
+msgid "[p]revious/[n]ext subsong   [q]uit"
+msgstr "[p]revious/[n]ext subsong   [q]uit"
+
+msgid "big"
+msgstr "big"
+
 #, c-format
 msgid "fcntl(F_GETFL) failed: %s\n"
 msgstr "fcntl(F_GETFL) failed: %s\n"
@@ -401,6 +420,9 @@ msgstr "gb / not available"
 
 msgid "gbr / not available"
 msgstr "gbr / not available"
+
+msgid "invalid"
+msgstr "invalid"
 
 #, c-format
 msgid "ioctl(fd, SNDCTL_DSP_GETBLKSIZE) failed: %s\n"
@@ -421,6 +443,12 @@ msgstr "ioctl(fd, SNDCTL_DSP_SPEED, %ld) failed: %s\n"
 #, c-format
 msgid "ioctl(fd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
 msgstr "ioctl(fd, SNDCTL_DSP_STEREO, %d) failed: %s\n"
+
+msgid "little"
+msgstr "little"
+
+msgid "native"
+msgstr "native"
 
 #, c-format
 msgid "pw_stream_connect failed: %s\n"
@@ -474,5 +502,12 @@ msgstr "snd_pcm_pause failed: %s\n"
 msgid "snd_pcm_writei failed: %s\n"
 msgstr "snd_pcm_writei failed: %s\n"
 
+#, c-format
+msgid "unhandled event %d\n"
+msgstr "unhandled event %d\n"
+
 msgid "vgm / not available"
 msgstr "vgm / not available"
+
+#~ msgid "default"
+#~ msgstr "default"

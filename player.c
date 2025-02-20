@@ -369,10 +369,10 @@ void update_displaytime(struct displaytime *time, const struct gbs_status *statu
 static char *endian_str(long endian)
 {
 	switch (endian) {
-	case PLUGOUT_ENDIAN_BIG: return "big";
-	case PLUGOUT_ENDIAN_LITTLE: return "little";
-	case PLUGOUT_ENDIAN_AUTOSELECT: return "default";
-	default: return "invalid";
+	case PLUGOUT_ENDIAN_BIG: return _("big");
+	case PLUGOUT_ENDIAN_LITTLE: return _("little");
+	case PLUGOUT_ENDIAN_AUTOSELECT: return _("native");
+	default: return _("invalid");
 	}
 }
 

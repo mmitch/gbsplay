@@ -16,6 +16,7 @@ Enhancements:
   - loop mode can be changed interactively (use the 'l' key)
   - display pause status when playback is paused
   - display current loop mode
+  - add i18n
 
 - documentation:
   - describe loop mode keybinding in gbsplay(1) manpage

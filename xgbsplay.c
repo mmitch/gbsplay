@@ -238,11 +238,12 @@ static void draw_screen_content()
 	draw_screen_line(0, 2, metadata->copyright);
 
 	draw_screen_linef(0, 4, "Song %3d/%3d", status->subsong+1, status->songs);
-	draw_screen_linef(0, 5, "%02ld:%02ld/%02ld:%02ld%s%s", displaytime.played_min, displaytime.played_sec, displaytime.total_min, displaytime.total_sec, get_pause_string(), get_loopmode_string(status));
+	draw_screen_linef(0, 5, "%02ld:%02ld/%02ld:%02ld%s", displaytime.played_min, displaytime.played_sec, displaytime.total_min, displaytime.total_sec, get_pause_string());
+	draw_screen_linef(0, 6, "           %s", get_loopmode_string(status));
 
-	draw_screen_line(0, 7, "[p]revious/[n]ext subsong   [q]uit");
-	draw_screen_line(0, 8, "[1-4] mute channel     [l]oop mode");
-	draw_screen_line(0, 9, "[ ] pause/resume");
+	draw_screen_line(0,  8, _("[p]revious/[n]ext subsong   [q]uit"));
+	draw_screen_line(0,  9, _("[1-4] mute channel     [l]oop mode"));
+	draw_screen_line(0, 10, _("[ ] pause/resume"));
 }
 
 static void redraw()
@@ -466,7 +467,7 @@ int main(int argc, char **argv)
 	/* init X11 */
 	conn = xcb_connect(NULL, NULL);
 	if (xcb_connection_has_error(conn)) {
-		fprintf(stderr, "Could not connect to X server: XCB error %d\n",
+		fprintf(stderr, _("Could not connect to X server: XCB error %d\n"),
 			xcb_connection_has_error(conn));
 		exit(1);
 	}
@@ -477,7 +478,7 @@ int main(int argc, char **argv)
 	screen = xcb_setup_roots_iterator(xcb_get_setup(conn)).data;
 	visual = find_visual(screen);
 	if (visual == NULL) {
-		fprintf(stderr, "Could not find visual\n");
+		fputs(_("Could not find visual\n"), stderr);
 		exit(1);
 	}
 	window = xcb_generate_id(conn);
@@ -564,7 +565,7 @@ int main(int argc, char **argv)
 				/* Ignored event */
 				break;
 			default: {
-				fprintf(stderr, "unhandled event %d\n", event->response_type & XCB_EVENT_MASK);
+				fprintf(stderr, _("unhandled event %d\n"), event->response_type & XCB_EVENT_MASK);
 				break;
 				}
 			}
