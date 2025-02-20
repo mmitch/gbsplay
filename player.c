@@ -325,9 +325,9 @@ void toggle_pause()
 		sound_pause(pause_mode);
 }
 
-long get_pause()
+const char *get_pause_string()
 {
-	return pause_mode;
+	return pause_mode ? _(" [Paused]") : "";
 }
 
 long step_emulation(struct gbs *gbs) {

@@ -12,6 +12,9 @@ Bugfixes:
 
 Enhancements:
 
+- xgbsplay:
+  - display pause status when playback is paused
+
 - documentation:
   - describe loop mode keybinding in gbsplay(1) manpage
 

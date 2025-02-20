@@ -1,7 +1,7 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2025 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -189,17 +189,15 @@ static void printstatus(struct gbs *gbs)
 {
 	const struct gbs_status *status;
 	struct displaytime time;
-	long pausemode;
 
 	status = gbs_get_status(gbs);
-	pausemode = get_pause();
 
 	update_displaytime(&time, status);
 
 	printf("\r\033[A\033[A"
 	       "Song %3d/%3d%s%s (%s)\033[K\n"
 	       "%02ld:%02ld/%02ld:%02ld",
-	       status->subsong+1, status->songs, pausemode ? _(" [Paused]") : "",
+	       status->subsong+1, status->songs, get_pause_string(),
 	       loopmodestring(status), status->songtitle,
 	       time.played_min, time.played_sec, time.total_min, time.total_sec);
 	if (verbosity>2) {

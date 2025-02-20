@@ -1,13 +1,14 @@
 /*
  * xgbsplay is an X11 frontend for gbsplay, the Gameboy sound player
  *
- * 2003-2020 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2025 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -102,10 +103,13 @@ static void update_title()
 	int len;
 
 	len = snprintf(statustext, STATUSTEXT_LENGTH, /* or use sizeof(statustext) ?? */
-		 "xgbsplay %s %d/%d "
-		 "%02ld:%02ld/%02ld:%02ld",
-		 filename, status->subsong+1, status->songs,
-		 displaytime.played_min, displaytime.played_sec, displaytime.total_min, displaytime.total_sec);
+		"xgbsplay %s %d/%d "
+		"%02ld:%02ld/%02ld:%02ld"
+		"%s",
+		filename, status->subsong+1, status->songs,
+		displaytime.played_min, displaytime.played_sec, displaytime.total_min, displaytime.total_sec,
+		get_pause_string()
+		);
 
 	xcb_icccm_set_wm_name(conn, window, XCB_ATOM_STRING, XCB_STRING_FORMAT, len, statustext);
 	xcb_flush(conn);
@@ -234,7 +238,7 @@ static void draw_screen_content(struct gbs *gbs)
 	draw_screen_line(0, 2, metadata->copyright);
 
 	draw_screen_linef(0, 4, "Song %3d/%3d", status->subsong+1, status->songs);
-	draw_screen_linef(0, 5, "%02ld:%02ld/%02ld:%02ld", displaytime.played_min, displaytime.played_sec, displaytime.total_min, displaytime.total_sec);
+	draw_screen_linef(0, 5, "%02ld:%02ld/%02ld:%02ld%s", displaytime.played_min, displaytime.played_sec, displaytime.total_min, displaytime.total_sec, get_pause_string());
 
 	draw_screen_line(0, 7, "[p]revious/[n]ext subsong   [q]uit");
 	draw_screen_line(0, 8, "[ ] pause/resume   [1-4] mute ch");
@@ -281,6 +285,7 @@ static int handle_button(xcb_button_release_event_t *bev, struct gbs *gbs)
 		bev->event_x, bev->event_y);
 
 	/* TODO: Have things to click on */
+	/* FIXME: All clicks fall through to the root window and might trigger unseen things */
 
 	return 0;
 }
@@ -402,7 +407,7 @@ static xcb_keysym_t lookup_keysym(xcb_keycode_t code, uint16_t state)
 	return keysyms[idx];
 }
 
-static void handle_user_input(struct gbs *gbs, char c)
+static bool handle_user_input(struct gbs *gbs, char c)
 {
 
 	switch (c) {
@@ -419,6 +424,7 @@ static void handle_user_input(struct gbs *gbs, char c)
 		break;
 	case ' ':
 		toggle_pause(gbs);
+		update_title();
 		break;
 	case '1':
 	case '2':
@@ -426,7 +432,12 @@ static void handle_user_input(struct gbs *gbs, char c)
 	case '4':
 		gbs_toggle_mute(gbs, c-'1');
 		break;
+
+	default:
+		return false; // unhandled key -> no status change
 	}
+
+	return true;
 }
 
 int main(int argc, char **argv)
@@ -506,7 +517,7 @@ int main(int argc, char **argv)
 				xcb_key_press_event_t *kev = (xcb_key_press_event_t *) event;
 				xcb_keysym_t sym = lookup_keysym(kev->detail, kev->state);
 				fprintf(stderr, "key press (key=%d, state=%d, sym=%04x)\n", kev->detail, kev->state, sym);
-				handle_user_input(gbs, sym);
+				screen_dirty |= handle_user_input(gbs, sym);
 				break;
 				}
 			case XCB_KEY_RELEASE:
