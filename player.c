@@ -330,6 +330,16 @@ const char *get_pause_string()
 	return pause_mode ? _(" [Paused]") : "";
 }
 
+const char *get_loopmode_string(const struct gbs_status *status)
+{
+	switch (status->loop_mode) {
+	default:
+	case LOOP_OFF:    return "";
+	case LOOP_RANGE:  return _(" [loop range]");
+	case LOOP_SINGLE: return _(" [loop single]");
+	}
+}
+
 long step_emulation(struct gbs *gbs) {
 	if (is_running()) {
 		return gbs_step(gbs, refresh_delay);

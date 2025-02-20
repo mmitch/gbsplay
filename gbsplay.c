@@ -154,16 +154,6 @@ static char *volstring(long v)
 	return &vollookup[5*v];
 }
 
-static char *loopmodestring(const struct gbs_status *status)
-{
-	switch (status->loop_mode) {
-	default:
-	case LOOP_OFF:    return "";
-	case LOOP_RANGE:  return _(" [loop range]");
-	case LOOP_SINGLE: return _(" [loop single]");
-	}
-}
-
 static void printregs(struct gbs *gbs)
 {
 	long i;
@@ -198,7 +188,7 @@ static void printstatus(struct gbs *gbs)
 	       "Song %3d/%3d%s%s (%s)\033[K\n"
 	       "%02ld:%02ld/%02ld:%02ld",
 	       status->subsong+1, status->songs, get_pause_string(),
-	       loopmodestring(status), status->songtitle,
+	       get_loopmode_string(status), status->songtitle,
 	       time.played_min, time.played_sec, time.total_min, time.total_sec);
 	if (verbosity>2) {
 		printf("  %s %s  %s %s  %s %s  %s %s  [%s|%s]\n",

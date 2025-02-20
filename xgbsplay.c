@@ -226,7 +226,7 @@ static void draw_screen_linef(double vx, double vy, const char *fmt, ...)
 	draw_screen_line(vx, vy, buf);
 }
 
-static void draw_screen_content(struct gbs *gbs)
+static void draw_screen_content()
 {
 	// #0b433a
 	cairo_set_source_rgb(cr, 0x0b/255.0, 0x43/255.0, 0x3a/255.0);
@@ -238,13 +238,13 @@ static void draw_screen_content(struct gbs *gbs)
 	draw_screen_line(0, 2, metadata->copyright);
 
 	draw_screen_linef(0, 4, "Song %3d/%3d", status->subsong+1, status->songs);
-	draw_screen_linef(0, 5, "%02ld:%02ld/%02ld:%02ld%s", displaytime.played_min, displaytime.played_sec, displaytime.total_min, displaytime.total_sec, get_pause_string());
+	draw_screen_linef(0, 5, "%02ld:%02ld/%02ld:%02ld%s%s", displaytime.played_min, displaytime.played_sec, displaytime.total_min, displaytime.total_sec, get_pause_string(), get_loopmode_string(status));
 
 	draw_screen_line(0, 7, "[p]revious/[n]ext subsong   [q]uit");
 	draw_screen_line(0, 8, "[ ] pause/resume   [1-4] mute ch");
 }
 
-static void redraw(struct gbs *gbs)
+static void redraw()
 {
 	// #a9988e
 	cairo_set_source_rgb(cr, 0xa8/255.0, 0x98/255.0, 0x8e/255.0);
@@ -260,7 +260,7 @@ static void redraw(struct gbs *gbs)
 			 8 /* deco height */);
 	draw_screen_inner(VLCD_OUT_HPAD + VLCD_IN_HPAD,
 			  TOP_DECO_PAD + TOP_DECO_SIZE + VLCD_OUT_VPAD + VLCD_IN_VPAD);
-	draw_screen_content(gbs);
+	draw_screen_content();
 
 	// #191a41
 	cairo_set_source_rgb(cr, 0x19/255.0, 0x1a/255.0, 0x41/255.0);
@@ -583,7 +583,7 @@ int main(int argc, char **argv)
 			screen_dirty = 1;
 		}
 		if (screen_dirty) {
-			redraw(gbs);
+			redraw();
 			xcb_flush(conn);
 			screen_dirty = 0;
 			{
