@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-20 22:13+0100\n"
+"POT-Creation-Date: 2025-02-20 23:10+0100\n"
 "PO-Revision-Date: 2023-11-19 15:29+0100\n"
 "Last-Translator: Tobias Diedrich <ranma+gbsplay@tdiedrich.de>\n"
 "Language-Team: none\n"
@@ -38,14 +38,14 @@ msgstr ""
 msgid " + VBlank (ugetab)"
 msgstr " + VBlank (ugetab)"
 
-msgid " [Paused]"
-msgstr " [Paused]"
-
 msgid " [loop range]"
 msgstr " [loop range]"
 
 msgid " [loop single]"
 msgstr " [loop single]"
+
+msgid " [paused]"
+msgstr " [paused]"
 
 #, c-format
 msgid ""

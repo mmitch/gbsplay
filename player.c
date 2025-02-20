@@ -327,7 +327,7 @@ void toggle_pause()
 
 const char *get_pause_string()
 {
-	return pause_mode ? _(" [Paused]") : "";
+	return pause_mode ? _(" [paused]") : "";
 }
 
 const char *get_loopmode_string(const struct gbs_status *status)
