@@ -199,7 +199,7 @@ static void printstatus(struct gbs *gbs)
 	printf("\r\033[A\033[A"
 	       "Song %3d/%3d%s%s (%s)\033[K\n"
 	       "%02ld:%02ld/%02ld:%02ld",
-	       status->subsong+1, status->songs, pausemode ? " [Paused]" : "",
+	       status->subsong+1, status->songs, pausemode ? _(" [Paused]") : "",
 	       loopmodestring(status), status->songtitle,
 	       time.played_min, time.played_sec, time.total_min, time.total_sec);
 	if (verbosity>2) {
