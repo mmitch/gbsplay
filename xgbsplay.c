@@ -520,7 +520,7 @@ int main(int argc, char **argv)
 			case XCB_KEY_PRESS: {
 				xcb_key_press_event_t *kev = (xcb_key_press_event_t *) event;
 				xcb_keysym_t sym = lookup_keysym(kev->detail, kev->state);
-				fprintf(stderr, "key press (key=%d, state=%d, sym=%04x)\n", kev->detail, kev->state, sym);
+				// fprintf(stderr, "key press (key=%d, state=%d, sym=%04x)\n", kev->detail, kev->state, sym);
 				screen_dirty |= handle_user_input(gbs, sym);
 				break;
 				}
@@ -537,7 +537,7 @@ int main(int argc, char **argv)
 				if (pnev->atom == atomWmName) {
 					break;
 				}
-				fprintf(stderr, "property notify: %s\n", debug_atom_name(pnev->atom));
+				// fprintf(stderr, "property notify: %s\n", debug_atom_name(pnev->atom));
 				break;
 				}
 			case XCB_CLIENT_MESSAGE: {
