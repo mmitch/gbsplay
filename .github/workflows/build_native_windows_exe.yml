@@ -1,19 +1,59 @@
-# This workflow will build and test gbsplay in various configurations on Windows.
+# this workflow handles new releases and adds artifacts to the release page
 
-name: Windows Build
-
+name: Release
 on:
-  push:
-  pull_request:
-    types: [opened]
-  schedule:
-    - cron: '23 4 5 * *'
+  push
+
+permissions: read-all
 
 jobs:
-  build-windows:
-    name: Build and test on Windows
+  release-tar-gz:
+    name: Release .tar.gz
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # needed to upload the artifact
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: build .tar.gz using make dist
+        run: |
+          # configure and determine build version
+          ./configure
+
+          # save build version for later
+          build_version="$(sed -n '/^VERSION/s/.*:= //p' config.mk)"
+          echo "build version is ${build_version}"
+
+          # build the tarball
+          make dist
+
+          # determine archive name for the next step
+          archive_name="gbsplay-${build_version}.tar.gz"
+          echo "archive name is ${archive_name}"
+          mv "../${archive_name}" .
+          ls -l "${archive_name}" || exit 1
+          echo "archive_name=${archive_name}" >> "$GITHUB_ENV"
+      - name: upload tar.gz artifact for next job
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-tar-gz
+          path: ${{ env.archive_name }}
+          if-no-files-found: error
+          retention-days: 1 # only needed for the next workflow part
+          compression-level: 0 # it's already compressed
+          overwrite: false # should not exist already
+
+  build-windows-binary:
+    name: build windows release binary
+
+    needs: release-tar-gz
 
     runs-on: windows-latest
+
+    permissions:
+      contents: write # needed to upload the artifact
 
     strategy:
       matrix:
@@ -31,7 +71,6 @@ jobs:
         shell: ${{ matrix.shell }}
 
     steps:
-    - uses: actions/checkout@v4
     - if: ${{ matrix.msystem }}
       name: Setup MSYS2
       uses: msys2/setup-msys2@v2
@@ -40,24 +79,32 @@ jobs:
         install: git base-devel ${{ matrix.packages }} zlib-devel dos2unix
         release: false
         update: false
-    - name: Build and test
+    - name: download .tar.gz artifact from previous job
+      uses: actions/download-artifact@v4
+      with:
+        name: release-tar-gz
+    - name: uncompress .tar.gz to current directory
+      run: |
+        tar -xzvf gbsplay-*.tar.gz --strip-components=1
+        rm -v gbsplay-*.tar.gz
+    - name: build and test
       env:
         CONFIGURE_FLAGS: ${{ matrix.flags }} --enable-verbosebuild --build=x86_64-w64-mingw32
       run: |
         make
-    - name: prepare artifacts
+    - name: prepare release artifacts
       run: |
         version=$(sed -n "/^VERSION/s/.* //p" config.mk)
-        output_dir=gbsplay-${version}
+        output_dir=artifacts/gbsplay-${version}
 
-        echo create artifact directory ${output_dir}/"
-        mkdir -p artifacts/${output_dir}/
+        echo "create artifact directory ${output_dir}/"
+        mkdir -p ${output_dir}/
 
         echo "copy binaries"
         cp -v gbsplay.exe gbsinfo.exe ${output_dir}/
         
         for manpage in gbsinfo gbsplay gbsplayrc; do
-            echo format manpage ${manpage}"
+            echo "format manpage ${manpage}"
             groff -Tascii -P-c -P-b -P-u -man man/${manpage}.? > ${output_dir}/${manpage}.txt
         done
 
