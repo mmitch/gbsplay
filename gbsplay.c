@@ -184,7 +184,7 @@ static void printstatus(struct gbs *gbs)
 
 	update_displaytime(&time, status);
 
-	printf("\r\033[A\033[A"
+	printf("\r\033[A\033[A\033[?25l"
 	       "Song %3d/%3d%s%s (%s)\033[K\n"
 	       "%02ld:%02ld/%02ld:%02ld",
 	       status->subsong+1, status->songs, get_pause_string(),
@@ -253,7 +253,7 @@ int main(int argc, char **argv)
 	/* stop sound */
 	common_cleanup(gbs);
 
-	/* clean up terminal */
+	/* restore terminal state */
 	restore_terminal();
 	if (verbosity>3) {
 		printf("\n\n\n\n\n\n");

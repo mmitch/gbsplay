@@ -47,7 +47,7 @@ enum playmode {
 	PLAYMODE_SHUFFLE = 3,
 };
 
-#define DEFAULT_REFRESH_DELAY 33
+#define DEFAULT_REFRESH_DELAY 17
 
 long refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
 
