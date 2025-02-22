@@ -47,7 +47,7 @@ struct player_cfg cfg = {
 /* forward declarations needed by configuration directives */
 static void cfg_string(void* const ptr);
 static void cfg_long(void* const ptr);
-static void cfg_int(void* const ptr);
+static void cfg_bool_as_int(void* const ptr);
 static void cfg_endian(void* const ptr);
 
 /* configuration directives */
@@ -55,7 +55,7 @@ static const struct cfg_option options[] = {
 	{ "endian", &cfg.requested_endian, cfg_endian },
 	{ "fadeout", &cfg.fadeout, cfg_long },
 	{ "filter_type", &cfg.filter_type, cfg_string },
-	{ "loop", &cfg.loop_mode, cfg_int },
+	{ "loop", &cfg.loop_mode, cfg_bool_as_int },
 	{ "output_plugin", &cfg.sound_name, cfg_string },
 	{ "rate", &cfg.rate, cfg_long },
 	{ "refresh_delay", &cfg.refresh_delay, cfg_long },
@@ -183,9 +183,10 @@ static void cfg_long(void* const ptr)
 	nextstate = 1;
 }
 
-static void cfg_int(void* const ptr)
+static void cfg_bool_as_int(void* const ptr)
 {
 	char num[10];
+	unsigned int tmp;
 	unsigned long n = 0;
 
 	if (!isdigit(c)) {
@@ -199,7 +200,8 @@ static void cfg_int(void* const ptr)
 	         n < (sizeof(num)-1));
 	num[n] = 0;
 
-	*((int*)ptr) = atoi(num);
+	tmp = atoi(num);
+	*((int*)ptr) = tmp ? 1 : 0;
 
 	state = 0;
 	nextstate = 1;
@@ -369,6 +371,40 @@ test void test_parse_complete_configuration() {
 	ASSERT_STRING_EQUAL("sound_name",   cfg.sound_name,       "altmidi");
 }
 TEST(test_parse_complete_configuration);
+
+/* manpage says: an integer; 0 = false = no loop mode; everything else = true = range loop mode */
+test void test_loop_0() {
+	// given
+
+	// when
+	cfg_parse("test/gbsplayrc-loop-0");
+
+	// then
+	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_OFF);
+}
+TEST(test_loop_0);
+
+test void test_loop_1() {
+	// given
+
+	// when
+	cfg_parse("test/gbsplayrc-loop-1");
+
+	// then
+	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_RANGE);
+}
+TEST(test_loop_1);
+
+test void test_loop_2() {
+	// given
+
+	// when
+	cfg_parse("test/gbsplayrc-loop-2");
+
+	// then
+	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_RANGE);
+}
+TEST(test_loop_2);
 
 TEST_EOF;
 
