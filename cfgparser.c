@@ -17,6 +17,7 @@
 
 #include "common.h"
 #include "cfgparser.h"
+#include "libgbs.h"
 #include "plugout.h"
 #include "test.h"
 
@@ -47,6 +48,7 @@ struct player_cfg cfg = {
 /* forward declarations needed by configuration directives */
 static void cfg_string(void* const ptr);
 static void cfg_long(void* const ptr);
+static void cfg_loop_mode(void* const ptr);
 static void cfg_bool_as_int(void* const ptr);
 static void cfg_endian(void* const ptr);
 
@@ -56,6 +58,7 @@ static const struct cfg_option options[] = {
 	{ "fadeout", &cfg.fadeout, cfg_long },
 	{ "filter_type", &cfg.filter_type, cfg_string },
 	{ "loop", &cfg.loop_mode, cfg_bool_as_int },
+	{ "loop_mode", &cfg.loop_mode, cfg_loop_mode },
 	{ "output_plugin", &cfg.sound_name, cfg_string },
 	{ "rate", &cfg.rate, cfg_long },
 	{ "refresh_delay", &cfg.refresh_delay, cfg_long },
@@ -65,6 +68,18 @@ static const struct cfg_option options[] = {
 	{ "verbosity", &cfg.verbosity, cfg_long },
 	/* playmode not implemented yet */
 	{ NULL, NULL, NULL }
+};
+
+struct loop_mode_map {
+	const char *keyword;
+	enum gbs_loop_mode loop_mode;
+};
+
+static const struct loop_mode_map loop_mode_map[] = {
+	{ "none",   LOOP_OFF },
+	{ "range",  LOOP_RANGE },
+	{ "single", LOOP_SINGLE },
+	{ NULL,     -1 }
 };
 
 static long cfg_line, cfg_char;
@@ -139,7 +154,30 @@ static void cfg_endian(void* const ptr)
 	nextstate = 1;
 }
 
-static void cfg_string(void * const ptr)
+static void cfg_loop_mode(void* const ptr)
+{
+	char *s;
+	enum gbs_loop_mode *loop_mode = ptr;
+	const struct loop_mode_map *entry;
+
+	// remember this because cfg_string() already reads the nextchar()
+	long cfg_line_orig = cfg_line;
+	long cfg_char_orig = cfg_char;
+
+	cfg_string(&s);
+
+	for (entry = loop_mode_map; entry->keyword; entry++) {
+		if (strncmp(s, entry->keyword, sizeof(s)-1) == 0) {
+			*loop_mode = entry->loop_mode;
+			return;
+		}
+	}
+
+	fprintf(stderr, _("'%s' is no valid loop mode at %s line %ld char %ld.\n"),
+		s, filename, cfg_line_orig, cfg_char_orig);
+}
+
+static void cfg_string(void* const ptr)
 {
 	char s[200];
 	unsigned long n = 0;
@@ -324,12 +362,19 @@ test void save_initial_cfg() {
 	initial_cfg.filter_type = strdup(cfg.filter_type);
 	initial_cfg.sound_name  = strdup(cfg.sound_name);
 };
+TEST(save_initial_cfg);
+
+test void restore_initial_cfg() {
+	cfg = initial_cfg;
+	cfg.filter_type = strdup(initial_cfg.filter_type);
+	cfg.sound_name  = strdup(initial_cfg.sound_name);
+};
 
 /************************* tests ************************/
 
 test void test_parse_missing_config_file() {
 	// given
-	save_initial_cfg();
+	restore_initial_cfg();
 
 	// when
 	cfg_parse("test/gbsplayrc-this-file-does-not-exist");
@@ -341,7 +386,7 @@ TEST(test_parse_missing_config_file);
 
 test void test_parse_empty_configuration() {
 	// given
-	save_initial_cfg();
+	restore_initial_cfg();
 
 	// when
 	cfg_parse("test/gbsplayrc-empty");
@@ -353,6 +398,7 @@ TEST(test_parse_empty_configuration);
 
 test void test_parse_complete_configuration() {
 	// given
+	restore_initial_cfg();
 
 	// when
 	cfg_parse("test/gbsplayrc-full");
@@ -375,6 +421,7 @@ TEST(test_parse_complete_configuration);
 /* manpage says: an integer; 0 = false = no loop mode; everything else = true = range loop mode */
 test void test_loop_0() {
 	// given
+	cfg.loop_mode = LOOP_RANGE;
 
 	// when
 	cfg_parse("test/gbsplayrc-loop-0");
@@ -386,17 +433,19 @@ TEST(test_loop_0);
 
 test void test_loop_1() {
 	// given
+	cfg.loop_mode = LOOP_SINGLE;
 
 	// when
 	cfg_parse("test/gbsplayrc-loop-1");
 
-	// then
+ 	// then
 	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_RANGE);
 }
 TEST(test_loop_1);
 
 test void test_loop_2() {
 	// given
+	cfg.loop_mode = LOOP_OFF;
 
 	// when
 	cfg_parse("test/gbsplayrc-loop-2");
@@ -405,6 +454,78 @@ test void test_loop_2() {
 	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_RANGE);
 }
 TEST(test_loop_2);
+
+test void test_loop_mode_none() {
+	// given
+	cfg.loop_mode = LOOP_RANGE;
+
+	// when
+	cfg_parse("test/gbsplayrc-loop-mode-none");
+
+	// then
+	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_OFF);
+}
+TEST(test_loop_mode_none);
+
+test void test_loop_mode_range() {
+	// given
+	cfg.loop_mode = LOOP_SINGLE;
+
+	// when
+	cfg_parse("test/gbsplayrc-loop-mode-range");
+
+	// then
+	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_RANGE);
+}
+TEST(test_loop_mode_range);
+
+test void test_loop_mode_single() {
+	// given
+	cfg.loop_mode = LOOP_RANGE;
+
+	// when
+	cfg_parse("test/gbsplayrc-loop-mode-single");
+
+	// then
+	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_SINGLE);
+}
+TEST(test_loop_mode_single);
+
+test void test_invalid_loop_mode() { // old setting is kept, warning in stderr
+	// given
+	cfg.loop_mode = LOOP_RANGE;
+
+	// when
+	cfg_parse("test/gbsplayrc-invalid-loop-mode");
+
+	// then
+	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_RANGE);
+}
+TEST(test_invalid_loop_mode);
+
+test void test_loop_mode_after_loop() {
+	// given
+	cfg.loop_mode = LOOP_RANGE;
+
+	// when
+	cfg_parse("test/gbsplayrc-loop-mode-after-loop");
+
+	// then
+	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_SINGLE);
+}
+TEST(test_loop_mode_after_loop);
+
+test void test_loop_after_loop_mode() {
+	// given
+	cfg.loop_mode = LOOP_RANGE;
+
+	// when
+	cfg_parse("test/gbsplayrc-loop-after-loop-mode");
+
+	// then
+	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_OFF);
+}
+TEST(test_loop_after_loop_mode);
 
 TEST_EOF;
 
