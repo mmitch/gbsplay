@@ -52,7 +52,6 @@ plugout_write_fn sound_write;
 plugout_close_fn sound_close;
 
 static enum playmode playmode = PLAYMODE_LINEAR;
-static enum gbs_loop_mode loop_mode = LOOP_OFF;
 static enum plugout_endian actual_endian = PLUGOUT_ENDIAN_AUTOSELECT;
 static long subsong_start = -1;
 static long subsong_stop = -1;
@@ -438,10 +437,10 @@ static void parseopts(int *argc, char ***argv)
 			cfg.filter_type = optarg;
 			break;
 		case 'l':
-			loop_mode = LOOP_RANGE;
+			cfg.loop_mode = LOOP_RANGE;
 			break;
 		case 'L':
-			loop_mode = LOOP_SINGLE;
+			cfg.loop_mode = LOOP_SINGLE;
 			break;
 		case 'o':
 			cfg.sound_name = optarg;
@@ -610,7 +609,7 @@ struct gbs *common_init(int argc, char **argv)
 
 	// FIXME: proper configuration interface to gbs, this is just quickly slapped together
 	gbs_configure(gbs, subsong_start, cfg.subsong_timeout, cfg.silence_timeout, cfg.subsong_gap, cfg.fadeout);
-	gbs_set_loop_mode(gbs, loop_mode);
+	gbs_set_loop_mode(gbs, cfg.loop_mode);
 	gbs_configure_channels(gbs, mute_channel[0], mute_channel[1], mute_channel[2], mute_channel[3]);
 
 	gbs_set_nextsubsong_cb(gbs, nextsubsong_cb, NULL);

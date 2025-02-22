@@ -18,6 +18,10 @@ Enhancements:
   - display current loop mode
   - add i18n
 
+- configuration:
+  - deprecate 'loop' option in gbsplayrc in favor of new 'loop_mode'
+    with values 'none', 'range' and 'single'
+
 - documentation:
   - describe loop mode keybinding in gbsplay(1) manpage
 
