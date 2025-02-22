@@ -35,7 +35,7 @@ jobs:
       - name: Test with coverage
         # run the test under coverage
         run: |
-          ./gbsplay -c examples/gbsplayrc_sample -E b -o stdout examples/nightmode.gbs >/dev/null
+          make test
           gcov *.o
       - name: Upload coverage to Codecov
         # upload to codecov.io
