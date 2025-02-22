@@ -19,6 +19,13 @@
 	} \
 } while(0)
 
+#define ASSERT_STRING_EQUAL(name, a, b) do {	\
+	if (strcmp(a, b)) { \
+		fprintf(stderr, "FAIL\nTest failed: %s '%s' != '%s' at %s:%d in %s()\n", (name), (a), (b), __FILE__, __LINE__, __func__); \
+		exit(1); \
+	} \
+} while(0)
+
 #define ASSERT_ARRAY_EQUAL(fmt, a, b) do { \
 	int pass = 1; \
 	int i; \

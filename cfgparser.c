@@ -18,6 +18,7 @@
 #include "common.h"
 #include "cfgparser.h"
 #include "plugout.h"
+#include "test.h"
 
 typedef void (*cfg_parse_fn)(void* const ptr);
 
@@ -291,3 +292,84 @@ char* get_userconfig(const char* const cfgfile)
 
 	return usercfg;
 }
+
+/********************* test helpers *********************/
+
+#ifdef ENABLE_TEST
+
+struct player_cfg initial_cfg;
+
+#define ASSERT_STRUCT_EQUAL(fmt, field, a, b) ASSERT_EQUAL(#field " " fmt, (a).field, (b).field)
+
+#define ASSERT_STRUCT_STRING_EQUAL(field, a, b) ASSERT_STRING_EQUAL(#field, (a).field, (b).field)
+
+#define ASSERT_CFG_EQUAL(actual, expected) do { \
+		ASSERT_STRUCT_EQUAL("%ld", fadeout,          actual, expected); \
+		ASSERT_STRUCT_EQUAL("%d",  loop_mode,        actual, expected); \
+		ASSERT_STRUCT_EQUAL("%ld", rate,             actual, expected); \
+		ASSERT_STRUCT_EQUAL("%ld", refresh_delay,    actual, expected); \
+		ASSERT_STRUCT_EQUAL("%d",  requested_endian, actual, expected); \
+		ASSERT_STRUCT_EQUAL("%ld", silence_timeout,  actual, expected); \
+		ASSERT_STRUCT_EQUAL("%ld", subsong_gap,      actual, expected); \
+		ASSERT_STRUCT_EQUAL("%ld", subsong_timeout,  actual, expected); \
+		ASSERT_STRUCT_EQUAL("%ld", verbosity,        actual, expected); \
+		ASSERT_STRUCT_STRING_EQUAL(filter_type,      actual, expected); \
+		ASSERT_STRUCT_STRING_EQUAL(sound_name,       actual, expected); \
+} while(0)
+
+test void save_initial_cfg() {
+	initial_cfg = cfg;
+	initial_cfg.filter_type = strdup(cfg.filter_type);
+	initial_cfg.sound_name  = strdup(cfg.sound_name);
+};
+
+/************************* tests ************************/
+
+test void test_parse_missing_config_file() {
+	// given
+	save_initial_cfg();
+
+	// when
+	cfg_parse("test/gbsplayrc-this-file-does-not-exist");
+
+	// then
+	ASSERT_CFG_EQUAL(cfg, initial_cfg);
+}
+TEST(test_parse_missing_config_file);
+
+test void test_parse_empty_configuration() {
+	// given
+	save_initial_cfg();
+
+	// when
+	cfg_parse("test/gbsplayrc-empty");
+
+	// then
+	ASSERT_CFG_EQUAL(cfg, initial_cfg);
+}
+TEST(test_parse_empty_configuration);
+
+test void test_parse_complete_configuration() {
+	// given
+
+	// when
+	cfg_parse("test/gbsplayrc-full");
+
+	// then
+	ASSERT_EQUAL("fadeout %ld",         cfg.fadeout,          0L);
+	ASSERT_EQUAL("loop_mode %d",        cfg.loop_mode,        LOOP_RANGE);
+	ASSERT_EQUAL("rate %ld",            cfg.rate,             12345L);
+	ASSERT_EQUAL("refresh_delay %ld",   cfg.refresh_delay,    987L);
+	ASSERT_EQUAL("requested_endian %d", cfg.requested_endian, PLUGOUT_ENDIAN_LITTLE);
+	ASSERT_EQUAL("silence_timeout %ld", cfg.silence_timeout,  19L);
+	ASSERT_EQUAL("subsong_gap %ld",     cfg.subsong_gap,      23L);
+	ASSERT_EQUAL("subsong_timeout %ld", cfg.subsong_timeout,  42L);
+	ASSERT_EQUAL("verbosity   %ld"    , cfg.verbosity,        5L);
+	ASSERT_STRING_EQUAL("filter_type",  cfg.filter_type,      CFG_FILTER_CGB);
+	ASSERT_STRING_EQUAL("sound_name",   cfg.sound_name,       "altmidi");
+}
+TEST(test_parse_complete_configuration);
+
+TEST_EOF;
+
+#endif /* ENABLE_TEST */
