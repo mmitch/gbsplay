@@ -14,7 +14,7 @@
 
 #define ASSERT_EQUAL(fmt, a, b) do { \
 	if ((a) != (b)) { \
-		fprintf(stderr, "FAIL\nTest failed: "fmt"!="fmt" at %s:%d\n", (a), (b), __FILE__, __LINE__); \
+		fprintf(stderr, "FAIL\nTest failed: "fmt"!="fmt" at %s:%d in %s()\n", (a), (b), __FILE__, __LINE__, __func__); \
 		exit(1); \
 	} \
 } while(0)
@@ -31,7 +31,7 @@
 	} \
 	if (pass) \
 		return; \
-	fprintf(stderr, "FAIL\nTest failed at %s:%d\n", __FILE__, __LINE__); \
+	fprintf(stderr, "FAIL\nTest failed at %s:%d in %s()\n", __FILE__, __LINE__, __func__); \
 	for (i=0; i<sizeof(a)/sizeof(*(a)); i++) { \
 		if ((a)[i] == (b)[i]) \
 			cmp = "=="; \
