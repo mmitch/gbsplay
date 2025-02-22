@@ -30,10 +30,6 @@ struct filter_map {
 	enum gbs_filter_type type;
 };
 
-#define CFG_FILTER_OFF "off"
-#define CFG_FILTER_DMG "dmg"
-#define CFG_FILTER_CGB "cgb"
-
 const struct filter_map FILTERS[] = {
 	{ CFG_FILTER_OFF, FILTER_OFF },
 	{ CFG_FILTER_DMG, FILTER_DMG },
@@ -41,24 +37,11 @@ const struct filter_map FILTERS[] = {
 	{ NULL, -1 },
 };
 
-enum playmode {
-	PLAYMODE_LINEAR  = 1,
-	PLAYMODE_RANDOM  = 2,
-	PLAYMODE_SHUFFLE = 3,
-};
-
-#define DEFAULT_REFRESH_DELAY 33
-
-long refresh_delay = DEFAULT_REFRESH_DELAY; /* msec */
-
 static long *subsong_playlist;
 static long subsong_playlist_idx = 0;
 static long pause_mode = 0;
 
 static unsigned long random_seed;
-
-/* default values */
-long verbosity = 3;
 
 plugout_open_fn  sound_open;
 plugout_skip_fn  sound_skip;
@@ -70,22 +53,14 @@ plugout_close_fn sound_close;
 
 static enum playmode playmode = PLAYMODE_LINEAR;
 static enum gbs_loop_mode loop_mode = LOOP_OFF;
-static enum plugout_endian requested_endian = PLUGOUT_ENDIAN_AUTOSELECT;
 static enum plugout_endian actual_endian = PLUGOUT_ENDIAN_AUTOSELECT;
-static long rate = 44100;
-static long silence_timeout = 2;
-static long fadeout = 3;
-static long subsong_gap = 2;
 static long subsong_start = -1;
 static long subsong_stop = -1;
-static long subsong_timeout = 2*60;
 
 static long mute_channel[4];
 
 static const char cfgfile[] = ".gbsplayrc";
 
-static char *sound_name = PLUGOUT_DEFAULT;
-static char *filter_type = CFG_FILTER_DMG;
 static char *sound_description;
 
 static struct gbs_output_buffer buf = {
@@ -95,23 +70,6 @@ static struct gbs_output_buffer buf = {
 };
 
 static struct timespec pause_wait_time;
-
-/* configuration directives */
-const struct cfg_option options[] = {
-	{ "endian", &requested_endian, cfg_endian },
-	{ "fadeout", &fadeout, cfg_long },
-	{ "filter_type", &filter_type, cfg_string },
-	{ "loop", &loop_mode, cfg_int },
-	{ "output_plugin", &sound_name, cfg_string },
-	{ "rate", &rate, cfg_long },
-	{ "refresh_delay", &refresh_delay, cfg_long },
-	{ "silence_timeout", &silence_timeout, cfg_long },
-	{ "subsong_gap", &subsong_gap, cfg_long },
-	{ "subsong_timeout", &subsong_timeout, cfg_long },
-	{ "verbosity", &verbosity, cfg_long },
-	/* playmode not implemented yet */
-	{ NULL, NULL, NULL }
-};
 
 static void swap_endian(struct gbs_output_buffer *buf)
 {
@@ -342,7 +300,7 @@ const char *get_loopmode_string(const struct gbs_status *status)
 
 long step_emulation(struct gbs *gbs) {
 	if (is_running()) {
-		return gbs_step(gbs, refresh_delay);
+		return gbs_step(gbs, cfg.refresh_delay);
 	}
 
 	nanosleep(&pause_wait_time, NULL);
@@ -425,15 +383,15 @@ static void usage(long exitcode)
 		  "  -1 to -4  mute a channel on startup\n"
 		  "  --        end options, next argument is GBS-FILE\n"),
 		myname,
-		endian_str(requested_endian),
-		fadeout,
-		subsong_gap,
-		_(filter_type),
-		sound_name,
-		rate,
-		refresh_delay,
-		subsong_timeout,
-		silence_timeout);
+		endian_str(cfg.requested_endian),
+		cfg.fadeout,
+		cfg.subsong_gap,
+		_(cfg.filter_type),
+		cfg.sound_name,
+		cfg.rate,
+		cfg.refresh_delay,
+		cfg.subsong_timeout,
+		cfg.silence_timeout);
 	exit(exitcode);
 }
 
@@ -453,31 +411,31 @@ static void parseopts(int *argc, char ***argv)
 			mute_channel[res-'1'] ^= 1;
 			break;
 		case 'c':
-			cfg_parse(optarg, options);
+			cfg_parse(optarg);
 			break;
 		case 'E':
 			if (strcasecmp(optarg, "b") == 0) {
-				requested_endian = PLUGOUT_ENDIAN_BIG;
+				cfg.requested_endian = PLUGOUT_ENDIAN_BIG;
 			} else if (strcasecmp(optarg, "l") == 0) {
-				requested_endian = PLUGOUT_ENDIAN_LITTLE;
+				cfg.requested_endian = PLUGOUT_ENDIAN_LITTLE;
 			} else if (strcasecmp(optarg, "n") == 0) {
-				requested_endian = PLUGOUT_ENDIAN_NATIVE;
+				cfg.requested_endian = PLUGOUT_ENDIAN_NATIVE;
 			} else {
 				printf(_("\"%s\" is not a valid endian.\n\n"), optarg);
 				usage(1);
 			}
 			break;
 		case 'f':
-			sscanf(optarg, "%ld", &fadeout);
+			sscanf(optarg, "%ld", &cfg.fadeout);
 			break;
 		case 'g':
-			sscanf(optarg, "%ld", &subsong_gap);
+			sscanf(optarg, "%ld", &cfg.subsong_gap);
 			break;
 		case 'h':
 			usage(0);
 			break;
 		case 'H':
-			filter_type = optarg;
+			cfg.filter_type = optarg;
 			break;
 		case 'l':
 			loop_mode = LOOP_RANGE;
@@ -486,25 +444,25 @@ static void parseopts(int *argc, char ***argv)
 			loop_mode = LOOP_SINGLE;
 			break;
 		case 'o':
-			sound_name = optarg;
+			cfg.sound_name = optarg;
 			break;
 		case 'q':
-			verbosity -= 1;
+			cfg.verbosity -= 1;
 			break;
 		case 'r':
-			sscanf(optarg, "%ld", &rate);
+			sscanf(optarg, "%ld", &cfg.rate);
 			break;
 		case 'R':
-			sscanf(optarg, "%ld", &refresh_delay);
+			sscanf(optarg, "%ld", &cfg.refresh_delay);
 			break;
 		case 't':
-			sscanf(optarg, "%ld", &subsong_timeout);
+			sscanf(optarg, "%ld", &cfg.subsong_timeout);
 			break;
 		case 'T':
-			sscanf(optarg, "%ld", &silence_timeout);
+			sscanf(optarg, "%ld", &cfg.silence_timeout);
 			break;
 		case 'v':
-			verbosity += 1;
+			cfg.verbosity += 1;
 			break;
 		case 'V':
 			version();
@@ -525,15 +483,15 @@ static void select_plugin(void)
 {
 	const struct output_plugin *plugout;
 
-	if (strcmp(sound_name, "list") == 0) {
+	if (strcmp(cfg.sound_name, "list") == 0) {
 		plugout_list_plugins();
 		exit(0);
 	}
 
-	plugout = plugout_select_by_name(sound_name);
+	plugout = plugout_select_by_name(cfg.sound_name);
 	if (plugout == NULL) {
 		fprintf(stderr, _("\"%s\" is not a known output plugin.\n\n"),
-		        sound_name);
+		        cfg.sound_name);
 		exit(1);
 	}
 
@@ -547,7 +505,7 @@ static void select_plugin(void)
 	sound_description = plugout->description;
 
 	if (plugout->flags & PLUGOUT_USES_STDOUT) {
-		verbosity = 0;
+		cfg.verbosity = 0;
 	}
 }
 
@@ -575,8 +533,8 @@ struct gbs *common_init(int argc, char **argv)
 	rand_seed(random_seed);
 
 	usercfg = get_userconfig(cfgfile);
-	cfg_parse(SYSCONF_PREFIX "/gbsplayrc", options);
-	cfg_parse((const char*)usercfg, options);
+	cfg_parse(SYSCONF_PREFIX "/gbsplayrc");
+	cfg_parse((const char*)usercfg);
 	free(usercfg);
 	parseopts(&argc, &argv);
 	select_plugin();
@@ -588,23 +546,23 @@ struct gbs *common_init(int argc, char **argv)
 	/* options have been parsed, argv[0] is our filename */
 	filename = filename_only(argv[0]);
 
-	if (requested_endian == PLUGOUT_ENDIAN_AUTOSELECT) {
+	if (cfg.requested_endian == PLUGOUT_ENDIAN_AUTOSELECT) {
 		actual_endian = PLUGOUT_ENDIAN_NATIVE;
 	} else {
-		actual_endian = requested_endian;
+		actual_endian = cfg.requested_endian;
 	}
 
 	metadata.player_name = myname;
 	metadata.filename = filename;
-	if (sound_open(&actual_endian, rate, &buf.bytes, metadata) != 0) {
+	if (sound_open(&actual_endian, cfg.rate, &buf.bytes, metadata) != 0) {
 		fprintf(stderr, _("Could not open output plugin \"%s\"\n"),
-		        sound_name);
+		        cfg.sound_name);
 		exit(1);
 	}
-	if (requested_endian != PLUGOUT_ENDIAN_AUTOSELECT &&
-	    actual_endian != requested_endian) {
+	if (cfg.requested_endian != PLUGOUT_ENDIAN_AUTOSELECT &&
+	    actual_endian != cfg.requested_endian) {
 		fprintf(stderr, _("Unsupported endian for output plugin \"%s\"\n"),
-		        sound_name);
+		        cfg.sound_name);
 		exit(1);
 	}
 	buf.data = malloc(buf.bytes);
@@ -628,9 +586,9 @@ struct gbs *common_init(int argc, char **argv)
 		gbs_set_io_callback(gbs, iocallback, NULL);
 	if (sound_write)
 		gbs_set_sound_callback(gbs, callback, NULL);
-	gbs_configure_output(gbs, &buf, rate);
-	if (!gbs_set_filter(gbs, parse_filter(filter_type))) {
-		fprintf(stderr, _("Invalid filter type \"%s\"\n"), filter_type);
+	gbs_configure_output(gbs, &buf, cfg.rate);
+	if (!gbs_set_filter(gbs, parse_filter(cfg.filter_type))) {
+		fprintf(stderr, _("Invalid filter type \"%s\"\n"), cfg.filter_type);
 		exit(1);
 	}
 
@@ -648,17 +606,17 @@ struct gbs *common_init(int argc, char **argv)
 	}
 
 	/* convert delay to internal wait */
-	pause_wait_time.tv_nsec = refresh_delay * 1000000;
+	pause_wait_time.tv_nsec = cfg.refresh_delay * 1000000;
 
 	// FIXME: proper configuration interface to gbs, this is just quickly slapped together
-	gbs_configure(gbs, subsong_start, subsong_timeout, silence_timeout, subsong_gap, fadeout);
+	gbs_configure(gbs, subsong_start, cfg.subsong_timeout, cfg.silence_timeout, cfg.subsong_gap, cfg.fadeout);
 	gbs_set_loop_mode(gbs, loop_mode);
 	gbs_configure_channels(gbs, mute_channel[0], mute_channel[1], mute_channel[2], mute_channel[3]);
 
 	gbs_set_nextsubsong_cb(gbs, nextsubsong_cb, NULL);
 	initial_subsong = setup_playmode(gbs);
 	play_subsong(gbs, initial_subsong);
-	if (verbosity>0) {
+	if (cfg.verbosity>0) {
 		gbs_internal_api.print_info(gbs, 0);
 	}
 

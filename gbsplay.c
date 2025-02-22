@@ -113,7 +113,7 @@ static void handleuserinput(struct gbs *gbs)
 		case ' ':
 			toggle_pause();
 			if (redraw) printinfo();
-			if (verbosity>1) printstatus(gbs);
+			if (cfg.verbosity>1) printstatus(gbs);
 			break;
 		case 'l':
 			gbs_cycle_loop_mode(gbs);
@@ -190,7 +190,7 @@ static void printstatus(struct gbs *gbs)
 	       status->subsong+1, status->songs, get_pause_string(),
 	       get_loopmode_string(status), status->songtitle,
 	       time.played_min, time.played_sec, time.total_min, time.total_sec);
-	if (verbosity>2) {
+	if (cfg.verbosity>2) {
 		printf("  %s %s  %s %s  %s %s  %s %s  [%s|%s]\n",
 		       notestring(gbs, 0), volstring(status->ch[0].vol),
 		       notestring(gbs, 1), volstring(status->ch[1].vol),
@@ -201,7 +201,7 @@ static void printstatus(struct gbs *gbs)
 	} else {
 		puts("");
 	}
-	if (verbosity>3) {
+	if (cfg.verbosity>3) {
 		printregs(gbs);
 	}
 	fflush(stdout);
@@ -209,11 +209,11 @@ static void printstatus(struct gbs *gbs)
 
 static void printinfo()
 {
-	if (verbosity>0) {
+	if (cfg.verbosity>0) {
 		puts(_("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player\n" \
 		         "           [ ] pause/resume   [1-4] mute channel   [l]oop mode"));
 	}
-	if (verbosity>1) {
+	if (cfg.verbosity>1) {
 		puts("\n\n"); /* additional newlines for the status display */
 	}
 	redraw = false;
@@ -245,7 +245,7 @@ int main(int argc, char **argv)
 		}
 		if (is_running()) {
 			if (redraw) printinfo();
-			if (verbosity>1) printstatus(gbs);
+			if (cfg.verbosity>1) printstatus(gbs);
 		}
 		handleuserinput(gbs);
 	}
@@ -255,7 +255,7 @@ int main(int argc, char **argv)
 
 	/* clean up terminal */
 	restore_terminal();
-	if (verbosity>3) {
+	if (cfg.verbosity>3) {
 		printf("\n\n\n\n\n\n");
 	}
 

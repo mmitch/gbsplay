@@ -23,9 +23,6 @@
 extern char *myname;
 extern char *filename;
 
-/* default values */
-extern long verbosity;
-
 extern plugout_open_fn  sound_open;
 extern plugout_skip_fn  sound_skip;
 extern plugout_pause_fn sound_pause;
