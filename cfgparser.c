@@ -1,7 +1,7 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2025 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -18,6 +18,53 @@
 #include "common.h"
 #include "cfgparser.h"
 #include "plugout.h"
+
+typedef void (*cfg_parse_fn)(void* const ptr);
+
+struct cfg_option {
+	const char* const name;
+	void* const ptr;
+	const cfg_parse_fn parse_fn;
+};
+
+/* default values */
+
+struct player_cfg cfg = {
+	.fadeout = 3,
+	.filter_type = CFG_FILTER_DMG,
+	.loop_mode = LOOP_OFF,
+	.rate = 44100,
+	.refresh_delay = 33, // ms
+	.requested_endian = PLUGOUT_ENDIAN_AUTOSELECT,
+	.silence_timeout = 2,
+	.sound_name = PLUGOUT_DEFAULT,
+	.subsong_gap = 2,
+	.subsong_timeout = 2*60,
+	.verbosity = 3,
+};
+
+/* forward declarations needed by configuration directives */
+static void cfg_string(void* const ptr);
+static void cfg_long(void* const ptr);
+static void cfg_int(void* const ptr);
+static void cfg_endian(void* const ptr);
+
+/* configuration directives */
+static const struct cfg_option options[] = {
+	{ "endian", &cfg.requested_endian, cfg_endian },
+	{ "fadeout", &cfg.fadeout, cfg_long },
+	{ "filter_type", &cfg.filter_type, cfg_string },
+	{ "loop", &cfg.loop_mode, cfg_int },
+	{ "output_plugin", &cfg.sound_name, cfg_string },
+	{ "rate", &cfg.rate, cfg_long },
+	{ "refresh_delay", &cfg.refresh_delay, cfg_long },
+	{ "silence_timeout", &cfg.silence_timeout, cfg_long },
+	{ "subsong_gap", &cfg.subsong_gap, cfg_long },
+	{ "subsong_timeout", &cfg.subsong_timeout, cfg_long },
+	{ "verbosity", &cfg.verbosity, cfg_long },
+	/* playmode not implemented yet */
+	{ NULL, NULL, NULL }
+};
 
 static long cfg_line, cfg_char;
 static FILE *cfg_file;
@@ -70,7 +117,7 @@ static void err_expect(const char* const s)
 	nextstate = 1;
 }
 
-void cfg_endian(void* const ptr)
+static void cfg_endian(void* const ptr)
 {
 	enum plugout_endian *endian = ptr;
 
@@ -91,7 +138,7 @@ void cfg_endian(void* const ptr)
 	nextstate = 1;
 }
 
-void cfg_string(void * const ptr)
+static void cfg_string(void * const ptr)
 {
 	char s[200];
 	unsigned long n = 0;
@@ -113,7 +160,7 @@ void cfg_string(void * const ptr)
 	nextstate = 1;
 }
 
-void cfg_long(void* const ptr)
+static void cfg_long(void* const ptr)
 {
 	char num[20];
 	unsigned long n = 0;
@@ -135,7 +182,7 @@ void cfg_long(void* const ptr)
 	nextstate = 1;
 }
 
-void cfg_int(void* const ptr)
+static void cfg_int(void* const ptr)
 {
 	char num[10];
 	unsigned long n = 0;
@@ -157,7 +204,7 @@ void cfg_int(void* const ptr)
 	nextstate = 1;
 }
 
-void cfg_parse(const char* const fname, const struct cfg_option* const options)
+void cfg_parse(const char* const fname)
 {
 	char option[200] = "";
 
@@ -244,4 +291,3 @@ char* get_userconfig(const char* const cfgfile)
 
 	return usercfg;
 }
-
