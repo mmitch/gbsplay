@@ -460,6 +460,8 @@ dist:	distclean
 	install -m 644 mime/* ./$(DISTDIR)/mime
 	install -d ./$(DISTDIR)/desktop
 	install -m 644 desktop/* ./$(DISTDIR)/desktop
+	install -d ./$(DISTDIR)/test
+	install -m 644 test/* ./$(DISTDIR)/test
 	tar -cvzf ../$(DISTDIR).tar.gz $(DISTDIR)/ 
 	rm -rf ./$(DISTDIR)
 
