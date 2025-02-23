@@ -21,6 +21,8 @@ Enhancements:
 - configuration:
   - deprecate 'loop' option in gbsplayrc in favor of new 'loop_mode'
     with values 'none', 'range' and 'single'
+  - add 'play_mode' option to gbsplayrc with values 'linear', 'random'
+    and 'shuffle'
   - support 'native', 'little' and 'big' values for 'endian' option in
     gbsplayrc instead of just 'n', 'l' and 'b'
 

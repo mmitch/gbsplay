@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-23 21:13+0100\n"
+"POT-Creation-Date: 2025-02-23 22:04+0100\n"
 "PO-Revision-Date: 2023-11-19 15:29+0100\n"
 "Last-Translator: Tobias Diedrich <ranma+gbsplay@tdiedrich.de>\n"
 "Language-Team: none\n"
@@ -94,6 +94,10 @@ msgstr "'%s' is no valid endian at %s line %ld char %ld.\n"
 #, c-format
 msgid "'%s' is no valid loop mode at %s line %ld char %ld.\n"
 msgstr "'%s' is no valid loop mode at %s line %ld char %ld.\n"
+
+#, c-format
+msgid "'%s' is no valid play mode at %s line %ld char %ld.\n"
+msgstr "'%s' is no valid play mode at %s line %ld char %ld.\n"
 
 msgid "59.7Hz VBlank\n"
 msgstr "59.7Hz VBlank\n"

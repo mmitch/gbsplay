@@ -26,6 +26,7 @@ struct player_cfg {
 	long fadeout;
 	char *filter_type;
 	enum gbs_loop_mode loop_mode;
+	enum playmode playmode;
 	long rate;
 	long refresh_delay;
 	enum plugout_endian requested_endian;
