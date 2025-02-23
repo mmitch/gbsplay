@@ -26,14 +26,19 @@ An integer number in decimal.
 \fB0\fP is considered \fIfalse\fP, everything else is \fItrue\fP.
 .TP
 .B Endian
-A single character denoting the endianness:
+A string to select the endianness:
 .RS
-.IP \fBn\fP
+.IP \fBnative\fP
 native endian
-.IP \fBl\fP
+.IP \fBlittle\fP
 little endian
-.IP \fBb\fP
+.IP \fBbig\fP
 big endian
+.RE
+.P
+.RS
+For backwards compatibility you can also use just the first character
+of each option ("\fBn\fP", "\fBl\fP" or "\fBb\fP").
 .RE
 .TP
 .B Integer

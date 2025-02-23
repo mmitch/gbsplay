@@ -70,6 +70,21 @@ static const struct cfg_option options[] = {
 	{ NULL, NULL, NULL }
 };
 
+struct endian_map {
+	const char *keyword;
+	enum plugout_endian endian;
+};
+
+static const struct endian_map endian_map[] = {
+	{ "b",      PLUGOUT_ENDIAN_BIG },
+	{ "big",    PLUGOUT_ENDIAN_BIG },
+	{ "l",      PLUGOUT_ENDIAN_LITTLE },
+	{ "little", PLUGOUT_ENDIAN_LITTLE },
+	{ "n",      PLUGOUT_ENDIAN_NATIVE },
+	{ "native", PLUGOUT_ENDIAN_NATIVE },
+	{ NULL,     -1 }
+};
+
 struct loop_mode_map {
 	const char *keyword;
 	enum gbs_loop_mode loop_mode;
@@ -135,23 +150,25 @@ static void err_expect(const char* const s)
 
 static void cfg_endian(void* const ptr)
 {
+	char *s;
 	enum plugout_endian *endian = ptr;
+	const struct endian_map *entry;
 
-	c = tolower(c);
-	if (c != 'b' && c != 'l' && c!= 'n') {
-		err_expect("[bln]");
-		return;
+	// remember this because cfg_string() already reads the nextchar()
+	long cfg_line_orig = cfg_line;
+	long cfg_char_orig = cfg_char;
+
+	cfg_string(&s);
+
+	for (entry = endian_map; entry->keyword; entry++) {
+		if (strncmp(s, entry->keyword, sizeof(s)-1) == 0) {
+			*endian = entry->endian;
+			return;
+		}
 	}
 
-	switch (c) {
-	case 'b': *endian = PLUGOUT_ENDIAN_BIG; break;
-	case 'l': *endian = PLUGOUT_ENDIAN_LITTLE; break;
-	default: *endian = PLUGOUT_ENDIAN_NATIVE; break;
-	}
-
-	c = nextchar();
-	state = 0;
-	nextstate = 1;
+	fprintf(stderr, _("'%s' is no valid endian at %s line %ld char %ld.\n"),
+		s, filename, cfg_line_orig, cfg_char_orig);
 }
 
 static void cfg_loop_mode(void* const ptr)
@@ -433,7 +450,7 @@ test void test_parse_complete_configuration() {
 	// given
 	restore_initial_cfg();
 	write_test_gbsplayrc_n(11,
-			       "endian=l",
+			       "endian=little",
 			       "fadeout=0",
 			       "filter_type=cgb",
 			       "loop=1",
@@ -584,6 +601,97 @@ test void test_loop_after_loop_mode() {
 	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_OFF);
 }
 TEST(test_loop_after_loop_mode);
+
+test void test_endian_b() {
+	// given
+	write_test_gbsplayrc("endian=b");
+	cfg.requested_endian = PLUGOUT_ENDIAN_NATIVE;
+
+	// when
+	cfg_parse(TEST_GBSPLAYRC);
+
+	// then
+	ASSERT_EQUAL("endian %d", cfg.requested_endian, PLUGOUT_ENDIAN_BIG);
+}
+TEST(test_endian_b);
+
+test void test_endian_big() {
+	// given
+	write_test_gbsplayrc("endian=big");
+	cfg.requested_endian = PLUGOUT_ENDIAN_NATIVE;
+
+	// when
+	cfg_parse(TEST_GBSPLAYRC);
+
+	// then
+	ASSERT_EQUAL("endian %d", cfg.requested_endian, PLUGOUT_ENDIAN_BIG);
+}
+TEST(test_endian_big);
+
+test void test_endian_l() {
+	// given
+	write_test_gbsplayrc("endian=l");
+	cfg.requested_endian = PLUGOUT_ENDIAN_BIG;
+
+	// when
+	cfg_parse(TEST_GBSPLAYRC);
+
+	// then
+	ASSERT_EQUAL("endian %d", cfg.requested_endian, PLUGOUT_ENDIAN_LITTLE);
+}
+TEST(test_endian_l);
+
+test void test_endian_little() {
+	// given
+	write_test_gbsplayrc("endian=little");
+	cfg.requested_endian = PLUGOUT_ENDIAN_BIG;
+
+	// when
+	cfg_parse(TEST_GBSPLAYRC);
+
+	// then
+	ASSERT_EQUAL("endian %d", cfg.requested_endian, PLUGOUT_ENDIAN_LITTLE);
+}
+TEST(test_endian_little);
+
+test void test_endian_n() {
+	// given
+	write_test_gbsplayrc("endian=n");
+	cfg.requested_endian = PLUGOUT_ENDIAN_LITTLE;
+
+	// when
+	cfg_parse(TEST_GBSPLAYRC);
+
+	// then
+	ASSERT_EQUAL("endian %d", cfg.requested_endian, PLUGOUT_ENDIAN_NATIVE);
+}
+TEST(test_endian_n);
+
+test void test_endian_native() {
+	// given
+	write_test_gbsplayrc("endian=native");
+	cfg.requested_endian = PLUGOUT_ENDIAN_LITTLE;
+
+	// when
+	cfg_parse(TEST_GBSPLAYRC);
+
+	// then
+	ASSERT_EQUAL("endian %d", cfg.requested_endian, PLUGOUT_ENDIAN_NATIVE);
+}
+TEST(test_endian_native);
+
+test void test_invalid_endian() { // old setting is kept, warning in stderr
+	// given
+	write_test_gbsplayrc("endian=INVALID");
+	cfg.requested_endian = PLUGOUT_ENDIAN_LITTLE;
+
+	// when
+	cfg_parse(TEST_GBSPLAYRC);
+
+	// then
+	ASSERT_EQUAL("endian %d", cfg.requested_endian, PLUGOUT_ENDIAN_LITTLE);
+}
+TEST(test_invalid_endian);
 
 TEST(delete_test_gbsplayrc); // cleanup
 TEST_EOF;
