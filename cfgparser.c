@@ -337,7 +337,11 @@ char* get_userconfig(const char* const cfgfile)
 
 #ifdef ENABLE_TEST
 
+#include <stdarg.h>
+
 struct player_cfg initial_cfg;
+
+#define TEST_GBSPLAYRC "./gbsplayrc.tmp"
 
 #define ASSERT_STRUCT_EQUAL(fmt, field, a, b) ASSERT_EQUAL(#field " " fmt, (a).field, (b).field)
 
@@ -370,6 +374,30 @@ test void restore_initial_cfg() {
 	cfg.sound_name  = strdup(initial_cfg.sound_name);
 };
 
+test void write_test_gbsplayrc_n(unsigned int n, ...) {
+	FILE *fh;
+	unsigned int i;
+	va_list lines;
+
+	fh = fopen(TEST_GBSPLAYRC, "w");
+
+	va_start(lines, n);
+	for (unsigned int i = 0; i < n; i++) {
+		fputs(va_arg(lines, char*), fh);
+		fputc('\n', fh);
+	}
+	va_end(lines);
+	fclose(fh);
+}
+
+test void write_test_gbsplayrc(const char line[]) {
+	write_test_gbsplayrc_n(1, line);
+}
+
+test void delete_test_gbsplayrc() {
+	unlink(TEST_GBSPLAYRC);
+}
+
 /************************* tests ************************/
 
 test void test_parse_missing_config_file() {
@@ -377,7 +405,7 @@ test void test_parse_missing_config_file() {
 	restore_initial_cfg();
 
 	// when
-	cfg_parse("test/gbsplayrc-this-file-does-not-exist");
+	cfg_parse("gbsplayrc-this-file-does-not-exist");
 
 	// then
 	ASSERT_CFG_EQUAL(cfg, initial_cfg);
@@ -387,6 +415,11 @@ TEST(test_parse_missing_config_file);
 test void test_parse_empty_configuration() {
 	// given
 	restore_initial_cfg();
+	write_test_gbsplayrc_n(4,
+			       "# just a comment",
+			       "",
+			       "",
+			       "# and some empty lines");
 
 	// when
 	cfg_parse("test/gbsplayrc-empty");
@@ -399,9 +432,21 @@ TEST(test_parse_empty_configuration);
 test void test_parse_complete_configuration() {
 	// given
 	restore_initial_cfg();
+	write_test_gbsplayrc_n(11,
+			       "endian=l",
+			       "fadeout=0",
+			       "filter_type=cgb",
+			       "loop=1",
+			       "output_plugin=altmidi",
+			       "rate=12345",
+			       "refresh_delay=987",
+			       "silence_timeout=19",
+			       "subsong_gap=23",
+			       "subsong_timeout=42",
+			       "verbosity=5");
 
 	// when
-	cfg_parse("test/gbsplayrc-full");
+	cfg_parse(TEST_GBSPLAYRC);
 
 	// then
 	ASSERT_EQUAL("fadeout %ld",         cfg.fadeout,          0L);
@@ -421,10 +466,11 @@ TEST(test_parse_complete_configuration);
 /* manpage says: an integer; 0 = false = no loop mode; everything else = true = range loop mode */
 test void test_loop_0() {
 	// given
+	write_test_gbsplayrc("loop=0");
 	cfg.loop_mode = LOOP_RANGE;
 
 	// when
-	cfg_parse("test/gbsplayrc-loop-0");
+	cfg_parse(TEST_GBSPLAYRC);
 
 	// then
 	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_OFF);
@@ -433,10 +479,11 @@ TEST(test_loop_0);
 
 test void test_loop_1() {
 	// given
+	write_test_gbsplayrc("loop=1");
 	cfg.loop_mode = LOOP_SINGLE;
 
 	// when
-	cfg_parse("test/gbsplayrc-loop-1");
+	cfg_parse(TEST_GBSPLAYRC);
 
  	// then
 	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_RANGE);
@@ -445,10 +492,11 @@ TEST(test_loop_1);
 
 test void test_loop_2() {
 	// given
+	write_test_gbsplayrc("loop=2");
 	cfg.loop_mode = LOOP_OFF;
 
 	// when
-	cfg_parse("test/gbsplayrc-loop-2");
+	cfg_parse(TEST_GBSPLAYRC);
 
 	// then
 	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_RANGE);
@@ -457,10 +505,11 @@ TEST(test_loop_2);
 
 test void test_loop_mode_none() {
 	// given
+	write_test_gbsplayrc("loop_mode=none");
 	cfg.loop_mode = LOOP_RANGE;
 
 	// when
-	cfg_parse("test/gbsplayrc-loop-mode-none");
+	cfg_parse(TEST_GBSPLAYRC);
 
 	// then
 	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_OFF);
@@ -469,10 +518,11 @@ TEST(test_loop_mode_none);
 
 test void test_loop_mode_range() {
 	// given
+	write_test_gbsplayrc("loop_mode=range");
 	cfg.loop_mode = LOOP_SINGLE;
 
 	// when
-	cfg_parse("test/gbsplayrc-loop-mode-range");
+	cfg_parse(TEST_GBSPLAYRC);
 
 	// then
 	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_RANGE);
@@ -481,10 +531,11 @@ TEST(test_loop_mode_range);
 
 test void test_loop_mode_single() {
 	// given
+	write_test_gbsplayrc("loop_mode=single");
 	cfg.loop_mode = LOOP_RANGE;
 
 	// when
-	cfg_parse("test/gbsplayrc-loop-mode-single");
+	cfg_parse(TEST_GBSPLAYRC);
 
 	// then
 	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_SINGLE);
@@ -493,10 +544,11 @@ TEST(test_loop_mode_single);
 
 test void test_invalid_loop_mode() { // old setting is kept, warning in stderr
 	// given
+	write_test_gbsplayrc("loop_mode=INVALID");
 	cfg.loop_mode = LOOP_RANGE;
 
 	// when
-	cfg_parse("test/gbsplayrc-invalid-loop-mode");
+	cfg_parse(TEST_GBSPLAYRC);
 
 	// then
 	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_RANGE);
@@ -505,10 +557,13 @@ TEST(test_invalid_loop_mode);
 
 test void test_loop_mode_after_loop() {
 	// given
+	write_test_gbsplayrc_n(2,
+			       "loop=1",
+			       "loop_mode=single");
 	cfg.loop_mode = LOOP_RANGE;
 
 	// when
-	cfg_parse("test/gbsplayrc-loop-mode-after-loop");
+	cfg_parse(TEST_GBSPLAYRC);
 
 	// then
 	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_SINGLE);
@@ -517,16 +572,20 @@ TEST(test_loop_mode_after_loop);
 
 test void test_loop_after_loop_mode() {
 	// given
+	write_test_gbsplayrc_n(2,
+			       "loop_mode=single",
+			       "loop=0");
 	cfg.loop_mode = LOOP_RANGE;
 
 	// when
-	cfg_parse("test/gbsplayrc-loop-after-loop-mode");
+	cfg_parse(TEST_GBSPLAYRC);
 
 	// then
 	ASSERT_EQUAL("loop_mode %d", cfg.loop_mode, LOOP_OFF);
 }
 TEST(test_loop_after_loop_mode);
 
+TEST(delete_test_gbsplayrc); // cleanup
 TEST_EOF;
 
 #endif /* ENABLE_TEST */
