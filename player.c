@@ -123,13 +123,13 @@ static long get_next_subsong(struct gbs *gbs)
 	const struct gbs_status *status = gbs_get_status(gbs);
 	long next = -1;
 
-	switch (cfg.playmode) {
+	switch (cfg.play_mode) {
 
-	case PLAYMODE_RANDOM:
+	case PLAY_MODE_RANDOM:
 		next = rand_long(status->songs);
 		break;
 
-	case PLAYMODE_SHUFFLE:
+	case PLAY_MODE_SHUFFLE:
 		subsong_playlist_idx++;
 		if (subsong_playlist_idx == status->songs) {
 			free(subsong_playlist);
@@ -140,7 +140,7 @@ static long get_next_subsong(struct gbs *gbs)
 		next = subsong_playlist[subsong_playlist_idx];
 		break;
 
-	case PLAYMODE_LINEAR:
+	case PLAY_MODE_LINEAR:
 		next = status->subsong + 1;
 		break;
 	}
@@ -154,13 +154,13 @@ static long get_prev_subsong(struct gbs *gbs)
 	const struct gbs_status *status = gbs_get_status(gbs);
 	long prev = -1;
 
-	switch (cfg.playmode) {
+	switch (cfg.play_mode) {
 
-	case PLAYMODE_RANDOM:
+	case PLAY_MODE_RANDOM:
 		prev = rand_long(status->songs);
 		break;
 
-	case PLAYMODE_SHUFFLE:
+	case PLAY_MODE_SHUFFLE:
 		subsong_playlist_idx--;
 		if (subsong_playlist_idx == -1) {
 			free(subsong_playlist);
@@ -171,7 +171,7 @@ static long get_prev_subsong(struct gbs *gbs)
 		prev = subsong_playlist[subsong_playlist_idx];
 		break;
 
-	case PLAYMODE_LINEAR:
+	case PLAY_MODE_LINEAR:
 		prev = status->subsong - 1;
 		break;
 	}
@@ -209,21 +209,21 @@ void play_prev_subsong(struct gbs *gbs)
 	play_subsong(gbs, prev);
 }
 
-static long setup_playmode(struct gbs *gbs)
-/* initializes the chosen playmode (set start subsong etc.) */
+static long setup_play_mode(struct gbs *gbs)
+/* initializes the chosen play mode (set start subsong etc.) */
 {
 	const struct gbs_status *status = gbs_get_status(gbs);
 	long subsong = status->subsong;
 
-	switch (cfg.playmode) {
+	switch (cfg.play_mode) {
 
-	case PLAYMODE_RANDOM:
+	case PLAY_MODE_RANDOM:
 		if (subsong == -1) {
 			subsong = get_next_subsong(gbs);
 		}
 		break;
 
-	case PLAYMODE_SHUFFLE:
+	case PLAY_MODE_SHUFFLE:
 		subsong_playlist = setup_playlist(status->songs);
 		subsong_playlist_idx = 0;
 		if (subsong == -1) {
@@ -239,7 +239,7 @@ static long setup_playmode(struct gbs *gbs)
 		}
 		break;
 
-	case PLAYMODE_LINEAR:
+	case PLAY_MODE_LINEAR:
 		if (subsong == -1) {
 			subsong = status->defaultsong - 1;
 		}
@@ -263,7 +263,7 @@ long nextsubsong_cb(struct gbs *gbs, void *priv)
 			return false;
 		}
 		subsong = subsong_start;
-		setup_playmode(gbs);
+		setup_play_mode(gbs);
 	}
 
 	play_subsong(gbs, subsong);
@@ -466,10 +466,10 @@ static void parseopts(int *argc, char ***argv)
 			version();
 			break;
 		case 'z':
-			cfg.playmode = PLAYMODE_SHUFFLE;
+			cfg.play_mode = PLAY_MODE_SHUFFLE;
 			break;
 		case 'Z':
-			cfg.playmode = PLAYMODE_RANDOM;
+			cfg.play_mode = PLAY_MODE_RANDOM;
 			break;
 		}
 	}
@@ -612,7 +612,7 @@ struct gbs *common_init(int argc, char **argv)
 	gbs_configure_channels(gbs, mute_channel[0], mute_channel[1], mute_channel[2], mute_channel[3]);
 
 	gbs_set_nextsubsong_cb(gbs, nextsubsong_cb, NULL);
-	initial_subsong = setup_playmode(gbs);
+	initial_subsong = setup_play_mode(gbs);
 	play_subsong(gbs, initial_subsong);
 	if (cfg.verbosity>0) {
 		gbs_internal_api.print_info(gbs, 0);
