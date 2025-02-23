@@ -35,6 +35,7 @@ struct player_cfg cfg = {
 	.fadeout = 3,
 	.filter_type = CFG_FILTER_DMG,
 	.loop_mode = LOOP_OFF,
+	.playmode = PLAYMODE_LINEAR,
 	.rate = 44100,
 	.refresh_delay = 33, // ms
 	.requested_endian = PLUGOUT_ENDIAN_AUTOSELECT,
@@ -46,11 +47,12 @@ struct player_cfg cfg = {
 };
 
 /* forward declarations needed by configuration directives */
-static void cfg_string(void* const ptr);
-static void cfg_long(void* const ptr);
-static void cfg_loop_mode(void* const ptr);
 static void cfg_bool_as_int(void* const ptr);
 static void cfg_endian(void* const ptr);
+static void cfg_long(void* const ptr);
+static void cfg_loop_mode(void* const ptr);
+static void cfg_playmode(void* const ptr);
+static void cfg_string(void* const ptr);
 
 /* configuration directives */
 static const struct cfg_option options[] = {
@@ -60,13 +62,13 @@ static const struct cfg_option options[] = {
 	{ "loop", &cfg.loop_mode, cfg_bool_as_int },
 	{ "loop_mode", &cfg.loop_mode, cfg_loop_mode },
 	{ "output_plugin", &cfg.sound_name, cfg_string },
+	{ "play_mode", &cfg.playmode, cfg_playmode },
 	{ "rate", &cfg.rate, cfg_long },
 	{ "refresh_delay", &cfg.refresh_delay, cfg_long },
 	{ "silence_timeout", &cfg.silence_timeout, cfg_long },
 	{ "subsong_gap", &cfg.subsong_gap, cfg_long },
 	{ "subsong_timeout", &cfg.subsong_timeout, cfg_long },
 	{ "verbosity", &cfg.verbosity, cfg_long },
-	/* playmode not implemented yet */
 	{ NULL, NULL, NULL }
 };
 
@@ -94,6 +96,18 @@ static const struct loop_mode_map loop_mode_map[] = {
 	{ "none",   LOOP_OFF },
 	{ "range",  LOOP_RANGE },
 	{ "single", LOOP_SINGLE },
+	{ NULL,     -1 }
+};
+
+struct playmode_map {
+	const char *keyword;
+	enum playmode playmode;
+};
+
+static const struct playmode_map playmode_map[] = {
+	{ "linear",  PLAYMODE_LINEAR },
+	{ "random",  PLAYMODE_RANDOM },
+	{ "shuffle", PLAYMODE_SHUFFLE },
 	{ NULL,     -1 }
 };
 
@@ -191,6 +205,29 @@ static void cfg_loop_mode(void* const ptr)
 	}
 
 	fprintf(stderr, _("'%s' is no valid loop mode at %s line %ld char %ld.\n"),
+		s, filename, cfg_line_orig, cfg_char_orig);
+}
+
+static void cfg_playmode(void* const ptr)
+{
+	char *s;
+	enum playmode *playmode = ptr;
+	const struct playmode_map *entry;
+
+	// remember this because cfg_string() already reads the nextchar()
+	long cfg_line_orig = cfg_line;
+	long cfg_char_orig = cfg_char;
+
+	cfg_string(&s);
+
+	for (entry = playmode_map; entry->keyword; entry++) {
+		if (strncmp(s, entry->keyword, sizeof(s)-1) == 0) {
+			*playmode = entry->playmode;
+			return;
+		}
+	}
+
+	fprintf(stderr, _("'%s' is no valid play mode at %s line %ld char %ld.\n"),
 		s, filename, cfg_line_orig, cfg_char_orig);
 }
 
@@ -367,6 +404,7 @@ struct player_cfg initial_cfg;
 #define ASSERT_CFG_EQUAL(actual, expected) do { \
 		ASSERT_STRUCT_EQUAL("%ld", fadeout,          actual, expected); \
 		ASSERT_STRUCT_EQUAL("%d",  loop_mode,        actual, expected); \
+		ASSERT_STRUCT_EQUAL("%d",  playmode,         actual, expected); \
 		ASSERT_STRUCT_EQUAL("%ld", rate,             actual, expected); \
 		ASSERT_STRUCT_EQUAL("%ld", refresh_delay,    actual, expected); \
 		ASSERT_STRUCT_EQUAL("%d",  requested_endian, actual, expected); \
@@ -449,12 +487,13 @@ TEST(test_parse_empty_configuration);
 test void test_parse_complete_configuration() {
 	// given
 	restore_initial_cfg();
-	write_test_gbsplayrc_n(11,
+	write_test_gbsplayrc_n(12,
 			       "endian=little",
 			       "fadeout=0",
 			       "filter_type=cgb",
 			       "loop=1",
 			       "output_plugin=altmidi",
+			       "play_mode=shuffle",
 			       "rate=12345",
 			       "refresh_delay=987",
 			       "silence_timeout=19",
@@ -468,6 +507,7 @@ test void test_parse_complete_configuration() {
 	// then
 	ASSERT_EQUAL("fadeout %ld",         cfg.fadeout,          0L);
 	ASSERT_EQUAL("loop_mode %d",        cfg.loop_mode,        LOOP_RANGE);
+	ASSERT_EQUAL("play_mode %d",        cfg.playmode,         PLAYMODE_SHUFFLE);
 	ASSERT_EQUAL("rate %ld",            cfg.rate,             12345L);
 	ASSERT_EQUAL("refresh_delay %ld",   cfg.refresh_delay,    987L);
 	ASSERT_EQUAL("requested_endian %d", cfg.requested_endian, PLUGOUT_ENDIAN_LITTLE);
@@ -692,6 +732,58 @@ test void test_invalid_endian() { // old setting is kept, warning in stderr
 	ASSERT_EQUAL("endian %d", cfg.requested_endian, PLUGOUT_ENDIAN_LITTLE);
 }
 TEST(test_invalid_endian);
+
+test void test_playmode_linear() {
+	// given
+	write_test_gbsplayrc("play_mode=linear");
+	cfg.playmode = PLAYMODE_RANDOM;
+
+	// when
+	cfg_parse(TEST_GBSPLAYRC);
+
+	// then
+	ASSERT_EQUAL("playmode %d", cfg.playmode, PLAYMODE_LINEAR);
+}
+TEST(test_playmode_linear);
+
+test void test_playmode_random() {
+	// given
+	write_test_gbsplayrc("play_mode=random");
+	cfg.playmode = PLAYMODE_SHUFFLE;
+
+	// when
+	cfg_parse(TEST_GBSPLAYRC);
+
+	// then
+	ASSERT_EQUAL("playmode %d", cfg.playmode, PLAYMODE_RANDOM);
+}
+TEST(test_playmode_random);
+
+test void test_playmode_shuffle() {
+	// given
+	write_test_gbsplayrc("play_mode=shuffle");
+	cfg.playmode = PLAYMODE_LINEAR;
+
+	// when
+	cfg_parse(TEST_GBSPLAYRC);
+
+	// then
+	ASSERT_EQUAL("playmode %d", cfg.playmode, PLAYMODE_SHUFFLE);
+}
+TEST(test_playmode_shuffle);
+
+test void test_invalid_playmode() { // old setting is kept, warning in stderr
+	// given
+	write_test_gbsplayrc("play_mode=INVALID");
+	cfg.playmode = PLAYMODE_SHUFFLE;
+
+	// when
+	cfg_parse(TEST_GBSPLAYRC);
+
+	// then
+	ASSERT_EQUAL("playmode %d", cfg.playmode, PLAYMODE_SHUFFLE);
+}
+TEST(test_invalid_playmode);
 
 TEST(delete_test_gbsplayrc); // cleanup
 TEST_EOF;

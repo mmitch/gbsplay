@@ -51,7 +51,6 @@ plugout_step_fn  sound_step;
 plugout_write_fn sound_write;
 plugout_close_fn sound_close;
 
-static enum playmode playmode = PLAYMODE_LINEAR;
 static enum plugout_endian actual_endian = PLUGOUT_ENDIAN_AUTOSELECT;
 static long subsong_start = -1;
 static long subsong_stop = -1;
@@ -124,7 +123,7 @@ static long get_next_subsong(struct gbs *gbs)
 	const struct gbs_status *status = gbs_get_status(gbs);
 	long next = -1;
 
-	switch (playmode) {
+	switch (cfg.playmode) {
 
 	case PLAYMODE_RANDOM:
 		next = rand_long(status->songs);
@@ -155,7 +154,7 @@ static long get_prev_subsong(struct gbs *gbs)
 	const struct gbs_status *status = gbs_get_status(gbs);
 	long prev = -1;
 
-	switch (playmode) {
+	switch (cfg.playmode) {
 
 	case PLAYMODE_RANDOM:
 		prev = rand_long(status->songs);
@@ -216,7 +215,7 @@ static long setup_playmode(struct gbs *gbs)
 	const struct gbs_status *status = gbs_get_status(gbs);
 	long subsong = status->subsong;
 
-	switch (playmode) {
+	switch (cfg.playmode) {
 
 	case PLAYMODE_RANDOM:
 		if (subsong == -1) {
@@ -467,10 +466,10 @@ static void parseopts(int *argc, char ***argv)
 			version();
 			break;
 		case 'z':
-			playmode = PLAYMODE_SHUFFLE;
+			cfg.playmode = PLAYMODE_SHUFFLE;
 			break;
 		case 'Z':
-			playmode = PLAYMODE_RANDOM;
+			cfg.playmode = PLAYMODE_RANDOM;
 			break;
 		}
 	}
