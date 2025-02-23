@@ -41,6 +41,17 @@ For backwards compatibility you can also use just the first character
 of each option ("\fBn\fP", "\fBl\fP" or "\fBb\fP").
 .RE
 .TP
+.B Filter type
+A string to select the output high-pass filter:
+.RS
+.IP \fBdmg\FP
+Gameboy Classic
+.IP \fBcgb\FP
+Gameboy Color
+.IP \fBoff\FP
+no filter
+.RE
+.TP
 .B Integer
 An integer number in decimal.
 .TP
@@ -85,6 +96,9 @@ Set the output endianness.
 .BR fadeout " = " \fIInteger\fP
 Set the fadeout time in seconds.
 Instead of cutting the subsong off hard, do a soft fadeout.
+.TP
+.BR filter_type " = " \fIFilter\ type\fP
+Set the output high-pass filter.
 .TP
 .BR loop " = " \fIBoolean\fP
 Set the loop mode to "\fBrange\fP" when enabled.
