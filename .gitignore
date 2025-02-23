@@ -18,6 +18,7 @@ libgbs
 *.pot
 gbsinfo
 gbsplay
+gbsplayrc.tmp
 xgbsplay
 test_gbs
 gbs2gb

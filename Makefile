@@ -328,7 +328,7 @@ clean-default:
 	rm -f libgbs libgbspic libgbs.def libgbs.so.1.ver
 	rm -f $(mans)
 	rm -f $(gbsplaybin) $(gbs2gbbin) $(gbsinfobin)
-	rm -f $(test_gbsbin)
+	rm -f $(test_gbsbin) gbsplayrc.tmp
 	rm -f $(gen_impulse_h_bin) impulse.h
 
 clean-apidoc:
@@ -460,8 +460,6 @@ dist:	distclean
 	install -m 644 mime/* ./$(DISTDIR)/mime
 	install -d ./$(DISTDIR)/desktop
 	install -m 644 desktop/* ./$(DISTDIR)/desktop
-	install -d ./$(DISTDIR)/test
-	install -m 644 test/* ./$(DISTDIR)/test
 	tar -cvzf ../$(DISTDIR).tar.gz $(DISTDIR)/ 
 	rm -rf ./$(DISTDIR)
 
