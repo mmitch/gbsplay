@@ -16,17 +16,17 @@
 #define CFG_FILTER_DMG "dmg"
 #define CFG_FILTER_CGB "cgb"
 
-enum playmode {
-	PLAYMODE_LINEAR  = 1,
-	PLAYMODE_RANDOM  = 2,
-	PLAYMODE_SHUFFLE = 3,
+enum play_mode {
+	PLAY_MODE_LINEAR  = 1,
+	PLAY_MODE_RANDOM  = 2,
+	PLAY_MODE_SHUFFLE = 3,
 };
 
 struct player_cfg {
 	long fadeout;
 	char *filter_type;
 	enum gbs_loop_mode loop_mode;
-	enum playmode playmode;
+	enum play_mode play_mode;
 	long rate;
 	long refresh_delay;
 	enum plugout_endian requested_endian;
