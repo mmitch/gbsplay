@@ -62,7 +62,7 @@ jobs:
         include:
           - type: MINGW64
             msystem: true
-            packages: mingw-w64-x86_64-toolchain groff
+            packages: mingw-w64-x86_64-toolchain groff zip
             plugouts: dsound
             shell: msys2 {0}
 
@@ -95,7 +95,9 @@ jobs:
     - name: prepare release artifacts
       run: |
         version=$(sed -n "/^VERSION/s/.* //p" config.mk)
-        output_dir=artifacts/gbsplay-${version}
+        gbsplay_version=gbsplay-${version}
+        output_dir=artifacts/${gbsplay_version}
+        zipfile=gbsplay-${version}_Windows_experimental.zip
 
         echo "create artifact directory ${output_dir}/"
         mkdir -p ${output_dir}/
@@ -113,11 +115,18 @@ jobs:
 
         echo "copy HISTORY"
         cat HISTORY > ${output_dir}/HISTORY.txt
+
+        echo "create ZIP"
+        cd artifacts
+        zip -mr "../$zipfile" "$gbsplay_version"
+        cd ..
+        echo "zipfile_name=$zipfile" >> "$GITHUB_ENV"
+
     - name: upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: gbsplay windows
-        path: artifacts/
+        path: ${{ env.zipfile_name }}
         if-no-files-found: error
         retention-days: 7 # don't hog resources, real builds are attached to the release anyway
-        compression-level: 9 # we seldom release, so try as hard as we can
+        compression-level: 0 # it's already compressed
