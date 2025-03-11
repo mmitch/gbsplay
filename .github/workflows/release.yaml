@@ -122,6 +122,9 @@ jobs:
         echo "copy HISTORY"
         cat HISTORY > ${output_dir}/HISTORY.txt
 
+        echo "copy LICENCE"
+        cat LICENCE > ${output_dir}/LICENCE.txt
+
         echo "create ZIP"
         cd artifacts
         zip -mr "../$zipfile" "$gbsplay_version"
