@@ -32,6 +32,7 @@ Enhancements:
 - documentation:
   - describe loop mode keybinding in gbsplay(1) manpage
   - describe 'filter_type' option in gbsplayrc(5) manpage
+  - add LICENCE to tarball
 
 
 2025/02/16  -  0.0.98
