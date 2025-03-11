@@ -12,6 +12,9 @@ Bugfixes:
 
 Enhancements:
 
+- automatically build Windows binaries and add them to the GitHub
+  release page (marked experimental for now)
+
 - xgbsplay:
   - loop mode can be changed interactively (use the 'l' key)
   - display pause status when playback is paused
