@@ -7,6 +7,10 @@ gbsplay HISTORY
 
 Bugfixes:
 
+- configuration:
+  - fix the deprecated 'loop' option to work as described in the manpage:
+    'loop=2' selects range loop mode, not single loop mode
+
 - build process:
   - fix version number detection in GitHub CI builds
 
