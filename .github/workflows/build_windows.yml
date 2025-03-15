@@ -17,13 +17,18 @@ jobs:
 
     strategy:
       matrix:
-        type: [MSYS, MINGW64, MINGW32, CYGWIN]
+        type: [MSYS, UCRT64, MINGW64, MINGW32, CYGWIN]
         flags: ['', '--enable-sharedlibgbs']
         include:
           - type: MSYS
             msystem: true
             packages: gcc
             plugouts: dsound devdsp
+            shell: msys2 {0}
+          - type: UCRT64
+            msystem: true
+            packages: mingw-w64-ucrt-x86_64-toolchain mingw-w64-ucrt-x86_64-SDL2
+            plugouts: dsound sdl
             shell: msys2 {0}
           - type: MINGW64
             msystem: true
