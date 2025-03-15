@@ -57,7 +57,7 @@ jobs:
       uses: msys2/setup-msys2@v2
       with:
         msystem: ${{ matrix.type }}
-        install: git base-devel libintl gettext-devel zlib-devel dos2unix
+        install: git base-devel libintl gettext-devel zlib-devel
         pacboy: ${{ matrix.packages }}
         release: false
         update: false
