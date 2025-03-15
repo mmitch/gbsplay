@@ -22,22 +22,22 @@ jobs:
         include:
           - type: MSYS
             msystem: true
-            packages: gcc
+            packages: gcc:p
             plugouts: dsound devdsp
             shell: msys2 {0}
           - type: UCRT64
             msystem: true
-            packages: mingw-w64-ucrt-x86_64-toolchain mingw-w64-ucrt-x86_64-SDL2
+            packages: toolchain:p SDL2:p
             plugouts: dsound sdl
             shell: msys2 {0}
           - type: MINGW64
             msystem: true
-            packages: mingw-w64-x86_64-toolchain mingw-w64-x86_64-SDL2
+            packages: toolchain:p SDL2:p
             plugouts: dsound sdl
             shell: msys2 {0}
           - type: MINGW32
             msystem: true
-            packages: mingw-w64-i686-toolchain mingw-w64-i686-SDL2
+            packages: toolchain:p SDL2:p
             plugouts: dsound sdl
             shell: msys2 {0}
           - type: CYGWIN
@@ -57,7 +57,8 @@ jobs:
       uses: msys2/setup-msys2@v2
       with:
         msystem: ${{ matrix.type }}
-        install: git base-devel ${{ matrix.packages }} libintl gettext-devel zlib-devel dos2unix
+        install: git base-devel libintl gettext-devel zlib-devel dos2unix
+        pacboy: ${{ matrix.packages }}
         release: false
         update: false
     - if: ${{ matrix.cygwin }}
