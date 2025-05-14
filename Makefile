@@ -316,7 +316,7 @@ else
 default: config.mk
 endif
 
-distclean: clean
+distclean: clean clean-xgbsplay
 	find . -regex ".*\.d" -exec rm -f "{}" \;
 	rm -f ./config.mk ./config.h ./config.err ./config.sed ./libgbs.pc
 

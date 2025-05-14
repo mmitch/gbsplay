@@ -10,6 +10,7 @@ Bugfixes:
 - build process:
   - fix manpage handling when version number contains a /
   - make 'install-*' targets self-contained
+  - remove xgbsplay binary on 'make distclean'
 
 
 2025/03/15  -  0.0.99
