@@ -337,9 +337,9 @@ clean-apidoc:
 clean-xgbsplay:
 	rm -f $(xgbsplaybin)
 
-install: all install-default $(EXTRA_INSTALL)
+install: install-default $(EXTRA_INSTALL)
 
-install-default:
+install-default: all
 	install -d $(bindir)
 	install -d $(man1dir)
 	install -d $(man5dir)
@@ -366,9 +366,10 @@ install-contrib:
 	install -d $(contribdir)
 	install -m 644 $(contribs) $(contribdir)
 
-install-xgbsplay:
+install-xgbsplay: $(xgbsplaybin) $(mans)
 	install -d $(bindir)
 	install -d $(man1dir)
+	install -d $(appdir)
 	install -m 755 $(xgbsplaybin) $(bindir)
 	install -m 644 man/xgbsplay.1 $(man1dir)
 	install -m 644 desktop/xgbsplay.desktop $(appdir)
