@@ -1376,7 +1376,7 @@ __EOF__
 ) > config.h
 
 (
-    echo "s/%%%VERSION%%%/$VERSION/g"
+    echo "s|%%%VERSION%%%|$VERSION|g"
 ) > config.sed
 
 # show configuration if verbose

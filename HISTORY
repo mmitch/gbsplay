@@ -2,6 +2,16 @@
 gbsplay HISTORY
 
 
+2025/xx/xx  -  0.0.100
+~~~~~~~~~~~~~~~~~~~~~~
+
+Bugfixes:
+
+- build process:
+  - fix manpage handling when version number contains a /
+
+
+
 2025/03/15  -  0.0.99
 ~~~~~~~~~~~~~~~~~~~~~
 
