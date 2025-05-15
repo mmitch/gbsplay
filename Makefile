@@ -3,7 +3,7 @@ MAKEFLAGS += --warn-undefined-variables
 SHELL := bash
 .SHELLFLAGS := -eu -o pipefail -c
 
-.PHONY: all default distclean clean install dist clean-apidoc
+.PHONY: all default distclean clean install dist clean-apidoc show-install-dirs
 
 all: default
 
@@ -386,6 +386,28 @@ install-headers:
 install-pkg-config:
 	install -d $(pkgconfigdir)
 	install -m 644 libgbs.pc $(pkgconfigdir)
+
+show-install-dirs:
+	@echo "+ DESTDIR      = $(DESTDIR)"
+	@echo "* bindir       = $(bindir)"
+	@echo "  includedir   = $(includedir)"
+	@echo "* libdir       = $(libdir)"
+	@echo "* mandir       = $(mandir)"
+	@echo "  man1dir      = $(man1dir)"
+	@echo "  man3dir      = $(man3dir)"
+	@echo "  man5dir      = $(man5dir)"
+	@echo "* appdir       = $(appdir)"
+	@echo "* docdir       = $(docdir)"
+	@echo "  contribdir   = $(contribdir)"
+	@echo "  exampledir   = $(exampledir)"
+	@echo "  localedir    = $(localedir)"
+	@for i in $(mos); do \
+		base=`basename $$i`; \
+		echo "                 $(localedir)/$${base%.mo}"; \
+	done
+	@echo "  mimedir      = $(mimedir)"
+	@echo "                 $(mimedir)/packages"
+	@echo "  pkgconfigdir = $(pkgconfigdir)"
 
 uninstall: uninstall-default $(EXTRA_UNINSTALL)
 
