@@ -56,6 +56,7 @@ DESTDIR     :=
 # Update paths with user-provided DESTDIR
 prefix       := $(DESTDIR)$(prefix)
 exec_prefix  := $(DESTDIR)$(exec_prefix)
+libdir       := $(DESTDIR)$(libdir)
 bindir       := $(DESTDIR)$(bindir)
 mandir       := $(DESTDIR)$(mandir)
 docdir       := $(DESTDIR)$(docdir)

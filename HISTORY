@@ -11,6 +11,7 @@ Bugfixes:
   - fix manpage handling when version number contains a /
   - make 'install-*' targets self-contained
   - remove xgbsplay binary on 'make distclean'
+  - fix libdir installation path when DESTDIR is set
 
 Enhancements:
 
