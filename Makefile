@@ -92,8 +92,8 @@ docs-dist          := INSTALL.md CODINGSTYLE gbsformat.txt PACKAGING.md
 contribs           := contrib/gbs2ogg.sh contrib/gbsplay.bashcompletion contrib/gbsplay.zshcompletion
 examples           := examples/nightmode.gbs examples/gbsplayrc_sample
 
-mans               := man/gbsplay.1    man/gbsinfo.1    man/gbsplayrc.5
-mans_src           := man/gbsplay.in.1 man/gbsinfo.in.1 man/gbsplayrc.in.5
+mans               := man/gbsplay.1    man/gbsinfo.1    man/gbsplayrc.5    man/gbs2gb.1
+mans_src           := man/gbsplay.in.1 man/gbsinfo.in.1 man/gbsplayrc.in.5 man/gbs2gb.in.1
 
 apimans_list       := libgbs.h gbs gbs_channel_status gbs_output_buffer gbs_status
 apidocdir          := apidoc
@@ -349,7 +349,7 @@ install-default: all
 	install -d $(mimedir)/packages
 	install -d $(appdir)
 	install -m 755 $(gbsplaybin) $(gbs2gbbin) $(gbsinfobin) $(bindir)
-	install -m 644 man/gbsplay.1 man/gbsinfo.1 $(man1dir)
+	install -m 644 man/gbsplay.1 man/gbsinfo.1 man/gbs2gb.1 $(man1dir)
 	install -m 644 man/gbsplayrc.5 $(man5dir)
 	install -m 644 mime/gbsplay.xml $(mimedir)/packages
 	-update-mime-database $(mimedir)
@@ -415,7 +415,7 @@ uninstall: uninstall-default $(EXTRA_UNINSTALL)
 uninstall-default:
 	rm -f $(bindir)/$(gbsplaybin) $(bindir)/$(gbs2gbbin) $(bindir)/$(gbsinfobin)
 	-rmdir -p $(bindir)
-	rm -f $(man1dir)/gbsplay.1 $(man1dir)/gbsinfo.1
+	rm -f $(man1dir)/gbsplay.1 $(man1dir)/gbsinfo.1 $(man1dir)/gbs2gb.1
 	-rmdir -p $(man1dir)
 	rm -f $(man5dir)/gbsplayrc.5
 	-rmdir -p $(man5dir)
