@@ -5,6 +5,7 @@
 config.*
 *~
 *.exe
+man/gbs2gb.1
 man/gbsinfo.1
 man/gbsplay.1
 man/xgbsplay.1
