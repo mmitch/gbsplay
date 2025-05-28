@@ -9,7 +9,7 @@ ifeq ($(MAKECMDGOALS),update-po)
 .PHONY: update-po
 update-po: po/gbsplay.pot $(pos) $(mos)
 
-po/gbsplay.pot: $(shell find -name "*.c")
+po/gbsplay.pot: $(wildcard *.[ch])
 	xgettext -k_ -kN_ --language c $+ -o - | msgen -o $@ -
 
 po/po.d: po/subdir.mk

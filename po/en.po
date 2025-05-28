@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-23 22:04+0100\n"
+"POT-Creation-Date: 2025-05-28 18:50+0200\n"
 "PO-Revision-Date: 2023-11-19 15:29+0100\n"
 "Last-Translator: Tobias Diedrich <ranma+gbsplay@tdiedrich.de>\n"
 "Language-Team: none\n"
@@ -120,6 +120,10 @@ msgstr "Bad data length: %ld\n"
 #, c-format
 msgid "Bad file size in header: %ld\n"
 msgstr "Bad file size in header: %ld\n"
+
+#, c-format
+msgid "Bad libgbs API version, want %s but got: %s\n"
+msgstr "Bad libgbs API version, want %s but got: %s\n"
 
 #, c-format
 msgid "Bank @0x4000:     %d\n"

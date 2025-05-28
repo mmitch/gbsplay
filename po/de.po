@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-23 22:04+0100\n"
-"PO-Revision-Date: 2025-02-23 22:06+0100\n"
+"POT-Creation-Date: 2025-05-28 18:50+0200\n"
+"PO-Revision-Date: 2025-05-28 18:54+0200\n"
 "Last-Translator: Christian Garbs <mitch@cgarbs.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -121,6 +121,10 @@ msgstr "Unzulässige Datenlänge: %ld\n"
 #, c-format
 msgid "Bad file size in header: %ld\n"
 msgstr "Unzulässige Dateigröße im Header: %ld\n"
+
+#, c-format
+msgid "Bad libgbs API version, want %s but got: %s\n"
+msgstr "Unpassende libgbs-API-Version; benötige %s, bekam aber: %s\n"
 
 #, c-format
 msgid "Bank @0x4000:     %d\n"
