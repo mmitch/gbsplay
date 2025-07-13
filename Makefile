@@ -536,7 +536,7 @@ test: gbsplay $(tests) test_gbs
 	fi
 	$(Q)rm gbsplay-1.wav
 	$(Q)MD5=`LD_LIBRARY_PATH=.:$${LD_LIBRARY_PATH-} $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -E l -o vgm $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null; cat gbsplay-1.vgm | (md5sum || md5 -r) | cut -f1 -d\ `; \
-	EXPECT="d00e08025048d6831caffafa3d5b88c6"; \
+	EXPECT="2cfb9d87de2b9a144d3e4710be97f429"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "VGM output ok"; \
 	else \
