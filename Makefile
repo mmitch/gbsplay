@@ -288,7 +288,7 @@ libgbspic: libgbspic.a
 	touch libgbspic
 endif # use_sharedlibs
 
-objs += $(objs_gbsplay) $(ojbs_gbs2gb) $(objs_gbsinfo)
+objs += $(objs_gbsplay) $(objs_gbs2gb) $(objs_gbsinfo)
 dsts += gbsplay gbs2gb gbsinfo
 
 ifeq ($(build_xgbsplay),yes)
