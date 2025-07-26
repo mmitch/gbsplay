@@ -83,7 +83,6 @@ static const long msec_cycles = GBHW_CLOCK/1000;
 #define IMPULSE_N (1 << IMPULSE_N_SHIFT)
 #define IMPULSE_N_MASK (IMPULSE_N - 1)
 
-static const long main_div_tc = 4;
 static const long sweep_div_tc = 2048;
 
 static inline long timertc_from_tac(uint8_t tac)
@@ -739,86 +738,126 @@ static void gb_change_level(struct gbhw *gbhw, long l_ofs, long r_ofs)
 	gbhw->impbuf->r_lvl += r_ofs*256;
 }
 
+static void gb_sound_update_level(struct gbhw *gbhw)
+{
+	long l_lvl, l_chg, r_lvl, r_chg;
+
+	gbhw->update_level = 0;
+	l_lvl = (gbhw->ch[0].leftgate & ~gbhw->ch[0].mute) * gbhw->ch[0].lvl
+	      + (gbhw->ch[1].leftgate & ~gbhw->ch[1].mute) * gbhw->ch[1].lvl
+	      + (gbhw->ch[2].leftgate & ~gbhw->ch[2].mute) * gbhw->ch[2].lvl
+	      + (gbhw->ch[3].leftgate & ~gbhw->ch[3].mute) * gbhw->ch[3].lvl;
+	r_lvl = (gbhw->ch[0].rightgate & ~gbhw->ch[0].mute) * gbhw->ch[0].lvl
+	      + (gbhw->ch[1].rightgate & ~gbhw->ch[1].mute) * gbhw->ch[1].lvl
+	      + (gbhw->ch[2].rightgate & ~gbhw->ch[2].mute) * gbhw->ch[2].lvl
+	      + (gbhw->ch[3].rightgate & ~gbhw->ch[3].mute) * gbhw->ch[3].lvl;
+
+	l_chg = l_lvl - gbhw->last_l_value;
+	r_chg = r_lvl - gbhw->last_r_value;
+
+	if (l_chg || r_chg) {
+		gb_change_level(gbhw, l_chg, r_chg);
+		gbhw->last_l_value = l_lvl;
+		gbhw->last_r_value = r_lvl;
+	}
+}
+
+static void gb_sound_substep(struct gbhw *gbhw)
+{
+	long update = gbhw->update_level;
+
+	if (gbhw->ch[2].running) {
+		gbhw->ch[2].div_ctr--;
+		if (gbhw->ch[2].div_ctr <= 0) {
+			long val = gbhw->ch3_next_nibble;
+			long pos = gbhw->ch3pos++;
+			gbhw->ch3_next_nibble = GET_NIBBLE(&gbhw->ioregs[0x30], pos) * 2;
+			gbhw->ch[2].div_ctr = gbhw->ch[2].div_tc*2;
+			if (gbhw->ch[2].env_volume) {
+				val = val >> (gbhw->ch[2].env_volume-1);
+			} else val = 0;
+			gbhw->ch[2].lvl = val - 15;
+			update = 1;
+		}
+	}
+
+	if (gbhw->ch[3].running) {
+		gbhw->ch[3].div_ctr--;
+		if (gbhw->ch[3].div_ctr <= 0) {
+			long val;
+			gbhw->ch[3].div_ctr = gbhw->ch[3].div_tc;
+			val = gbhw->ch[3].env_volume * 2 * gblfsr_next_value(&gbhw->lfsr);
+			gbhw->ch[3].lvl = val - 15;
+			update = 1;
+		}
+	}
+
+	if (update) {
+		gb_sound_update_level(gbhw);
+	}
+}
+
+static void gb_sound_mainstep(struct gbhw *gbhw)
+{
+	long i;
+
+	for (i=0; i<2; i++) if (gbhw->ch[i].running) {
+		long bit = (gbhw->ch[i].duty_val >> gbhw->ch[i].duty_ctr) & 1;
+		long val = bit * 2 * gbhw->ch[i].env_volume;
+		gbhw->ch[i].lvl = val - 15;
+		gbhw->ch[i].div_ctr--;
+		if (gbhw->ch[i].div_ctr <= 0) {
+			gbhw->ch[i].div_ctr = gbhw->ch[i].div_tc;
+			gbhw->ch[i].duty_ctr++;
+			gbhw->ch[i].duty_ctr &= 7;
+		}
+	}
+
+	gbhw->sweep_div += 1;
+	if (gbhw->sweep_div >= sweep_div_tc) {
+		gbhw->sweep_div = 0;
+		sequencer_step(gbhw);
+	}
+
+	gb_sound_update_level(gbhw);
+}
+
 static void gb_sound(struct gbhw *gbhw, cycles_t cycles)
 {
-	long i, j;
-	long l_lvl = 0, r_lvl = 0;
-
+	cycles_t i;
+	uint64_t impbuf_max_cycles, impbuf_left;
 	assert(gbhw->impbuf != NULL);
+	assert(cycles % 4 == 0);  /* cycles is always a multiple of 4 */
+	impbuf_max_cycles = gbhw->sound_div_tc*(gbhw->impbuf->samples - IMPULSE_WIDTH/2)/SOUND_DIV_MULT;
+	impbuf_left = impbuf_max_cycles - gbhw->impbuf->cycles;
 
-	for (j=0; j<cycles; j++) {
-		gbhw->main_div++;
-		gbhw->impbuf->cycles++;
-		if (gbhw->impbuf->cycles*SOUND_DIV_MULT >= gbhw->sound_div_tc*(gbhw->impbuf->samples - IMPULSE_WIDTH/2))
-			gb_flush_buffer(gbhw);
-
-		if (gbhw->ch[2].running) {
-			gbhw->ch[2].div_ctr--;
-			if (gbhw->ch[2].div_ctr <= 0) {
-				long val = gbhw->ch3_next_nibble;
-				long pos = gbhw->ch3pos++;
-				gbhw->ch3_next_nibble = GET_NIBBLE(&gbhw->ioregs[0x30], pos) * 2;
-				gbhw->ch[2].div_ctr = gbhw->ch[2].div_tc*2;
-				if (gbhw->ch[2].env_volume) {
-					val = val >> (gbhw->ch[2].env_volume-1);
-				} else val = 0;
-				gbhw->ch[2].lvl = val - 15;
-				gbhw->update_level = 1;
-			}
+	if (impbuf_left >= cycles) {
+		for (i=cycles; i; i-=4) {
+			gbhw->impbuf->cycles++;
+			gb_sound_substep(gbhw);
+			gbhw->impbuf->cycles++;
+			gb_sound_substep(gbhw);
+			gbhw->impbuf->cycles++;
+			gb_sound_substep(gbhw);
+			gbhw->impbuf->cycles++;
+			gb_sound_substep(gbhw);
+			gb_sound_mainstep(gbhw);
 		}
-
-		if (gbhw->ch[3].running) {
-			gbhw->ch[3].div_ctr--;
-			if (gbhw->ch[3].div_ctr <= 0) {
-				long val;
-				gbhw->ch[3].div_ctr = gbhw->ch[3].div_tc;
-				val = gbhw->ch[3].env_volume * 2 * gblfsr_next_value(&gbhw->lfsr);
-				gbhw->ch[3].lvl = val - 15;
-				gbhw->update_level = 1;
-			}
-		}
-
-		if (gbhw->main_div >= main_div_tc) {
-			gbhw->main_div -= main_div_tc;
-
-			for (i=0; i<2; i++) if (gbhw->ch[i].running) {
-				long bit = (gbhw->ch[i].duty_val >> gbhw->ch[i].duty_ctr) & 1;
-				long val = bit * 2 * gbhw->ch[i].env_volume;
-				gbhw->ch[i].lvl = val - 15;
-				gbhw->ch[i].div_ctr--;
-				if (gbhw->ch[i].div_ctr <= 0) {
-					gbhw->ch[i].div_ctr = gbhw->ch[i].div_tc;
-					gbhw->ch[i].duty_ctr++;
-					gbhw->ch[i].duty_ctr &= 7;
-				}
-			}
-
-			gbhw->sweep_div += 1;
-			if (gbhw->sweep_div >= sweep_div_tc) {
-				gbhw->sweep_div = 0;
-				sequencer_step(gbhw);
-			}
-			gbhw->update_level = 1;
-		}
-
-		if (gbhw->update_level) {
-			gbhw->update_level = 0;
-			l_lvl = 0;
-			r_lvl = 0;
-			for (i=0; i<4; i++) {
-				if (gbhw->ch[i].mute)
-					continue;
-				if (gbhw->ch[i].leftgate)
-					l_lvl += gbhw->ch[i].lvl;
-				if (gbhw->ch[i].rightgate)
-					r_lvl += gbhw->ch[i].lvl;
-			}
-
-			if (l_lvl != gbhw->last_l_value || r_lvl != gbhw->last_r_value) {
-				gb_change_level(gbhw, l_lvl - gbhw->last_l_value, r_lvl - gbhw->last_r_value);
-				gbhw->last_l_value = l_lvl;
-				gbhw->last_r_value = r_lvl;
-			}
+	} else {
+		for (i=cycles; i; i-=4) {
+			if (++gbhw->impbuf->cycles >= impbuf_max_cycles)
+				gb_flush_buffer(gbhw);
+			gb_sound_substep(gbhw);
+			if (++gbhw->impbuf->cycles >= impbuf_max_cycles)
+				gb_flush_buffer(gbhw);
+			gb_sound_substep(gbhw);
+			if (++gbhw->impbuf->cycles >= impbuf_max_cycles)
+				gb_flush_buffer(gbhw);
+			gb_sound_substep(gbhw);
+			if (++gbhw->impbuf->cycles >= impbuf_max_cycles)
+				gb_flush_buffer(gbhw);
+			gb_sound_substep(gbhw);
+			gb_sound_mainstep(gbhw);
 		}
 	}
 }
@@ -944,7 +983,6 @@ void gbhw_init(struct gbhw* const gbhw)
 	gbhw->vblankctr = vblanktc;
 	gbhw->timerctr = 0;
 	gbhw->divoffset = 0;
-	gbhw->main_div = 0;
 	gbhw->sweep_div = 0;
 
 	if (gbhw->impbuf)

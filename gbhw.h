@@ -111,7 +111,6 @@ struct gbhw {
 	struct gblfsr lfsr;
 
 	long long sound_div_tc;
-	long main_div;
 	long sweep_div;
 
 	long ch3pos;
