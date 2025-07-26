@@ -833,14 +833,21 @@ static void gb_sound(struct gbhw *gbhw, cycles_t cycles)
 
 	if (impbuf_left >= cycles) {
 		for (i=cycles; i; i-=4) {
-			gbhw->impbuf->cycles++;
-			gb_sound_substep(gbhw);
-			gbhw->impbuf->cycles++;
-			gb_sound_substep(gbhw);
-			gbhw->impbuf->cycles++;
-			gb_sound_substep(gbhw);
-			gbhw->impbuf->cycles++;
-			gb_sound_substep(gbhw);
+			if (gbhw->ch[2].div_ctr >= 4 && gbhw->ch[3].div_ctr >= 4) {
+				/* can skip calling gb_sound_substep, only update counters */
+				gbhw->impbuf->cycles += 4;
+				gbhw->ch[2].div_ctr -= gbhw->ch[2].running * 4;
+				gbhw->ch[3].div_ctr -= gbhw->ch[3].running * 4;
+			} else {
+				gbhw->impbuf->cycles++;
+				gb_sound_substep(gbhw);
+				gbhw->impbuf->cycles++;
+				gb_sound_substep(gbhw);
+				gbhw->impbuf->cycles++;
+				gb_sound_substep(gbhw);
+				gbhw->impbuf->cycles++;
+				gb_sound_substep(gbhw);
+			}
 			gb_sound_mainstep(gbhw);
 		}
 	} else {
