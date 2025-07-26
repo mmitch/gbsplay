@@ -778,7 +778,7 @@ static void gb_sound(struct gbhw *gbhw, cycles_t cycles)
 			}
 		}
 
-		if (gbhw->main_div > main_div_tc) {
+		if (gbhw->main_div >= main_div_tc) {
 			gbhw->main_div -= main_div_tc;
 
 			for (i=0; i<2; i++) if (gbhw->ch[i].running) {
