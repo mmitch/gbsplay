@@ -764,7 +764,7 @@ static void gb_sound_update_level(struct gbhw *gbhw)
 
 static void gb_sound_substep(struct gbhw *gbhw)
 {
-	long update = gbhw->update_level;
+	long update = 0;
 
 	if (gbhw->ch[2].running) {
 		gbhw->ch[2].div_ctr--;
@@ -831,9 +831,14 @@ static void gb_sound(struct gbhw *gbhw, cycles_t cycles)
 	impbuf_max_cycles = gbhw->sound_div_tc*(gbhw->impbuf->samples - IMPULSE_WIDTH/2)/SOUND_DIV_MULT;
 	impbuf_left = impbuf_max_cycles - gbhw->impbuf->cycles;
 
+	if (gbhw->update_level) {
+		/* gating register was updated */
+		gb_sound_update_level(gbhw);
+	}
+
 	if (impbuf_left >= cycles) {
 		for (i=cycles; i; i-=4) {
-			if (gbhw->ch[2].div_ctr >= 4 && gbhw->ch[3].div_ctr >= 4) {
+			if (gbhw->ch[2].div_ctr > 4 && gbhw->ch[3].div_ctr > 4) {
 				/* can skip calling gb_sound_substep, only update counters */
 				gbhw->impbuf->cycles += 4;
 				gbhw->ch[2].div_ctr -= gbhw->ch[2].running * 4;
