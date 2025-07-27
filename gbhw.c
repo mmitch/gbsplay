@@ -1072,7 +1072,7 @@ uint8_t gbhw_io_peek(const struct gbhw* const gbhw, uint16_t addr)
 }
 
 
-void gbhw_check_if(struct gbhw *gbhw)
+static void gbhw_check_if(struct gbhw *gbhw)
 {
 	struct gbcpu *gbcpu = &gbhw->gbcpu;
 
