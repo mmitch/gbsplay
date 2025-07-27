@@ -799,12 +799,15 @@ static void gb_sound_substep(struct gbhw *gbhw)
 
 static void gb_sound_mainstep(struct gbhw *gbhw)
 {
-	long i;
+	long i, update = 0;
 
 	for (i=0; i<2; i++) if (gbhw->ch[i].running) {
 		long bit = (gbhw->ch[i].duty_val >> gbhw->ch[i].duty_ctr) & 1;
-		long val = bit * 2 * gbhw->ch[i].env_volume;
-		gbhw->ch[i].lvl = val - 15;
+		long val = bit * 2 * gbhw->ch[i].env_volume - 15;
+		if (val != gbhw->ch[i].lvl) {
+			update = 1;
+			gbhw->ch[i].lvl = val;
+		}
 		gbhw->ch[i].div_ctr--;
 		if (gbhw->ch[i].div_ctr <= 0) {
 			gbhw->ch[i].div_ctr = gbhw->ch[i].div_tc;
@@ -819,7 +822,9 @@ static void gb_sound_mainstep(struct gbhw *gbhw)
 		sequencer_step(gbhw);
 	}
 
-	gb_sound_update_level(gbhw);
+	if (update) {
+		gb_sound_update_level(gbhw);
+	}
 }
 
 static void gb_sound(struct gbhw *gbhw, cycles_t cycles)
