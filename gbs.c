@@ -376,6 +376,31 @@ static long gbs_nextsubsong(struct gbs* const gbs)
 	return true;
 }
 
+static void blargg_debug(struct gbcpu *gbcpu)
+{
+	long i;
+
+	/* Blargg GB debug output signature. */
+	if (gbcpu_mem_get(gbcpu, 0xa001) != 0xde ||
+	    gbcpu_mem_get(gbcpu, 0xa002) != 0xb0 ||
+	    gbcpu_mem_get(gbcpu, 0xa003) != 0x61) {
+		return;
+	}
+
+	fprintf(stderr, "\nBlargg debug output:\n");
+
+	for (i = 0xa004; i < 0xb000; i++) {
+		uint8_t c = gbcpu_mem_get(gbcpu, i);
+		if (c == 0 || c >= 128) {
+			return;
+		}
+		if (c < 32 && c != 10 && c != 13) {
+			return;
+		}
+		fputc(c, stderr);
+	}
+}
+
 long gbs_step(struct gbs* const gbs, long time_to_work)
 {
 	struct gbhw *gbhw = &gbs->gbhw;
@@ -384,6 +409,10 @@ long gbs_step(struct gbs* const gbs, long time_to_work)
 	long time;
 
 	if (cycles < 0) {
+		if (gbhw_locked_up(gbhw)) {
+			fprintf(stderr, "CPU locked up (halt with interrupts disabled).\n");
+			blargg_debug(&gbhw->gbcpu);
+		}
 		return false;
 	}
 

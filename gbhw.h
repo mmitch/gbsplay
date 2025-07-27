@@ -86,7 +86,6 @@ struct gbhw {
 	long sample_rate;
 	long update_level;
 	long sequence_ctr;
-	cycles_t halted_noirq_cycles;
 
 	long vblankctr;
 	long timertc;
@@ -146,5 +145,6 @@ float gbhw_calc_timer_hz(uint8_t tac, uint8_t tma);
 cycles_t gbhw_step(struct gbhw* const gbhw, long time_to_work);
 uint8_t gbhw_io_peek(const struct gbhw* const gbhw, uint16_t addr);  /* unmasked peek */
 void gbhw_io_put(struct gbhw* const gbhw, uint16_t addr, uint8_t val);
+bool gbhw_locked_up(struct gbhw* const gbhw);
 
 #endif

@@ -109,7 +109,6 @@ void gbhw_init_struct(struct gbhw *gbhw) {
 
 	gbhw->update_level = 0;
 	gbhw->sequence_ctr = 0;
-	gbhw->halted_noirq_cycles = 0;
 
 	gbhw->timertc = 16;
 
@@ -1026,7 +1025,6 @@ void gbhw_init(struct gbhw* const gbhw)
 	}
 
 	gbhw->sum_cycles = 0;
-	gbhw->halted_noirq_cycles = 0;
 	gbhw->ch[0].duty_ctr = 0;
 	gbhw->ch[1].duty_ctr = 0;
 	gbhw->ch3pos = 0;
@@ -1098,31 +1096,6 @@ static void gbhw_check_if(struct gbhw *gbhw)
 	}
 }
 
-static void blargg_debug(struct gbcpu *gbcpu)
-{
-	long i;
-
-	/* Blargg GB debug output signature. */
-	if (gbcpu_mem_get(gbcpu, 0xa001) != 0xde ||
-	    gbcpu_mem_get(gbcpu, 0xa002) != 0xb0 ||
-	    gbcpu_mem_get(gbcpu, 0xa003) != 0x61) {
-		return;
-	}
-
-	fprintf(stderr, "\nBlargg debug output:\n");
-
-	for (i = 0xa004; i < 0xb000; i++) {
-		uint8_t c = gbcpu_mem_get(gbcpu, i);
-		if (c == 0 || c >= 128) {
-			return;
-		}
-		if (c < 32 && c != 10 && c != 13) {
-			return;
-		}
-		fputc(c, stderr);
-	}
-}
-
 /**
  * @param time_to_work  emulated time in milliseconds
  * @return  elapsed cpu cycles
@@ -1147,16 +1120,10 @@ cycles_t gbhw_step(struct gbhw *gbhw, long time_to_work)
 			gbhw_check_if(gbhw);
 			step = gbcpu_step(gbcpu);
 			if (gbcpu->halted) {
-				gbhw->halted_noirq_cycles += step;
-				if (gbcpu->ime == 0 &&
-				    (gbhw->ioregs[REG_IE] == 0 ||
-				     gbhw->halted_noirq_cycles > GBHW_CLOCK/10)) {
-					fprintf(stderr, "CPU locked up (halt with interrupts disabled).\n");
-					blargg_debug(gbcpu);
+				if (gbcpu->ime == 0 && gbhw->ioregs[REG_IE] == 0) {
+					/* Locked in halt state */
 					return -1;
 				}
-			} else {
-				gbhw->halted_noirq_cycles = 0;
 			}
 			if (step < 0) return step;
 			cycles += step;
@@ -1189,4 +1156,10 @@ cycles_t gbhw_step(struct gbhw *gbhw, long time_to_work)
 	}
 
 	return cycles_total;
+}
+
+bool gbhw_locked_up(struct gbhw* const gbhw)
+{
+	struct gbcpu *gbcpu = &gbhw->gbcpu;
+	return gbcpu->halted && gbcpu->ime == 0 && gbhw->ioregs[REG_IE] == 0;
 }
