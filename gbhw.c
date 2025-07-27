@@ -1069,30 +1069,29 @@ uint8_t gbhw_io_peek(const struct gbhw* const gbhw, uint16_t addr)
 	return 0xff;
 }
 
+static uint8_t gbhw_clz_lookup[] = {
+	/*
+	 000,  001,  010,  011,  100,  101,  110,  111 */
+	0xff, 0x00, 0x01, 0x00, 0x02, 0x00, 0x01, 0x00, /* 00xxx */
+	0x03, 0x00, 0x01, 0x00, 0x02, 0x00, 0x01, 0x00, /* 01xxx */
+	0x04, 0x00, 0x01, 0x00, 0x02, 0x00, 0x01, 0x00, /* 10xxx */
+	0x03, 0x00, 0x01, 0x00, 0x02, 0x00, 0x01, 0x00, /* 11xxx */
+};
 
-static void gbhw_check_if(struct gbhw *gbhw)
+
+static void gbhw_check_if(struct gbhw *gbhw, struct gbcpu *gbcpu)
 {
-	struct gbcpu *gbcpu = &gbhw->gbcpu;
-
-	uint8_t mask = 0x01; /* lowest bit is highest priority irq */
-	uint8_t vec = 0x40;
-	if (!gbcpu->ime) {
-		/* interrupts disabled */
-		if (gbhw->ioregs[REG_IF] & gbhw->ioregs[REG_IE]) {
-			/* but will still exit halt */
-			gbcpu->halted = 0;
-		}
-		return;
-	}
-	while (mask <= 0x10) {
-		if (gbhw->ioregs[REG_IF] & gbhw->ioregs[REG_IE] & mask) {
-			gbhw->ioregs[REG_IF] &= ~mask;
-			gbcpu->halted = 0;
+	/* lowest bit is highest priority irq */
+	uint8_t enabled = gbhw->ioregs[REG_IF] & gbhw->ioregs[REG_IE] & 0x1f;
+	uint8_t hit = gbhw_clz_lookup[enabled];
+	if (hit < 5) {
+		/* will exit halt even if ime not set */
+		gbcpu->halted = 0;
+		if (gbcpu->ime) {
+			uint8_t vec = 0x40 + (hit * 8);
+			gbhw->ioregs[REG_IF] &= ~(1 << hit);
 			gbcpu_intr(gbcpu, vec);
-			break;
 		}
-		vec += 0x08;
-		mask <<= 1;
 	}
 }
 
@@ -1117,7 +1116,7 @@ cycles_t gbhw_step(struct gbhw *gbhw, long time_to_work)
 		gbhw->io_written = 0;
 		while (cycles < maxcycles && !gbhw->io_written) {
 			long step;
-			gbhw_check_if(gbhw);
+			gbhw_check_if(gbhw, gbcpu);
 			step = gbcpu_step(gbcpu);
 			if (gbcpu->halted) {
 				if (gbcpu->ime == 0 && gbhw->ioregs[REG_IE] == 0) {
