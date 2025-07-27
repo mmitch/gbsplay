@@ -1161,15 +1161,15 @@ cycles_t gbhw_step(struct gbhw *gbhw, long time_to_work)
 			if (step < 0) return step;
 			cycles += step;
 			gbhw->sum_cycles += step;
-			gbhw->vblankctr -= step;
-			if (gbhw->vblankctr <= 0) {
-				gbhw->vblankctr += vblanktc;
-				gbhw->ioregs[REG_IF] |= 0x01;
-				DPRINTF("vblank_interrupt\n");
-			}
 			gb_sound(gbhw, step);
 			if (gbhw->stepcallback)
 			   gbhw->stepcallback(gbhw->sum_cycles, gbhw->ch, gbhw->stepcallback_priv);
+		}
+		gbhw->vblankctr -= cycles;
+		if (gbhw->vblankctr <= 0) {
+			gbhw->vblankctr += vblanktc;
+			gbhw->ioregs[REG_IF] |= 0x01;
+			DPRINTF("vblank_interrupt\n");
 		}
 
 		if (gbhw->ioregs[REG_TAC] & 4) {
