@@ -18,7 +18,7 @@ jobs:
       contents: write # needed to upload the artifact
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: build .tar.gz using make dist
         run: |
           # configure and determine build version
