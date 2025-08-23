@@ -442,9 +442,9 @@ long gbs_step(struct gbs* const gbs, long time_to_work)
 	if (gbs->subsong_timeout && gbs->status.loop_mode != LOOP_SINGLE) {
 		if (gbs->fadeout &&
 		    time >= gbs->subsong_timeout - gbs->fadeout - gbs->gap)
-			gbhw_master_fade(gbhw, 128/gbs->fadeout, 0);
+			gbhw_master_fade(gbhw, 1000 * gbs->fadeout, 0);
 		if (time >= gbs->subsong_timeout - gbs->gap)
-			gbhw_master_fade(gbhw, 128*16, 0);
+			gbhw_master_fade(gbhw, 63, 0);
 		if (time >= gbs->subsong_timeout) {
 			gbhw_flush_buffer(&gbs->gbhw);
 			return gbs_nextsubsong(gbs);

@@ -621,7 +621,9 @@ static void sequencer_step(struct gbhw *gbhw)
 		}
 	}
 	if (gbhw->master_fade) {
-		gbhw->master_volume += gbhw->master_fade;
+		long master_fade = gbhw->master_fade + gbhw->master_fade_remainder;
+		gbhw->master_volume += master_fade / 1024;
+		gbhw->master_fade_remainder = master_fade % 1024;
 		if ((gbhw->master_fade > 0 &&
 		     gbhw->master_volume >= gbhw->master_dstvol) ||
 		    (gbhw->master_fade < 0 &&
@@ -632,14 +634,15 @@ static void sequencer_step(struct gbhw *gbhw)
 	}
 }
 
-void gbhw_master_fade(struct gbhw* const gbhw, long speed, long dstvol)
+void gbhw_master_fade(struct gbhw* const gbhw, long millis, long dstvol)
 {
 	if (dstvol < MASTER_VOL_MIN) dstvol = MASTER_VOL_MIN;
 	if (dstvol > MASTER_VOL_MAX) dstvol = MASTER_VOL_MAX;
 	gbhw->master_dstvol = dstvol;
+	gbhw->master_fade_remainder = 0;
 	if (dstvol > gbhw->master_volume)
-		gbhw->master_fade = speed;
-	else gbhw->master_fade = -speed;
+		gbhw->master_fade = (128 * 1024 * 1000 + millis - 1) / millis;
+	else gbhw->master_fade = -(128 * 1024 * 1000 + millis - 1) / millis;
 }
 
 #define GET_NIBBLE(p, n) ({ \
