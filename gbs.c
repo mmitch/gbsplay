@@ -435,6 +435,7 @@ long gbs_step(struct gbs* const gbs, long time_to_work)
 		if (gbs->subsong_info[gbs->subsong].len == 0) {
 			gbs->subsong_info[gbs->subsong].len = gbs->ticks * GBS_LEN_DIV / GBHW_CLOCK;
 		}
+		gbhw_flush_buffer(&gbs->gbhw);
 		return gbs_nextsubsong(gbs);
 	}
 
@@ -444,8 +445,10 @@ long gbs_step(struct gbs* const gbs, long time_to_work)
 			gbhw_master_fade(gbhw, 128/gbs->fadeout, 0);
 		if (time >= gbs->subsong_timeout - gbs->gap)
 			gbhw_master_fade(gbhw, 128*16, 0);
-		if (time >= gbs->subsong_timeout)
+		if (time >= gbs->subsong_timeout) {
+			gbhw_flush_buffer(&gbs->gbhw);
 			return gbs_nextsubsong(gbs);
+		}
 	}
 
 	return true;

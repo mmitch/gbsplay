@@ -647,7 +647,7 @@ void gbhw_master_fade(struct gbhw* const gbhw, long speed, long dstvol)
 	long shift = (~(n) & 1) << 2; \
 	(((p)[index] >> shift) & 0xf); })
 
-static void gb_flush_buffer(struct gbhw *gbhw)
+void gbhw_flush_buffer(struct gbhw *gbhw)
 {
 	long i;
 	long overlap;
@@ -862,16 +862,16 @@ static void gb_sound(struct gbhw *gbhw, cycles_t cycles)
 	} else {
 		for (i=cycles; i; i-=4) {
 			if (++gbhw->impbuf->cycles >= impbuf_max_cycles)
-				gb_flush_buffer(gbhw);
+				gbhw_flush_buffer(gbhw);
 			gb_sound_substep(gbhw);
 			if (++gbhw->impbuf->cycles >= impbuf_max_cycles)
-				gb_flush_buffer(gbhw);
+				gbhw_flush_buffer(gbhw);
 			gb_sound_substep(gbhw);
 			if (++gbhw->impbuf->cycles >= impbuf_max_cycles)
-				gb_flush_buffer(gbhw);
+				gbhw_flush_buffer(gbhw);
 			gb_sound_substep(gbhw);
 			if (++gbhw->impbuf->cycles >= impbuf_max_cycles)
-				gb_flush_buffer(gbhw);
+				gbhw_flush_buffer(gbhw);
 			gb_sound_substep(gbhw);
 			gb_sound_mainstep(gbhw);
 		}

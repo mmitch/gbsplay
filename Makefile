@@ -505,7 +505,7 @@ test: gbsplay $(tests) test_gbs
 		exit 1; \
 	fi
 	$(Q)MD5=`LD_LIBRARY_PATH=.:$${LD_LIBRARY_PATH-} $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -E b -o stdout $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | (md5sum || md5 -r) | cut -f1 -d\ `; \
-	EXPECT="dd52b93de9403af3ebd81195c5446027"; \
+	EXPECT="a415dadc7f8b0fcf35da6fc97c583b92"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "Bigendian output ok"; \
 	else \
@@ -515,7 +515,7 @@ test: gbsplay $(tests) test_gbs
 		exit 1; \
 	fi
 	$(Q)MD5=`LD_LIBRARY_PATH=.:$${LD_LIBRARY_PATH-} $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -E l -o stdout $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null | (md5sum || md5 -r) | cut -f1 -d\ `; \
-	EXPECT="dc243daf9d8652ba740b08de968cb1c8"; \
+	EXPECT="14b351ee391aaa11cfc0a0d0e25babab"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "Littleendian output ok"; \
 	else \
@@ -525,7 +525,7 @@ test: gbsplay $(tests) test_gbs
 		exit 1; \
 	fi
 	$(Q)MD5=`LD_LIBRARY_PATH=.:$${LD_LIBRARY_PATH-} $(TEST_WRAPPER) ./gbsplay -c examples/gbsplayrc_sample -E l -o wav $(TESTOPTS) examples/nightmode.gbs 1 < /dev/null; cat gbsplay-1.wav | (md5sum || md5 -r) | cut -f1 -d\ `; \
-	EXPECT="000eb28be953d57910d73002b8aae8ff"; \
+	EXPECT="f04623d1da242df5ca99effe1e3c3599"; \
 	if [ "$$MD5" = "$$EXPECT" ]; then \
 		echo "WAV output ok"; \
 	else \

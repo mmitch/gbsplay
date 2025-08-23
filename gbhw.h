@@ -146,5 +146,6 @@ cycles_t gbhw_step(struct gbhw* const gbhw, long time_to_work);
 uint8_t gbhw_io_peek(const struct gbhw* const gbhw, uint16_t addr);  /* unmasked peek */
 void gbhw_io_put(struct gbhw* const gbhw, uint16_t addr, uint8_t val);
 bool gbhw_locked_up(struct gbhw* const gbhw);
+void gbhw_flush_buffer(struct gbhw *gbhw);
 
 #endif
