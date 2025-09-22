@@ -425,7 +425,7 @@ static bool handle_user_input(struct gbs *gbs, char c)
 		quit = 1;
 		break;
 	case ' ':
-		toggle_pause(gbs);
+		toggle_pause();
 		update_title();
 		break;
 	case '1':
