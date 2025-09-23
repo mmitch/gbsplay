@@ -35,13 +35,13 @@ struct displaytime {
 	long played_min, played_sec, total_min, total_sec;
 };
 
-long is_running();
+long is_running(void);
 long nextsubsong_cb(struct gbs *gbs, void *priv);
 void play_next_subsong(struct gbs *gbs);
 void play_prev_subsong(struct gbs *gbs);
 long step_emulation(struct gbs *gbs);
-void toggle_pause();
-const char *get_pause_string();
+void toggle_pause(void);
+const char *get_pause_string(void);
 const char *get_loopmode_string(const struct gbs_status *status);
 void update_displaytime(struct displaytime *time, const struct gbs_status *status);
 struct gbs *common_init(int argc, char **argv);

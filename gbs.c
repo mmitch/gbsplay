@@ -699,7 +699,7 @@ static struct gbs* gbs_new(char *buf)
 	return gbs;
 }
 
-const uint8_t *gbs_get_bootrom()
+const uint8_t *gbs_get_bootrom(void)
 {
 	static uint8_t bootrom[256];
 	char *bootname = NULL;

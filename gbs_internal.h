@@ -34,7 +34,7 @@ struct gbs_internal_api {
 
 extern struct gbs_internal_api gbs_internal_api;
 
-static inline void assert_internal_api_valid() {
+static inline void assert_internal_api_valid(void) {
 	if (strcmp(gbs_internal_api.version, GBS_VERSION) != 0) {
 		fprintf(stderr, _("Bad libgbs API version, want %s but got: %s\n"), GBS_VERSION, gbs_internal_api.version);
 		exit(1);

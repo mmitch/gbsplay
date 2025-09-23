@@ -81,7 +81,7 @@ void parseopts(int *argc, char ***argv)
 	*argv += optind;
 }
 
-void read_default_template()
+void read_default_template(void)
 {
 	const uint8_t *bootrom = gbs_internal_api.get_bootrom();
 	if (!bootrom) {

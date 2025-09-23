@@ -270,18 +270,18 @@ long nextsubsong_cb(struct gbs *gbs, void *priv)
 	return true;
 }
 
-long is_running() {
+long is_running(void) {
 	return !pause_mode;
 }
 
-void toggle_pause()
+void toggle_pause(void)
 {
 	pause_mode = !pause_mode;
 	if (sound_pause)
 		sound_pause(pause_mode);
 }
 
-const char *get_pause_string()
+const char *get_pause_string(void)
 {
 	return pause_mode ? _(" [paused]") : "";
 }

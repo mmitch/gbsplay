@@ -31,7 +31,7 @@ long redraw = false;
 
 /* forward declarations */
 static void printstatus(struct gbs *gbs);
-static void printinfo();
+static void printinfo(void);
 
 /* Pre-generates "tracker-style" 3-character representations of the
  * note that is playing, covering everying from "C-0" to "B-9". */
@@ -207,7 +207,7 @@ static void printstatus(struct gbs *gbs)
 	fflush(stdout);
 }
 
-static void printinfo()
+static void printinfo(void)
 {
 	if (cfg.verbosity>0) {
 		puts(_("\ncommands:  [p]revious subsong   [n]ext subsong   [q]uit player\n" \
