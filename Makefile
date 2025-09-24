@@ -186,7 +186,9 @@ endif
 
 # test built binary?
 ifeq ($(build_test),yes)
-TEST_TARGETS += test
+TEST_TARGETS = test
+else
+TEST_TARGETS =
 endif
 
 # Cygwin automatically adds .exe to binaries.
