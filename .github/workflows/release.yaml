@@ -86,7 +86,7 @@ jobs:
         release: false
         update: false
     - name: download .tar.gz artifact from previous job
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: release-tar-gz
     - name: uncompress .tar.gz to current directory
