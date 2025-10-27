@@ -42,7 +42,7 @@ jobs:
         with:
           files: ${{ env.archive_name }}
       - name: upload tar.gz artifact for next job
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: release-tar-gz
           path: ${{ env.archive_name }}
