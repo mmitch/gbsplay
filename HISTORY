@@ -2,6 +2,33 @@
 gbsplay HISTORY
 
 
+unreleased
+~~~~~~~~~~
+
+Bugfixes:
+
+- gbs core:
+  - flush buffers before subsong end so no sound gets lost
+  - increase fadeout precision (don't accumulate rounding errors)
+  - only add ROM replayer when dumping ROM via gbs2gb
+    for usage on real hardware
+  - fix off-by-one error in main_div counter comparison
+    (right before refactoring that variable away)
+
+- gbsplay:
+  - VGM plugout: enable APU on startup by initializing NR52/NR51/NR50
+
+- build process:
+  - fix compiler warnings on newer compilers and stricter settings
+    (mostly use 'void' instead of empty parameter declarations)
+  - fix warnings about unintialized Makefile variables
+
+Enhancements:
+
+- gbs core:
+  - refactor hardware code for reduced CPU usage
+
+
 2025/06/13  -  0.0.100
 ~~~~~~~~~~~~~~~~~~~~~~
 
