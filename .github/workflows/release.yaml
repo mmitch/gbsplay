@@ -103,7 +103,7 @@ jobs:
         version=$(sed -n "/^VERSION/s/.* //p" config.mk)
         gbsplay_version=gbsplay-${version}
         output_dir=artifacts/${gbsplay_version}
-        zipfile=gbsplay-${version}_Windows_experimental.zip
+        zipfile=gbsplay-${version}_Windows.zip
 
         echo "create artifact directory ${output_dir}/"
         mkdir -p ${output_dir}/
