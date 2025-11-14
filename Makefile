@@ -93,7 +93,6 @@ contribs           := contrib/gbs2ogg.sh contrib/gbsplay.bashcompletion contrib/
 examples           := examples/nightmode.gbs examples/gbsplayrc_sample
 
 mans               := man/gbsplay.1    man/gbsinfo.1    man/gbsplayrc.5    man/gbs2gb.1
-mans_src           := man/gbsplay.in.1 man/gbsinfo.in.1 man/gbsplayrc.in.5 man/gbs2gb.in.1
 
 apimans_list       := libgbs.h gbs gbs_channel_status gbs_output_buffer gbs_status
 apidocdir          := apidoc
@@ -297,7 +296,6 @@ ifeq ($(build_xgbsplay),yes)
 objs += $(objs_xgbsplay)
 dsts += xgbsplay
 mans += man/xgbsplay.1
-mans_src += man/xgbsplay.in.1
 EXTRA_INSTALL += install-xgbsplay
 EXTRA_UNINSTALL += uninstall-xgbsplay
 EXTRA_CLEAN += clean-xgbsplay
@@ -472,7 +470,7 @@ dist:	distclean
 	install -m 644 *.c ./$(DISTDIR)/
 	install -m 644 *.h ./$(DISTDIR)/
 	install -d ./$(DISTDIR)/man
-	install -m 644 $(mans_src) ./$(DISTDIR)/man
+	install -m 644 man/*.in.? ./$(DISTDIR)/man
 	install -m 644 $(docs) $(docs-dist) ./$(DISTDIR)/
 	install -d ./$(DISTDIR)/examples
 	install -m 644 $(examples) ./$(DISTDIR)/examples
