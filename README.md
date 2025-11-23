@@ -17,9 +17,7 @@ Homepage/Repo:   https://github.com/mmitch/gbsplay/
 Bug reports:     please use the issue tracker at
                  https://github.com/mmitch/gbsplay/issues
 
-gbsplay is compatible to GBSv1.  It uses a backwards compatible extension
-to store additional information in the file.  The gbsplay package contains
-the following parts:
+The gbsplay package contains the following parts:
 
  * `gbsplay`:    a console player
  * `gbsinfo`:    displays information about a gbs file
