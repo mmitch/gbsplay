@@ -21,6 +21,8 @@ The gbsplay package contains the following parts:
 
  * `gbsplay`:    a console player
  * `gbsinfo`:    displays information about a gbs file
+ * `gbs2gb`:     convert a gbs file to gb to play it on real hardware
+ * `xgbsplay`:   an X11 player (need to be enabled during configure)
 
 ## Packaging status
 
