@@ -30,7 +30,7 @@ the following parts:
 
 ## License
 
-``
+```
 (C) 2003-2025 by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
                  Christian Garbs <mitch@cgarbs.de>
                  Maximilian Rehkopf <otakon@gmx.net>
@@ -60,4 +60,4 @@ File:       crc32.c
 Copyright:  Provided to GNUnet by peter@horizon.com
 License:    Public Domain
 Homepage:   n/a
-``
+```
