@@ -21,7 +21,7 @@ jobs:
         flags: ['', --disable-i18n --disable-zlib --prefix=/tmp/gbsplay, --with-xgbsplay --enable-sharedlibgbs]
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Install dependencies
       run: |
         sudo apt-get update
