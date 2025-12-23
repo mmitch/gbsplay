@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-25 15:21+0100\n"
+"POT-Creation-Date: 2025-12-25 15:44+0100\n"
 "PO-Revision-Date: 2025-12-25 15:42+0100\n"
 "Last-Translator: Tobias Diedrich <ranma+gbsplay@tdiedrich.de>\n"
 "Language-Team: none\n"
@@ -275,6 +275,9 @@ msgstr "Not compiled with zlib support"
 msgid "Number of subsongs = %d is unreasonable.\n"
 msgstr "Number of subsongs = %d is unreasonable.\n"
 
+msgid "Output filename too long!"
+msgstr "Output filename too long!"
+
 #, c-format
 msgid "Output plugin \"%s\" could not prepare next subsong.\n"
 msgstr "Output plugin \"%s\" could not prepare next subsong.\n"
@@ -304,6 +307,10 @@ msgstr "Timing:           %s\n"
 #, c-format
 msgid "Unknown option %s at %s line %ld.\n"
 msgstr "Unknown option %s at %s line %ld.\n"
+
+#, c-format
+msgid "Unknown placeholder %%%c was not expanded.\n"
+msgstr "Unknown placeholder %%%c was not expanded.\n"
 
 #, c-format
 msgid "Unsupported DMG clock: %ldHz\n"

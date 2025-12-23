@@ -20,16 +20,58 @@
 
 #define FILENAME_SIZE 23
 
+#define FILENAME_TEMPLATE "gbsplay-%d.%s"
+
 static char filename[FILENAME_SIZE];
 
-int expand_filename(const char* const extension, const int subsong) {
-	return snprintf(filename, FILENAME_SIZE, "gbsplay-%d.%s", subsong + 1, extension);
+int expand_filename(const char* const template, const char* const extension, const int subsong) {
+	char* const last = filename + FILENAME_SIZE;
+	const char *src;
+	char *dst;
+
+	for (src = template, dst = filename; *src != 0; src++) {
+		if (*src == '%') {
+			switch (*(++src)) {
+			case '%': // %% -> literal %
+				*dst++ = '%';
+				break;
+
+			case 'd': // %d -> subsong number
+				dst += snprintf(dst, last - dst, "%d", subsong + 1);
+				break;
+
+			case 'D': // %D -> subsong number with leading zeroes
+				dst += snprintf(dst, last - dst, "%03d", subsong + 1);
+				break;
+
+			case 's': // %s -> filename extension
+				dst += snprintf(dst, last - dst, "%s", extension);
+				break;
+
+			default:
+				fprintf(stderr, _("Unknown placeholder %%%c was not expanded.\n"), *src);
+				dst += snprintf(dst, last - dst, "%%%c", *src);
+				break;
+			}
+		} else {
+			*dst++ = *src;
+		}
+	}
+
+	if (dst < last) {
+		*dst = 0;
+	} else {
+		fprintf(stderr, "%s\n", _("Output filename too long!"));
+		*(last - 1) = 0;
+	}
+
+	return dst - filename;
 }
 
 FILE* file_open(const char* const extension, const int subsong) {
 	FILE* file = NULL;
 
-	if (expand_filename(extension, subsong) >= FILENAME_SIZE)
+	if (expand_filename(FILENAME_TEMPLATE, extension, subsong) >= FILENAME_SIZE)
 		goto error;
 
 	if ((file = fopen(filename, "wb")) == NULL)
@@ -48,24 +90,63 @@ error:
 
 #ifdef ENABLE_TEST
 
-test void test_expand_filename_ok(void) {
+test void test_expand_filename_default_template_ok(void) {
 	// given
 
 	// when
-	int chars = expand_filename("wav", 0);
+	int chars = expand_filename(FILENAME_TEMPLATE, "wav", 0);
 
 	// then
 	ASSERT_EQUAL("chars written %d", chars, 13);
 	ASSERT_EQUAL("%c", filename[13], 0);
 	ASSERT_STRING_EQUAL("filename %s", filename, "gbsplay-1.wav");
 }
-TEST(test_expand_filename_ok);
+TEST(test_expand_filename_default_template_ok);
+
+test void test_expand_filename_leading_zeroes_ok(void) {
+	// given
+
+	// when
+	int chars = expand_filename("gbsplay-%D.%s", "wav", 3);
+
+	// then
+	ASSERT_EQUAL("chars written %d", chars, 15);
+	ASSERT_EQUAL("%c", filename[15], 0);
+	ASSERT_STRING_EQUAL("filename %s", filename, "gbsplay-004.wav");
+}
+TEST(test_expand_filename_leading_zeroes_ok);
+
+test void test_expand_filename_multiple_placeholders_ok(void) {
+	// given
+
+	// when
+	int chars = expand_filename("%s.%d-%D-%d.foo", "wav", 49);
+
+	// then
+	ASSERT_EQUAL("chars written %d", chars, 17);
+	ASSERT_EQUAL("%c", filename[17], 0);
+	ASSERT_STRING_EQUAL("filename %s", filename, "wav.50-050-50.foo");
+}
+TEST(test_expand_filename_multiple_placeholders_ok);
+
+test void test_expand_filename_unknown_percent_sequence_parsed_literally(void) {
+	// given
+
+	// when
+	int chars = expand_filename("gbsplay-%?.%s", "wav", 5);
+
+	// then
+	ASSERT_EQUAL("chars written %d", chars, 14);
+	ASSERT_EQUAL("%c", filename[14], 0);
+	ASSERT_STRING_EQUAL("filename %s", filename, "gbsplay-%?.wav");
+}
+TEST(test_expand_filename_unknown_percent_sequence_parsed_literally);
 
 test void test_expand_filename_too_long(void) {
 	// given
 
 	// when
-	int chars = expand_filename("superlongextension", 10);
+	int chars = expand_filename(FILENAME_TEMPLATE, "superlongextension", 10);
 
 	// then
 	ASSERT_EQUAL("chars written %d", chars, 29); // reported size is longer than actual written size!
