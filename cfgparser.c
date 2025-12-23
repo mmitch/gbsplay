@@ -17,6 +17,7 @@
 
 #include "common.h"
 #include "cfgparser.h"
+#include "playercfg.h"
 #include "libgbs.h"
 #include "plugout.h"
 #include "test.h"

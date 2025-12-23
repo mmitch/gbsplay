@@ -14,6 +14,7 @@
 
 #include "config.h"
 #include "common.h"
+#include "playercfg.h"
 #include "gbhw.h"
 
 #if PLUGOUT_DSOUND == 1
@@ -29,12 +30,6 @@
 #else
 #  define PLUGOUT_DEFAULT "oss"
 #endif
-
-enum plugout_endian {
-	PLUGOUT_ENDIAN_BIG,
-	PLUGOUT_ENDIAN_LITTLE,
-	PLUGOUT_ENDIAN_AUTOSELECT,
-};
 
 #if GBS_BYTE_ORDER == GBS_ORDER_LITTLE_ENDIAN
 #define PLUGOUT_ENDIAN_NATIVE PLUGOUT_ENDIAN_LITTLE
