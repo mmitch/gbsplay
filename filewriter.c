@@ -22,14 +22,56 @@
 
 static char filename[FILENAME_SIZE];
 
-int expand_filename(const char* const extension, const int subsong) {
-	return snprintf(filename, FILENAME_SIZE, "gbsplay-%d.%s", subsong + 1, extension);
+#define FILENAME_TEMPLATE "gbsplay-%d.%s"
+
+int expand_filename(const char* const filename_template, const char* const extension, const int subsong) {
+	char* const last = filename + FILENAME_SIZE - 1;
+	const char *src;
+	char *dst;
+
+	for (src = filename_template, dst = filename; *src != 0 && dst < last; src++) {
+		if (*src == '%') {
+			switch (*(++src)) {
+			case '%': // %% -> literal %
+				*dst++ = '%';
+				break;
+
+			case 'd': // %d -> subsong number
+				dst += snprintf(dst, last + 1 - dst, "%d", subsong + 1);
+				break;
+
+			case 'D': // %D -> subsong number with leading zeroes
+				dst += snprintf(dst, last + 1 - dst, "%03d", subsong + 1);
+				break;
+
+			case 's': // %s -> filename extension
+				dst += snprintf(dst, last + 1 - dst, "%s", extension);
+				break;
+
+			default:
+				fprintf(stderr, _("Unknown placeholder %%%c was not expanded.\n"), *src);
+				dst += snprintf(dst, last + 1 - dst, "%%%c", *src);
+				break;
+			}
+		} else {
+			*dst++ = *src;
+		}
+	}
+
+	if (dst > last || *src != 0) {
+		fprintf(stderr, "%s\n", _("Output filename too long!"));
+		*(last) = 0;
+		return 1;
+	}
+
+	*dst = 0;
+	return 0;
 }
 
 FILE* file_open(const char* const extension, const int subsong) {
 	FILE* file = NULL;
 
-	if (expand_filename(extension, subsong) >= FILENAME_SIZE)
+	if (expand_filename(FILENAME_TEMPLATE, extension, subsong)  != 0)
 		goto error;
 
 	if ((file = fopen(filename, "wb")) == NULL)
@@ -48,31 +90,96 @@ error:
 
 #ifdef ENABLE_TEST
 
-test void test_expand_filename_ok(void) {
+#define CANARY "CANARY"
+
+char* canary_start = filename + FILENAME_SIZE;
+
+#define ASSERT_RC_OK(rc)     ASSERT_EQUAL("rc %d", rc, 0)
+#define ASSERT_RC_FAILED(rc) ASSERT_EQUAL("rc %d", rc, 1)
+#define ASSERT_CANARY_OK()   ASSERT_STRING_EQUAL("canary", canary_start, CANARY)
+
+test void setup_canary() {
+	sprintf(canary_start, CANARY);
+}
+TEST(setup_canary);
+
+test void test_expand_filename_default_template_ok(void) {
 	// given
 
 	// when
-	int chars = expand_filename("wav", 0);
+	int result = expand_filename(FILENAME_TEMPLATE, "wav", 0);
 
 	// then
-	ASSERT_EQUAL("chars written %d", chars, 13);
-	ASSERT_EQUAL("%c", filename[13], 0);
-	ASSERT_STRING_EQUAL("filename %s", filename, "gbsplay-1.wav");
+	ASSERT_RC_OK(result);
+	ASSERT_STRING_EQUAL("filename", filename, "gbsplay-1.wav");
+	ASSERT_CANARY_OK();
 }
-TEST(test_expand_filename_ok);
+TEST(test_expand_filename_default_template_ok);
 
-test void test_expand_filename_too_long(void) {
+test void test_expand_filename_leading_zeroes_ok(void) {
 	// given
 
 	// when
-	int chars = expand_filename("superlongextension", 10);
+	int result = expand_filename("gbsplay-%D.%s", "wav", 3);
 
 	// then
-	ASSERT_EQUAL("chars written %d", chars, 29); // reported size is longer than actual written size!
-	ASSERT_EQUAL("%c", filename[FILENAME_SIZE], 0);
-	ASSERT_STRING_EQUAL("filename %s", filename, "gbsplay-11.superlongex");
+	ASSERT_RC_OK(result);
+	ASSERT_STRING_EQUAL("filename", filename, "gbsplay-004.wav");
+	ASSERT_CANARY_OK();
 }
-TEST(test_expand_filename_too_long);
+TEST(test_expand_filename_leading_zeroes_ok);
+
+test void test_expand_filename_multiple_placeholders_ok(void) {
+	// given
+
+	// when
+	int result = expand_filename("%s.%d-%D-%d.foo", "wav", 49);
+
+	// then
+	ASSERT_RC_OK(result);
+	ASSERT_STRING_EQUAL("filename", filename, "wav.50-050-50.foo");
+	ASSERT_CANARY_OK();
+}
+TEST(test_expand_filename_multiple_placeholders_ok);
+
+test void test_expand_filename_unknown_percent_sequence_parsed_literally_ok(void) {
+	// given
+
+	// when
+	int result = expand_filename("gbsplay-%?.%s", "wav", 5);
+
+	// then
+	ASSERT_RC_OK(result);
+	ASSERT_STRING_EQUAL("filename", filename, "gbsplay-%?.wav");
+	ASSERT_CANARY_OK();
+}
+TEST(test_expand_filename_unknown_percent_sequence_parsed_literally_ok);
+
+test void test_expand_filename_too_long_after_expansion_fail(void) {
+	// given
+
+	// when
+	int result = expand_filename(FILENAME_TEMPLATE, "superlongextension", 10);
+
+	// then
+	ASSERT_RC_FAILED(result);
+	ASSERT_STRING_EQUAL("filename", filename, "gbsplay-11.superlongex");
+	ASSERT_CANARY_OK();
+}
+TEST(test_expand_filename_too_long_after_expansion_fail);
+
+test void test_expand_filename_template_longer_than_target_fail(void) {
+	// given
+
+	// when
+	int result = expand_filename("aaaaabbbbbcccccdddddeeeee", "ext", 0);
+
+	// then
+	ASSERT_RC_FAILED(result);
+	ASSERT_STRING_EQUAL("filename %s", filename, "aaaaabbbbbcccccdddddee"); // cut off after 22 chars, filename[23] == 0
+	ASSERT_CANARY_OK();
+}
+TEST(test_expand_filename_template_longer_than_target_fail);
 
 TEST_EOF;
 
