@@ -477,7 +477,7 @@ test void test_parse_empty_configuration() {
 			       "# and some empty lines");
 
 	// when
-	cfg_parse("test/gbsplayrc-empty");
+	cfg_parse(TEST_GBSPLAYRC);
 
 	// then
 	ASSERT_CFG_EQUAL(cfg, initial_cfg);
