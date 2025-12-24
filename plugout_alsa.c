@@ -74,10 +74,7 @@ static long alsa_open(struct plugout_cfg *actual, long *buffer_bytes, const stru
 		fprintf(stderr, _("snd_pcm_hw_params_set_rate_near failed: %s\n"), snd_strerror(err));
 		return -1;
 	}
-	if (cfg.requested_rate != exact_rate) {
-		fprintf(stderr, _("Requested rate %ldHz, got %dHz.\n"), cfg.requested_rate, exact_rate);
-		actual->rate = exact_rate;
-	}
+	actual->rate = exact_rate;
 
 	if ((err = snd_pcm_hw_params_set_channels(pcm_handle, hwparams, 2)) < 0) {
 		fprintf(stderr, _("snd_pcm_hw_params_set_channels failed: %s\n"), snd_strerror(err));

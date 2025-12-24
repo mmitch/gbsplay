@@ -55,10 +55,7 @@ static long devdsp_open(struct plugout_cfg *actual, long *buffer_bytes, const st
 		fprintf(stderr, _("ioctl(fd, SNDCTL_DSP_SPEED, %ld) failed: %s\n"), cfg.requested_rate, strerror(errno));
 		return -1;
 	}
-	if (c != cfg.requested_rate) {
-		fprintf(stderr, _("Requested rate %ldHz, got %dHz.\n"), cfg.requested_rate, c);
-		actual->rate = c;
-	}
+	actual->rate = c;
 	c=1;
 	if ((ioctl(fd, SNDCTL_DSP_STEREO, &c)) == -1) {
 		fprintf(stderr, _("ioctl(fd, SNDCTL_DSP_STEREO, %d) failed: %s\n"), c, strerror(errno));

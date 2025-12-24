@@ -63,10 +63,7 @@ static long sdl_open(struct plugout_cfg *actual, long *buffer_bytes, const struc
 		return -1;
 	}
 
-	if (desired.freq != obtained.freq) {
-		fprintf(stderr, _("Requested rate %ldHz, got %dHz.\n"), desired.freq, obtained.freq);
-		actual->rate = obtained.freq;
-	}
+	actual->rate = obtained.freq;
 
 	SDL_PauseAudioDevice(device, UNPAUSE);
 
