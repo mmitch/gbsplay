@@ -41,7 +41,7 @@ static AuServer *nas_server;
 static AuFlowID             nas_flow;
 
 /* forward function declarations */
-static long    nas_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata);
+static long    nas_open(struct plugout_cfg *actual, long *buffer_bytes, const struct plugout_metadata metadata);
 static ssize_t nas_write(const void *buf, size_t count);
 static void    nas_close();
 
@@ -96,14 +96,13 @@ static AuDeviceID nas_find_device(AuServer *aud)
  * This includes finding a suitable output device and setting
  * up the flow chain.
  *
- * @param endian  requested endianness
- * @param rate  requested samplerate
+ * @param actual  return actual configuration to player
  * @param buffer_bytes  pointer to requested buffer_size,
  *                      value update to actual buffer_size.
  * @param metadata  player name and currently playing filename (basename only)
  * @return  0 on success
  */
-static long nas_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata)
+static long nas_open(struct plugout_cfg *actual, long *buffer_bytes, const struct plugout_metadata metadata)
 {
 	char *text = "";
 	unsigned char nas_format;
@@ -111,10 +110,11 @@ static long nas_open(enum plugout_endian *endian, long rate, long *buffer_bytes,
 	AuStatus  status = AuBadValue;
 	AuDeviceID nas_device;
 
+	UNUSED(actual);
 	UNUSED(buffer_bytes);
 	UNUSED(metadata);
 
-	switch (*endian) {
+	switch (cfg.requested_endian) {
 	case PLUGOUT_ENDIAN_BIG:	nas_format = AuFormatLinearSigned16MSB;     break;
 	case PLUGOUT_ENDIAN_LITTLE:	nas_format = AuFormatLinearSigned16LSB;     break;
 	default:			nas_format = AuFormatLinearSigned16_NATIVE; break;
@@ -147,10 +147,10 @@ static long nas_open(enum plugout_endian *endian, long rate, long *buffer_bytes,
 	 * We only use an import client and export device, for volume
 	 * control a MultipyConstant could be added.
 	 */
-	AuMakeElementImportClient(nas_elements, rate, nas_format, 2, AuTrue,
+	AuMakeElementImportClient(nas_elements, cfg.requested_rate, nas_format, 2, AuTrue,
 	                          NAS_BUFFER_SAMPLES, NAS_BUFFER_SAMPLES / 2,
 	                          0, NULL);
-	AuMakeElementExportDevice(nas_elements+1, 0, nas_device, rate,
+	AuMakeElementExportDevice(nas_elements+1, 0, nas_device, cfg.requested_rate,
 	                          AuUnlimitedSamples, 0, NULL);
 	AuSetElements(nas_server, nas_flow, AuTrue, 2, nas_elements, &status);
 	if (status != AuSuccess) {

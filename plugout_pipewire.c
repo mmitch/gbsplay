@@ -31,7 +31,7 @@ static const struct pw_stream_events pipewire_stream_events = {
         PW_VERSION_STREAM_EVENTS,
 };
 
-static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata)
+static long pipewire_open(struct plugout_cfg *actual, long *buffer_bytes, const struct plugout_metadata metadata)
 {
 	const struct spa_pod *params[2];
 	uint8_t buffer[1024];
@@ -40,8 +40,10 @@ static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_b
 	enum spa_audio_format fmt;
 	int err;
 
+	UNUSED(actual);
+
 	// determine endianess
-	switch (*endian) {
+	switch (cfg.requested_endian) {
 	case PLUGOUT_ENDIAN_BIG:    fmt = SPA_AUDIO_FORMAT_S16_BE; break;
 	case PLUGOUT_ENDIAN_LITTLE: fmt = SPA_AUDIO_FORMAT_S16_LE; break;
 	default:                    fmt = SPA_AUDIO_FORMAT_S16;    break;
@@ -51,7 +53,7 @@ static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_b
 	pipewire_data.buffer_fill_wait_time.tv_sec = 0;
 	pipewire_data.buffer_fill_wait_time.tv_nsec =
 		1000000000                 // nanoseconds per second
-		/ rate                     // sample rate
+		/ cfg.requested_rate       // sample rate
 		* (*buffer_bytes / STRIDE) // samples in buffer
 		/ 4;                       // 25% of that
 
@@ -75,7 +77,7 @@ static long pipewire_open(enum plugout_endian *endian, long rate, long *buffer_b
 					       &SPA_AUDIO_INFO_RAW_INIT(
 						       .format = fmt,
 						       .channels = CHANNELS,
-						       .rate = rate));
+						       .rate = cfg.requested_rate));
 	// triple-buffer audio
 	params[1] = spa_pod_builder_add_object(&pod_builder, SPA_TYPE_OBJECT_ParamBuffers,
 					       SPA_PARAM_Buffers,

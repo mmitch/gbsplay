@@ -30,7 +30,7 @@ bool can_pause;
 #define SND_PCM_FORMAT_S16_NE SND_PCM_FORMAT_S16_BE
 #endif
 
-static long alsa_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata)
+static long alsa_open(struct plugout_cfg *actual, long *buffer_bytes, const struct plugout_metadata metadata)
 {
 	const char *pcm_name = "default";
 	int fmt, err;
@@ -41,7 +41,7 @@ static long alsa_open(enum plugout_endian *endian, long rate, long *buffer_bytes
 
 	UNUSED(metadata);
 
-	switch (*endian) {
+	switch (cfg.requested_endian) {
 	case PLUGOUT_ENDIAN_BIG:    fmt = SND_PCM_FORMAT_S16_BE; break;
 	case PLUGOUT_ENDIAN_LITTLE: fmt = SND_PCM_FORMAT_S16_LE; break;
 	default:                    fmt = SND_PCM_FORMAT_S16_NE; break;
@@ -69,14 +69,14 @@ static long alsa_open(enum plugout_endian *endian, long rate, long *buffer_bytes
 		return -1;
 	}
 
-	exact_rate = rate;
+	exact_rate = cfg.requested_rate;
 	if ((err = snd_pcm_hw_params_set_rate_near(pcm_handle, hwparams, &exact_rate, 0)) < 0) {
 		fprintf(stderr, _("snd_pcm_hw_params_set_rate_near failed: %s\n"), snd_strerror(err));
 		return -1;
 	}
-	if (rate != exact_rate) {
-		fprintf(stderr, _("Requested rate %ldHz, got %dHz.\n"),
-		        rate, exact_rate);
+	if (cfg.requested_rate != exact_rate) {
+		fprintf(stderr, _("Requested rate %ldHz, got %dHz.\n"), cfg.requested_rate, exact_rate);
+		actual->rate = exact_rate;
 	}
 
 	if ((err = snd_pcm_hw_params_set_channels(pcm_handle, hwparams, 2)) < 0) {

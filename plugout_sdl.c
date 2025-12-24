@@ -3,7 +3,8 @@
  *
  * SDL2 sound output plugin
  *
- * 2020-2024 (C) by Christian Garbs <mitch@cgarbs.de>
+ * 2020-2025 (C) by Christian Garbs <mitch@cgarbs.de>
+ *
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
 
@@ -32,7 +33,7 @@
 int device;
 SDL_AudioSpec obtained;
 
-static long sdl_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata)
+static long sdl_open(struct plugout_cfg *actual, long *buffer_bytes, const struct plugout_metadata metadata)
 {
 	SDL_AudioSpec desired;
 
@@ -45,12 +46,12 @@ static long sdl_open(enum plugout_endian *endian, long rate, long *buffer_bytes,
 	SDL_SetHint(SDL_HINT_AUDIO_DEVICE_STREAM_NAME, metadata.filename);
 
 	SDL_zero(desired);
-	desired.freq = rate;
+	desired.freq = cfg.requested_rate;
 	desired.channels = 2;
 	desired.samples = 1024;
 	desired.callback = NULL;
 
-	switch (*endian) {
+	switch (cfg.requested_endian) {
 	case PLUGOUT_ENDIAN_BIG:    desired.format = AUDIO_S16MSB; break;
 	case PLUGOUT_ENDIAN_LITTLE: desired.format = AUDIO_S16LSB; break;
 	default:                    desired.format = AUDIO_S16SYS; break;
@@ -60,6 +61,11 @@ static long sdl_open(enum plugout_endian *endian, long rate, long *buffer_bytes,
 	if (device == 0) {
 		fprintf(stderr, _("Could not open SDL audio device: %s\n"), SDL_GetError());
 		return -1;
+	}
+
+	if (desired.freq != obtained.freq) {
+		fprintf(stderr, _("Requested rate %ldHz, got %dHz.\n"), desired.freq, obtained.freq);
+		actual->rate = obtained.freq;
 	}
 
 	SDL_PauseAudioDevice(device, UNPAUSE);

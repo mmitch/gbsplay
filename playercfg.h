@@ -33,14 +33,16 @@ struct player_cfg {
 	char *filter_type;
 	enum gbs_loop_mode loop_mode;
 	enum play_mode play_mode;
-	long rate;
 	long refresh_delay;
-	enum plugout_endian requested_endian;
 	long silence_timeout;
 	char *sound_name;
 	long subsong_gap;
 	long subsong_timeout;
 	long verbosity;
+
+	// prepend with 'requested_' to signal possible override in struct plugout_cfg
+	enum plugout_endian requested_endian;
+	long requested_rate;
 };
 
 // this is a global variable, but for the config options this seems acceptable

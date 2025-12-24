@@ -51,7 +51,8 @@ plugout_step_fn  sound_step;
 plugout_write_fn sound_write;
 plugout_close_fn sound_close;
 
-static enum plugout_endian actual_endian = PLUGOUT_ENDIAN_AUTOSELECT;
+static struct plugout_cfg actual;
+
 static long subsong_start = -1;
 static long subsong_stop = -1;
 
@@ -92,7 +93,7 @@ static void callback(struct gbs *gbs, struct gbs_output_buffer *buf, void *priv)
 	UNUSED(gbs);
 	UNUSED(priv);
 
-	if (actual_endian != PLUGOUT_ENDIAN_NATIVE) {
+	if (actual.endian != PLUGOUT_ENDIAN_NATIVE) {
 		swap_endian(buf);
 	}
 	sound_write(buf->data, buf->pos*2*sizeof(int16_t));
@@ -390,7 +391,7 @@ static void usage(long exitcode)
 		cfg.subsong_gap,
 		_(cfg.filter_type),
 		cfg.sound_name,
-		cfg.rate,
+		cfg.requested_rate,
 		cfg.refresh_delay,
 		cfg.subsong_timeout,
 		cfg.silence_timeout);
@@ -452,7 +453,7 @@ static void parseopts(int *argc, char ***argv)
 			cfg.verbosity -= 1;
 			break;
 		case 'r':
-			sscanf(optarg, "%ld", &cfg.rate);
+			sscanf(optarg, "%ld", &cfg.requested_rate);
 			break;
 		case 'R':
 			sscanf(optarg, "%ld", &cfg.refresh_delay);
@@ -549,20 +550,22 @@ struct gbs *common_init(int argc, char **argv)
 	filename = filename_only(argv[0]);
 
 	if (cfg.requested_endian == PLUGOUT_ENDIAN_AUTOSELECT) {
-		actual_endian = PLUGOUT_ENDIAN_NATIVE;
+		actual.endian = PLUGOUT_ENDIAN_NATIVE;
 	} else {
-		actual_endian = cfg.requested_endian;
+		actual.endian = cfg.requested_endian;
 	}
+	actual.rate = cfg.requested_rate;
 
 	metadata.player_name = myname;
 	metadata.filename = filename;
-	if (sound_open(&actual_endian, cfg.rate, &buf.bytes, metadata) != 0) {
+	if (sound_open(&actual, &buf.bytes, metadata) != 0) {
 		fprintf(stderr, _("Could not open output plugin \"%s\"\n"),
 		        cfg.sound_name);
 		exit(1);
 	}
+
 	if (cfg.requested_endian != PLUGOUT_ENDIAN_AUTOSELECT &&
-	    actual_endian != cfg.requested_endian) {
+	    actual.endian != cfg.requested_endian) {
 		fprintf(stderr, _("Unsupported endian for output plugin \"%s\"\n"),
 		        cfg.sound_name);
 		exit(1);
@@ -588,7 +591,7 @@ struct gbs *common_init(int argc, char **argv)
 		gbs_set_io_callback(gbs, iocallback, NULL);
 	if (sound_write)
 		gbs_set_sound_callback(gbs, callback, NULL);
-	gbs_configure_output(gbs, &buf, cfg.rate);
+	gbs_configure_output(gbs, &buf, actual.rate);
 	if (!gbs_set_filter(gbs, parse_filter(cfg.filter_type))) {
 		fprintf(stderr, _("Invalid filter type \"%s\"\n"), cfg.filter_type);
 		exit(1);

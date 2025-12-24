@@ -59,10 +59,9 @@ static void vgm_finalize(void) {
 	fpackat(vgmfile, VGM_OFS_NUMSAMPLES, "<d", (uint32_t)samples_total);
 }
 
-static long vgm_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata)
+static long vgm_open(struct plugout_cfg *actual, long *buffer_bytes, const struct plugout_metadata metadata)
 {
-	UNUSED(endian);
-	UNUSED(rate);
+	UNUSED(actual);
 	UNUSED(buffer_bytes);
 	UNUSED(metadata);
 	return 0;
