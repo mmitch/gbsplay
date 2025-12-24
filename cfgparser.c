@@ -36,7 +36,7 @@ struct player_cfg cfg = {
 	.fadeout = 3,
 	.filter_type = CFG_FILTER_DMG,
 	.loop_mode = LOOP_OFF,
-	.output_filename = "gbsplay-%d.%s",
+	.output_filename = "gbsplay-%s.%e",
 	.play_mode = PLAY_MODE_LINEAR,
 	.refresh_delay = 33, // ms
 	.requested_endian = PLUGOUT_ENDIAN_AUTOSELECT,
@@ -472,7 +472,7 @@ test void test_parse_check_defaults() {
 	ASSERT_EQUAL("subsong_timeout %ld",    cfg.subsong_timeout,  120L);
 	ASSERT_EQUAL("verbosity %ld",          cfg.verbosity,        3L);
 	ASSERT_STRING_EQUAL("filter_type",     cfg.filter_type,      CFG_FILTER_DMG);
-	ASSERT_STRING_EQUAL("output_filename", cfg.output_filename,  "gbsplay-%d.%s");
+	ASSERT_STRING_EQUAL("output_filename", cfg.output_filename,  "gbsplay-%s.%e");
 	// "sound_name" depends on compile options and configure defaults, skip it
 }
 TEST(test_parse_check_defaults);
@@ -538,7 +538,7 @@ test void test_parse_complete_configuration() {
 	ASSERT_EQUAL("subsong_timeout %ld",    cfg.subsong_timeout,  42L);
 	ASSERT_EQUAL("verbosity %ld",          cfg.verbosity,        5L);
 	ASSERT_STRING_EQUAL("filter_type",     cfg.filter_type,      CFG_FILTER_CGB);
-	ASSERT_STRING_EQUAL("output_filename", cfg.output_filename, "gbsplay-%d.%s");
+	ASSERT_STRING_EQUAL("output_filename", cfg.output_filename, "gbsplay-%s.%e");
 	ASSERT_STRING_EQUAL("sound_name",      cfg.sound_name,       "altmidi");
 }
 TEST(test_parse_complete_configuration);

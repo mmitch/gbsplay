@@ -35,15 +35,15 @@ int expand_filename(const char* const filename_template, const char* const exten
 				*dst++ = '%';
 				break;
 
-			case 'd': // %d -> subsong number
+			case 's': // %s -> subsong number
 				dst += snprintf(dst, last + 1 - dst, "%d", subsong + 1);
 				break;
 
-			case 'D': // %D -> subsong number with leading zeroes
+			case 'S': // %S -> subsong number with leading zeroes
 				dst += snprintf(dst, last + 1 - dst, "%03d", subsong + 1);
 				break;
 
-			case 's': // %s -> filename extension
+			case 'e': // %e -> filename extension
 				dst += snprintf(dst, last + 1 - dst, "%s", extension);
 				break;
 
@@ -107,7 +107,7 @@ test void test_expand_filename_default_template_ok(void) {
 	// given
 
 	// when
-	int result = expand_filename("gbsplay-%d.%s", "wav", 0);
+	int result = expand_filename("gbsplay-%s.%e", "wav", 0);
 
 	// then
 	ASSERT_RC_OK(result);
@@ -120,7 +120,7 @@ test void test_expand_filename_leading_zeroes_ok(void) {
 	// given
 
 	// when
-	int result = expand_filename("gbsplay-%D.%s", "wav", 3);
+	int result = expand_filename("gbsplay-%S.%e", "wav", 3);
 
 	// then
 	ASSERT_RC_OK(result);
@@ -133,7 +133,7 @@ test void test_expand_filename_multiple_placeholders_ok(void) {
 	// given
 
 	// when
-	int result = expand_filename("%s.%d-%D-%d.foo", "wav", 49);
+	int result = expand_filename("%e.%s-%S-%s.foo", "wav", 49);
 
 	// then
 	ASSERT_RC_OK(result);
@@ -146,7 +146,7 @@ test void test_expand_filename_unknown_percent_sequence_parsed_literally_ok(void
 	// given
 
 	// when
-	int result = expand_filename("gbsplay-%?.%s", "wav", 5);
+	int result = expand_filename("gbsplay-%?.%e", "wav", 5);
 
 	// then
 	ASSERT_RC_OK(result);
@@ -159,7 +159,7 @@ test void test_expand_filename_too_long_after_expansion_fail(void) {
 	// given
 
 	// when
-	int result = expand_filename("gbsplay-%d.%s", "superlongextension", 10);
+	int result = expand_filename("gbsplay-%s.%e", "superlongextension", 10);
 
 	// then
 	ASSERT_RC_FAILED(result);
