@@ -37,9 +37,9 @@ struct player_cfg cfg = {
 	.filter_type = CFG_FILTER_DMG,
 	.loop_mode = LOOP_OFF,
 	.play_mode = PLAY_MODE_LINEAR,
-	.rate = 44100,
 	.refresh_delay = 33, // ms
 	.requested_endian = PLUGOUT_ENDIAN_AUTOSELECT,
+	.requested_rate = 44100,
 	.silence_timeout = 2,
 	.sound_name = PLUGOUT_DEFAULT,
 	.subsong_gap = 2,
@@ -64,7 +64,7 @@ static const struct cfg_option options[] = {
 	{ "loop_mode", &cfg.loop_mode, cfg_loop_mode },
 	{ "output_plugin", &cfg.sound_name, cfg_string },
 	{ "play_mode", &cfg.play_mode, cfg_play_mode },
-	{ "rate", &cfg.rate, cfg_long },
+	{ "rate", &cfg.requested_rate, cfg_long },
 	{ "refresh_delay", &cfg.refresh_delay, cfg_long },
 	{ "silence_timeout", &cfg.silence_timeout, cfg_long },
 	{ "subsong_gap", &cfg.subsong_gap, cfg_long },
@@ -406,9 +406,9 @@ struct player_cfg initial_cfg;
 		ASSERT_STRUCT_EQUAL("%ld", fadeout,          actual, expected); \
 		ASSERT_STRUCT_EQUAL("%d",  loop_mode,        actual, expected); \
 		ASSERT_STRUCT_EQUAL("%d",  play_mode,        actual, expected); \
-		ASSERT_STRUCT_EQUAL("%ld", rate,             actual, expected); \
 		ASSERT_STRUCT_EQUAL("%ld", refresh_delay,    actual, expected); \
 		ASSERT_STRUCT_EQUAL("%d",  requested_endian, actual, expected); \
+		ASSERT_STRUCT_EQUAL("%ld", requested_rate,   actual, expected); \
 		ASSERT_STRUCT_EQUAL("%ld", silence_timeout,  actual, expected); \
 		ASSERT_STRUCT_EQUAL("%ld", subsong_gap,      actual, expected); \
 		ASSERT_STRUCT_EQUAL("%ld", subsong_timeout,  actual, expected); \
@@ -509,9 +509,9 @@ test void test_parse_complete_configuration() {
 	ASSERT_EQUAL("fadeout %ld",         cfg.fadeout,          0L);
 	ASSERT_EQUAL("loop_mode %d",        cfg.loop_mode,        LOOP_RANGE);
 	ASSERT_EQUAL("play_mode %d",        cfg.play_mode,        PLAY_MODE_SHUFFLE);
-	ASSERT_EQUAL("rate %ld",            cfg.rate,             12345L);
 	ASSERT_EQUAL("refresh_delay %ld",   cfg.refresh_delay,    987L);
 	ASSERT_EQUAL("requested_endian %d", cfg.requested_endian, PLUGOUT_ENDIAN_LITTLE);
+	ASSERT_EQUAL("rate %ld",            cfg.requested_rate,   12345L);
 	ASSERT_EQUAL("silence_timeout %ld", cfg.silence_timeout,  19L);
 	ASSERT_EQUAL("subsong_gap %ld",     cfg.subsong_gap,      23L);
 	ASSERT_EQUAL("subsong_timeout %ld", cfg.subsong_timeout,  42L);

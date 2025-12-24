@@ -17,12 +17,11 @@
 static FILE *file;
 static cycles_t cycles_prev = 0;
 
-static long iodumper_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata)
+static long iodumper_open(struct plugout_cfg *actual, long *buffer_bytes, const struct plugout_metadata metadata)
 {
 	int fd;
 
-	UNUSED(endian);
-	UNUSED(rate);
+	UNUSED(actual);
 	UNUSED(buffer_bytes);
 	UNUSED(metadata);
 

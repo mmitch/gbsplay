@@ -26,12 +26,10 @@ static int set_fd_to_binmode(void)
 	return 0;
 }
 
-static long stdout_open(enum plugout_endian *endian,
-                        long rate, long *buffer_bytes,
+static long stdout_open(struct plugout_cfg *actual, long *buffer_bytes,
                         const struct plugout_metadata metadata)
 {
-	UNUSED(endian);
-	UNUSED(rate);
+	UNUSED(actual);
 	UNUSED(buffer_bytes);
 	UNUSED(metadata);
 

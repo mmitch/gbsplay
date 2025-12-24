@@ -24,7 +24,7 @@
 
 static int fd;
 
-static long devdsp_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata)
+static long devdsp_open(struct plugout_cfg *actual, long *buffer_bytes, const struct plugout_metadata metadata)
 {
 	int c;
 	int flags;
@@ -41,7 +41,7 @@ static long devdsp_open(enum plugout_endian *endian, long rate, long *buffer_byt
 		fprintf(stderr, _("fcntl(F_SETFL, flags&~O_NONBLOCK) failed: %s\n"), strerror(errno));
 	}
 
-	switch (*endian) {
+	switch (cfg.requested_endian) {
 	case PLUGOUT_ENDIAN_BIG:        c = AFMT_S16_BE; break;
 	case PLUGOUT_ENDIAN_LITTLE:     c = AFMT_S16_LE; break;
 	case PLUGOUT_ENDIAN_AUTOSELECT: c = AFMT_S16_NE; break;
@@ -50,14 +50,14 @@ static long devdsp_open(enum plugout_endian *endian, long rate, long *buffer_byt
 		fprintf(stderr, _("ioctl(fd, SNDCTL_DSP_SETFMT, %d) failed: %s\n"), c, strerror(errno));
 		return -1;
 	}
-	c = rate;
+	c = cfg.requested_rate;
 	if ((ioctl(fd, SNDCTL_DSP_SPEED, &c)) == -1) {
-		fprintf(stderr, _("ioctl(fd, SNDCTL_DSP_SPEED, %ld) failed: %s\n"), rate, strerror(errno));
+		fprintf(stderr, _("ioctl(fd, SNDCTL_DSP_SPEED, %ld) failed: %s\n"), cfg.requested_rate, strerror(errno));
 		return -1;
 	}
-	if (c != rate) {
-		fprintf(stderr, _("Requested rate %ldHz, got %dHz.\n"), rate, c);
-		rate = c;
+	if (c != cfg.requested_rate) {
+		fprintf(stderr, _("Requested rate %ldHz, got %dHz.\n"), cfg.requested_rate, c);
+		actual->rate = c;
 	}
 	c=1;
 	if ((ioctl(fd, SNDCTL_DSP_STEREO, &c)) == -1) {

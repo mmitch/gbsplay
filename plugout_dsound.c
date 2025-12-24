@@ -30,13 +30,13 @@ static DWORD writeMax;       // Maximum amount we can write at once.
 static WAVEFORMATEX wfx;
 static DSBUFFERDESC dsbdesc;
 
-static long dsound_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata)
+static long dsound_open(struct plugout_cfg *actual, long *buffer_bytes, const struct plugout_metadata metadata)
 {
 	HRESULT hr;
 	
 	UNUSED(metadata);
 
-	*endian = PLUGOUT_ENDIAN_NATIVE;
+	actual->endian = PLUGOUT_ENDIAN_NATIVE;
 
 	hr = DirectSoundCreate8(NULL, &dsound_device, NULL);
 
@@ -88,7 +88,7 @@ static long dsound_open(enum plugout_endian *endian, long rate, long *buffer_byt
 	memset(&wfx, 0, sizeof(WAVEFORMATEX));
 	wfx.wFormatTag = WAVE_FORMAT_PCM;
 	wfx.nChannels = 2;
-	wfx.nSamplesPerSec = rate;
+	wfx.nSamplesPerSec = cfg.requested_rate;
 	wfx.nBlockAlign = 4;
 	wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
 	wfx.wBitsPerSample = 16;

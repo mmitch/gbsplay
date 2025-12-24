@@ -22,18 +22,19 @@
 static pa_simple *pulse_handle;
 static pa_sample_spec pulse_spec;
 
-static long pulse_open(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata)
+static long pulse_open(struct plugout_cfg *actual, long *buffer_bytes, const struct plugout_metadata metadata)
 {
 	int err;
 
+	UNUSED(actual);
 	UNUSED(buffer_bytes);
 
-	switch (*endian) {
+	switch (cfg.requested_endian) {
 	case PLUGOUT_ENDIAN_BIG:    pulse_spec.format = PA_SAMPLE_S16BE; break;
 	case PLUGOUT_ENDIAN_LITTLE: pulse_spec.format = PA_SAMPLE_S16LE; break;
 	default:                    pulse_spec.format = PA_SAMPLE_S16NE; break;
 	}
-	pulse_spec.rate = rate;
+	pulse_spec.rate = cfg.requested_rate;
 	pulse_spec.channels = 2;
 
 	pulse_handle = pa_simple_new(NULL, metadata.player_name, PA_STREAM_PLAYBACK, NULL, metadata.filename, &pulse_spec, NULL, NULL, &err);

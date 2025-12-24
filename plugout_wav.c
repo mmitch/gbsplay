@@ -3,7 +3,7 @@
  *
  * WAV file writer output plugin
  *
- * 2022 (C) by Christian Garbs <mitch@cgarbs.de>
+ * 2022-2025 (C) by Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
@@ -20,10 +20,10 @@
 
 static const uint8_t blank_hdr[44];
 
-static long sample_rate;
 static FILE* file = NULL;
 
 static int wav_write_header(void) {
+	const long sample_rate = cfg.requested_rate;
 	const uint32_t fmt_subchunk_length = 16;
 	const uint16_t audio_format_uncompressed_pcm = 1;
 	const uint16_t num_channels = 2;
@@ -68,16 +68,13 @@ static int wav_close_file(void) {
 	return result;
 }
 
-static long wav_open(enum plugout_endian *endian,
-		     const long rate, long *buffer_bytes,
+static long wav_open(struct plugout_cfg *actual, long *buffer_bytes,
 		     const struct plugout_metadata metadata)
 {
 	UNUSED(buffer_bytes);
 	UNUSED(metadata);
 
-	sample_rate = rate;
-
-	*endian = PLUGOUT_ENDIAN_LITTLE;
+	actual->endian = PLUGOUT_ENDIAN_LITTLE;
 
 	return 0;
 }

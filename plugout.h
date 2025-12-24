@@ -1,7 +1,8 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2004-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2004-2025 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
@@ -42,8 +43,13 @@ struct plugout_metadata {
 	const char * filename;
 };
 
+struct plugout_cfg {
+	enum plugout_endian endian;
+	long rate;
+};
+
 /* Initial open of plugout. */
-typedef long    (*plugout_open_fn )(enum plugout_endian *endian, long rate, long *buffer_bytes, const struct plugout_metadata metadata);
+typedef long    (*plugout_open_fn )(struct plugout_cfg *actual, long *buffer_bytes, const struct plugout_metadata metadata);
 /* Notification when next subsong is about to start. */
 typedef int     (*plugout_skip_fn )(int subsong);
 /* Notification the the player is paused/resumed. */
