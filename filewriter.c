@@ -16,13 +16,12 @@
 
 #include "common.h"
 #include "filewriter.h"
+#include "playercfg.h"
 #include "test.h"
 
 #define FILENAME_SIZE 23
 
 static char filename[FILENAME_SIZE];
-
-#define FILENAME_TEMPLATE "gbsplay-%d.%s"
 
 int expand_filename(const char* const filename_template, const char* const extension, const int subsong) {
 	char* const last = filename + FILENAME_SIZE - 1;
@@ -71,7 +70,7 @@ int expand_filename(const char* const filename_template, const char* const exten
 FILE* file_open(const char* const extension, const int subsong) {
 	FILE* file = NULL;
 
-	if (expand_filename(FILENAME_TEMPLATE, extension, subsong)  != 0)
+	if (expand_filename(cfg.output_filename, extension, subsong)  != 0)
 		goto error;
 
 	if ((file = fopen(filename, "wb")) == NULL)
@@ -92,6 +91,7 @@ error:
 
 #define CANARY "CANARY"
 
+struct player_cfg cfg;
 char* canary_start = filename + FILENAME_SIZE;
 
 #define ASSERT_RC_OK(rc)     ASSERT_EQUAL("rc %d", rc, 0)
@@ -107,7 +107,7 @@ test void test_expand_filename_default_template_ok(void) {
 	// given
 
 	// when
-	int result = expand_filename(FILENAME_TEMPLATE, "wav", 0);
+	int result = expand_filename("gbsplay-%d.%s", "wav", 0);
 
 	// then
 	ASSERT_RC_OK(result);
@@ -159,7 +159,7 @@ test void test_expand_filename_too_long_after_expansion_fail(void) {
 	// given
 
 	// when
-	int result = expand_filename(FILENAME_TEMPLATE, "superlongextension", 10);
+	int result = expand_filename("gbsplay-%d.%s", "superlongextension", 10);
 
 	// then
 	ASSERT_RC_FAILED(result);
