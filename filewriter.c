@@ -16,20 +16,19 @@
 
 #include "common.h"
 #include "filewriter.h"
+#include "playercfg.h"
 #include "test.h"
 
 #define FILENAME_SIZE 23
 
-#define FILENAME_TEMPLATE "gbsplay-%d.%s"
-
 static char filename[FILENAME_SIZE];
 
-int expand_filename(const char* const template, const char* const extension, const int subsong) {
+int expand_filename(const char* const filename_template, const char* const extension, const int subsong) {
 	char* const last = filename + FILENAME_SIZE;
 	const char *src;
 	char *dst;
 
-	for (src = template, dst = filename; *src != 0; src++) {
+	for (src = filename_template, dst = filename; *src != 0; src++) {
 		if (*src == '%') {
 			switch (*(++src)) {
 			case '%': // %% -> literal %
@@ -71,7 +70,7 @@ int expand_filename(const char* const template, const char* const extension, con
 FILE* file_open(const char* const extension, const int subsong) {
 	FILE* file = NULL;
 
-	if (expand_filename(FILENAME_TEMPLATE, extension, subsong) >= FILENAME_SIZE)
+	if (expand_filename(cfg.output_filename, extension, subsong) >= FILENAME_SIZE)
 		goto error;
 
 	if ((file = fopen(filename, "wb")) == NULL)
@@ -90,11 +89,13 @@ error:
 
 #ifdef ENABLE_TEST
 
+struct player_cfg cfg;
+
 test void test_expand_filename_default_template_ok(void) {
 	// given
 
 	// when
-	int chars = expand_filename(FILENAME_TEMPLATE, "wav", 0);
+	int chars = expand_filename("gbsplay-%d.%s", "wav", 0);
 
 	// then
 	ASSERT_EQUAL("chars written %d", chars, 13);
@@ -146,7 +147,7 @@ test void test_expand_filename_too_long(void) {
 	// given
 
 	// when
-	int chars = expand_filename(FILENAME_TEMPLATE, "superlongextension", 10);
+	int chars = expand_filename("gbsplay-%d.%s", "superlongextension", 10);
 
 	// then
 	ASSERT_EQUAL("chars written %d", chars, 29); // reported size is longer than actual written size!

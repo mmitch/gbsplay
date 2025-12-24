@@ -36,6 +36,7 @@ struct player_cfg cfg = {
 	.fadeout = 3,
 	.filter_type = CFG_FILTER_DMG,
 	.loop_mode = LOOP_OFF,
+	.output_filename = "gbsplay-%d.%s",
 	.play_mode = PLAY_MODE_LINEAR,
 	.refresh_delay = 33, // ms
 	.requested_endian = PLUGOUT_ENDIAN_AUTOSELECT,
@@ -414,20 +415,23 @@ struct player_cfg initial_cfg;
 		ASSERT_STRUCT_EQUAL("%ld", subsong_timeout,  actual, expected); \
 		ASSERT_STRUCT_EQUAL("%ld", verbosity,        actual, expected); \
 		ASSERT_STRUCT_STRING_EQUAL(filter_type,      actual, expected); \
+		ASSERT_STRUCT_STRING_EQUAL(output_filename,  actual, expected); \
 		ASSERT_STRUCT_STRING_EQUAL(sound_name,       actual, expected); \
 } while(0)
 
 test void save_initial_cfg() {
 	initial_cfg = cfg;
-	initial_cfg.filter_type = strdup(cfg.filter_type);
-	initial_cfg.sound_name  = strdup(cfg.sound_name);
+	initial_cfg.filter_type     = strdup(cfg.filter_type);
+	initial_cfg.output_filename = strdup(cfg.output_filename);
+	initial_cfg.sound_name      = strdup(cfg.sound_name);
 };
 TEST(save_initial_cfg);
 
 test void restore_initial_cfg() {
 	cfg = initial_cfg;
-	cfg.filter_type = strdup(initial_cfg.filter_type);
-	cfg.sound_name  = strdup(initial_cfg.sound_name);
+	cfg.filter_type     = strdup(initial_cfg.filter_type);
+	cfg.output_filename = strdup(initial_cfg.output_filename);
+	cfg.sound_name      = strdup(initial_cfg.sound_name);
 };
 
 test void write_test_gbsplayrc_n(unsigned int n, ...) {
@@ -455,6 +459,23 @@ test void delete_test_gbsplayrc() {
 }
 
 /************************* tests ************************/
+
+test void test_parse_check_defaults() {
+	ASSERT_EQUAL("fadeout %ld",            cfg.fadeout,          3L);
+	ASSERT_EQUAL("loop_mode %d",           cfg.loop_mode,        LOOP_OFF);
+	ASSERT_EQUAL("play_mode %d",           cfg.play_mode,        PLAY_MODE_LINEAR);
+	ASSERT_EQUAL("rate %ld",               cfg.requested_rate,   44100L);
+	ASSERT_EQUAL("refresh_delay %ld",      cfg.refresh_delay,    33L);
+	ASSERT_EQUAL("requested_endian %d",    cfg.requested_endian, PLUGOUT_ENDIAN_AUTOSELECT);
+	ASSERT_EQUAL("silence_timeout %ld",    cfg.silence_timeout,  2L);
+	ASSERT_EQUAL("subsong_gap %ld",        cfg.subsong_gap,      2L);
+	ASSERT_EQUAL("subsong_timeout %ld",    cfg.subsong_timeout,  120L);
+	ASSERT_EQUAL("verbosity %ld",          cfg.verbosity,        3L);
+	ASSERT_STRING_EQUAL("filter_type",     cfg.filter_type,      CFG_FILTER_DMG);
+	ASSERT_STRING_EQUAL("output_filename", cfg.output_filename,  "gbsplay-%d.%s");
+	// "sound_name" depends on compile options and configure defaults, skip it
+}
+TEST(test_parse_check_defaults);
 
 test void test_parse_missing_config_file() {
 	// given
@@ -488,7 +509,7 @@ TEST(test_parse_empty_configuration);
 test void test_parse_complete_configuration() {
 	// given
 	restore_initial_cfg();
-	write_test_gbsplayrc_n(12,
+	write_test_gbsplayrc_n(13,
 			       "endian=little",
 			       "fadeout=0",
 			       "filter_type=cgb",
@@ -506,18 +527,19 @@ test void test_parse_complete_configuration() {
 	cfg_parse(TEST_GBSPLAYRC);
 
 	// then
-	ASSERT_EQUAL("fadeout %ld",         cfg.fadeout,          0L);
-	ASSERT_EQUAL("loop_mode %d",        cfg.loop_mode,        LOOP_RANGE);
-	ASSERT_EQUAL("play_mode %d",        cfg.play_mode,        PLAY_MODE_SHUFFLE);
-	ASSERT_EQUAL("refresh_delay %ld",   cfg.refresh_delay,    987L);
-	ASSERT_EQUAL("requested_endian %d", cfg.requested_endian, PLUGOUT_ENDIAN_LITTLE);
-	ASSERT_EQUAL("rate %ld",            cfg.requested_rate,   12345L);
-	ASSERT_EQUAL("silence_timeout %ld", cfg.silence_timeout,  19L);
-	ASSERT_EQUAL("subsong_gap %ld",     cfg.subsong_gap,      23L);
-	ASSERT_EQUAL("subsong_timeout %ld", cfg.subsong_timeout,  42L);
-	ASSERT_EQUAL("verbosity   %ld"    , cfg.verbosity,        5L);
-	ASSERT_STRING_EQUAL("filter_type",  cfg.filter_type,      CFG_FILTER_CGB);
-	ASSERT_STRING_EQUAL("sound_name",   cfg.sound_name,       "altmidi");
+	ASSERT_EQUAL("fadeout %ld",            cfg.fadeout,          0L);
+	ASSERT_EQUAL("loop_mode %d",           cfg.loop_mode,        LOOP_RANGE);
+	ASSERT_EQUAL("play_mode %d",           cfg.play_mode,        PLAY_MODE_SHUFFLE);
+	ASSERT_EQUAL("refresh_delay %ld",      cfg.refresh_delay,    987L);
+	ASSERT_EQUAL("requested_endian %d",    cfg.requested_endian, PLUGOUT_ENDIAN_LITTLE);
+	ASSERT_EQUAL("rate %ld",               cfg.requested_rate,   12345L);
+	ASSERT_EQUAL("silence_timeout %ld",    cfg.silence_timeout,  19L);
+	ASSERT_EQUAL("subsong_gap %ld",        cfg.subsong_gap,      23L);
+	ASSERT_EQUAL("subsong_timeout %ld",    cfg.subsong_timeout,  42L);
+	ASSERT_EQUAL("verbosity %ld",          cfg.verbosity,        5L);
+	ASSERT_STRING_EQUAL("filter_type",     cfg.filter_type,      CFG_FILTER_CGB);
+	ASSERT_STRING_EQUAL("output_filename", cfg.output_filename, "gbsplay-%d.%s");
+	ASSERT_STRING_EQUAL("sound_name",      cfg.sound_name,       "altmidi");
 }
 TEST(test_parse_complete_configuration);
 

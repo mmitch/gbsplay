@@ -32,6 +32,7 @@ struct player_cfg {
 	long fadeout;
 	char *filter_type;
 	enum gbs_loop_mode loop_mode;
+	char *output_filename;
 	enum play_mode play_mode;
 	long refresh_delay;
 	long silence_timeout;
