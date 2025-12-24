@@ -570,6 +570,13 @@ struct gbs *common_init(int argc, char **argv)
 		        cfg.sound_name);
 		exit(1);
 	}
+
+	if (cfg.requested_rate != actual.rate) {
+		fprintf(stderr, _("Requested rate %ldHz, got %dHz.\n"),
+			cfg.requested_rate, actual.rate);
+		// warning only, don't exit
+	}
+
 	buf.data = malloc(buf.bytes);
 
 	if (argc >= 2) {
