@@ -184,8 +184,12 @@ static void play_subsong(struct gbs *gbs, long subsong) {
 	 * sound_skip notifies the plugout we are preparing to play the next
 	 * subsong.
 	 */
-	if (sound_skip)
-		sound_skip(subsong);
+	if (sound_skip && sound_skip(subsong) != 0) {
+		fprintf(stderr, _("Output plugin \"%s\" could not prepare next subsong.\n"),
+			cfg.sound_name);
+		exit(1);
+	}
+
 	/*
 	 * Now that the plugout is notified we can re-initialize the GBS state.
 	 */

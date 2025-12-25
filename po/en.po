@@ -1,6 +1,6 @@
 # English translations for gbsplay.
 #
-# Copyright (C) 2003-2025 Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+# Copyright (C) 2003-2025  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
 #
 # This file is distributed under GNU GPL v1 or, at your option, any later version.
 #
@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-28 18:50+0200\n"
-"PO-Revision-Date: 2023-11-19 15:29+0100\n"
+"POT-Creation-Date: 2025-12-25 15:21+0100\n"
+"PO-Revision-Date: 2025-12-25 15:42+0100\n"
 "Last-Translator: Tobias Diedrich <ranma+gbsplay@tdiedrich.de>\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -275,6 +275,10 @@ msgstr "Not compiled with zlib support"
 msgid "Number of subsongs = %d is unreasonable.\n"
 msgstr "Number of subsongs = %d is unreasonable.\n"
 
+#, c-format
+msgid "Output plugin \"%s\" could not prepare next subsong.\n"
+msgstr "Output plugin \"%s\" could not prepare next subsong.\n"
+
 msgid "ROM size above limit (8 MiB)!"
 msgstr "ROM size above limit (8 MiB)!"
 
@@ -524,6 +528,3 @@ msgstr "unhandled event %d\n"
 
 msgid "vgm / not available"
 msgstr "vgm / not available"
-
-#~ msgid "default"
-#~ msgstr "default"

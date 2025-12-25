@@ -2,6 +2,15 @@
 gbsplay HISTORY
 
 
+unreleased
+~~~~~~~~~~
+
+Bugfixes:
+
+- gbsplay:
+  - handle error if an output file can't be opened on subsong change
+
+
 2025/11/14  -  0.0.102
 ~~~~~~~~~~~~~~~~~~~~~~
 
