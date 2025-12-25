@@ -8,6 +8,7 @@ unreleased
 Bugfixes:
 
 - gbsplay:
+  - make the output filename pattern used by some plugouts configurable by -O
   - handle error if an output file can't be opened on subsong change
 
 

@@ -374,6 +374,7 @@ static void usage(long exitcode)
 		  "  -L        set loop mode to single\n"
 		  "  -o        select output plugin (%s)\n"
 		  "            'list' shows available plugins\n"
+		  "  -O        output filename pattern (%s)\n"
 		  "  -q        reduce verbosity\n"
 		  "  -r        set samplerate (%ldHz)\n"
 		  "  -R        set refresh delay (%ld milliseconds)\n"
@@ -391,6 +392,7 @@ static void usage(long exitcode)
 		cfg.subsong_gap,
 		_(cfg.filter_type),
 		cfg.sound_name,
+		cfg.output_filename,
 		cfg.requested_rate,
 		cfg.refresh_delay,
 		cfg.subsong_timeout,
@@ -402,7 +404,7 @@ static void parseopts(int *argc, char ***argv)
 {
 	long res;
 	myname = filename_only(*argv[0]);
-	while ((res = getopt(*argc, *argv, "1234c:E:f:g:hH:lLo:qr:R:t:T:vVzZ")) != -1) {
+	while ((res = getopt(*argc, *argv, "1234c:E:f:g:hH:lLo:O:qr:R:t:T:vVzZ")) != -1) {
 		switch (res) {
 		default:
 			usage(1);
@@ -448,6 +450,9 @@ static void parseopts(int *argc, char ***argv)
 			break;
 		case 'o':
 			cfg.sound_name = optarg;
+			break;
+		case 'O':
+			cfg.output_filename = optarg;
 			break;
 		case 'q':
 			cfg.verbosity -= 1;

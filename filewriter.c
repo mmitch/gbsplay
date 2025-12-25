@@ -19,7 +19,13 @@
 #include "playercfg.h"
 #include "test.h"
 
+#define FILENAME_SIZE 256
+
+// set lower filename size used in unit tests to easier check handling of oversized strings
+#ifdef TEST
+#undef  FILENAME_SIZE
 #define FILENAME_SIZE 23
+#endif
 
 static char filename[FILENAME_SIZE];
 
