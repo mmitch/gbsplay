@@ -59,6 +59,26 @@ Select sound output plugin \fIplugin\fP.
 Select \fBlist\fP to view a list of all available output plugins.
 Default value depends on compilation options.
 .TP
+.BI -O " pattern"
+Set the output filename pattern used by some sound output plugins to \fIpattern\fP.
+The pattern may contain these placeholders that will be replaced when generating the actual filename:
+.RS
+.TP
+.B %s
+current subsong number
+.TP
+.B %S
+current subsong number with leading zeroes (always 3 digits)
+.TP
+.B %e
+default filename extension based on sound output plugin in use
+.TP
+.B %%
+a literal \fB%\fP
+.P
+Default value is \fIgbsplay-%s.%e\fP.
+.RE
+.TP
 .B -q
 Be quieter, reduce verbosity.
 Can be applied multiple times.
@@ -247,8 +267,8 @@ because stdout is used for the dumped data.
 .B midi
 Write a simple MIDI conversion of the song
 into a separate file per subsong.
-The files are called \fIgbsplay-%d.mid\fP,
-where \fI%d\fP is replaced with the subsong number.
+See \fI-O\fP for the filenames used;
+the extension placeholder \fI%e\fP expands to \fImid\fP.
 The files are created in the current working directory
 and existing files are silently overwritten.
 Only channels 1 to 3 are converted to MIDI,
@@ -286,15 +306,15 @@ Sample rate and endianness can be set via \fI-r\fP and \fI-E\fP.
 .TP
 .B vgm
 Write separate VGM files for every subsong.
-The files are called \fIgbsplay-%d.vgm\fP,
-where \fI%d\fP is replaced with the subsong number.
+See \fI-O\fP for the filenames used;
+the extension placeholder \fI%e\fP expands to \fIvgm\fP.
 The files are created in the current working directory
 and existing files are silently overwritten.
 .TP
 .B wav
 Write separate WAV files (RIFF WAVE) for every subsong.
-The files are called \fIgbsplay-%d.wav\fP,
-where \fI%d\fP is replaced with the subsong number.
+See \fI-O\fP for the filenames used;
+the extension placeholder \fI%e\fP expands to \fIwav\fP.
 The files are created in the current working directory
 and existing files are silently overwritten.
 The output is always encoded as stereo (2 channels), 16 bit signed PCM

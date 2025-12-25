@@ -19,12 +19,12 @@
 #include "playercfg.h"
 #include "test.h"
 
-#define FILENAME_SIZE 23
+#define FILENAME_SIZE 256
 
 static char filename[FILENAME_SIZE];
 
-int expand_filename(const char* const filename_template, const char* const extension, const int subsong) {
-	char* const last = filename + FILENAME_SIZE - 1;
+int expand_filename(const char* const filename_template, const unsigned int filename_size, const char* const extension, const int subsong) {
+	char* const last = filename + filename_size - 1;
 	const char *src;
 	char *dst;
 
@@ -70,7 +70,7 @@ int expand_filename(const char* const filename_template, const char* const exten
 FILE* file_open(const char* const extension, const int subsong) {
 	FILE* file = NULL;
 
-	if (expand_filename(cfg.output_filename, extension, subsong)  != 0)
+	if (expand_filename(cfg.output_filename, FILENAME_SIZE, extension, subsong)  != 0)
 		goto error;
 
 	if ((file = fopen(filename, "wb")) == NULL)
@@ -89,10 +89,12 @@ error:
 
 #ifdef ENABLE_TEST
 
+// user lower filename size for unit tests to easily check handling of oversized strings
+#define TEST_FILENAME_SIZE 23
 #define CANARY "CANARY"
 
 struct player_cfg cfg;
-char* canary_start = filename + FILENAME_SIZE;
+char* canary_start = filename + TEST_FILENAME_SIZE;
 
 #define ASSERT_RC_OK(rc)     ASSERT_EQUAL("rc %d", rc, 0)
 #define ASSERT_RC_FAILED(rc) ASSERT_EQUAL("rc %d", rc, 1)
@@ -107,7 +109,7 @@ test void test_expand_filename_default_template_ok(void) {
 	// given
 
 	// when
-	int result = expand_filename("gbsplay-%s.%e", "wav", 0);
+	int result = expand_filename("gbsplay-%s.%e", TEST_FILENAME_SIZE, "wav", 0);
 
 	// then
 	ASSERT_RC_OK(result);
@@ -120,7 +122,7 @@ test void test_expand_filename_leading_zeroes_ok(void) {
 	// given
 
 	// when
-	int result = expand_filename("gbsplay-%S.%e", "wav", 3);
+	int result = expand_filename("gbsplay-%S.%e", TEST_FILENAME_SIZE, "wav", 3);
 
 	// then
 	ASSERT_RC_OK(result);
@@ -133,7 +135,7 @@ test void test_expand_filename_multiple_placeholders_ok(void) {
 	// given
 
 	// when
-	int result = expand_filename("%e.%s-%S-%s.foo", "wav", 49);
+	int result = expand_filename("%e.%s-%S-%s.foo", TEST_FILENAME_SIZE, "wav", 49);
 
 	// then
 	ASSERT_RC_OK(result);
@@ -146,7 +148,7 @@ test void test_expand_filename_unknown_percent_sequence_parsed_literally_ok(void
 	// given
 
 	// when
-	int result = expand_filename("gbsplay-%?.%e", "wav", 5);
+	int result = expand_filename("gbsplay-%?.%e", TEST_FILENAME_SIZE, "wav", 5);
 
 	// then
 	ASSERT_RC_OK(result);
@@ -159,7 +161,7 @@ test void test_expand_filename_too_long_after_expansion_fail(void) {
 	// given
 
 	// when
-	int result = expand_filename("gbsplay-%s.%e", "superlongextension", 10);
+	int result = expand_filename("gbsplay-%s.%e", TEST_FILENAME_SIZE, "superlongextension", 10);
 
 	// then
 	ASSERT_RC_FAILED(result);
@@ -172,7 +174,7 @@ test void test_expand_filename_template_longer_than_target_fail(void) {
 	// given
 
 	// when
-	int result = expand_filename("aaaaabbbbbcccccdddddeeeee", "ext", 0);
+	int result = expand_filename("aaaaabbbbbcccccdddddeeeee", TEST_FILENAME_SIZE, "ext", 0);
 
 	// then
 	ASSERT_RC_FAILED(result);

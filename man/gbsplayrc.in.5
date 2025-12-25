@@ -41,6 +41,20 @@ For backwards compatibility you can also use just the first character
 of each option ("\fBn\fP", "\fBl\fP" or "\fBb\fP").
 .RE
 .TP
+.B Filename pattern
+A pattern describing filenames that may contain placeholders that will be replaced when generating the actual filename.
+Available placeholders are:
+.RS
+.IP \fB%s\fP
+current subsong number
+.IP \fB%S\fP
+current subsong number with leading zeroes (always 3 digits)
+.IP \fB%e\fP
+default filename extension based on sound output plugin in use
+.IP \fB%%\fP
+a literal \fB%\fP
+.RE
+.TP
 .B Filter type
 A string to select the output high-pass filter:
 .RS
@@ -107,6 +121,9 @@ Deprecated in favor of the \fBloop_mode\fP option.
 .TP
 .BR loop_mode " = " \fILoop\ mode\fP
 Set the desired loop mode.
+.TP
+.BR output_filename " = " \fIFilename\ pattern\fP
+Set the output filename pattern used by some output plugins.
 .TP
 .BR output_plugin " = " \fIPlugin\fP
 Set the sound output plugin.

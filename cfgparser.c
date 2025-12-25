@@ -55,6 +55,7 @@ static void cfg_long(void* const ptr);
 static void cfg_loop_mode(void* const ptr);
 static void cfg_play_mode(void* const ptr);
 static void cfg_string(void* const ptr);
+static void cfg_string_until_newline(void* const ptr);
 
 /* configuration directives */
 static const struct cfg_option options[] = {
@@ -63,6 +64,7 @@ static const struct cfg_option options[] = {
 	{ "filter_type", &cfg.filter_type, cfg_string },
 	{ "loop", &cfg.loop_mode, cfg_bool_as_int },
 	{ "loop_mode", &cfg.loop_mode, cfg_loop_mode },
+	{ "output_filename", &cfg.output_filename, cfg_string_until_newline },
 	{ "output_plugin", &cfg.sound_name, cfg_string },
 	{ "play_mode", &cfg.play_mode, cfg_play_mode },
 	{ "rate", &cfg.requested_rate, cfg_long },
@@ -246,6 +248,24 @@ static void cfg_string(void* const ptr)
 		s[n++] = c;
 		c = nextchar();
 	} while ((isalnum(c) || c == '-' || c == '_') &&
+	         n < (sizeof(s)-1));
+	s[n] = 0;
+
+	*((char**)ptr) = strdup(s);
+
+	state = 0;
+	nextstate = 1;
+}
+
+static void cfg_string_until_newline(void* const ptr)
+{
+	char s[200];
+	unsigned long n = 0;
+
+	do {
+		s[n++] = c;
+		c = nextchar();
+	} while (c != '\n' && c != '\r' &&
 	         n < (sizeof(s)-1));
 	s[n] = 0;
 
@@ -514,6 +534,7 @@ test void test_parse_complete_configuration() {
 			       "fadeout=0",
 			       "filter_type=cgb",
 			       "loop=1",
+			       "output_filename=gbs-%D.%s",
 			       "output_plugin=altmidi",
 			       "play_mode=shuffle",
 			       "rate=12345",
@@ -538,7 +559,7 @@ test void test_parse_complete_configuration() {
 	ASSERT_EQUAL("subsong_timeout %ld",    cfg.subsong_timeout,  42L);
 	ASSERT_EQUAL("verbosity %ld",          cfg.verbosity,        5L);
 	ASSERT_STRING_EQUAL("filter_type",     cfg.filter_type,      CFG_FILTER_CGB);
-	ASSERT_STRING_EQUAL("output_filename", cfg.output_filename, "gbsplay-%s.%e");
+	ASSERT_STRING_EQUAL("output_filename", cfg.output_filename, "gbs-%D.%s");
 	ASSERT_STRING_EQUAL("sound_name",      cfg.sound_name,       "altmidi");
 }
 TEST(test_parse_complete_configuration);
