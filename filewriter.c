@@ -105,7 +105,7 @@ test void test_expand_filename_default_template_ok(void) {
 
 	// then
 	ASSERT_EQUAL("chars written %d", chars, 13);
-	ASSERT_STRING_EQUAL("filename %s", filename, "gbsplay-1.wav");
+	ASSERT_STRING_EQUAL("filename", filename, "gbsplay-1.wav");
 }
 TEST(test_expand_filename_default_template_ok);
 
@@ -117,7 +117,7 @@ test void test_expand_filename_leading_zeroes_ok(void) {
 
 	// then
 	ASSERT_EQUAL("chars written %d", chars, 15);
-	ASSERT_STRING_EQUAL("filename %s", filename, "gbsplay-004.wav");
+	ASSERT_STRING_EQUAL("filename", filename, "gbsplay-004.wav");
 }
 TEST(test_expand_filename_leading_zeroes_ok);
 
@@ -129,7 +129,7 @@ test void test_expand_filename_multiple_placeholders_ok(void) {
 
 	// then
 	ASSERT_EQUAL("chars written %d", chars, 17);
-	ASSERT_STRING_EQUAL("filename %s", filename, "wav.50-050-50.foo");
+	ASSERT_STRING_EQUAL("filename", filename, "wav.50-050-50.foo");
 }
 TEST(test_expand_filename_multiple_placeholders_ok);
 
@@ -141,7 +141,7 @@ test void test_expand_filename_unknown_percent_sequence_parsed_literally(void) {
 
 	// then
 	ASSERT_EQUAL("chars written %d", chars, 14);
-	ASSERT_STRING_EQUAL("filename %s", filename, "gbsplay-%?.wav");
+	ASSERT_STRING_EQUAL("filename", filename, "gbsplay-%?.wav");
 }
 TEST(test_expand_filename_unknown_percent_sequence_parsed_literally);
 
@@ -153,7 +153,7 @@ test void test_expand_filename_too_long(void) {
 
 	// then
 	ASSERT_EQUAL("chars written %d", chars, 29); // reported size is longer than actual written size!
-	ASSERT_STRING_EQUAL("filename %s", filename, "gbsplay-11.superlongex");
+	ASSERT_STRING_EQUAL("filename", filename, "gbsplay-11.superlongex");
 }
 TEST(test_expand_filename_too_long);
 
