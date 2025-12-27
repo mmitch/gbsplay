@@ -30,7 +30,7 @@
 static char filename[FILENAME_SIZE];
 
 int expand_filename(const char* const filename_template, const char* const extension, const int subsong) {
-	char* const last = filename + FILENAME_SIZE;
+	char* const last = filename + FILENAME_SIZE - 1;
 	const char *src;
 	char *dst;
 
@@ -42,20 +42,20 @@ int expand_filename(const char* const filename_template, const char* const exten
 				break;
 
 			case 's': // %s -> subsong number
-				dst += snprintf(dst, last - dst, "%d", subsong + 1);
+				dst += snprintf(dst, last + 1 - dst, "%d", subsong + 1);
 				break;
 
 			case 'S': // %S -> subsong number with leading zeroes
-				dst += snprintf(dst, last - dst, "%03d", subsong + 1);
+				dst += snprintf(dst, last + 1 - dst, "%03d", subsong + 1);
 				break;
 
 			case 'e': // %e -> filename extension
-				dst += snprintf(dst, last - dst, "%s", extension);
+				dst += snprintf(dst, last + 1 - dst, "%s", extension);
 				break;
 
 			default:
 				fprintf(stderr, _("Unknown placeholder %%%c was not expanded.\n"), *src);
-				dst += snprintf(dst, last - dst, "%%%c", *src);
+				dst += snprintf(dst, last + 1 - dst, "%%%c", *src);
 				break;
 			}
 		} else {
@@ -63,11 +63,11 @@ int expand_filename(const char* const filename_template, const char* const exten
 		}
 	}
 
-	if (dst < last) {
+	if (dst <= last) {
 		*dst = 0;
 	} else {
 		fprintf(stderr, "%s\n", _("Output filename too long!"));
-		*(last - 1) = 0;
+		*(last) = 0;
 	}
 
 	return dst - filename;
