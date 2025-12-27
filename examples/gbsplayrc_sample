@@ -4,6 +4,7 @@
 endian = n             # native endian
 fadeout = 3            # seconds
 loop = 0
+output_filename = gbsplay-%s.%e
 output_plugin = oss
 rate = 48000           # this is a comment
 refresh_delay = 33     # milliseconds
