@@ -21,20 +21,20 @@
 
 #define FILENAME_SIZE 256
 
+static char filename[FILENAME_SIZE];
+
 // set lower filename size used in unit tests to easier check handling of oversized strings
 #ifdef TEST
 #undef  FILENAME_SIZE
 #define FILENAME_SIZE 23
 #endif
 
-static char filename[FILENAME_SIZE];
-
 int expand_filename(const char* const filename_template, const char* const extension, const int subsong) {
 	char* const last = filename + FILENAME_SIZE - 1;
 	const char *src;
 	char *dst;
 
-	for (src = filename_template, dst = filename; *src != 0; src++) {
+	for (src = filename_template, dst = filename; *src != 0 && dst < last; src++) {
 		if (*src == '%') {
 			switch (*(++src)) {
 			case '%': // %% -> literal %
@@ -63,20 +63,20 @@ int expand_filename(const char* const filename_template, const char* const exten
 		}
 	}
 
-	if (dst <= last) {
-		*dst = 0;
-	} else {
+	if (dst > last || *src != 0) {
 		fprintf(stderr, "%s\n", _("Output filename too long!"));
 		*(last) = 0;
+		return 1;
 	}
 
-	return dst - filename;
+	*dst = 0;
+	return 0;
 }
 
 FILE* file_open(const char* const extension, const int subsong) {
 	FILE* file = NULL;
 
-	if (expand_filename(cfg.output_filename, extension, subsong) >= FILENAME_SIZE)
+	if (expand_filename(cfg.output_filename, extension, subsong) != 0)
 		goto error;
 
 	if ((file = fopen(filename, "wb")) == NULL)
@@ -95,17 +95,30 @@ error:
 
 #ifdef ENABLE_TEST
 
+#define CANARY "CANARY"
+
 struct player_cfg cfg;
+char* canary_start = filename + FILENAME_SIZE;
+
+#define ASSERT_RC_OK(rc)     ASSERT_EQUAL("rc %d", rc, 0)
+#define ASSERT_RC_FAILED(rc) ASSERT_EQUAL("rc %d", rc, 1)
+#define ASSERT_CANARY_OK()   ASSERT_STRING_EQUAL("canary", canary_start, CANARY)
+
+test void setup_canary() {
+	sprintf(canary_start, CANARY);
+}
+TEST(setup_canary);
 
 test void test_expand_filename_default_template_ok(void) {
 	// given
 
 	// when
-	int chars = expand_filename("gbsplay-%s.%e", "wav", 0);
+	int result = expand_filename("gbsplay-%s.%e", "wav", 0);
 
 	// then
-	ASSERT_EQUAL("chars written %d", chars, 13);
+	ASSERT_RC_OK(result);
 	ASSERT_STRING_EQUAL("filename", filename, "gbsplay-1.wav");
+	ASSERT_CANARY_OK();
 }
 TEST(test_expand_filename_default_template_ok);
 
@@ -113,11 +126,12 @@ test void test_expand_filename_leading_zeroes_ok(void) {
 	// given
 
 	// when
-	int chars = expand_filename("gbsplay-%S.%e", "wav", 3);
+	int result = expand_filename("gbsplay-%S.%e", "wav", 3);
 
 	// then
-	ASSERT_EQUAL("chars written %d", chars, 15);
+	ASSERT_RC_OK(result);
 	ASSERT_STRING_EQUAL("filename", filename, "gbsplay-004.wav");
+	ASSERT_CANARY_OK();
 }
 TEST(test_expand_filename_leading_zeroes_ok);
 
@@ -125,37 +139,53 @@ test void test_expand_filename_multiple_placeholders_ok(void) {
 	// given
 
 	// when
-	int chars = expand_filename("%e.%s-%S-%s.foo", "wav", 49);
+	int result = expand_filename("%e.%s-%S-%s.foo", "wav", 49);
 
 	// then
-	ASSERT_EQUAL("chars written %d", chars, 17);
+	ASSERT_RC_OK(result);
 	ASSERT_STRING_EQUAL("filename", filename, "wav.50-050-50.foo");
+	ASSERT_CANARY_OK();
 }
 TEST(test_expand_filename_multiple_placeholders_ok);
 
-test void test_expand_filename_unknown_percent_sequence_parsed_literally(void) {
+test void test_expand_filename_unknown_percent_sequence_parsed_literally_ok(void) {
 	// given
 
 	// when
-	int chars = expand_filename("gbsplay-%?.%e", "wav", 5);
+	int result = expand_filename("gbsplay-%?.%e", "wav", 5);
 
 	// then
-	ASSERT_EQUAL("chars written %d", chars, 14);
+	ASSERT_RC_OK(result);
 	ASSERT_STRING_EQUAL("filename", filename, "gbsplay-%?.wav");
+	ASSERT_CANARY_OK();
 }
-TEST(test_expand_filename_unknown_percent_sequence_parsed_literally);
+TEST(test_expand_filename_unknown_percent_sequence_parsed_literally_ok);
 
-test void test_expand_filename_too_long(void) {
+test void test_expand_filename_too_long_fail(void) {
 	// given
 
 	// when
-	int chars = expand_filename("gbsplay-%s.%e", "superlongextension", 10);
+	int result = expand_filename("gbsplay-%s.%e", "superlongextension", 10);
 
 	// then
-	ASSERT_EQUAL("chars written %d", chars, 29); // reported size is longer than actual written size!
+	ASSERT_RC_FAILED(result);
 	ASSERT_STRING_EQUAL("filename", filename, "gbsplay-11.superlongex");
+	ASSERT_CANARY_OK();
 }
-TEST(test_expand_filename_too_long);
+TEST(test_expand_filename_too_long_fail);
+
+test void test_expand_filename_template_longer_than_target_fail(void) {
+	// given
+
+	// when
+	int result = expand_filename("aaaaabbbbbcccccdddddeeeee", "ext", 0);
+
+	// then
+	ASSERT_RC_FAILED(result);
+	ASSERT_STRING_EQUAL("filename %s", filename, "aaaaabbbbbcccccdddddee"); // cut off after 22 chars, filename[23] == 0
+	ASSERT_CANARY_OK();
+}
+TEST(test_expand_filename_template_longer_than_target_fail);
 
 TEST_EOF;
 
