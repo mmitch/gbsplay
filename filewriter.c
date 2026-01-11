@@ -3,7 +3,7 @@
  *
  * write audio data to file
  *
- * 2006-2025 (C) by Christian Garbs <mitch@cgarbs.de>
+ * 2006-2026 (C) by Christian Garbs <mitch@cgarbs.de>
  *                  Vegard Nossum
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -48,9 +48,9 @@ int expand_filename(const char* const filename_template, const unsigned int file
 				break;
 
 			default:
-				fprintf(stderr, _("Unknown placeholder %%%c was not expanded.\n"), *src);
-				dst += snprintf(dst, last + 1 - dst, "%%%c", *src);
-				break;
+				fprintf(stderr, _("Unknown placeholder %%%c in filename pattern could not be expanded.\n"), *src);
+				*(dst) = 0;
+				return 1;
 			}
 		} else {
 			*dst++ = *src;
@@ -144,18 +144,18 @@ test void test_expand_filename_multiple_placeholders_ok(void) {
 }
 TEST(test_expand_filename_multiple_placeholders_ok);
 
-test void test_expand_filename_unknown_percent_sequence_parsed_literally_ok(void) {
+test void test_expand_filename_unknown_percent_sequence_fail(void) {
 	// given
 
 	// when
 	int result = expand_filename("gbsplay-%?.%e", TEST_FILENAME_SIZE, "wav", 5);
 
 	// then
-	ASSERT_RC_OK(result);
-	ASSERT_STRING_EQUAL("filename", filename, "gbsplay-%?.wav");
+	ASSERT_RC_FAILED(result);
+	ASSERT_STRING_EQUAL("filename", filename, "gbsplay-");
 	ASSERT_CANARY_OK();
 }
-TEST(test_expand_filename_unknown_percent_sequence_parsed_literally_ok);
+TEST(test_expand_filename_unknown_percent_sequence_fail);
 
 test void test_expand_filename_too_long_after_expansion_fail(void) {
 	// given

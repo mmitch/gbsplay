@@ -1,6 +1,6 @@
 # English translations for gbsplay.
 #
-# Copyright (C) 2003-2025  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+# Copyright (C) 2003-2026  Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
 #
 # This file is distributed under GNU GPL v1 or, at your option, any later version.
 #
@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-25 15:44+0100\n"
+"POT-Creation-Date: 2026-01-11 16:32+0100\n"
 "PO-Revision-Date: 2025-12-25 15:42+0100\n"
 "Last-Translator: Tobias Diedrich <ranma+gbsplay@tdiedrich.de>\n"
 "Language-Team: none\n"
@@ -309,8 +309,8 @@ msgid "Unknown option %s at %s line %ld.\n"
 msgstr "Unknown option %s at %s line %ld.\n"
 
 #, c-format
-msgid "Unknown placeholder %%%c was not expanded.\n"
-msgstr "Unknown placeholder %%%c was not expanded.\n"
+msgid "Unknown placeholder %%%c in filename pattern could not be expanded.\n"
+msgstr "Unknown placeholder %%%c in filename pattern could not be expanded.\n"
 
 #, c-format
 msgid "Unsupported DMG clock: %ldHz\n"
