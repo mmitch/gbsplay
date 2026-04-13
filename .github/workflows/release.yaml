@@ -38,7 +38,7 @@ jobs:
           ls -l "${archive_name}" || exit 1
           echo "archive_name=${archive_name}" >> "$GITHUB_ENV"
       - name: append .tar.gz to release page
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: ${{ env.archive_name }}
       - name: upload tar.gz artifact for next job
@@ -131,6 +131,6 @@ jobs:
         cd ..
         echo "zipfile_name=$zipfile" >> "$GITHUB_ENV"
     - name: append .zip to release page
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
         files: ${{ env.zipfile_name }}
