@@ -1,5 +1,5 @@
 # This workflow will build and test gbsplay in various configurations on FreeBSD.
-
+---
 name: FreeBSD Build
 
 on:
@@ -10,24 +10,23 @@ on:
     - cron: '13 4 5 * *'
 
 jobs:
-  build-windows:
+  build-freebsd:
     name: Build and test on FreeBSD
 
     runs-on: ${{ matrix.os.host }}
 
+    defaults:
+      run:
+        shell: cpa.sh {0}
+
     strategy:
       matrix:
         os:
-#          - name: freebsd
-#            architecture: x86-64
-#            version: '13.2'
-#            host: macos-12
           - name: freebsd
             architecture: arm64
             version: '13.2'
             host: ubuntu-latest
         flags: ['']
-#        flags: ['', '--enable-sharedlibgbs']
 
     steps:
       - uses: actions/checkout@v7
