@@ -31,7 +31,7 @@ The gbsplay package contains the following parts:
 ## License
 
 ```
-(C) 2003-2025 by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+(C) 2003-2026 by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
                  Christian Garbs <mitch@cgarbs.de>
                  Maximilian Rehkopf <otakon@gmx.net>
                  Vegard Nossum <vegardno@ifi.uio.no>
