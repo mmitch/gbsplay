@@ -75,6 +75,7 @@ static void mapper_map(struct bank *b, uint8_t *data, size_t size, long bank)
 		WARN_ONCE("Bank %ld out of range (0-%ld)!\n", bank, (long)max_banks - 1);
 		b->data = NULL;
 		b->size = 0;
+		return;
 	}
 	ofs = bank * b->banksize;
 	b->data = data + ofs;
