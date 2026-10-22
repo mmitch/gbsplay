@@ -733,7 +733,7 @@ const uint8_t *gbs_get_bootrom(void)
 	return bootrom;
 }
 
-static struct gbs *gb_open(const char* const name, char *buf, size_t size)
+static struct gbs *gb_open(const char* const name, char *buf, size_t size, int recursion)
 {
 	long i;
 	struct gbs* gbs = gbs_new(buf);
@@ -789,7 +789,7 @@ static struct gbs *gb_open(const char* const name, char *buf, size_t size)
 	return gbs;
 }
 
-static struct gbs *gbr_open(const char* const name, char *buf, size_t size)
+static struct gbs *gbr_open(const char* const name, char *buf, size_t size, int recursion)
 {
 	long i;
 	struct gbs* gbs = gbs_new(buf);
@@ -945,7 +945,7 @@ static void gd3_parse(struct gbs **gbs, const char* const gd3, long gd3_len)
 	}
 }
 
-static struct gbs *vgm_open(const char* const name, char* const buf, size_t size)
+static struct gbs *vgm_open(const char* const name, char* const buf, size_t size, int recursion)
 {
 	struct gbs* gbs = gbs_new(buf);
 	char *na_str = _("vgm / not available");
@@ -1188,7 +1188,7 @@ static struct gbs *vgm_open(const char* const name, char* const buf, size_t size
 	return gbs;
 }
 
-static struct gbs* gbs_open_internal(const char* const name, char* const buf, size_t size)
+static struct gbs* gbs_open_internal(const char* const name, char* const buf, size_t size, int recursion)
 {
 	struct gbs* const gbs = gbs_new(buf);
 	long i;
@@ -1300,15 +1300,20 @@ static struct gbs* gbs_open_internal(const char* const name, char* const buf, si
 	return gbs;
 }
 
-static struct gbs* gbs_open_mem(const char* const name, char* const buf, size_t size);
+static struct gbs* gbs_open_mem(const char* const name, char* const buf, size_t size, int recursion);
 
 #ifdef USE_ZLIB
-static struct gbs *gzip_open(const char* const name, char* const buf, size_t size)
+static struct gbs *gzip_open(const char* const name, char* const buf, size_t size, int recursion)
 {
 	struct gbs* gbs = NULL;
 	int ret;
 	char *out = malloc(GB_MAX_ROM_SIZE);
 	z_stream strm;
+
+	if (recursion) {
+		fprintf(stderr, _("Could not open %s: gzip recursion not allowed\n"), name);
+		goto exit_free;
+	}
 
 	strm.zalloc = Z_NULL;
 	strm.zfree = Z_NULL;
@@ -1331,7 +1336,7 @@ static struct gbs *gzip_open(const char* const name, char* const buf, size_t siz
 		goto exit_free;
 	}
 	inflateEnd(&strm);
-	gbs = gbs_open_mem(name, out, GB_MAX_ROM_SIZE - strm.avail_out);
+	gbs = gbs_open_mem(name, out, GB_MAX_ROM_SIZE - strm.avail_out, recursion + 1);
 
 exit_free:
 	if (gbs == NULL || gbs->buf != out) {
@@ -1340,29 +1345,29 @@ exit_free:
 	return gbs;
 }
 #else
-static struct gbs *gzip_open(const char* const name, char* const buf, size_t size)
+static struct gbs *gzip_open(const char* const name, char* const buf, size_t size, int recursion)
 {
 	fprintf(stderr, _("Could not open %s: %s\n"), name, _("Not compiled with zlib support"));
 	return NULL;
 }
 #endif
 
-static struct gbs* gbs_open_mem(const char* const name, char* const buf, size_t size)
+static struct gbs* gbs_open_mem(const char* const name, char* const buf, size_t size, int recursion)
 {
 	if (size > HDR_LEN_GZIP && strncmp(buf, GZIP_MAGIC, 3) == 0) {
-		return gzip_open(name, buf, size);
+		return gzip_open(name, buf, size, recursion);
 	}
 	if (size > HDR_LEN_GBR && strncmp(buf, GBR_MAGIC, 4) == 0) {
-		return gbr_open(name, buf, size);
+		return gbr_open(name, buf, size, recursion);
 	}
 	if (size > HDR_LEN_VGM && strncmp(buf, VGM_MAGIC, 4) == 0) {
-		return vgm_open(name, buf, size);
+		return vgm_open(name, buf, size, recursion);
 	}
 	if (size > HDR_LEN_GBS && strncmp(buf, GBS_MAGIC, 3) == 0) {
-		return gbs_open_internal(name, buf, size);
+		return gbs_open_internal(name, buf, size, recursion);
 	}
 	if (size > HDR_LEN_GB && gbs_crc32(0, &buf[0x104], 48) == 0x46195417) {
-		return gb_open(name, buf, size);
+		return gb_open(name, buf, size, recursion);
 	}
 	fprintf(stderr, _("Not a GBS-File: %s\n"), name);
 	return NULL;
@@ -1393,7 +1398,7 @@ struct gbs* gbs_open(const char* const name)
 		goto exit_free;
 	}
 
-	gbs = gbs_open_mem(name, buf, st.st_size);
+	gbs = gbs_open_mem(name, buf, st.st_size, 0);
 	if (gbs != NULL) {
 		gbs->status.songs = gbs->songs;
 		gbs->status.defaultsong = gbs->defaultsong;
