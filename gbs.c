@@ -787,6 +787,12 @@ static struct gbs *gbr_open(const char* const name, char *buf, size_t size)
 	uint16_t vsync_addr;
 	uint16_t timer_addr;
 
+	if (size < 1024) {
+		fprintf(stderr, _("Truncated GBR, must be >=1KiB: %ldKiB\n"), (long)(size / 1024));
+		gbs_free(gbs);
+		return NULL;
+	}
+
 	if (strncmp(buf, GBR_MAGIC, 4) != 0) {
 		fprintf(stderr, _("Not a GBR-File: %s\n"), name);
 		gbs_free(gbs);
@@ -947,6 +953,12 @@ static struct gbs *vgm_open(const char* const name, char* const buf, size_t size
 	long code_used;
 	long addr;
 	long jpaddr;
+
+	if (size < 0x100) {
+		fprintf(stderr, _("Truncated VGM, must be >= 256 Bytes: %ld\n"), (long)size);
+		gbs_free(gbs);
+		return NULL;
+	}
 
 	if (strncmp(buf, VGM_MAGIC, 4) != 0) {
 		fprintf(stderr, _("Not a VGM-File: %s\n"), name);
