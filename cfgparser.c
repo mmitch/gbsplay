@@ -487,7 +487,6 @@ test void restore_initial_cfg() {
 
 test void write_test_gbsplayrc_n(unsigned int n, ...) {
 	FILE *fh;
-	unsigned int i;
 	va_list lines;
 
 	fh = fopen(TEST_GBSPLAYRC, "w");

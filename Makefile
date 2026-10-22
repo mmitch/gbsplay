@@ -76,6 +76,8 @@ DISTDIR := gbsplay-$(VERSION)
 
 GBSCFLAGS  := -D_XOPEN_SOURCE=500 -D_POSIX_C_SOURCE=200809L $(EXTRA_CFLAGS)
 GBSLDFLAGS := $(EXTRA_LDFLAGS)
+HOSTCFLAGS  := -D_XOPEN_SOURCE=500 -D_POSIX_C_SOURCE=200809L -Wall $(EXTRA_HOSTCFLAGS)
+HOSTLDFLAGS := $(EXTRA_HOSTLDFLAGS)
 comma := ,
 GBSLIBLDFLAGS := -lm $(subst -pie,,$(subst -Wl$(comma)-pie,,$(EXTRA_LDFLAGS)))
 # Additional ldflags for the gbsplay executable
@@ -569,7 +571,7 @@ test: gbsplay $(tests) test_gbs
 	$(Q)rm gbsplay-1.mid
 
 $(gen_impulse_h_bin): $(objs_gen_impulse_h)
-	$(HOSTCC) -o $(gen_impulse_h_bin) $(objs_gen_impulse_h) $(GBSLDFLAGS) -lm
+	$(HOSTCC) -o $(gen_impulse_h_bin) $(objs_gen_impulse_h) $(HOSTLDFLAGS) -lm
 impulse.h: $(gen_impulse_h_bin)
 	$(Q)./$(gen_impulse_h_bin) > $@
 gbhw.d: impulse.h
@@ -602,7 +604,7 @@ xgbsplay: $(objs_xgbsplay) libgbs
 	$(Q)$(BUILDCC) $(GBSCFLAGS) -fpie -c -o $@ $<
 .c.ho:
 	@echo HOSTCC $< -o $@
-	$(Q)$(HOSTCC) $(GBSCFLAGS) -fpie -c -o $@ $<
+	$(Q)$(HOSTCC) $(HOSTCFLAGS) -fpie -c -o $@ $<
 
 .c.i:
 	$(BUILDCC) -E $(GBSCFLAGS) -o $@ $<
@@ -616,7 +618,7 @@ config.mk: configure
 
 %.test: %.c
 	@echo TEST $<
-	$(Q)$(HOSTCC) -DENABLE_TEST=1 -o $@$(binsuffix) $< -lm
+	$(Q)$(HOSTCC) $(HOSTCFLAGS) -DENABLE_TEST=1 -o $@$(binsuffix) $< $(HOSTLDFLAGS) -lm
 	$(Q)./$@$(binsuffix)
 	$(Q)rm ./$@$(binsuffix)
 
