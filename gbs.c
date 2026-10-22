@@ -924,7 +924,7 @@ static void gd3_parse(struct gbs **gbs, const char* const gd3, long gd3_len)
 	}
 	*gbs = realloc(*gbs, sizeof(struct gbs) + gd3_len);
 	s = buf = (char *)&(*gbs)[1];
-	while (ofs < gd3_len) {
+	while (ofs + 1 < gd3_len) {
 		uint16_t val = le16(&gd3[ofs]);
 		if (val == 0) {
 			*(buf++) = 0;
