@@ -732,6 +732,12 @@ static struct gbs *gb_open(const char* const name, char *buf, size_t size)
 
 	UNUSED(name);
 
+	if (size < 0x8000) {
+		fprintf(stderr, _("Truncated ROM, must be >=32KiB: %ldKiB\n"), (long)(size / 1024));
+		gbs_free(gbs);
+		return NULL;
+	}
+
 	/* Test if this looks like a valid rom header title */
 	for (i=0x0134; i<0x0143; i++) {
 		if (!(isalnum(buf[i]) || isspace(buf[i])))
