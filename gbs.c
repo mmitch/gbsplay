@@ -940,13 +940,12 @@ static struct gbs *vgm_open(const char* const name, char* const buf, size_t size
 	struct gbs* gbs = gbs_new(buf);
 	char *na_str = _("vgm / not available");
 	char *gd3 = NULL;
-	char *data;
+	char *data, *data_end;
 	long dmg_clock;
-	uint32_t eof_ofs;
-	long gd3_ofs;
-	long gd3_len;
-	long data_ofs;
-	long data_len;
+	size_t eof_ofs;
+	size_t gd3_ofs;
+	size_t gd3_len;
+	size_t data_ofs;
 	long vgm_parsed = false;
 	long total_wait;
 	long total_clocks;
@@ -954,7 +953,7 @@ static struct gbs *vgm_open(const char* const name, char* const buf, size_t size
 	long addr;
 	long jpaddr;
 
-	if (size < 0x100) {
+	if (size < HDR_LEN_VGM) {
 		fprintf(stderr, _("Truncated VGM, must be >= 256 Bytes: %ld\n"), (long)size);
 		gbs_free(gbs);
 		return NULL;
@@ -976,30 +975,30 @@ static struct gbs *vgm_open(const char* const name, char* const buf, size_t size
 		gbs_free(gbs);
 		return NULL;
 	}
-	eof_ofs = le32(&buf[0x4]) + 0x4;
-	if (eof_ofs > size) {
-		fprintf(stderr, _("Bad file size in header: %ld\n"), eof_ofs);
+	eof_ofs = (size_t)le32(&buf[0x4]) + 0x4;
+	if (eof_ofs < HDR_LEN_VGM || eof_ofs > size) {
+		fprintf(stderr, _("Bad file size in header: %ld\n"), (long)eof_ofs);
 		gbs_free(gbs);
 		return NULL;
 	}
-	gd3_ofs = le32(&buf[0x14]) + 0x14;
+	gd3_ofs = (size_t)le32(&buf[0x14]) + 0x14;
 	if (gd3_ofs == 0x14) {
 		gd3_ofs = eof_ofs;
 		gd3_len = 0;
 	} else {
 		gd3_len = eof_ofs - gd3_ofs;
 		gd3 = &buf[gd3_ofs];
-		if (gd3_len < 4 || strncmp(gd3, GD3_MAGIC, 4) != 0) {
-			fprintf(stderr, _("Bad GD3 offset: %08lx\n"), gd3_ofs);
+		if (gd3_ofs > eof_ofs || gd3_len < 4 || strncmp(gd3, GD3_MAGIC, 4) != 0) {
+			fprintf(stderr, _("Bad GD3 offset: %08lx\n"), (long)gd3_ofs);
 			gbs_free(gbs);
 			return NULL;
 		}
 	}
-	data_ofs = le32(&buf[0x34]) + 0x34;
-	data_len = gd3_ofs - data_ofs;
+	data_ofs = (size_t)le32(&buf[0x34]) + 0x34;
 	data = &buf[data_ofs];
-	if (data_len < 0) {
-		fprintf(stderr, _("Bad data length: %ld\n"), data_len);
+	data_end = &buf[gd3_ofs];
+	if (data >= data_end) {
+		fprintf(stderr, _("Bad data offset: %ld\n"), (long)data_ofs);
 		gbs_free(gbs);
 		return NULL;
 	}
@@ -1010,13 +1009,17 @@ static struct gbs *vgm_open(const char* const name, char* const buf, size_t size
 	code_used = 0;
 
 	total_wait = total_clocks = 0;
-	while (!vgm_parsed) {
+	while (!vgm_parsed && data < data_end) {
 		switch ((uint8_t)*data) {
 		default:
 			fprintf(stderr, _("Unsupported VGM opcode: 0x%02x\n"), *data);
 			gbs_free(gbs);
 			return NULL;
 		case 0x61:  /* Wait n samples */
+			if (data_end - data < 3) {
+				data = data_end;
+				continue;
+			}
 			total_wait += le16(&data[1]);
 			data += 2;
 			break;
@@ -1049,6 +1052,10 @@ static struct gbs *vgm_open(const char* const name, char* const buf, size_t size
 			total_wait += (*data & 0xf) + 1;
 			break;
 		case 0xb3:  /* DMG write */
+			if (data_end - data < 3) {
+				data = data_end;
+				continue;
+			}
 			{
 				long delay = (total_wait * 41943L / 441L) - total_clocks;
 				long units = (delay + 31) / 64;
@@ -1075,6 +1082,12 @@ static struct gbs *vgm_open(const char* const name, char* const buf, size_t size
 		}
 		data++;
 	}
+	if (!vgm_parsed) {
+		fprintf(stderr, _("EOF before reaching end of data tag\n"));
+		gbs_free(gbs);
+		return NULL;
+	}
+
 	/* RST 0x38 */
 	emit(gbs, &code_used, 0xff, 1);
 
