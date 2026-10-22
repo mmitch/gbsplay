@@ -497,13 +497,19 @@ void gbs_print_info(const struct gbs* const gbs, long verbose)
 
 static void update_status_on_subsong_change(struct gbs* const gbs) {
 	struct gbs_status *status = &gbs->status;
+	int subsong = gbs->subsong;
+	if (subsong >= 0 && subsong < gbs->songs) {
+		status->songtitle = gbs->subsong_info[gbs->subsong].title;
+		status->subsong_len = gbs->subsong_info[gbs->subsong].len;
+	} else {
+		status->songtitle = NULL;
+		status->subsong_len = 0;
+	}
 
-	status->songtitle = gbs->subsong_info[gbs->subsong].title;
 	if (!status->songtitle) {
 		status->songtitle = _("Untitled");
 	}
 	status->subsong = gbs->subsong;
-	status->subsong_len = gbs->subsong_info[gbs->subsong].len;
 	if (status->subsong_len == 0 && gbs->status.loop_mode != LOOP_SINGLE) {
 		status->subsong_len = gbs->subsong_timeout * 1024;
 	}
