@@ -569,7 +569,7 @@ test: gbsplay $(tests) test_gbs
 	$(Q)rm gbsplay-1.mid
 
 $(gen_impulse_h_bin): $(objs_gen_impulse_h)
-	$(HOSTCC) -o $(gen_impulse_h_bin) $(objs_gen_impulse_h) -lm
+	$(HOSTCC) -o $(gen_impulse_h_bin) $(objs_gen_impulse_h) $(GBSLDFLAGS) -lm
 impulse.h: $(gen_impulse_h_bin)
 	$(Q)./$(gen_impulse_h_bin) > $@
 gbhw.d: impulse.h
