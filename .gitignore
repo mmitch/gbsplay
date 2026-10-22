@@ -29,5 +29,6 @@ impulse.h
 apidoc/
 libgbs.pc
 libgbs.so.*
+sanitize-error.log
 *#
 .#*
