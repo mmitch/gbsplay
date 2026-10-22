@@ -1093,7 +1093,7 @@ static struct gbs *vgm_open(const char* const name, char* const buf, size_t size
 		data++;
 	}
 	if (!vgm_parsed) {
-		fprintf(stderr, _("EOF before reaching end of data tag\n"));
+		fputs(_("EOF before reaching end of data tag"), stderr);
 		gbs_free(gbs);
 		return NULL;
 	}
