@@ -69,13 +69,14 @@ static struct mapper *mapper_new(const uint8_t *rom, size_t rom_size, size_t ram
 
 static void mapper_map(struct bank *b, uint8_t *data, size_t size, long bank)
 {
-	size_t ofs = bank * b->banksize;
-	size_t len = size - ofs;
-	if (len <= 0) {
-		WARN_ONCE("Bank %ld out of range (0-%ld)!\n", bank, size / b->banksize);
+	size_t ofs = 0;
+	size_t max_banks = size / b->banksize;
+	if (bank < 0 || (size_t)bank >= max_banks) {
+		WARN_ONCE("Bank %ld out of range (0-%ld)!\n", bank, (long)max_banks - 1);
 		b->data = NULL;
 		b->size = 0;
 	}
+	ofs = bank * b->banksize;
 	b->data = data + ofs;
 	b->size = size - ofs;
 }
@@ -96,7 +97,7 @@ static uint32_t bank_get(void *priv, uint32_t addr)
 {
 	struct bank *b = priv;
 	uint32_t maddr = addr & b->mask;
-	if (maddr > b->size || b->enable == 0) {
+	if (maddr >= b->size || b->enable == 0) {
 		return 0xff;
 	}
 	return b->data[maddr];
@@ -106,7 +107,7 @@ static void bank_put(void *priv, uint32_t addr, uint8_t val)
 {
 	struct bank *b = priv;
 	uint32_t maddr = addr & b->mask;
-	if (maddr > b->size || b->enable == 0) {
+	if (maddr >= b->size || b->enable == 0) {
 		return;
 	}
 	b->data[maddr] = val;
@@ -187,7 +188,7 @@ struct mapper *mapper_gbs(struct gbcpu *gbcpu, const uint8_t *rom, size_t size) 
 	struct mapper *m = mapper_new(rom, size, MAPPER_RAMBANK_SIZE);
 	m->extram.enable = 1;
 	mapper_map_rom(&m->rom_lower, 0);
-	mapper_map_rom(&m->rom_upper, 1);
+	mapper_map_rom(&m->rom_upper, size > MAPPER_ROMBANK_SIZE);
 	mapper_map_ram(&m->extram, 0);
 	gbcpu_add_mem(gbcpu, 0x00, 0x3f, gbs_rom_put, bank_get, &m->rom_lower);
 	gbcpu_add_mem(gbcpu, 0x40, 0x7f, gbs_rom_put, bank_get, &m->rom_upper);
@@ -239,7 +240,7 @@ struct mapper *mapper_gb(struct gbcpu *gbcpu, const uint8_t *rom, size_t size, u
 	m = mapper_new(rom, size, ram_size);
 
 	mapper_map_rom(&m->rom_lower, 0);
-	mapper_map_rom(&m->rom_upper, 1);
+	mapper_map_rom(&m->rom_upper, size > MAPPER_ROMBANK_SIZE);
 	gbcpu_add_mem(gbcpu, 0x00, 0x3f, rom_put, bank_get, &m->rom_lower);
 	gbcpu_add_mem(gbcpu, 0x40, 0x7f, rom_put, bank_get, &m->rom_upper);
 
