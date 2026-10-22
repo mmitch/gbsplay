@@ -32,17 +32,21 @@ struct cfg_option {
 
 /* default values */
 
+static const char default_filter_type[] = CFG_FILTER_DMG;
+static const char default_output_filename[] = "gbsplay-%s.%e";
+static const char default_sound_name[] = PLUGOUT_DEFAULT;
+
 struct player_cfg cfg = {
 	.fadeout = 3,
-	.filter_type = CFG_FILTER_DMG,
+	.filter_type = default_filter_type,
 	.loop_mode = LOOP_OFF,
-	.output_filename = "gbsplay-%s.%e",
+	.output_filename = default_output_filename,
 	.play_mode = PLAY_MODE_LINEAR,
 	.refresh_delay = 33, // ms
 	.requested_endian = PLUGOUT_ENDIAN_AUTOSELECT,
 	.requested_rate = 44100,
 	.silence_timeout = 2,
-	.sound_name = PLUGOUT_DEFAULT,
+	.sound_name = default_sound_name,
 	.subsong_gap = 2,
 	.subsong_timeout = 2*60,
 	.verbosity = 3,
@@ -168,7 +172,7 @@ static void err_expect(const char* const s)
 
 static void cfg_endian(void* const ptr)
 {
-	char *s;
+	char *s = NULL;
 	enum plugout_endian *endian = ptr;
 	const struct endian_map *entry;
 
@@ -181,17 +185,19 @@ static void cfg_endian(void* const ptr)
 	for (entry = endian_map; entry->keyword; entry++) {
 		if (strncmp(s, entry->keyword, sizeof(s)-1) == 0) {
 			*endian = entry->endian;
-			return;
+			goto exit_free;
 		}
 	}
 
 	fprintf(stderr, _("'%s' is no valid endian at %s line %ld char %ld.\n"),
 		s, filename, cfg_line_orig, cfg_char_orig);
+exit_free:
+	free(s);
 }
 
 static void cfg_loop_mode(void* const ptr)
 {
-	char *s;
+	char *s = NULL;
 	enum gbs_loop_mode *loop_mode = ptr;
 	const struct loop_mode_map *entry;
 
@@ -204,17 +210,19 @@ static void cfg_loop_mode(void* const ptr)
 	for (entry = loop_mode_map; entry->keyword; entry++) {
 		if (strncmp(s, entry->keyword, sizeof(s)-1) == 0) {
 			*loop_mode = entry->loop_mode;
-			return;
+			goto exit_free;
 		}
 	}
 
 	fprintf(stderr, _("'%s' is no valid loop mode at %s line %ld char %ld.\n"),
 		s, filename, cfg_line_orig, cfg_char_orig);
+exit_free:
+	free(s);
 }
 
 static void cfg_play_mode(void* const ptr)
 {
-	char *s;
+	char *s = NULL;
 	enum play_mode *play_mode = ptr;
 	const struct play_mode_map *entry;
 
@@ -227,12 +235,25 @@ static void cfg_play_mode(void* const ptr)
 	for (entry = play_mode_map; entry->keyword; entry++) {
 		if (strncmp(s, entry->keyword, sizeof(s)-1) == 0) {
 			*play_mode = entry->play_mode;
-			return;
+			goto exit_free;
 		}
 	}
 
 	fprintf(stderr, _("'%s' is no valid play mode at %s line %ld char %ld.\n"),
 		s, filename, cfg_line_orig, cfg_char_orig);
+exit_free:
+	free(s);
+}
+
+void cfg_set_string(void* const ptr, const char *value)
+{
+	char *s = *((char**)ptr);
+	if (s != default_output_filename &&
+	    s != default_filter_type &&
+	    s != default_sound_name) {
+		free(s);
+	}
+	*((char**)ptr) = strdup(value);
 }
 
 static void cfg_string(void* const ptr)
@@ -251,7 +272,7 @@ static void cfg_string(void* const ptr)
 	         n < (sizeof(s)-1));
 	s[n] = 0;
 
-	*((char**)ptr) = strdup(s);
+	cfg_set_string(ptr, s);
 
 	state = 0;
 	nextstate = 1;
@@ -269,7 +290,7 @@ static void cfg_string_until_newline(void* const ptr)
 	         n < (sizeof(s)-1));
 	s[n] = 0;
 
-	*((char**)ptr) = strdup(s);
+	cfg_set_string(ptr, s);
 
 	state = 0;
 	nextstate = 1;
@@ -390,6 +411,16 @@ void cfg_parse(const char* const fname)
 	(void)fclose(cfg_file);
 }
 
+void cfg_cleanup(void)
+{
+	cfg_set_string(&cfg.filter_type, "");
+	free((void*)cfg.filter_type);
+	cfg_set_string(&cfg.output_filename, "");
+	free((void*)cfg.output_filename);
+	cfg_set_string(&cfg.sound_name, "");
+	free((void*)cfg.sound_name);
+}
+
 char* get_userconfig(const char* const cfgfile)
 {
 	char *homedir, *usercfg;
@@ -441,17 +472,17 @@ struct player_cfg initial_cfg;
 
 test void save_initial_cfg() {
 	initial_cfg = cfg;
-	initial_cfg.filter_type     = strdup(cfg.filter_type);
-	initial_cfg.output_filename = strdup(cfg.output_filename);
-	initial_cfg.sound_name      = strdup(cfg.sound_name);
+	initial_cfg.filter_type     = default_filter_type;
+	initial_cfg.output_filename = default_output_filename;
+	initial_cfg.sound_name      = default_sound_name;
 };
 TEST(save_initial_cfg);
 
 test void restore_initial_cfg() {
 	cfg = initial_cfg;
-	cfg.filter_type     = strdup(initial_cfg.filter_type);
-	cfg.output_filename = strdup(initial_cfg.output_filename);
-	cfg.sound_name      = strdup(initial_cfg.sound_name);
+	cfg_set_string(&cfg.filter_type,     initial_cfg.filter_type);
+	cfg_set_string(&cfg.output_filename, initial_cfg.output_filename);
+	cfg_set_string(&cfg.sound_name,      initial_cfg.sound_name);
 };
 
 test void write_test_gbsplayrc_n(unsigned int n, ...) {

@@ -30,13 +30,13 @@ enum plugout_endian {
 
 struct player_cfg {
 	long fadeout;
-	char *filter_type;
+	const char *filter_type;
 	enum gbs_loop_mode loop_mode;
-	char *output_filename;
+	const char *output_filename;
 	enum play_mode play_mode;
 	long refresh_delay;
 	long silence_timeout;
-	char *sound_name;
+	const char *sound_name;
 	long subsong_gap;
 	long subsong_timeout;
 	long verbosity;

@@ -440,7 +440,7 @@ static void parseopts(int *argc, char ***argv)
 			usage(0);
 			break;
 		case 'H':
-			cfg.filter_type = optarg;
+			cfg_set_string(&cfg.filter_type, optarg);
 			break;
 		case 'l':
 			cfg.loop_mode = LOOP_RANGE;
@@ -449,10 +449,10 @@ static void parseopts(int *argc, char ***argv)
 			cfg.loop_mode = LOOP_SINGLE;
 			break;
 		case 'o':
-			cfg.sound_name = optarg;
+			cfg_set_string(&cfg.sound_name, optarg);
 			break;
 		case 'O':
-			cfg.output_filename = optarg;
+			cfg_set_string(&cfg.output_filename, optarg);
 			break;
 		case 'q':
 			cfg.verbosity -= 1;
@@ -645,4 +645,5 @@ void common_cleanup(struct gbs *gbs)
 	sound_close();
 	free(buf.data);
 	gbs_close(gbs);
+	cfg_cleanup();
 }

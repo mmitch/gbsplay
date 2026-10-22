@@ -12,5 +12,7 @@
 
 void  cfg_parse(const char* const fname);
 char* get_userconfig(const char* const cfgfile);
+void  cfg_set_string(void* const ptr, const char *value);
+void  cfg_cleanup(void);
 
 #endif
