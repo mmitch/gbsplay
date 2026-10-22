@@ -1,0 +1,8 @@
+This are bad files that try to trigger some bugs.
+The CI pipeline will run them through gbsplay and
+make sure that the bugs stay fixed.
+
+poc_bank.gbr: out-of-range bank not rejected (see issue #201)
+poc_title.gbr: title field read past end of file (see issue #201)
+poc_vgm.vgm: missing end bound in VGM loader (see issue #201)
+

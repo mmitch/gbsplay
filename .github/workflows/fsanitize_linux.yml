@@ -1,0 +1,35 @@
+# This workflow will build and test gbsplay with address sanitization on Linux.
+
+name: Address Sanitizer
+
+on:
+  push:
+  pull_request:
+    types: [opened]
+  schedule:
+    - cron: '23 4 5 * *'
+
+jobs:
+  fsanitize-linux:
+    name: Run address sanitizing test on Linux
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        compiler: ['gcc', 'clang']
+        # TODO: --enable-sharedlibgbs does not work, needs fix with library path
+        # --with-xgbsplay makes no sense unless we start an X server and use it for testing
+        flags: ['']
+
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build and run test
+        env:
+          CC: ${{ matrix.compiler }}
+        run: |
+          ./check_fsanitize.sh ${{ matrix.flags }}
+      - name: Dump configure on error
+        if: ${{ failure() }}
+        run: |
+          bash -x -v configure && cat config.err
