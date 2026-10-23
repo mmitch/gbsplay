@@ -742,11 +742,7 @@ static struct gbs *gb_open(const char* const name, char *buf, size_t size, int r
 
 	UNUSED(name);
 
-	if (size < 0x8000) {
-		fprintf(stderr, _("Truncated ROM, must be >=32KiB: %ldKiB\n"), (long)(size / 1024));
-		gbs_free(gbs);
-		return NULL;
-	}
+	// Note: Minimum size and header is checked in gbs_open_mem.
 
 	/* Test if this looks like a valid rom header title */
 	for (i=0x0134; i<0x0143; i++) {
@@ -797,17 +793,8 @@ static struct gbs *gbr_open(const char* const name, char *buf, size_t size, int 
 	uint16_t vsync_addr;
 	uint16_t timer_addr;
 
-	if (size < 1024) {
-		fprintf(stderr, _("Truncated GBR, must be >=1KiB: %ldKiB\n"), (long)(size / 1024));
-		gbs_free(gbs);
-		return NULL;
-	}
+	// Note: Minimum size and header is checked in gbs_open_mem.
 
-	if (strncmp(buf, GBR_MAGIC, 4) != 0) {
-		fprintf(stderr, _("Not a GBR-File: %s\n"), name);
-		gbs_free(gbs);
-		return NULL;
-	}
 	if (buf[0x07] < 1 || buf[0x07] > 3) {
 		fprintf(stderr, _("Unsupported timerflag value: %d\n"), buf[0x07]);
 		gbs_free(gbs);
@@ -963,17 +950,8 @@ static struct gbs *vgm_open(const char* const name, char* const buf, size_t size
 	long addr;
 	long jpaddr;
 
-	if (size < HDR_LEN_VGM) {
-		fprintf(stderr, _("Truncated VGM, must be >= 256 Bytes: %ld\n"), (long)size);
-		gbs_free(gbs);
-		return NULL;
-	}
+	// Note: Minimum size and header is checked in gbs_open_mem.
 
-	if (strncmp(buf, VGM_MAGIC, 4) != 0) {
-		fprintf(stderr, _("Not a VGM-File: %s\n"), name);
-		gbs_free(gbs);
-		return NULL;
-	}
 	if (buf[0x09] != 1 || buf[0x08] < 0x61) {
 		fprintf(stderr, _("Unsupported VGM version: %d.%02x\n"), buf[0x09], buf[0x08]);
 		gbs_free(gbs);
@@ -1309,6 +1287,8 @@ static struct gbs *gzip_open(const char* const name, char* const buf, size_t siz
 	int ret;
 	char *out = malloc(GB_MAX_ROM_SIZE);
 	z_stream strm;
+
+	// Note: Minimum size and header is checked in gbr_open_mem.
 
 	if (recursion) {
 		fprintf(stderr, _("Could not open %s: gzip recursion not allowed\n"), name);
