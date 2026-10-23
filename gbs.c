@@ -76,6 +76,7 @@ struct gbs {
 	char *copyright;
 	unsigned long codelen;
 	char *code;
+	int code_owned;
 	size_t filesize;
 	uint32_t crc;
 	uint32_t crcnow;
@@ -540,6 +541,8 @@ static void gbs_free(struct gbs* const gbs)
 		mapper_free(gbs->mapper);
 	if (gbs->buf && gbs->buf_owned)
 		free(gbs->buf);
+	if (gbs->code && gbs->code_owned)
+		free(gbs->code);
 	if (gbs->rom)
 		free(gbs->rom);
 	if (gbs->subsong_info)
@@ -994,6 +997,7 @@ static struct gbs *vgm_open(const char* const name, char* const buf, size_t size
 	gbs->filetype = FILETYPE_VGM;
 	gbs->codelen = 0x4000;
 	gbs->code = calloc(1, gbs->codelen);
+	gbs->code_owned = 1;
 	code_used = 0;
 
 	total_wait = total_clocks = 0;
