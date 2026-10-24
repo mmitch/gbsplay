@@ -30,7 +30,7 @@ is_contained_in()
 }
 
 # these don't have dependencies and should always be built
-declare -a expected_plugouts=( iodumper midi altmidi stdout vgm wav )
+declare -a expected_plugouts=( iodumper midi altmidi null stdout vgm wav )
 
 # additional plugouts are given as commandline parameters
 expected_plugouts+=( $* )

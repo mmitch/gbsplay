@@ -136,6 +136,9 @@ ifeq ($(plugout_nas),yes)
 plugout_objs += plugout_nas.o
 plugout_ldflags += -laudio $(libaudio_flags)
 endif
+ifeq ($(plugout_null),yes)
+plugout_objs += plugout_null.o
+endif
 ifeq ($(plugout_sdl),yes)
 plugout_objs += plugout_sdl.o
 plugout_ldflags += $(libSDL2_flags)

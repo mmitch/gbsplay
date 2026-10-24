@@ -2,6 +2,15 @@
 gbsplay HISTORY
 
 
+unreleased  -  0.0.104
+~~~~~~~~~~~~~~~~~~~~~~
+
+Enhancements:
+
+- gbsplay:
+  - add null plugout
+
+
 2026/10/18  -  0.0.103
 ~~~~~~~~~~~~~~~~~~~~~~
 

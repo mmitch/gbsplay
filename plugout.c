@@ -35,6 +35,9 @@ extern const struct output_plugin plugout_altmidi;
 #ifdef PLUGOUT_NAS
 extern const struct output_plugin plugout_nas;
 #endif
+#ifdef PLUGOUT_NULL
+extern const struct output_plugin plugout_null;
+#endif
 #ifdef PLUGOUT_PIPEWIRE
 extern const struct output_plugin plugout_pipewire;
 #endif
@@ -78,6 +81,9 @@ static output_plugin_const_t plugouts[] = {
 #endif
 #ifdef PLUGOUT_NAS
 	&plugout_nas,
+#endif
+#ifdef PLUGOUT_NULL
+	&plugout_null,
 #endif
 #ifdef PLUGOUT_MIDI
 	&plugout_midi,

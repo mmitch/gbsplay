@@ -566,6 +566,7 @@ Output Plugins:
   --disable-midi         omit MIDI file writer plugin
   --disable-altmidi      omit alternative MIDI file writer plugin
   --disable-nas          omit NAS sound output plugin
+  --disable-null         omit NULL soound output plugin
   --disable-pipewire     omit PipeWire sound output plugin
   --disable-pulse        omit PulseAudio sound output plugin
   --disable-sdl          omit SDL sound output plugin
@@ -590,6 +591,7 @@ OPTS="${OPTS} use_iodumper"
 OPTS="${OPTS} use_midi"
 OPTS="${OPTS} use_altmidi"
 OPTS="${OPTS} use_nas"
+OPTS="${OPTS} use_null"
 OPTS="${OPTS} use_pipewire"
 OPTS="${OPTS} use_pulse"
 OPTS="${OPTS} use_sdl"
@@ -1258,6 +1260,7 @@ setdefault use_debug no
 
 setdefault use_midi yes
 setdefault use_altmidi yes
+setdefault use_null yes
 setdefault use_stdout yes
 setdefault use_vgm yes
 setdefault use_wav yes
@@ -1340,6 +1343,7 @@ __EOF__
     echo plugout_midi := $use_midi
     echo plugout_altmidi := $use_altmidi
     echo plugout_nas := $use_nas
+    echo plugout_null := $use_null
     echo plugout_pipewire := $use_pipewire
     echo plugout_pulse := $use_pulse
     echo plugout_sdl := $use_sdl
@@ -1362,6 +1366,7 @@ __EOF__
     plugout_x MIDI
     plugout_x ALTMIDI
     plugout_x NAS
+    plugout_x NULL
     plugout_x PIPEWIRE
     plugout_x PULSE
     plugout_x STDOUT
