@@ -29,6 +29,8 @@ LDFLAGS="${LDFLAGS-}"
 HOSTCC="$CC"
 HOSTOS=$(uname)
 HOSTARCH=$(uname -m)
+HOST_CFLAGS="${HOST_CFLAGS-}"
+HOST_LDFLAGS="${HOST_LDFLAGS-}"
 BUILDCC="$HOSTCC"
 BUILDOS="$HOSTOS"
 BUILDARCH="$HOSTARCH"
@@ -477,6 +479,12 @@ parseoption()
     LDFLAGS=*)
         LDFLAGS="${1#LDFLAGS=}"
         ;;
+    HOST_CFLAGS=*)
+        HOST_CFLAGS="${1#HOST_CFLAGS=}"
+        ;;
+    HOST_LDFLAGS=*)
+        HOST_LDFLAGS="${1#HOST_LDFLAGS=}"
+        ;;
     --help)
         usage 0
         ;;
@@ -573,6 +581,12 @@ Output Plugins:
   --disable-stdout       omit stdout file writer plugin
   --disable-vgm          omit VGM file writer plugin
   --disable-wav          omit WAV file writer plugin
+
+Additional compiler/linker flags (can also be set as environment variables):
+  CFLAGS="..."           set additional compiler flags for target arch
+  LDFLAGS="..."          set additional linker flags for target arch
+  HOST_CFLAGS="..."      set additional compiler flags for build arch
+  HOST_LDFLAGS="..."     set additional linker flags for build arch
 EOF
     exit "$1"
 }
@@ -1281,6 +1295,10 @@ EXTRA_CFLAGS="$CFLAGS"
 EXTRA_LDFLAGS="$LDFLAGS"
 echo "EXTRA_CFLAGS=$EXTRA_CFLAGS"
 echo "EXTRA_LDFLAGS=$EXTRA_LDFLAGS"
+EXTRA_HOSTCFLAGS="$HOST_CFLAGS"
+EXTRA_HOSTLDFLAGS="$HOST_LDFLAGS"
+echo "EXTRA_HOSTCFLAGS=$EXTRA_HOSTCFLAGS"
+echo "EXTRA_HOSTLDFLAGS=$EXTRA_HOSTLDFLAGS"
 
 ## generate pkg-config configuration
 # can't be done in Makefile because $DESTDIR would show up in the paths
@@ -1302,6 +1320,8 @@ __EOF__
     done << __EOF__
 EXTRA_ALL
 EXTRA_CFLAGS
+EXTRA_HOSTCFLAGS
+EXTRA_HOSTLDFLAGS
 EXTRA_INSTALL
 EXTRA_LDFLAGS
 EXTRA_SRCS
