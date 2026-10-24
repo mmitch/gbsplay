@@ -1,7 +1,7 @@
 /*
  * gbsplay is a Gameboy sound player
  *
- * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2026 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -745,7 +745,11 @@ static struct gbs *gb_open(const char* const name, char *buf, size_t size, int r
 
 	UNUSED(name);
 
-	// Note: Minimum size and header is checked in gbs_open_mem.
+	if (size < 0x8000) {
+		fprintf(stderr, _("Truncated GB ROM, must be >=32KiB: %ldKiB\n"), (long)(size / 1024));
+		gbs_free(gbs);
+		return NULL;
+	}
 
 	/* Test if this looks like a valid rom header title */
 	for (i=0x0134; i<0x0143; i++) {
@@ -796,7 +800,11 @@ static struct gbs *gbr_open(const char* const name, char *buf, size_t size, int 
 	uint16_t vsync_addr;
 	uint16_t timer_addr;
 
-	// Note: Minimum size and header is checked in gbs_open_mem.
+	if (size < 1024) {
+		fprintf(stderr, _("Truncated GBR, must be >=1KiB: %ldKiB\n"), (long)(size / 1024));
+		gbs_free(gbs);
+		return NULL;
+	}
 
 	if (buf[0x07] < 1 || buf[0x07] > 3) {
 		fprintf(stderr, _("Unsupported timerflag value: %d\n"), buf[0x07]);
@@ -953,7 +961,11 @@ static struct gbs *vgm_open(const char* const name, char* const buf, size_t size
 	long addr;
 	long jpaddr;
 
-	// Note: Minimum size and header is checked in gbs_open_mem.
+	if (size < HDR_LEN_VGM) {
+		fprintf(stderr, _("Truncated VGM, must be >= %d Bytes: %ld\n"), HDR_LEN_VGM, (long)size);
+		gbs_free(gbs);
+		return NULL;
+	}
 
 	if (buf[0x09] != 1 || buf[0x08] < 0x61) {
 		fprintf(stderr, _("Unsupported VGM version: %d.%02x\n"), buf[0x09], buf[0x08]);
@@ -1290,14 +1302,12 @@ static struct gbs *gzip_open(const char* const name, char* const buf, size_t siz
 	struct gbs* gbs = NULL;
 	int ret;
 	char *out = malloc(GB_MAX_ROM_SIZE);
-	z_stream strm;
-
-	// Note: Minimum size and header is checked in gbr_open_mem.
+        z_stream strm;
 
 	if (recursion) {
 		fprintf(stderr, _("Could not open %s: gzip recursion not allowed\n"), name);
 		goto exit_free;
-	}
+        }
 
 	strm.zalloc = Z_NULL;
 	strm.zfree = Z_NULL;
@@ -1338,22 +1348,26 @@ static struct gbs *gzip_open(const char* const name, char* const buf, size_t siz
 
 static struct gbs* gbs_open_mem(const char* const name, char* const buf, size_t size, int recursion)
 {
-	if (size > HDR_LEN_GZIP && strncmp(buf, GZIP_MAGIC, 3) == 0) {
-		return gzip_open(name, buf, size, recursion);
+	if (size >= 3) {
+		if (strncmp(buf, GZIP_MAGIC, 3) == 0) {
+			return gzip_open(name, buf, size, recursion);
+		}
+		if (strncmp(buf, GBS_MAGIC, 3) == 0) {
+			return gbs_open_internal(name, buf, size, recursion);
+                }
 	}
-	if (size > HDR_LEN_GBR && strncmp(buf, GBR_MAGIC, 4) == 0) {
-		return gbr_open(name, buf, size, recursion);
-	}
-	if (size > HDR_LEN_VGM && strncmp(buf, VGM_MAGIC, 4) == 0) {
-		return vgm_open(name, buf, size, recursion);
-	}
-	if (size > HDR_LEN_GBS && strncmp(buf, GBS_MAGIC, 3) == 0) {
-		return gbs_open_internal(name, buf, size, recursion);
+	if (size >= 4) {
+		if (strncmp(buf, GBR_MAGIC, 4) == 0) {
+			return gbr_open(name, buf, size, recursion);
+		}
+		if (strncmp(buf, VGM_MAGIC, 4) == 0) {
+			return vgm_open(name, buf, size, recursion);
+                }
 	}
 	if (size > HDR_LEN_GB && gbs_crc32(0, &buf[0x104], 48) == 0x46195417) {
 		return gb_open(name, buf, size, recursion);
 	}
-	fprintf(stderr, _("Not a GBS-File: %s\n"), name);
+	fprintf(stderr, _("No supported file format detected: %s\n"), name);
 	return NULL;
 }
 
