@@ -3,7 +3,7 @@
  *
  * This file contains the player code common to both CLI and X11 frontends.
  *
- * 2003-2025 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
+ * 2003-2026 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
@@ -634,7 +634,7 @@ struct gbs *common_init(int argc, char **argv)
 	initial_subsong = setup_play_mode(gbs);
 	play_subsong(gbs, initial_subsong);
 	if (cfg.verbosity>0) {
-		gbs_internal_api.print_info(gbs, 0);
+		gbs_internal_api.print_info(gbs);
 	}
 
 	return gbs;

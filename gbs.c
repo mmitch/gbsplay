@@ -455,7 +455,7 @@ long gbs_step(struct gbs* const gbs, long time_to_work)
 	return true;
 }
 
-void gbs_print_info(const struct gbs* const gbs, long verbose)
+void gbs_print_info(const struct gbs* const gbs)
 {
 	printf(_("GBSVersion:       %u\n"
 	         "Title:            \"%s\"\n"
@@ -736,14 +736,12 @@ const uint8_t *gbs_get_bootrom(void)
 	return bootrom;
 }
 
-static struct gbs *gb_open(const char* const name, char *buf, size_t size, int recursion)
+static struct gbs *gb_open(char *buf, size_t size)
 {
 	long i;
 	struct gbs* gbs = gbs_new(buf);
 	char *na_str = _("gb / not available");
 	const uint8_t *bootrom = gbs_get_bootrom();
-
-	UNUSED(name);
 
 	if (size < 0x8000) {
 		fprintf(stderr, _("Truncated GB ROM, must be >=32KiB: %ldKiB\n"), (long)(size / 1024));
@@ -792,7 +790,7 @@ static struct gbs *gb_open(const char* const name, char *buf, size_t size, int r
 	return gbs;
 }
 
-static struct gbs *gbr_open(const char* const name, char *buf, size_t size, int recursion)
+static struct gbs *gbr_open(char *buf, size_t size)
 {
 	long i;
 	struct gbs* gbs = gbs_new(buf);
@@ -943,7 +941,7 @@ static void gd3_parse(struct gbs **gbs, const char* const gd3, long gd3_len)
 	}
 }
 
-static struct gbs *vgm_open(const char* const name, char* const buf, size_t size, int recursion)
+static struct gbs *vgm_open(char* const buf, size_t size)
 {
 	struct gbs* gbs = gbs_new(buf);
 	char *na_str = _("vgm / not available");
@@ -1182,12 +1180,10 @@ static struct gbs *vgm_open(const char* const name, char* const buf, size_t size
 	return gbs;
 }
 
-static struct gbs* gbs_open_internal(const char* const name, char* const buf, size_t size, int recursion)
+static struct gbs* gbs_open_internal(char* const buf, size_t size)
 {
 	struct gbs* const gbs = gbs_new(buf);
 	long i;
-
-	UNUSED(name);
 
 	gbs->version = buf[0x03];
 	if (gbs->version != 1) {
@@ -1353,19 +1349,19 @@ static struct gbs* gbs_open_mem(const char* const name, char* const buf, size_t 
 			return gzip_open(name, buf, size, recursion);
 		}
 		if (strncmp(buf, GBS_MAGIC, 3) == 0) {
-			return gbs_open_internal(name, buf, size, recursion);
+			return gbs_open_internal(buf, size);
                 }
 	}
 	if (size >= 4) {
 		if (strncmp(buf, GBR_MAGIC, 4) == 0) {
-			return gbr_open(name, buf, size, recursion);
+			return gbr_open(buf, size);
 		}
 		if (strncmp(buf, VGM_MAGIC, 4) == 0) {
-			return vgm_open(name, buf, size, recursion);
+			return vgm_open(buf, size);
                 }
 	}
 	if (size > HDR_LEN_GB && gbs_crc32(0, &buf[0x104], 48) == 0x46195417) {
-		return gb_open(name, buf, size, recursion);
+		return gb_open(buf, size);
 	}
 	fprintf(stderr, _("No supported file format detected: %s\n"), name);
 	return NULL;
