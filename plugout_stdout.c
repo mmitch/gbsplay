@@ -14,13 +14,13 @@
 #include "common.h"
 #include "plugout.h"
 
-int fd;
+int plugout_stdout_fd;
 
 static int set_fd_to_binmode(void)
 {
 	// skip this on POSIX, as there are no text and binary modes
 #ifdef HAVE_SETMODE
-	if (setmode(fd, O_BINARY) == -1)
+	if (setmode(plugout_stdout_fd, O_BINARY) == -1)
 		return -1;
 #endif
 	return 0;
@@ -37,8 +37,8 @@ static long stdout_open(struct plugout_cfg *actual, long *buffer_bytes,
 	 * clone and close STDOUT_FILENO
 	 * to make sure nobody else can write to stdout
 	 */
-	fd = dup(STDOUT_FILENO);
-	if (fd == -1) return -1;
+	plugout_stdout_fd = dup(STDOUT_FILENO);
+	if (plugout_stdout_fd == -1) return -1;
 	(void)close(STDOUT_FILENO);
 
 	if (set_fd_to_binmode() == -1)
@@ -49,12 +49,12 @@ static long stdout_open(struct plugout_cfg *actual, long *buffer_bytes,
 
 static ssize_t stdout_write(const void *buf, size_t count)
 {
-	return write(fd, buf, count);
+	return write(plugout_stdout_fd, buf, count);
 }
 
 static void stdout_close(void)
 {
-	(void)close(fd);
+	(void)close(plugout_stdout_fd);
 }
 
 const struct output_plugin plugout_stdout = {
