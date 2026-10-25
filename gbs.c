@@ -1326,10 +1326,10 @@ static struct gbs *gzip_open(const char* const name, char* const buf, size_t siz
 		fprintf(stderr, _("Could not open %s: inflate: %d\n"), name, ret);
 		goto exit_free;
 	}
-	inflateEnd(&strm);
 	gbs = gbs_open_mem(name, out, GB_MAX_ROM_SIZE - strm.avail_out, recursion + 1);
 
 exit_free:
+	inflateEnd(&strm);
 	if (gbs == NULL || gbs->buf != out) {
 		free(out);
 	}
