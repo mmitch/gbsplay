@@ -16,3 +16,7 @@ poc_vgm.vgm:
   - original bug: missing end bound in VGM loader (see issue #201)
   - status: mitigated
   - expected validation error: EOF before reaching end of data tag
+
+truncated_gzip.gbs
+  - original bug: memory leak from inflateInit2() in libz
+
