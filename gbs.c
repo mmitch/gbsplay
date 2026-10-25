@@ -825,7 +825,7 @@ static struct gbs *gbr_open(char *buf, size_t size)
 	gbs->tac = buf[0x0f];
 
 	/* Test if this looks like a valid rom header title */
-	for (i=0x0154; i<0x0163; i++) {
+	for (i=0x0154; i<0x0163 && i<size; i++) {
 		if (!(isalnum(buf[i]) || isspace(buf[i])))
 			break;
 	}
