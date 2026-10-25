@@ -961,7 +961,7 @@ static struct gbs *vgm_open(char* const buf, size_t size)
 	long jpaddr;
 
 	if (size < HDR_LEN_VGM) {
-		fprintf(stderr, _("Truncated VGM, must be >= %d Bytes: %ld\n"), HDR_LEN_VGM, (long)size);
+		fprintf(stderr, _("Truncated VGM, must be >=%d: %ld\n"), HDR_LEN_VGM, (long)size);
 		gbs_free(gbs);
 		return NULL;
 	}
