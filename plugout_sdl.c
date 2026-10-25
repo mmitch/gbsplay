@@ -30,8 +30,8 @@
 	#define SDL_FLAGS NO_CHANGES_ALLOWED
 #endif
 
-int device;
-SDL_AudioSpec obtained;
+static int device;
+static SDL_AudioSpec obtained;
 
 static long sdl_open(struct plugout_cfg *actual, long *buffer_bytes, const struct plugout_metadata metadata)
 {

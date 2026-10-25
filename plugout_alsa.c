@@ -20,9 +20,9 @@
 #include "plugout.h"
 
 /* Handle for the PCM device */
-snd_pcm_t *pcm_handle;
+static snd_pcm_t *pcm_handle;
 
-bool can_pause;
+static bool can_pause;
 
 #if GBS_BYTE_ORDER == GBS_ORDER_LITTLE_ENDIAN
 #define SND_PCM_FORMAT_S16_NE SND_PCM_FORMAT_S16_LE
