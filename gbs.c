@@ -743,8 +743,8 @@ static struct gbs *gb_open(char *buf, size_t size)
 	char *na_str = _("gb / not available");
 	const uint8_t *bootrom = gbs_get_bootrom();
 
-	if (size < 0x8000) {
-		fprintf(stderr, _("Truncated GB ROM, must be >=32KiB: %ldKiB\n"), (long)(size / 1024));
+	if (size < HDR_LEN_GB) {
+		fprintf(stderr, _("Truncated GB ROM, must be >=%d: %ld\n"), HDR_LEN_GB, (long)size);
 		gbs_free(gbs);
 		return NULL;
 	}
@@ -798,8 +798,8 @@ static struct gbs *gbr_open(char *buf, size_t size)
 	uint16_t vsync_addr;
 	uint16_t timer_addr;
 
-	if (size < 1024) {
-		fprintf(stderr, _("Truncated GBR, must be >=1KiB: %ldKiB\n"), (long)(size / 1024));
+	if (size < HDR_LEN_GBR) {
+		fprintf(stderr, _("Truncated GBR, must be >=%d: %ld\n"), HDR_LEN_GBR, (long)size);
 		gbs_free(gbs);
 		return NULL;
 	}
@@ -824,16 +824,17 @@ static struct gbs *gbr_open(char *buf, size_t size)
 	gbs->tma = buf[0x0e];
 	gbs->tac = buf[0x0f];
 
-	/* Test if this looks like a valid rom header title */
-	for (i=0x0154; i<0x0163 && i<size; i++) {
-		if (!(isalnum(buf[i]) || isspace(buf[i])))
-			break;
-	}
-	if (buf[i] == 0) {
-		/* Title looks valid and is zero-terminated. */
-		gbs->title = &buf[0x0154];
-	} else {
-		gbs->title = na_str;
+	gbs->title = na_str;
+	/* Test if this looks like a valid rom header title (not part of the spec, but often true) */
+	if (size > (HDR_LEN_GB + HDR_LEN_GBR) && gbs_crc32(0, &buf[0x124], 48) == 0x46195417) {
+		for (i=0x0154; i<0x0163 && i<size; i++) {
+			if (!(isalnum(buf[i]) || isspace(buf[i])))
+				break;
+		}
+		if (buf[i] == 0) {
+			/* Title looks valid and is zero-terminated. */
+			gbs->title = &buf[0x0154];
+		}
 	}
 	gbs->author = na_str;
 	gbs->copyright = na_str;
