@@ -14,7 +14,7 @@
 #include "common.h"
 #include "plugout.h"
 
-int plugout_stdout_fd;
+static int plugout_stdout_fd;
 
 static int set_fd_to_binmode(void)
 {
