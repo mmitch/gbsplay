@@ -1086,7 +1086,7 @@ static struct gbs *vgm_open(char* const buf, size_t size)
 		data++;
 	}
 	if (!vgm_parsed) {
-		fputs(_("EOF before reaching end of data tag"), stderr);
+		fputs(_("EOF before reaching end of data tag\n"), stderr);
 		gbs_free(gbs);
 		return NULL;
 	}
