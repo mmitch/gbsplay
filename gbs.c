@@ -1306,6 +1306,11 @@ static struct gbs *gzip_open(const char* const name, char* const buf, size_t siz
 		goto exit_free;
         }
 
+	if (size < HDR_LEN_GZIP) {
+		fprintf(stderr, _("Truncated gzip, must be >=%d: %ld\n"), HDR_LEN_GZIP, (long)size);
+		goto exit_free;
+	}
+
 	strm.zalloc = Z_NULL;
 	strm.zfree = Z_NULL;
 	strm.opaque = Z_NULL;

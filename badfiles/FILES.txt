@@ -20,5 +20,5 @@ poc_vgm.vgm:
 truncated_gzip.gbs
   - original bug: memory leak from inflateInit2() in libz
   - status: mitigated
-  - expected validation error: inflate: -5
+  - expected validation error: Truncated gzip, must be >=10: 3
 
