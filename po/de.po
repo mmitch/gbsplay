@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-11 16:32+0100\n"
-"PO-Revision-Date: 2026-01-11 16:38+0100\n"
+"POT-Creation-Date: 2026-10-26 01:14+0100\n"
+"PO-Revision-Date: 2026-10-26 01:23+0100\n"
 "Last-Translator: Christian Garbs <mitch@cgarbs.de>\n"
 "Language-Team: none\n"
 "Language: de\n"
@@ -115,8 +115,8 @@ msgid "Bad GD3 offset: %08lx\n"
 msgstr "Unzulässiger GD3-Offset: %08lx\n"
 
 #, c-format
-msgid "Bad data length: %ld\n"
-msgstr "Unzulässige Datenlänge: %ld\n"
+msgid "Bad data offset: %ld\n"
+msgstr "Unzulässiges Daten-Offset: %ld\n"
 
 #, c-format
 msgid "Bad file size in header: %ld\n"
@@ -151,6 +151,10 @@ msgstr "Konnte SDL nicht initialisieren: %s\n"
 #, c-format
 msgid "Could not open %s: %s\n"
 msgstr "Konnte %s nicht öffnen: %s\n"
+
+#, c-format
+msgid "Could not open %s: gzip recursion not allowed\n"
+msgstr "Konnte %s nicht öffnen: verschachteltes gzip nicht erlaubt\n"
 
 #, c-format
 msgid "Could not open %s: inflate: %d\n"
@@ -203,6 +207,9 @@ msgstr "Konnte SDL-Audiodaten nicht schreiben: %s\n"
 #, c-format
 msgid "Default subsong %d is out of range [1..%d].\n"
 msgstr "Standard-Subsong %d liegt außerhalb des Wertebereiches [1..%d].\n"
+
+msgid "EOF before reaching end of data tag\n"
+msgstr "Dateiende vor Erreichen des Datenende-Tags\n"
 
 #, c-format
 msgid "GBS Version %d unsupported.\n"
@@ -258,16 +265,8 @@ msgstr ""
 "\n"
 
 #, c-format
-msgid "Not a GBR-File: %s\n"
-msgstr "Keine GBR-Datei: %s\n"
-
-#, c-format
-msgid "Not a GBS-File: %s\n"
-msgstr "Keine GBS-Datei: %s\n"
-
-#, c-format
-msgid "Not a VGM-File: %s\n"
-msgstr "Keine VGM-Datei: %s\n"
+msgid "No supported file format detected: %s\n"
+msgstr "Kein unterstütztes Dateiformat erkannt: %s\n"
 
 msgid "Not compiled with zlib support"
 msgstr "Unterstützung für zlib nicht aktiviert"
@@ -304,6 +303,22 @@ msgstr "Timing:           %2.2fHz-Timer%s\n"
 #, c-format
 msgid "Timing:           %s\n"
 msgstr "Timing:           %s\n"
+
+#, c-format
+msgid "Truncated GB ROM, must be >=%d: %ld\n"
+msgstr "Abgeschnittenes GB-ROM, muss >=%d sein: %ld\n"
+
+#, c-format
+msgid "Truncated GBR, must be >=%d: %ld\n"
+msgstr "Abgeschnittenes GBR, muss >=%d sein: %ld\n"
+
+#, c-format
+msgid "Truncated VGM, must be >=%d: %ld\n"
+msgstr "Abgeschnittenes VGM, muss >=%d sein: %ld\n"
+
+#, c-format
+msgid "Truncated gzip, must be >=%d: %ld\n"
+msgstr "Abgeschnittenes gzip, muss >=%d sein: %ld\n"
 
 #, c-format
 msgid "Unknown option %s at %s line %ld.\n"

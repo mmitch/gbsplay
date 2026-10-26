@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-11 16:32+0100\n"
-"PO-Revision-Date: 2025-12-25 15:42+0100\n"
+"POT-Creation-Date: 2026-10-26 01:14+0100\n"
+"PO-Revision-Date: 2026-10-26 01:16+0100\n"
 "Last-Translator: Tobias Diedrich <ranma+gbsplay@tdiedrich.de>\n"
 "Language-Team: none\n"
 "Language: en\n"
@@ -114,8 +114,8 @@ msgid "Bad GD3 offset: %08lx\n"
 msgstr "Bad GD3 offset: %08lx\n"
 
 #, c-format
-msgid "Bad data length: %ld\n"
-msgstr "Bad data length: %ld\n"
+msgid "Bad data offset: %ld\n"
+msgstr "Bad data offset: %ld\n"
 
 #, c-format
 msgid "Bad file size in header: %ld\n"
@@ -150,6 +150,10 @@ msgstr "Could not init SDL: %s\n"
 #, c-format
 msgid "Could not open %s: %s\n"
 msgstr "Could not open %s: %s\n"
+
+#, c-format
+msgid "Could not open %s: gzip recursion not allowed\n"
+msgstr "Could not open %s: gzip recursion not allowed\n"
 
 #, c-format
 msgid "Could not open %s: inflate: %d\n"
@@ -202,6 +206,9 @@ msgstr "Could not write SDL audio data: %s\n"
 #, c-format
 msgid "Default subsong %d is out of range [1..%d].\n"
 msgstr "Default subsong %d is out of range [1..%d].\n"
+
+msgid "EOF before reaching end of data tag\n"
+msgstr "EOF before reaching end of data tag\n"
 
 #, c-format
 msgid "GBS Version %d unsupported.\n"
@@ -257,16 +264,8 @@ msgstr ""
 "\n"
 
 #, c-format
-msgid "Not a GBR-File: %s\n"
-msgstr "Not a GBR-File: %s\n"
-
-#, c-format
-msgid "Not a GBS-File: %s\n"
-msgstr "Not a GBS-File: %s\n"
-
-#, c-format
-msgid "Not a VGM-File: %s\n"
-msgstr "Not a VGM-File: %s\n"
+msgid "No supported file format detected: %s\n"
+msgstr "No supported file format detected: %s\n"
 
 msgid "Not compiled with zlib support"
 msgstr "Not compiled with zlib support"
@@ -303,6 +302,22 @@ msgstr "Timing:           %2.2fHz timer%s\n"
 #, c-format
 msgid "Timing:           %s\n"
 msgstr "Timing:           %s\n"
+
+#, c-format
+msgid "Truncated GB ROM, must be >=%d: %ld\n"
+msgstr "Truncated GB ROM, must be >=%d: %ld\n"
+
+#, c-format
+msgid "Truncated GBR, must be >=%d: %ld\n"
+msgstr "Truncated GBR, must be >=%d: %ld\n"
+
+#, c-format
+msgid "Truncated VGM, must be >=%d: %ld\n"
+msgstr "Truncated VGM, must be >=%d: %ld\n"
+
+#, c-format
+msgid "Truncated gzip, must be >=%d: %ld\n"
+msgstr "Truncated gzip, must be >=%d: %ld\n"
 
 #, c-format
 msgid "Unknown option %s at %s line %ld.\n"
