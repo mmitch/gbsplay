@@ -10,7 +10,7 @@ poc_bank.gbr:
 poc_title.gbr:
   - original bug: title field read past end of file (see issue #201)
   - status: mitigated
-  - expected validation error: Truncated GBR, must be >=1KiB: 0KiB
+  - expected validation error: Bank 1 out of range (0-0)!
 
 poc_vgm.vgm:
   - original bug: missing end bound in VGM loader (see issue #201)
