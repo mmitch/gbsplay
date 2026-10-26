@@ -3,7 +3,7 @@
  *
  * STDOUT file writer output plugin
  *
- * 2004-2022 (C) by Christian Garbs <mitch@cgarbs.de>
+ * 2004-2026 (C) by Christian Garbs <mitch@cgarbs.de>
  *
  * Licensed under GNU GPL v1 or, at your option, any later version.
  */
