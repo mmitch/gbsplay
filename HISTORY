@@ -5,10 +5,37 @@ gbsplay HISTORY
 unreleased  -  0.0.104
 ~~~~~~~~~~~~~~~~~~~~~~
 
+Bugfixes:
+
+- gbs core:
+  - fix overflows and off-by-one bank comparisions in ROM mapper
+  - add or fix minimum size checks for all file formats
+  - prevent vgm player from playing past the file end
+  - fix possible out-of-bounds read of subsong title
+  - properly check for $HOME when looking for the GB bootrom
+  - forbid recursion in gzip streams
+  - fix out-of-bound bank handling to really return an emty map
+  - fix off-by-one bounds check in VGM gd3 parser
+  - fix memory leak when VGM file open returns with an error
+  - fix memory leak when gzip file open returns with an error
+
+- gbsplay:
+  - fix memory leak in config parser
+
+- documentation:
+  - describe CFLAGS and LDFLAGS in configure help text
+
+- build process:
+  - add separate HOSTCFLAGS/HOSTLDFLAGS for building gen_impulse.h
+
 Enhancements:
 
 - gbsplay:
   - add null plugout
+
+- build process:
+  - add test run with address sanitizer
+  - test handling of known bad files
 
 
 2026/10/18  -  0.0.103
