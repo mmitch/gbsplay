@@ -7,14 +7,12 @@ gbsplay \- Gameboy sound player
 .B gbsplay
 .RI [ OPTION ]...
 .RI [ -- ]
-.I GBS\-FILE
+.I INPUT\-FILE
 .RI [ START\-AT\-SUBSONG " [" STOP\-AFTER\-SUBSONG "] ]"
 .SH "DESCRIPTION"
 .B gbsplay
 emulates the sound hardware of the Nintendo Gameboy.
-It is able to play the sounds from a Gameboy module dump (.GBS format) over
-.I /dev/dsp
-and other sound drivers.
+It is able to play the sounds from a Gameboy module dump via various sound drivers.
 .SH "OPTIONS"
 .TP
 .BI -E " endian"
@@ -141,9 +139,11 @@ Marks the end of options.
 The next argument will be treated as a filename, even when starting with a
 .BR \- .
 .TP
-.I GBS\-FILE
+.I INPUT\-FILE
 The sound file to play.
-Must be in uncompressed .GBS format.
+Various file formats are supported, see
+.I SUPPORTED FILE FORMATS
+below.
 .TP
 .I START\-AT\-SUBSONG
 The subsong from the sound file to play first.
@@ -324,6 +324,37 @@ and existing files are silently overwritten.
 The output is always encoded as stereo (2 channels), 16 bit signed PCM
 in little endian (the \fI-E\fP switch is ignored).
 Sample rate can be set via \fI-r\fP.
+.SH "SUPPORTED FILE FORMATS"
+.B gbsplay
+supports playback of multiple file formats.
+All file formats are recognized by their headers, so there is no need to have matching filename extensions.
+If
+.B gbsplay
+has been compiled with zlib support, gzip compressed files can be played as well (recursion is not supported, a gzip within a gzip will result in an error).
+.TP
+.B GBS
+This is the main format of Gameboy module dumps which contain only the module's sound routines to play music.
+Supports title, author and copyright information, different subsongs and is completely supported by
+.BR gbsplay .
+.TP
+.B VGM
+This file format contains a dump of the command stream to the sound hardware.
+Should be fully supported, but only for Gameboy hardware (DMG sound chip).
+Instructions for other sound chips are silently ignored.
+Files are commonly gzip compressed as
+.BR VGZ .
+.TP
+.B GBR
+This is the predecessor of the GBS format and should be fully supported as well.
+.TP
+.B GB
+This is a full module dump containing not just the sound routines.
+It is partially supported by
+.B gbsplay
+and will only work if the module does not need any user input or interacts with the graphics subsystem because these parts of a Gameboy are not emulated.
+Some homebrew sound demos are known to work.
+Playback will use a boot rom for extra accuracy if it is available at
+.IR ~/.dmg_rom.bin " ."
 .SH "FILES"
 .TP
 .I /etc/gbsplayrc
