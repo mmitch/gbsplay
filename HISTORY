@@ -33,6 +33,9 @@ Enhancements:
 - gbsplay:
   - add null plugout
 
+- documentation:
+  - describe supported file formats in manpages
+
 - build process:
   - add test run with address sanitizer
   - test handling of known bad files
