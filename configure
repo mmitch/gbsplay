@@ -1305,7 +1305,7 @@ echo "EXTRA_HOSTLDFLAGS=$EXTRA_HOSTLDFLAGS"
 
 cat > libgbs.pc << __EOF__
 Name: libgbs
-Description: The Gameboy sound player library
+Description: The Game Boy sound player library
 Version: ${VERSION}
 Cflags: -I${includedir}/libgbs
 Libs: -L${libdir} -lgbs -lm

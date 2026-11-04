@@ -1,5 +1,5 @@
 /*
- * gbsplay is a Gameboy sound player
+ * gbsplay is a Game Boy sound player
  *
  * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *
@@ -51,7 +51,7 @@ typedef uint64_t cycles_t;
 
 #define C0HZ 16.35
 #define C0MIDI 12
-#define C6GBRAW 1923 /* First note in gameboy startup sound, 1048.576Hz (3.4 cents too high) */
+#define C6GBRAW 1923 /* First note in Game Boy startup sound, 1048.576Hz (3.4 cents too high) */
 #define C6GB (2048 - C6GBRAW)
 #define C6MIDI 84 /* 1046.50Hz in equal temperament */
 /* wave channel produces half the frequency */

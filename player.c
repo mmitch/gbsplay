@@ -1,5 +1,5 @@
 /*
- * gbsplay is a Gameboy sound player
+ * gbsplay is a Game Boy sound player
  *
  * This file contains the player code common to both CLI and X11 frontends.
  *

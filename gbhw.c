@@ -1,5 +1,5 @@
 /*
- * gbsplay is a Gameboy sound player
+ * gbsplay is a Game Boy sound player
  *
  * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
@@ -671,7 +671,7 @@ void gbhw_flush_buffer(struct gbhw *gbhw)
 		r_smpl = r_smpl + gbhw->impbuf->data32[i*2+1];
 		if (gbhw->filter_enabled && gbhw->cap_factor <= 0x10000) {
 			/*
-			 * RC High-pass & DC decoupling filter. Gameboy
+			 * RC High-pass & DC decoupling filter. Game Boy
 			 * Classic uses 1uF and 510 Ohms in series,
 			 * followed by 10K Ohms pot to ground between
 			 * CPU output and amplifier input, which gives a
@@ -987,7 +987,7 @@ float gbhw_calc_timer_hz(uint8_t tac, uint8_t tma)
 }
 
 /*
- * Initialize Gameboy hardware emulation.
+ * Initialize Game Boy hardware emulation.
  * The size should be a multiple of 0x4000,
  * so we don't need range checking in rom_get and
  * rombank_get.

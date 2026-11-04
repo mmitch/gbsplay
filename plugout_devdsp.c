@@ -1,5 +1,5 @@
 /*
- * gbsplay is a Gameboy sound player
+ * gbsplay is a Game Boy sound player
  *
  * header file for /dev/dsp sound output plugin
  *

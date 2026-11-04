@@ -1,5 +1,5 @@
 /*
- * gbsplay is a Gameboy sound player
+ * gbsplay is a Game Boy sound player
  *
  * 2003-2021 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
@@ -17,7 +17,7 @@
 /**
  * @file libgbs.h
  * API of libgbs.
- * This file contains the API definition of libgbs, the Gameboy sound player library.
+ * This file contains the API definition of libgbs, the Game Boy sound player library.
  */
 
 #include <inttypes.h>
@@ -114,8 +114,8 @@ struct gbs_status {
  */
 enum gbs_filter_type {
 	FILTER_OFF, /**< no filter */
-	FILTER_DMG, /**< Gameboy classic high-pass filter */
-	FILTER_CGB, /**< Gameboy Color high-pass filter */
+	FILTER_DMG, /**< Game Boy classic high-pass filter */
+	FILTER_CGB, /**< Game Boy Color high-pass filter */
 };
 
 //

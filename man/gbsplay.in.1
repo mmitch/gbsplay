@@ -1,8 +1,8 @@
 .\" This manpage 2003-2026 (C) by Christian Garbs <mitch@cgarbs.de>
 .\" Licensed under GNU GPL v1 or, at your option, any later version.
-.TH "GBSPLAY" "1" "%%%VERSION%%%" "Tobias Diedrich" "Gameboy sound player"
+.TH "GBSPLAY" "1" "%%%VERSION%%%" "Tobias Diedrich" "Game Boy sound player"
 .SH "NAME"
-gbsplay \- Gameboy sound player
+gbsplay \- Game Boy sound player
 .SH "SYNOPSIS"
 .B gbsplay
 .RI [ OPTION ]...
@@ -11,8 +11,8 @@ gbsplay \- Gameboy sound player
 .RI [ START\-AT\-SUBSONG " [" STOP\-AFTER\-SUBSONG "] ]"
 .SH "DESCRIPTION"
 .B gbsplay
-emulates the sound hardware of the Nintendo Gameboy.
-It is able to play the sounds from a Gameboy module dump via various sound drivers.
+emulates the sound hardware of the Nintendo Game Boy.
+It is able to play the sounds from a Game Boy module dump via various sound drivers.
 .SH "OPTIONS"
 .TP
 .BI -E " endian"
@@ -37,8 +37,8 @@ Display short help and exit.
 .BI -H " filter"
 Set output high-pass type to \fIfilter\fP.
 Valid values are
-.BR dmg " (Gameboy Classic),"
-.BR cgb " (Gameboy Color) and"
+.BR dmg " (Game Boy Classic),"
+.BR cgb " (Game Boy Color) and"
 .BR off " (no filter)."
 Default value is dmg.
 .TP
@@ -261,7 +261,7 @@ Use the OSS sound driver for sound output via \fI/dev/dsp\fP.
 Use the DirectSound sound driver for sound output on Microsoft Windows.
 .TP
 .B iodumper
-Dump IO calls to the Gameboy sound hardware to stdout.
+Dump IO calls to the Game Boy sound hardware to stdout.
 This reduces the verbosity to 0 (see \fI-q\fP)
 because stdout is used for the dumped data.
 .TP
@@ -333,13 +333,13 @@ If
 has been compiled with zlib support, gzip (deflate) compressed files can be played as well (recursion is not supported, a gzip within a gzip will result in an error).
 .TP
 .BR GBS " (Game Boy Sound System)"
-This is the main format of Gameboy module dumps which contain only a module's sound routines to play music.
+This is the main format of Game Boy module dumps which contain only a module's sound routines to play music.
 Supports title, author and copyright information, different subsongs and is completely supported by
 .BR gbsplay .
 .TP
 .BR VGM " (Video Game Music)"
 This file format contains a dump of the command stream to the sound hardware.
-Should be fully supported, but only for Gameboy hardware (DMG sound chip).
+Should be fully supported, but only for Game Boy hardware (DMG sound chip).
 Instructions for other sound chips are ignored.
 Files are commonly gzip compressed as
 .BR VGZ .
@@ -352,7 +352,7 @@ The format does not contain meta information, so subsong count and title/author/
 This is a full module dump containing not just the sound routines.
 It is partially supported by
 .B gbsplay
-and will only work if the module does not need any user input or interacts with the graphics subsystem because these parts of a Gameboy are not emulated.
+and will only work if the module does not need any user input or interacts with the graphics subsystem because these parts of a Game Boy are not emulated.
 Some homebrew sound demos are known to work.
 Playback will use a boot rom for extra accuracy if it is available at
 .IR ~/.dmg_rom.bin " ."

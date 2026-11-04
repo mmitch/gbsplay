@@ -23,6 +23,7 @@ Bugfixes:
   - fix memory leak in config parser
 
 - documentation:
+  - rename Gameboy to Game Boy, it's the official spelling
   - describe CFLAGS and LDFLAGS in configure help text
 
 - build process:
@@ -554,7 +555,7 @@ Enhancements:
 Enhancements:
 
 - gbsplay:
-  - don't use random() for noise, emulate the original Gameboy
+  - don't use random() for noise, emulate the original Game Boy
     behaviour
   - support more verbosity levels than just "quiet"
 

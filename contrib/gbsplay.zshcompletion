@@ -17,7 +17,7 @@ function _gbsplay_internal() {
 		-f+'[set fadeout]:fadeout:'
 		-g+'[set subsong gap]:subsong gap:'
 		'(- :)'-h'[display help and exit]'
-		-H+'[set output high-pass filter]:filter:((dmg\:"Gameboy Classic (default)" cgb\:"Gameboy Color" off\:"no filter"))'
+		-H+'[set output high-pass filter]:filter:((dmg\:"Game Boy Classic (default)" cgb\:"Game Boy Color" off\:"no filter"))'
 		'(-L)'-l'[set loop mode to range]'
 		'(-l)'-L'[set loop mode to single]'
 		-o+'[select output plugin]:plugout:->plugout'

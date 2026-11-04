@@ -1,11 +1,11 @@
 [Desktop Entry]
 Name=xgbsplay
 NoDisplay=true
-Comment=X11 Gameboy sound player
+Comment=X11 Game Boy sound player
 Exec=xgbsplay %f
 Icon=xgbsplay
 Terminal=false
 Type=Application
 Categories=AudioVideo;AudioVideoEditing
-Keywords=gameboy;
+Keywords=Game Boy;
 MimeType=audio/prs.gbs;

@@ -47,7 +47,7 @@ gbsinfo "$FILENAME" | cut -d : -f 2- | sed -e 's/^ *//' -e 's/^"//' -e 's/"$//' 
 	printf "== converting song %02d/%02d:\n" "$SUBSONG" "$SUBSONGS"
 	gbsplay -o stdout -E l -r "$RATE" -g "$GAP" -f "$FADE" -t "$PLAY" "$FILENAME" "$SUBSONG" "$SUBSONG" </dev/null \
 	    | oggenc -q"$QUALITY" -r --raw-endianness 0 -B 16 -C 2 -R "$RATE" \
-		     -N "$SUBSONG" -t "$TITLE" -a "$AUTHOR" -c "copyright=$COPYRIGHT" -c "COMMENT=Subsong $SUBSONG" -G "Gameboy music" \
+		     -N "$SUBSONG" -t "$TITLE" -a "$AUTHOR" -c "copyright=$COPYRIGHT" -c "COMMENT=Subsong $SUBSONG" -G "Game Boy music" \
 		     -o "$OGGFILE" -
     done
 )

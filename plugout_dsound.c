@@ -1,5 +1,5 @@
 /*
- * gbsplay is a Gameboy sound player
+ * gbsplay is a Game Boy sound player
  *
  * header file for DirectSound output under Windows, aquanight <aquanight@gmail.com>
  * This is C++ because COM is a pain in pure C

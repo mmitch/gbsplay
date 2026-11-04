@@ -1,5 +1,5 @@
 /*
- * xgbsplay is an X11 frontend for gbsplay, the Gameboy sound player
+ * xgbsplay is an X11 frontend for gbsplay, the Game Boy sound player
  *
  * 2003-2025 (C) by Tobias Diedrich <ranma+gbsplay@tdiedrich.de>
  *                  Christian Garbs <mitch@cgarbs.de>
@@ -28,7 +28,7 @@
 #define XCB_EVENT_MASK (~(XCB_EVENT_SYNTHETIC))
 
 /*
- * Virtual LCD has double the real Gameboy pixel count for usability
+ * Virtual LCD has double the real Game Boy pixel count for usability
  * With an 8x16 font this gives us 
  */
 #define VLCD_WIDTH 320

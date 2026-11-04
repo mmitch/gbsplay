@@ -1,5 +1,5 @@
 /*
- * gbsplay is a Gameboy sound player
+ * gbsplay is a Game Boy sound player
  *
  * VGM output plugin
  * 2022 (C) by Maximilian Rehkopf <otakon@gmx.net>

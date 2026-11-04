@@ -1,5 +1,5 @@
 /*
- * gbsplay is a Gameboy sound player
+ * gbsplay is a Game Boy sound player
  *
  * 2024-2025 (C) by Christian Garbs <mitch@cgarbs.de>
  *                  Lisa Riedler <dev@riedler.wien>

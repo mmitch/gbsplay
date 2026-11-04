@@ -1,5 +1,5 @@
 /*
- * gbsplay is a Gameboy sound player
+ * gbsplay is a Game Boy sound player
  *
  * This file contains various toolbox functions that
  * can be useful in different parts of gbsplay.
