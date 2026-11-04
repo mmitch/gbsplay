@@ -2,10 +2,10 @@
 
 # gbsplay, gbsinfo, gbs2gb and gbs2ogg zsh completion
 #
-# 2024-2025 (c) Riedler <dev@riedler.wien>
+# 2024-2026 (c) Riedler <dev@riedler.wien>
 # licensed under GNU GPL v1 or, at your option, any later version
 
-local gbsfiles='_files -g "*(.gbs|.gbs.gz)"'
+local gbsfiles='_files -g "*(.gb|.gb.gz|.gbr|.gbr.gz|.gbs|.gbs.gz|.vgm|.vgm.gz|.vgz)"'
 
 function _get_subsongs() {
 	gbsinfo "$1" | grep -i "subsongs" | grep -oP "\\d+"

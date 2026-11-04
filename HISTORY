@@ -34,8 +34,11 @@ Enhancements:
 - gbsplay:
   - add null plugout
 
+- contrib:
+  - add all supported file formats to command completion scripts
+
 - documentation:
-  - describe supported file formats in manpages
+  - describe all supported file formats in manpages
 
 - build process:
   - add test run with address sanitizer

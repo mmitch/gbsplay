@@ -2,7 +2,7 @@
 #
 # gbsplay/gbsinfo bash completion
 #
-# 2008-2025 (C) Christian Garbs <mitch@cgarbs.de>
+# 2008-2026 (C) Christian Garbs <mitch@cgarbs.de>
 # licensed under GNU GPL v1 or, at your option, any later version
 #
 # originally based on the ditz bash completion code
@@ -22,7 +22,7 @@ __gbsplay_expand_filename()
     local i ext
 
     local -a files
-    for ext in .gbs .gbs.gz; do
+    for ext in .gb .gb.gz .gbr .gbr.gz .gbs .gbs.gz .vgm .vgm.gz .vgz; do
 
 	# get all matching files ending with $ext
 	# FIXME: This will always fail for filenames containing a newline.
